@@ -1,0 +1,22 @@
+<!--
+  Esquire frameworks (tm)
+  Esquire Explorer
+
+  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
+  mailto:mir0n.the.programmer@gmail.com
+
+  History:
+-->
+  <div class="app-explorer">
+  <mat-toolbar> 
+    <img style="width:48px; height:48px;" src="main.ico"/>
+    <h1> Esquire Tree Explorer </h1>
+  </mat-toolbar>
+  <esqExplorer #explorer 
+    [esqRestApi]="esqRestApiWrapper()"
+    [esqExplorerCallApi]="esqExplorerCallApiWrapper()">
+  </esqExplorer>
+  <mat-toolbar>Footer</mat-toolbar>
+</div>
+
+
