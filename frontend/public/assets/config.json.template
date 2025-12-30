@@ -1,0 +1,3 @@
+{
+  "apiBasePath": "http://${BACKEND_HOST}:${BACKEND_PORT}"
+}

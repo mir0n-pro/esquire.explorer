@@ -1,5 +1,13 @@
 Esquire Frameworks(tm) 2.0
 Esquire Exporer (frontend)
 
+12/30/2025 Dockerization
+app\app.config.ts
+  - handle failure of RUNTIME_CONFIG injection
++ added app\app.tokens.ts
+main.ts
+  - load config.json
+
+
 12/26/2025 initial  
 

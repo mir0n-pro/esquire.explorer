@@ -1,0 +1,27 @@
+services:
+  frontend:
+    build:
+      context: .
+      secrets:
+        - npmrc        
+    image: esquire.frontend
+    ports:
+      - "4200:4200"
+    environment:
+      # These variables are injected into assets/config.json at container start
+      - BACKEND_HOST=localhost
+      - BACKEND_PORT=3000
+    # Command overrides angular.json for Docker without changing local code
+    command: >
+          /bin/sh -c "
+          envsubst < ./public/assets/config.json.template > ./public/assets/config.json && 
+          npx ng serve --host 0.0.0.0 --port 4200 --poll 2000
+          "
+#    volumes:
+#      - .:/app
+#      - /app/node_modules # Prevents local node_modules from overwriting container's
+# Mount ONLY the template as read-only
+#      - ./public/assets/config.json.template:/public/assets/config.json.template:ro
+secrets:
+  npmrc:
+    file: ./.npmrc_composer 

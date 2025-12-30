@@ -1,0 +1,8 @@
+node_modules
+.git
+.angular
+.yalc
+.npmrc
+package-lock.json
+Dockerfile
+README.md
