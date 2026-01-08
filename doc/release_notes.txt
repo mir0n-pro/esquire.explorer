@@ -1,8 +1,13 @@
 Esquire Frameworks(tm) 2.0
 Esquire Exporer (frontend)
 
-v1.0.0-2512.3016  Dockerization
+v1.0.1-2601.0800 Keycloak added
+  - keycloak added
+  - assets\config.json is required now even with local setup
+  - added KEYCLOAK_* environment params 
+  - initialize explorer component correctly
 
+v1.0.0-2512.3016  Dockerization
 
 v1.0.0-2512.2615  initial version 
 

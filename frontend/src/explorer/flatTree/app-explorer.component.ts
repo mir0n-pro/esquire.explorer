@@ -6,6 +6,7 @@
 *
 *  History:
 * 12/24/2025 mir0n kind parameter is requried for esq-cmd, esq-enode
+* 01/08/2026 mir0n move initialization out from constructor
 */
 import {Component,
   OnInit,
@@ -40,47 +41,68 @@ import {EsquireService} from '../../rest/api/esquire.service';
 })
 
 export class ExplorerComponent implements OnInit, AfterViewInit {
-  dataService: EsquireService;
+  dataService?: EsquireService;
+  _dataService: EsquireService;
   readonly detailsDialog:MatDialog = inject(MatDialog);
-  private callApiMill:EsqExplorerCallApiMill;
-  private dictionary:EsqDictionaryApi;
+  private callApiMill?:EsqExplorerCallApiMill;
+  private dictionary?:EsqDictionaryApi;
    
   constructor(dataService: EsquireService) {
-    this.dataService = dataService; 
-    EsqNodeTypeFactory.init(Object.values(EsquireNodeTypes));
-    EsqNodeStatusFactory.init(Object.values(EsquireStatuses));
-    this.dictionary = new EsqDictionary(this.esqRestApiWrapper());
-    this.callApiMill = new EsqExplorerCallApiMill(this.detailsDialog, this.dictionary, this.esqRestApiWrapper());
+    this._dataService = dataService; 
   }
 
   public esqRestApiWrapper(): EsqRestApi {
     return {
       esquire: (id?: string, skip?: number, take?: number, options?:any) => {
+        if(!this.dataService) {
+          throw new Error("Data service not initialized");
+        }
         return this.dataService.esquire(id?encodeURIComponent(id):undefined, skip, take, 'body', false, options) ;
       },
       esquirePath: (id: string, options?:any) => {
+        if(!this.dataService) {
+          throw new Error("Data service not initialized");
+        }
         return this.dataService.esquirePath(encodeURIComponent(id), options) ;
       },
       esquireCmd: ( kind: number, id: string, cmd?: string, options?:any) => {
+        if(!this.dataService) {
+          throw new Error("Data service not initialized");
+        }
         return this.dataService.esquireCmd( kind, encodeURIComponent(id), cmd, options) ;
       },
      esquireEntityNode: (kind: number, id?: string, name?: string, options?:any) => {
+        if(!this.dataService) {
+          throw new Error("Data service not initialized");
+        }
         return this.dataService.esquireEntityNode( kind, (id && id.length >0)? encodeURIComponent(id) : undefined,
           name?encodeURIComponent(name):undefined, 
           options
         );
       },
      esquireDictionary: (kind: number, options?:any) => {
+        if(!this.dataService) {
+          throw new Error("Data service not initialized");
+        }
         return this.dataService.esquireDictionary(kind , options);
       },
     }
   };
 
   public esqExplorerCallApiWrapper(): EsqExplorerCallApi {
-    return this.callApiMill.instance();
+    if (this.callApiMill) {
+      return this.callApiMill.instance();
+    } else {
+      throw new Error("CallApiMill not initialized");
+    }
   }
 
   async ngOnInit() {
+    this.dataService = this._dataService; 
+    EsqNodeTypeFactory.init(Object.values(EsquireNodeTypes));
+    EsqNodeStatusFactory.init(Object.values(EsquireStatuses));
+    this.dictionary = new EsqDictionary(this.esqRestApiWrapper());
+    this.callApiMill = new EsqExplorerCallApiMill(this.detailsDialog, this.dictionary, this.esqRestApiWrapper());
   }
 
   async ngAfterViewInit() {

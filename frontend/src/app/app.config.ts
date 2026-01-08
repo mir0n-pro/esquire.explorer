@@ -6,40 +6,94 @@
 *
 *  History:
 * 12/30/2025 mir0n handle failure of RUNTIME_CONFIG injection
+* 01/08/2026 mir0n includeBearerTokenInterceptor
+*                  attempt to init keycloack
 */
 
-
-
-import {ApplicationConfig, inject, provideZonelessChangeDetection} from '@angular/core';
+import {ApplicationConfig, inject, provideAppInitializer, provideZonelessChangeDetection} from '@angular/core';
 import {provideRouter} from '@angular/router';
+//import { authInterceptor, provideAuth } from 'angular-auth-oidc-client';
+//import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import {provideHttpClient, withInterceptors} from '@angular/common/http';
 
 import {routes} from './app.routes';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
-import { provideHttpClient } from "@angular/common/http";
 import {BASE_PATH} from "../rest";
 import { RUNTIME_CONFIG} from './app.tokens';
-
+import { INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, includeBearerTokenInterceptor, provideKeycloak, KeycloakService } from 'keycloak-angular';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideHttpClient(
+      withInterceptors([includeBearerTokenInterceptor]) // Ensure this is here
+    ),
+    {
+      provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
+      useFactory: () => {
+        const config = inject(RUNTIME_CONFIG);
+        // Define which URLs get the token (e.g., your API base path)
+       var s = config.apiBasePath; // Extracts the string for OpenAPI services
+        if (!s || s.includes('${')) {
+            console.debug('path variables have not been replaced!!!: ',s);
+            s = "http://localhost:3000"; // Fallback if template placeholder not replaced
+        } 
+        s = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special regex characters       
+        return [
+          {
+            urlPattern: new RegExp(`^${s}/.*`, 'i'),
+            httpMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
+          }
+        ];
+      }
+    },
+
+    
+//xxx: unable to init keycloak dynamically, within appConfig providers, let have it in main.ts 
+//     until the issue is solved by angular/keycloak-angular team
+/*   
+// dummy config to allow initialization
+    provideKeycloak({
+      config: {
+        url: '', 
+        realm: '',
+        clientId: ''
+      }
+    }),
+    //real config initializer
+    provideAppInitializer(async () => {
+      const keycloakService = inject(KeycloakService); // Use the service here
+      const config = inject(RUNTIME_CONFIG);
+      await keycloakService.init({
+        config: {
+          url: config.keycloakUrl,
+          realm: config.keycloakRealm,
+          clientId: config.keycloakClientId,
+          grant_type:'password', 
+          scope: 'openid profile email'
+        },
+        initOptions: {
+          //onLoad: 'check-sso',
+          onLoad: 'login-required',
+          checkLoginIframe: false, 
+          pkceMethod: 'S256'        
+          //flow: 'standard',
+          //silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
+        }
+      });
+    }),
+  */  
     provideRouter(routes), 
-    provideAnimationsAsync(), 
-    provideHttpClient(),
+    provideAnimationsAsync(),
     provideZonelessChangeDetection(),
     {
       provide: BASE_PATH,
       useFactory: () => {
-        var s = "http://localhost:3000";
-        try {
-          const config = inject(RUNTIME_CONFIG);
-          s = config.apiBasePath; // Extracts the string for OpenAPI services
-          if (!s || s.includes('${')) {
-            console.error('path variables have not been replaced!!!: ',s);
+        const config = inject(RUNTIME_CONFIG);
+        var s = config.apiBasePath; // Extracts the string for OpenAPI services
+        if (!s || s.includes('${')) {
+            console.debug('path variables have not been replaced!!!: ',s);
             s = "http://localhost:3000"; // Fallback if template placeholder not replaced
           }
-        } catch (e) {
-          console.error('RUNTIME_CONFIG injection failed, using default BASE_PATH', e);
-        }
         return s;
       }
     }
