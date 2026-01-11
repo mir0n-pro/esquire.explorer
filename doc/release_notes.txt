@@ -1,6 +1,9 @@
 Esquire Frameworks(tm) 2.0
 Esquire Exporer (frontend)
 
+v1.0.1-2601.1022 Cosmetic
+  - Copyright added
+
 v1.0.1-2601.0800 Keycloak added
   - keycloak added
   - assets\config.json is required now even with local setup
