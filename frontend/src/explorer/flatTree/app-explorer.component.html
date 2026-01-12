@@ -22,32 +22,34 @@
     </div>         
     <mat-menu #menu="matMenu">
       @if (isConnected()) {
-        <button mat-menu-item
+        <button mat-menu-item style="line-height: 1;min-height: 12px" 
           (click)="logout()">
           <!--mat-icon>power_settings_new</mat-icon-->
-          <span style="font-size: 10pt;">Log out</span>          
+          <span style="font-size: 9pt;">Log out</span>          
         </button>
       }@else{
-        <button mat-menu-item
+        <button mat-menu-item style="line-height: 1;min-height: 12px"
           (click)="login()">
           <!--mat-icon>power_settings_new</mat-icon-->
-          <span style="font-size: 10pt;">Log in</span>
+          <span style="font-size: 9pt;">Log in</span>
         </button>
       } 
-      <button mat-menu-item 
+      <button mat-menu-item style="line-height: 1;min-height: 12px"
        [disabled]="!isConnected()"
        (click)="showProfile()">
         <!--mat-icon>settings</mat-icon-->
-        <span style="font-size: 10pt;">Profile</span>
+        <span style="font-size: 9pt;">Profile</span>
       </button>
     </mat-menu>
   </mat-toolbar>
 
-  @if (authState() === 'Authenticated') {
+
+  @if (isConnected()) {
     <esqExplorer #explorer 
         [esqRestApi]="esqRestApiWrapper()"
         [esqExplorerCallApi]="esqExplorerCallApiWrapper()">
       </esqExplorer>
+      
   } @else {
     <div style="height: 80vh;">
       <p class="info-text">Please login to access the explorer features.</p>

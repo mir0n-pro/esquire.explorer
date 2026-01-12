@@ -50,28 +50,10 @@
     grid-template-columns: auto fit-content(24px);
   }
 
-  .menu-button {
-    transform: scale(0.75) !important;
-  }
-
 }
 
 .right-aligned-text {
   text-align: right;
   /* You may need to ensure it takes the full width */
   width: 100%; 
-}
-/*
-.mat-mdc-menu-item {
-  font-size: 18px !important;
-}
-.mat-mdc-menu-item .mat-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-}
-*/
-
-.large-menu .mat-mdc-menu-item {
-  font-size: 9px;
 }

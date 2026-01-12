@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+01/12/2026 Keycload UI/UX (up to "ok-for-now")
+app\app.component.ts
+  - added profile dialog menu command
+  - login handshake : load profile at logon
+
 01/10/2026 Keycload UI/UX
 main.ts
   - complete keyCloak init withAutoRefreshToken

@@ -1,6 +1,9 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.01-2601.1217
+  - keyCloak UI/UX: "OK-for-now"
+
 v1.01-2601.1119 
   - complete keyCloak UI/UX setup
 

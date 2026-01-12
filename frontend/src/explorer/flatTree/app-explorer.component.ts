@@ -9,6 +9,8 @@
 * 01/08/2026 mir0n move initialization out from constructor
 * 01/10/2026 mir0n added keycloakSignal processing
 *                  added keyCloak UI/UX elements
+* 01/12/2026 mir0n added profile dialog menu command
+*                  login handshake : load profile at logon
 */
 import {Component,
   OnInit,
@@ -39,6 +41,11 @@ import {EsquireService} from '../../rest/api/esquire.service';
 import { KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
 import Keycloak from 'keycloak-js';
 
+const STATUS_CONNECTED = "Connected";
+const STATUS_AUTHENTICATED = "Authenticated";
+const STATUS_READY = "Ready";
+const CMD_PROFILE = "profile";
+
 
 @Component({
   selector: 'app-explorer',
@@ -53,7 +60,6 @@ import Keycloak from 'keycloak-js';
   templateUrl: './app-explorer.component.html',
   styleUrl: './app-explorer.component.scss'
 })
-
 export class ExplorerComponent implements OnInit, AfterViewInit {
   private keycloak: Keycloak;
   keycloakSignal: Signal<KeycloakEvent> = inject(KEYCLOAK_EVENT_SIGNAL);
@@ -64,32 +70,56 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
   readonly detailsDialog:MatDialog = inject(MatDialog);
   private callApiMill?:EsqExplorerCallApiMill;
   private dictionary?:EsqDictionaryApi;
-   
+  private profile:any = undefined;
+  private profileRequested = false; 
+
   constructor(dataService: EsquireService) {
     this._dataService = dataService; 
     this.keycloak = inject(Keycloak);
     effect(() => {
       const event = this.keycloakSignal();
+      console.warn('Session status update: ' + event.type);
       if (event.type === KeycloakEventType.TokenExpired) {
         this.authState.set('Token expired');
-        console.warn('Session expired - system is attempting background refresh.');
-      } else if (event.type === KeycloakEventType.AuthSuccess) {
-        this.authState.set('Authenticated');
-        console.log('User successfully authenticated');
+      //} else if (event.type === KeycloakEventType.AuthSuccess) {
+      //  this.authState.set('Authenticated');
+      //  console.log('User successfully authenticated');
       } else if (event.type === KeycloakEventType.AuthError) {
         this.authState.set('Authentication error');
-        console.error('Error during authentication');
+        this.logout(); 
       } else if (event.type === KeycloakEventType.AuthRefreshError) {
       // Handle the case where the refresh token itself expired
-        this.keycloak.logout();
+        this.logout();                      
       } else if (event.type === KeycloakEventType.Ready) {
         var good = computed(() => this.keycloak.authenticated ?? false);
         if (good()) {
-          this.authState.set('Authenticated');
+          let was:string = this.authState();
+          if (!this.profileRequested) {
+            this.authState.set(STATUS_AUTHENTICATED);
+            if (was != STATUS_AUTHENTICATED) {
+              this.profileRequested = true;
+              this._dataService.esquireCmd( 0, '0', CMD_PROFILE).subscribe({
+                  next: (value) => {
+                    this.profile = value;
+                  },
+                  error: (err) => {
+                    console.error('Something went wrong: ' + err);
+                    this.authState.set("Error in profile");
+                    this.logout();                      
+                  },
+                  complete: () =>  {
+                    this.authState.set(STATUS_CONNECTED);
+                  }
+              });
+            }
+          }
+
         } else {
-          this.authState.set('Ready');
+          this.authState.set(STATUS_READY);
         }
       } else {
+        //xxx: this will disable access to explorer, keeping session open, simple "login" will bring all back
+        //     it could be more complex solution, but that is good-enough for now
         this.authState.set('' + event.type);
       }
     });
@@ -154,50 +184,61 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
 
 public async login(): Promise<void> {
   await this.keycloak.login({
-    redirectUri: window.location.origin, // Where to go after
+    redirectUri: window.location.origin
   });
 }  
 
-public showProfile() {
-  alert("TODO");
+public async showProfile() {
+    if (this.isConnected() && this.profile) {
+      this.callApiMill?.instance().calle("details",this.profile.id,"", this.profile.kind);
+    }   
 }
 
 public isConnected() : boolean {
-  return this.authState() === 'Authenticated';
+  return this.authState() === STATUS_CONNECTED;
 }
 
 public faceIcon() : string {
-  if (this.authState() === 'Authenticated') {
-    return "img/client.ico";
+  var ret = "img/unknown.ico";
+  if (this.isConnected()) {
+    ret = this.findIcon(this.profile.kind);
   }
-  return "img/unknown.ico";
+  return ret;
 }
 public faceName() : string {
-  if (this.authState() === 'Authenticated') {
-    return "Connected ";
+  if (this.isConnected()) {
+    return this.profile.name;
   }
   return "Diconnected";
 }
 public faceNameClass() : string {
-  if (this.authState() === 'Authenticated') {
-    return "name-bar";
-  }
-  return "name-bar";
+  var ret = "name-bar" 
+  //if (this.isConnected())) {
+  //  return "name-bar";
+  //}
+  return ret;
 }
 
-
-
-
 public async logout(): Promise<void> {
+  this.profileRequested = false;
+  this.profile = undefined;
   await this.keycloak.logout({
     redirectUri: window.location.origin, // Where to go after
   });
-  // Correct 2026 way: Redirect back to home after invalidating server session
-//  await this.keycloak.logout(window.location.origin + '/welcome');
 }
 
-
+private findIcon(kind:number) : string {
+  var ret: string = "img/unknown.ico";
+  for (const tp of Object.values(EsquireNodeTypes)) {
+    if (tp.id == kind) {
+      ret = tp.icon;
+      break;
+    }
+  }
+  return ret;
 }
+}
+
 
 export const EsquireNodeTypes = {
     System:      new EsqNodeType( 0, "System",             "img/folders/system.ico",  true,  [{columnDef:"name", header:"Name"},  {columnDef:"desc", header:"Description"}]),
