@@ -7,14 +7,23 @@
 *  History:
 * 12/24/2025 mir0n kind parameter is requried for esq-cmd, esq-enode
 * 01/08/2026 mir0n move initialization out from constructor
+* 01/10/2026 mir0n added keycloakSignal processing
+*                  added keyCloak UI/UX elements
 */
 import {Component,
   OnInit,
   AfterViewInit,
   inject,
+  Signal,
+  signal,
+  effect,
+  computed,
 } from '@angular/core';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatDialog} from '@angular/material/dialog';
+import {MatIconButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 
 import {EsqNodeType
   , EsqNodeTypeFactory
@@ -27,6 +36,8 @@ import {EsqNodeType
 import { EsqExplorerCallApiMill, EsqDictionary } from '@mir0n-pro/esquire.ui/components';
 import { EsqExplorerComponent} from '@mir0n-pro/esquire.ui/explorer/flatTree';
 import {EsquireService} from '../../rest/api/esquire.service';
+import { KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
+import Keycloak from 'keycloak-js';
 
 
 @Component({
@@ -34,6 +45,9 @@ import {EsquireService} from '../../rest/api/esquire.service';
   standalone: true,
   imports: [
     MatToolbar,
+    MatIconButton,
+    MatIconModule,
+    MatMenuModule,
     EsqExplorerComponent
   ],
   templateUrl: './app-explorer.component.html',
@@ -41,14 +55,44 @@ import {EsquireService} from '../../rest/api/esquire.service';
 })
 
 export class ExplorerComponent implements OnInit, AfterViewInit {
+  private keycloak: Keycloak;
+  keycloakSignal: Signal<KeycloakEvent> = inject(KEYCLOAK_EVENT_SIGNAL);
+  authState = signal('Initial');
   dataService?: EsquireService;
   _dataService: EsquireService;
+
   readonly detailsDialog:MatDialog = inject(MatDialog);
   private callApiMill?:EsqExplorerCallApiMill;
   private dictionary?:EsqDictionaryApi;
    
   constructor(dataService: EsquireService) {
     this._dataService = dataService; 
+    this.keycloak = inject(Keycloak);
+    effect(() => {
+      const event = this.keycloakSignal();
+      if (event.type === KeycloakEventType.TokenExpired) {
+        this.authState.set('Token expired');
+        console.warn('Session expired - system is attempting background refresh.');
+      } else if (event.type === KeycloakEventType.AuthSuccess) {
+        this.authState.set('Authenticated');
+        console.log('User successfully authenticated');
+      } else if (event.type === KeycloakEventType.AuthError) {
+        this.authState.set('Authentication error');
+        console.error('Error during authentication');
+      } else if (event.type === KeycloakEventType.AuthRefreshError) {
+      // Handle the case where the refresh token itself expired
+        this.keycloak.logout();
+      } else if (event.type === KeycloakEventType.Ready) {
+        var good = computed(() => this.keycloak.authenticated ?? false);
+        if (good()) {
+          this.authState.set('Authenticated');
+        } else {
+          this.authState.set('Ready');
+        }
+      } else {
+        this.authState.set('' + event.type);
+      }
+    });
   }
 
   public esqRestApiWrapper(): EsqRestApi {
@@ -107,6 +151,51 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
 
   async ngAfterViewInit() {
   }
+
+public async login(): Promise<void> {
+  await this.keycloak.login({
+    redirectUri: window.location.origin, // Where to go after
+  });
+}  
+
+public showProfile() {
+  alert("TODO");
+}
+
+public isConnected() : boolean {
+  return this.authState() === 'Authenticated';
+}
+
+public faceIcon() : string {
+  if (this.authState() === 'Authenticated') {
+    return "img/client.ico";
+  }
+  return "img/unknown.ico";
+}
+public faceName() : string {
+  if (this.authState() === 'Authenticated') {
+    return "Connected ";
+  }
+  return "Diconnected";
+}
+public faceNameClass() : string {
+  if (this.authState() === 'Authenticated') {
+    return "name-bar";
+  }
+  return "name-bar";
+}
+
+
+
+
+public async logout(): Promise<void> {
+  await this.keycloak.logout({
+    redirectUri: window.location.origin, // Where to go after
+  });
+  // Correct 2026 way: Redirect back to home after invalidating server session
+//  await this.keycloak.logout(window.location.origin + '/welcome');
+}
+
 
 }
 

@@ -1,5 +1,14 @@
 Esquire Frameworks(tm) 2.0
-Esquire Exporer (frontend)
+Esquire Explorer (frontend)
+
+01/10/2026 Keycload UI/UX
+main.ts
+  - complete keyCloak init withAutoRefreshToken
+app\app.component.ts
+  - remove keycloakSignal 
+flatTree\app-explorer.component.ts
+  - added keycloakSignal processing
+  - added keyCloak UI/UX elements
 
 01/08/2026 Keycload added 
 main.ts  

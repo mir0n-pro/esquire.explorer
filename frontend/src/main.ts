@@ -8,13 +8,14 @@
 * 12/30/2025 mir0n load config.json
 * 01/08/2026 mir0n assets/config.json is required
 *                  added keyclock init (unfortunately you cannod do it within app.config.ts )
+* 01/10/2026 mir0n complete keyCloak init withAutoRefreshToken
 */
 
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 import { RUNTIME_CONFIG } from './app/app.tokens';
-import { INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, includeBearerTokenInterceptor, provideKeycloak } from 'keycloak-angular';
+import { AutoRefreshTokenService, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, includeBearerTokenInterceptor, provideKeycloak, UserActivityService, withAutoRefreshToken } from 'keycloak-angular';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { routes } from './app/app.routes';
@@ -36,17 +37,22 @@ import { BASE_PATH } from './rest';
             url: config.keycloakUrl?? "http://localhost:8080", 
             realm: config.keycloakRealm?? "esquire",
             clientId: config.keycloakClientId?? "esq-angular",
-            grant_type:'password', 
-            scope: 'openid profile email'  
           },
           initOptions: {
-            //onLoad: 'check-sso',
-            onLoad: 'login-required',
-            checkLoginIframe: false, 
+            onLoad: 'check-sso',
+            checkLoginIframe: true, 
             pkceMethod: 'S256',       
             //flow: 'standard',
-            //silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
-          }
+            silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
+            
+          },
+          features: [
+            withAutoRefreshToken({
+              sessionTimeout: 300000, // Optional: time in ms for inactivity logout
+              onInactivityTimeout: 'logout' // What to do if the session actually dies
+            })
+          ],
+           providers: [AutoRefreshTokenService, UserActivityService]
         }),
         ...(appConfig.providers || []),
         { provide: RUNTIME_CONFIG, useValue: config }

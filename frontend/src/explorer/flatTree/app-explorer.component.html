@@ -7,19 +7,56 @@
 
   History:
 -->
+
   <div class="app-explorer">
+
   <mat-toolbar> 
     <img style="width:48px; height:48px;" src="main.ico"/>
-    <h1> Esquire Tree Explorer </h1>
+    <h1>Esquire Tree Explorer </h1>
+
+    <div [class]="faceNameClass()">
+      <span>{{faceName()}}</span>
+    <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Profile menu">
+      <img style="width: 24px; height:24px;"  [src]="faceIcon()"/>
+    </button>
+    </div>         
+    <mat-menu #menu="matMenu">
+      @if (isConnected()) {
+        <button mat-menu-item
+          (click)="logout()">
+          <!--mat-icon>power_settings_new</mat-icon-->
+          <span style="font-size: 10pt;">Log out</span>          
+        </button>
+      }@else{
+        <button mat-menu-item
+          (click)="login()">
+          <!--mat-icon>power_settings_new</mat-icon-->
+          <span style="font-size: 10pt;">Log in</span>
+        </button>
+      } 
+      <button mat-menu-item 
+       [disabled]="!isConnected()"
+       (click)="showProfile()">
+        <!--mat-icon>settings</mat-icon-->
+        <span style="font-size: 10pt;">Profile</span>
+      </button>
+    </mat-menu>
   </mat-toolbar>
-  <esqExplorer #explorer 
-    [esqRestApi]="esqRestApiWrapper()"
-    [esqExplorerCallApi]="esqExplorerCallApiWrapper()">
-  </esqExplorer>
+
+  @if (authState() === 'Authenticated') {
+    <esqExplorer #explorer 
+        [esqRestApi]="esqRestApiWrapper()"
+        [esqExplorerCallApi]="esqExplorerCallApiWrapper()">
+      </esqExplorer>
+  } @else {
+    <div style="height: 80vh;">
+      <p class="info-text">Please login to access the explorer features.</p>
+    </div>
+  }
+
   <mat-toolbar>
-    <p></p>
+    <p class="info-text">{{authState()}}</p>
     <p class="right-aligned-text">Copyright&#169; 2001, 2026 mir0n&co</p>
   </mat-toolbar>
-</div>
-
+  </div>
 

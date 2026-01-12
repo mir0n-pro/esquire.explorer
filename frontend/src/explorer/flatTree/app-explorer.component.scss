@@ -17,8 +17,13 @@
     border : 1px;
     background: rgba(235, 235, 235, 0.5);
 
+    vertical-align: middle;
+    font-size: 9pt;
+    text-align: left;
+    font-weight: normal;  
+    
     display: grid;
-    grid-template-columns: fit-content(48px) auto;
+    grid-template-columns: fit-content(48px) auto fit-content(120px);
     gap: 16px;
   }
 
@@ -26,21 +31,47 @@
     padding: 3px 3px 3px 3px;
 
   }
-  
-  .mat-toolbar {
-    bottom: 0;
-    height: 10hv;
-    border : 1px;
-    background: rgba(235, 235, 235, 0.5);
-    vertical-align: middle;
-    font-size: 9pt;
-    text-align: left;
-    font-weight: normal;  
+
+  .name-bar {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    //left: 100px;
+    //border-radius: 16px;
+    //box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.5);
+    //background-color: rgba(0, 0, 0, 0);
+    display: flex;
+    align-items: center; 
+    vertical-align: middle;    
+
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-left: 10px;
+     display: grid;
+    grid-template-columns: auto fit-content(24px);
   }
+
+  .menu-button {
+    transform: scale(0.75) !important;
+  }
+
 }
 
 .right-aligned-text {
   text-align: right;
   /* You may need to ensure it takes the full width */
   width: 100%; 
+}
+/*
+.mat-mdc-menu-item {
+  font-size: 18px !important;
+}
+.mat-mdc-menu-item .mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+*/
+
+.large-menu .mat-mdc-menu-item {
+  font-size: 9px;
 }

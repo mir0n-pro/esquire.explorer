@@ -1,5 +1,8 @@
 Esquire Frameworks(tm) 2.0
-Esquire Exporer (frontend)
+Esquire Explorer (frontend)
+
+v1.01-2601.1119 
+  - complete keyCloak UI/UX setup
 
 v1.0.1-2601.1022 Cosmetic
   - Copyright added
