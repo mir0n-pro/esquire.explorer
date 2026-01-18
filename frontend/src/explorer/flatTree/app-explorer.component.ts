@@ -11,6 +11,7 @@
 *                  added keyCloak UI/UX elements
 * 01/12/2026 mir0n added profile dialog menu command
 *                  login handshake : load profile at logon
+* 01/18/2026 mir0n errorMessage signal added 
 */
 import {Component,
   OnInit,
@@ -40,6 +41,8 @@ import { EsqExplorerComponent} from '@mir0n-pro/esquire.ui/explorer/flatTree';
 import {EsquireService} from '../../rest/api/esquire.service';
 import { KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
 import Keycloak from 'keycloak-js';
+import { Observable } from 'rxjs';
+import { ProblemDetails } from '../../app/interceptor/rfc9457Interceptor';
 
 const STATUS_CONNECTED = "Connected";
 const STATUS_AUTHENTICATED = "Authenticated";
@@ -64,6 +67,7 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
   private keycloak: Keycloak;
   keycloakSignal: Signal<KeycloakEvent> = inject(KEYCLOAK_EVENT_SIGNAL);
   authState = signal('Initial');
+  errorMessage = signal('');
   dataService?: EsquireService;
   _dataService: EsquireService;
 
@@ -105,7 +109,11 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
                   error: (err) => {
                     console.error('Something went wrong: ' + err);
                     this.authState.set("Error in profile");
-                    this.logout();                      
+                    this.errorMessage.set('Something went wrong: ' + err.detail);
+                    //if (err.detail) {
+                    //  alert('Something went wrong: ' + err.detail);
+                    //}                 
+                    this.logout();     
                   },
                   complete: () =>  {
                     this.authState.set(STATUS_CONNECTED);
@@ -128,37 +136,82 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
   public esqRestApiWrapper(): EsqRestApi {
     return {
       esquire: (id?: string, skip?: number, take?: number, options?:any) => {
+        this.errorMessage.set("");
         if(!this.dataService) {
+          this.errorMessage.set("Data service not initialized");
           throw new Error("Data service not initialized");
         }
-        return this.dataService.esquire(id?encodeURIComponent(id):undefined, skip, take, 'body', false, options) ;
+        let ret: Observable<any> = this.dataService.esquire(id?encodeURIComponent(id):undefined, skip, take, 'body', false, options);
+        ret.subscribe({
+          error : (err: ProblemDetails) => {
+            console.error(err.detail || err.title);
+            this.errorMessage.set( err.detail || err.title);
+          }
+        }) ;
+        return ret;
       },
       esquirePath: (id: string, options?:any) => {
+        this.errorMessage.set("");
         if(!this.dataService) {
+          this.errorMessage.set("Data service not initialized");
           throw new Error("Data service not initialized");
         }
-        return this.dataService.esquirePath(encodeURIComponent(id), options) ;
+        let ret: Observable<any> = this.dataService.esquirePath(encodeURIComponent(id), options);
+        ret.subscribe({
+          error : (err: ProblemDetails) => {
+            console.error(err.detail || err.title);
+            this.errorMessage.set( err.detail || err.title);
+          }
+        }) ;
+        return ret;
       },
       esquireCmd: ( kind: number, id: string, cmd?: string, options?:any) => {
+        this.errorMessage.set("");
         if(!this.dataService) {
+          this.errorMessage.set("Data service not initialized");
           throw new Error("Data service not initialized");
         }
-        return this.dataService.esquireCmd( kind, encodeURIComponent(id), cmd, options) ;
+        let ret: Observable<any> = this.dataService.esquireCmd( kind, encodeURIComponent(id), cmd, options) ;
+        ret.subscribe({
+          error : (err: ProblemDetails) => {
+            console.error(err.detail || err.title);
+            this.errorMessage.set( err.detail || err.title);
+          }
+        }) ;
+        return ret;
       },
      esquireEntityNode: (kind: number, id?: string, name?: string, options?:any) => {
+        this.errorMessage.set("");
         if(!this.dataService) {
+          this.errorMessage.set("Data service not initialized");
           throw new Error("Data service not initialized");
         }
-        return this.dataService.esquireEntityNode( kind, (id && id.length >0)? encodeURIComponent(id) : undefined,
+        let ret: Observable<any> = this.dataService.esquireEntityNode( kind, (id && id.length >0)? encodeURIComponent(id) : undefined,
           name?encodeURIComponent(name):undefined, 
           options
         );
+        ret.subscribe({
+          error : (err: ProblemDetails) => {
+            console.error(err.detail || err.title);
+            this.errorMessage.set( err.detail || err.title);
+          }
+        }) ;
+        return ret; 
       },
      esquireDictionary: (kind: number, options?:any) => {
+        this.errorMessage.set("");
         if(!this.dataService) {
+          this.errorMessage.set("Data service not initialized");
           throw new Error("Data service not initialized");
         }
-        return this.dataService.esquireDictionary(kind , options);
+        let ret: Observable<any> = this.dataService.esquireDictionary(kind , options);
+        ret.subscribe({
+          error : (err: ProblemDetails) => {
+            console.error(err.detail || err.title);
+            this.errorMessage.set( err.detail || err.title);
+          }
+        }) ;
+        return ret;
       },
     }
   };

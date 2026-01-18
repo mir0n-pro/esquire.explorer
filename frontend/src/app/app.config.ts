@@ -8,6 +8,7 @@
 * 12/30/2025 mir0n handle failure of RUNTIME_CONFIG injection
 * 01/08/2026 mir0n includeBearerTokenInterceptor
 *                  attempt to init keycloack
+* 01/18/2026 mir0n added interceptors: tracingInterceptor, rfc9457Interceptor
 */
 
 import {ApplicationConfig, inject, provideAppInitializer, provideZonelessChangeDetection} from '@angular/core';
@@ -21,11 +22,17 @@ import {provideAnimationsAsync} from '@angular/platform-browser/animations/async
 import {BASE_PATH} from "../rest";
 import { RUNTIME_CONFIG} from './app.tokens';
 import { INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, includeBearerTokenInterceptor, provideKeycloak, KeycloakService } from 'keycloak-angular';
+import { rfc9457Interceptor } from './interceptor/rfc9457Interceptor';
+import { tracingInterceptor } from './interceptor/tracingInterceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(
-      withInterceptors([includeBearerTokenInterceptor]) // Ensure this is here
+      withInterceptors([
+        tracingInterceptor,
+        includeBearerTokenInterceptor,
+        rfc9457Interceptor,
+      ]) 
     ),
     {
       provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,

@@ -1,6 +1,15 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+01/12/2026 Error handling, performance metrics
++ added app\interceptor\rfc9457Interceptor.ts
++ added app\interceptor\tracingInterceptor.ts
+app\app.config.ts
+  - added interceptors: tracingInterceptor, rfc9457Interceptor
+flatTree\app-explorer.component.ts
+  - errorMessage signal added 
+  - error handling: show errors in footer
+
 01/12/2026 Keycload UI/UX (up to "ok-for-now")
 app\app.component.ts
   - added profile dialog menu command

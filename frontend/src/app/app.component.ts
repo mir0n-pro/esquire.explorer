@@ -21,7 +21,7 @@ import { KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType  } from 'keyclo
 })
 export class AppComponent implements OnInit{
   title = 'Esquire Explorer';
+
   ngOnInit() {
-    // This property is what the interceptor checks
   }
 }

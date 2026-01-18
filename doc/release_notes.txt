@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.01-2601.1817
+  - Request/Correlation/Trace IDs
+  - Error Handling
+  - Performance metrics
+  
 v1.01-2601.1217
   - keyCloak UI/UX: "OK-for-now"
 
