@@ -1,10 +1,21 @@
+/*
+*  Esquire frameworks (tm)
+*  Esquire Explorer
+*  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
+*  mailto:mir0n.the.programmer@gmail.com
+*
+*  History:
+* 01/19/2026 mir0n use ui\api\ProblemDetail.ts
+*/
+
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { catchError, throwError, Timestamp } from 'rxjs';
+import { ProblemDetail } from 'src/ui/api/ProblemDetail';
 
 export const rfc9457Interceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      let problem: ProblemDetails;
+      let problem: ProblemDetail;
 
       if (error.error instanceof ErrorEvent) {
         // Client-side or network error
@@ -12,7 +23,8 @@ export const rfc9457Interceptor: HttpInterceptorFn = (req, next) => {
           type: 'about:blank',
           title: 'Network Error',
           detail: error.error.message || error.message,
-          status: error.status
+          status: error.status,
+          traceId: 'n\a'
         };
       } else if (error.status === 0) {
         // Gateway down / Connection refused / CORS issue
@@ -21,7 +33,8 @@ export const rfc9457Interceptor: HttpInterceptorFn = (req, next) => {
           title: 'Server Unreachable',
           detail: 'Could not connect to the server. Please check your internet connection or try again later.',
           status: 0,
-          instance: req.url
+          instance: req.url,
+          traceId: 'n\a'
         };
     } else {
         // Server-side error (RFC 9457 expected)
@@ -64,30 +77,7 @@ export const rfc9457Interceptor: HttpInterceptorFn = (req, next) => {
   );
 };
 
-// rfc9457-problem.model.ts
-export interface ProblemDetails {
-  type: string;        // URI identifying the error type
-  title: string;       // Short, human-readable summary
-  status: number;     // HTTP status code
-  detail?: string;     // Detailed, actionable explanation
-  instance?: string;   // URI identifying the specific occurrence
-  
-  // Extension Members (Standardized across your services)
-  traceId?: string;    // Correlation ID for backend logs
-  errors?: Array<{     // Common extension for validation errors
-    name?: string;
-    reason: string;
-    pointer?: string;  // JSON Pointer to the invalid field
-  }>
-  timestamp?:string;
-  requestId?:string;
-  correlationId?:string;
-  processingTime?:string;
-  stackTrace?:string;
-}
-
 /*
-
 // user-profile.component.ts
 this.userService.updateProfile(data).subscribe({
   error: (err: ProblemDetails) => {

@@ -49,11 +49,14 @@
      display: grid;
     grid-template-columns: auto fit-content(24px);
   }
-
+  .esq-icon-button {
+    transform: scale(0.75) !important;
+  }
+    
+  .right-aligned-text {
+    text-align: right;
+    width: 100%; 
+  }
 }
 
-.right-aligned-text {
-  text-align: right;
-  /* You may need to ensure it takes the full width */
-  width: 100%; 
-}
+

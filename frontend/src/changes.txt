@@ -1,7 +1,17 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
-01/12/2026 Error handling, performance metrics
+01/19/2026 
++ added ui package (targeting to esqurie.ui library)
+  + api\ProblemDetail.ts : Problem Detail and its Dictionary
+  + components\EsqSingleEntryDialog.* Single JSON entry dialog
+app\interceptor\rfc9457Interceptor.ts
+  - use ui\api\ProblemDetail.*
+explorer\flatTree\app-explorer.component.ts
+  - alert on false logon uncommented 
+  - Error Report added
+
+01/18/2026 Error handling, performance metrics
 + added app\interceptor\rfc9457Interceptor.ts
 + added app\interceptor\tracingInterceptor.ts
 app\app.config.ts

@@ -6,6 +6,8 @@
   mailto:mir0n.the.programmer@gmail.com
 
   History:
+  01/19/2026 mir0n  Error Report added
+  
 -->
 
   <div class="app-explorer">
@@ -57,7 +59,23 @@
   }
 
   <mat-toolbar>
-    <p class="info-text">{{authState()}} <b>{{errorMessage()}}</b> </p>
+    @if (errorMessage().length > 0) {
+      <p class="info-text">
+       <b>{{errorMessage()}}</b>
+        @if (canShowErrorReport()) {
+          <button matIconButton style="top: 6px;"
+            class = "esq-icon-button"
+            matTooltip="Error Report"
+          (click)="runErrorReport()">
+            <img style="width: 24px; height:24px;" src="./img/error.ico"/>
+
+          <!-- mat-icon>report_problem</mat-icon -->
+          </button>
+        }
+      </p>
+    } @else{
+      <p class="info-text">{{authState()}} </p>
+    }
     <p class="right-aligned-text">Copyright&#169; 2001, 2026 mir0n&co</p>
   </mat-toolbar>
   </div>

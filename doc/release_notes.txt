@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.02-2601.1921
+ - Complete error handling 
+   : Error Report Dialog added
+
 v1.01-2601.1817
   - Request/Correlation/Trace IDs
   - Error Handling
