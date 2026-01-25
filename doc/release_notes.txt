@@ -1,6 +1,9 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.02.01-2601.2516
+  Paper Client Account type added
+
 v1.02.01 
   - include esquire.ui library
   - comment out github authentication

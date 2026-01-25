@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+01/25/2026 
+explorer\flatTree\app-explorer.component.ts
+  - paper account type added
+
 01/24/2026 
 app\interceptor\rfc9457Interceptor.ts
   - move ui package to esquire.ui
