@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.02.01 
+  - include esquire.ui library
+  - comment out github authentication
+  - move app.ui package to to esquire.ui 
+
 v1.02-2601.1921
  - Complete error handling 
    : Error Report Dialog added

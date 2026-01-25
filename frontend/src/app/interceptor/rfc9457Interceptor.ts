@@ -6,11 +6,12 @@
 *
 *  History:
 * 01/19/2026 mir0n use ui\api\ProblemDetail.ts
+* 01/24/2026 mir0n move ui package to esquire.ui
 */
 
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { catchError, throwError, Timestamp } from 'rxjs';
-import { ProblemDetail } from 'src/ui/api/ProblemDetail';
+import { ProblemDetail } from 'src/esquire.ui/api/ProblemDetail';
 
 export const rfc9457Interceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(

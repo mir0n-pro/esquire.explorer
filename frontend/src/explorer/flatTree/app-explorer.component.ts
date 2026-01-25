@@ -14,6 +14,7 @@
 * 01/18/2026 mir0n errorMessage signal added 
 * 01/19/2025 mir0n alert on false logon uncommented 
 *                  Error Report added
+* 01/24/2026 mir0n use local esquire.ui instead of library
 *
 */
 import {Component,
@@ -30,24 +31,39 @@ import { MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatIconButton} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-
+/*
 import {EsqNodeType
   , EsqNodeTypeFactory
   , EsqNodeStatus
   , EsqNodeStatusFactory
   , EsqRestApi
   , EsqDictionaryApi
-  , EsqExplorerCallApi, 
-  EsqEntityLayer
+  , EsqExplorerCallApi
+  ,  EsqEntityLayer
 } from '@mir0n-pro/esquire.ui/api';
+
 import { EsqExplorerCallApiMill, EsqDictionary } from '@mir0n-pro/esquire.ui/components';
 import { EsqExplorerComponent} from '@mir0n-pro/esquire.ui/explorer/flatTree';
+*/
+
+import {EsqNodeType,EsqNodeTypeFactory} from 'src/esquire.ui/api/EsqNodeTypeFactory';
+import {EsqNodeStatus,EsqNodeStatusFactory} from 'src/esquire.ui/api/EsqNodeStatusFactory';
+import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
+import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
+import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
+//import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
+import {EsqExplorerCallApiMill} from 'src/esquire.ui/components/EsqExplorerCallApiMill';
+import {EsqDictionary} from 'src/esquire.ui/components/EsqDictionary';
+import {EsqExplorerComponent} from 'src/esquire.ui/explorer/flatTree/EsqExplorerComponent';
+import { ProblemDetail, problemDetailDictionary } from 'src/esquire.ui/api/ProblemDetail';
+import { EsqSingleEntryDialog } from 'src/esquire.ui/components/EsqSingleEntryDialog';
+
+
 import {EsquireService} from '../../rest/api/esquire.service';
 import { KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
 import Keycloak from 'keycloak-js';
 import { Observable } from 'rxjs';
-import { ProblemDetail, problemDetailDictionary } from 'src/ui/api/ProblemDetail';
-import { EsqSingleEntryDialog } from 'src/ui/components/EsqSingleEntryDialog';
+
 
 const STATUS_CONNECTED = "Connected";
 const STATUS_AUTHENTICATED = "Authenticated";

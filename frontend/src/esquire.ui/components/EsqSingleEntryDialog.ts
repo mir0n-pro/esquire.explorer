@@ -26,14 +26,18 @@ import { MatDividerModule } from '@angular/material/divider';
 import { firstValueFrom, from, lastValueFrom, Observable } from 'rxjs';
 import { CommonModule } from '@angular/common'
 import {MatTableModule } from '@angular/material/table';
+
+/*
 import { EsqEntityLayer } from '@mir0n-pro/esquire.ui/api';
-//import { EsqTabLStringComponent } from "./EsqTabStringComponent";
-import { EsqTabLStringComponent} from '@mir0n-pro/esquire.ui/components';
+*/
+import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
+
+import { EsqTabLStringComponent} from './EsqTabStringComponent';
 
 @Component({
   selector: 'details-dialog',
   templateUrl: './EsqSingleEntryDialog.html',
-  styleUrl: './EsqDetailsDialog.scss',   // ./EsqSingleEntryDialog.scss',  cannot load this from library
+  styleUrl: './EsqDetailsDialog.scss',  
   imports: [
     MatDialogModule,
     MatButtonModule,

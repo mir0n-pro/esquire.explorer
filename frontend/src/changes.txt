@@ -1,6 +1,12 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+01/24/2026 
+app\interceptor\rfc9457Interceptor.ts
+  - move ui package to esquire.ui
+explorer\flatTree\app-explorer.component.ts
+  - use local esquire.ui instead of library
+
 01/19/2026 
 + added ui package (targeting to esqurie.ui library)
   + api\ProblemDetail.ts : Problem Detail and its Dictionary

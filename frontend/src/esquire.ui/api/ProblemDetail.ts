@@ -7,7 +7,7 @@
 *  History:
 */
 
-import { EsqEntityLayer } from "@mir0n-pro/esquire.ui/api";
+import { EsqEntityLayer } from "./EsqEntityDictionary";
 
 // rfc9457-problem.model.ts
 export interface ProblemDetail {

@@ -2,8 +2,8 @@ services:
   frontend:
     build:
       context: .
-      secrets:
-        - npmrc        
+#      secrets:
+#        - npmrc        
     image: esquire.frontend
     ports:
       - "4200:4200"
@@ -26,6 +26,6 @@ services:
 #      - /app/node_modules # Prevents local node_modules from overwriting container's
 # Mount ONLY the template as read-only
 #      - ./public/assets/config.json.template:/public/assets/config.json.template:ro
-secrets:
-  npmrc:
-    file: ./.npmrc_composer 
+#secrets:
+#  npmrc:
+#    file: ./.npmrc_composer 
