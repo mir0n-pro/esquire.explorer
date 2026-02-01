@@ -5,6 +5,7 @@
 *  mailto:mir0n.the.programmer@gmail.com
 *
 *  History:
+* 02/01/2026 mir0n EsqTabLStringComponent renamed with EsqTabStringComponent
 */
 import {AfterViewInit, 
   Component, 
@@ -32,7 +33,7 @@ import { EsqEntityLayer } from '@mir0n-pro/esquire.ui/api';
 */
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 
-import { EsqTabLStringComponent} from './EsqTabStringComponent';
+import { EsqTabStringComponent} from './EsqTabStringComponent';
 
 @Component({
   selector: 'details-dialog',
@@ -49,7 +50,7 @@ import { EsqTabLStringComponent} from './EsqTabStringComponent';
     MatDividerModule,
     CommonModule,
     MatTableModule,
-    EsqTabLStringComponent
+    EsqTabStringComponent
 ],
   encapsulation: ViewEncapsulation.None,
 })

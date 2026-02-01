@@ -1,3 +1,4 @@
+import {EsqTreeNode} from "./EsqTreeNode";
 
 /**
 *  Esquire frameworks (tm)
@@ -6,6 +7,11 @@
 *  mailto:mir0n.the.programmer@gmail.com
 *
 * History :
+* 02/01/2026 mir0n  added childTypes array
+*                   added commands array
+*                   added isCommandAllowed()
+*                   added isNewAllowed()
+*                   added ACCESSPROFILE virtual note type
 */
 export interface EsqColumnHeaderDef {
   columnDef:string;
@@ -18,19 +24,36 @@ export class EsqNodeType {
   public icon:string;
   public detailed:boolean;
   public listHeaders: EsqColumnHeaderDef[];
-  constructor (id:number, name:string, icon:string, detailed:boolean, listHeaders?: EsqColumnHeaderDef[]) {
+  public childTypes: number[];
+  public commands: string[];
+
+  constructor (id:number, name:string, icon:string, detailed:boolean, childTypes?:number[], commands?:string[], listHeaders?: EsqColumnHeaderDef[]) {
     this.id = id;
     this.name = name;
     this.icon = icon;  
     this.detailed = detailed;  
     this.listHeaders = (listHeaders?listHeaders:[]);
+    this.childTypes = (childTypes?childTypes:[]);
+    this.commands =(commands?commands:[] );
   }
+
+  public isCommandAllowed(cmd:string): boolean {
+        if (!this.commands || this.commands.length == 0) {
+            return false;
+        }
+        return this.commands.includes(cmd);
+    }
+    public isNewAllowed(): boolean {
+        return this.childTypes.length > 0;
+    }
+
 }
 
 export class EsqNodeTypeFactory {
   private static dictionary:EsqNodeType[] = [];
   public static UNKNOWN:EsqNodeType =  new EsqNodeType(0, "Unknown", "", false);
   public static MORE:EsqNodeType =  new EsqNodeType(999, "...", "", false);
+  public static ACCESSPROFILE:EsqNodeType =  new EsqNodeType(998, "Access", "", false);
 
   private constructor (dictionary: EsqNodeType[]) {
   }
@@ -53,6 +76,16 @@ export class EsqNodeTypeFactory {
     }
     return ret;
   } ;
-  
+
+  public static getAllowedChildTypes(parent: EsqTreeNode | null | undefined): EsqNodeType[] {
+    if (!parent) {
+        return [];
+    }
+    const allowedTypeIds= parent.type.childTypes || [];
+    return allowedTypeIds
+        .map(id => this.instanceOf(id))
+        .filter(type => type !== EsqNodeTypeFactory.UNKNOWN);
+ }
+
 }
 

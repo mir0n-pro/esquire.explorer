@@ -31,10 +31,10 @@ export class EsqNodeStatusFactory {
   public static instanceOf(statusId: number): EsqNodeStatus {
     var ret:EsqNodeStatus = EsqNodeStatusFactory.UNKNOWN;
     if (this.dictionary.length > 0 ){
-    const res:EsqNodeStatus[] = this.dictionary.filter((x) => x.id == statusId) as EsqNodeStatus[];
-    if (res && res.length > 0) {
-        ret = res[0];
-    } 
+        const res:EsqNodeStatus[] = this.dictionary.filter((x) => x.id == statusId) as EsqNodeStatus[];
+        if (res && res.length > 0) {
+            ret = res[0];
+        }
     }
     return ret;
   } ;

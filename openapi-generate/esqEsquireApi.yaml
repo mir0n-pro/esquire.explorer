@@ -179,6 +179,31 @@ paths:
                   $ref: '#/components/schemas/EsqEntityLayer'
         '405':
           description: Invalid input
+  /esq-key:
+    get:
+      tags:
+        - esquire
+      summary: Obtain an access profile
+      description: Obtain an access profile of a user
+      operationId: esquireKey
+      parameters:
+        - name: id
+          in: query
+          description: a user id
+          required: optional
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/EsqAccessProfile'          
+        '405':
+          description: Invalid input
 
 components:
   schemas:
@@ -331,3 +356,102 @@ components:
         format:
           type: string
           description: For tablist field - a kind of entities represented in the list; for string - max length; for integer, number, datetime- format
+    EsqRole:
+      title: Access Profile
+      description: Access Profile of a user
+      type: object
+      properties:
+        id:
+          type: number
+          format: int32
+          description: Role ID
+          example: 100
+        name:
+          type: string
+          description: Role Name
+          example: TREE
+    EsqPermission:
+      title: User Permission
+      description: User Permission
+      type: object
+      properties:
+        id:
+          type: number
+          format: int32
+          description: Permission ID
+          example: 112
+        entityKind:
+          type: number
+          format: int32
+          description: Kind  of user were access defined
+          example: 12
+        type:
+          type: string
+          description: Type of permission
+          example: Admin
+        name:
+          type: string
+          description: Type of permission
+          example: Client
+        flags:
+          type: array
+          items:
+            type: string
+          description: "Permission Y/N flags: create, update, delete, security, accounting"
+    EsqAccessProfile:
+      title: Access Profile
+      description: Access Profile of a user
+      type: object
+      properties:
+        id:
+          type: string
+          description: User ID
+          example: 6
+        kind:
+          type: number
+          format: int32
+          description: Kind  of user
+          example: 12
+        loginId:
+          type: string
+          description: User Login ID
+          example: mainadmin
+        email:
+          type: string
+          description: User email
+          example: pasilii.pupkin@gmail.com
+        pwdChangeForced:
+          type: string
+          enum:
+            - Y
+            - N
+          description: Y/N Flag to force password change
+          example: N
+        tfaMethod:
+          type: string
+          enum:
+            - N
+            - G
+            - g
+          description: Method of 2 factor authentication, N:not set, G:google authenticator, g:google authenticator pending"
+          example: N
+        roles:
+          type: array
+          description: List of roles assigned to user
+          items:
+            $ref: '#/components/schemas/EsqRole'
+        permissions:    
+          type: object
+          description: Grouped permissions assigned to user
+          properties:
+            admin:
+              type: array
+              description: Admin permissions
+              items:
+                $ref: '#/components/schemas/EsqPermission'
+            tools:
+              type: array
+              description: List of user tools and applications
+              items:
+                $ref: '#/components/schemas/EsqPermission'
+          additionalProperties: false            

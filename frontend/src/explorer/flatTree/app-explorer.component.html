@@ -38,10 +38,16 @@
       } 
       <button mat-menu-item style="line-height: 1;min-height: 12px"
        [disabled]="!isConnected()"
-       (click)="showProfile()">
+       (click)="showDetails()">
         <!--mat-icon>settings</mat-icon-->
-        <span style="font-size: 9pt;">Profile</span>
+        <span style="font-size: 9pt;">Details</span>
       </button>
+        <button mat-menu-item style="line-height: 1;min-height: 12px"
+                [disabled]="!isConnected()"
+                (click)="showAccessProfile()">
+            <!--mat-icon>settings</mat-icon-->
+            <span style="font-size: 9pt;">Access Profile</span>
+        </button>
     </mat-menu>
   </mat-toolbar>
 
@@ -49,7 +55,8 @@
   @if (isConnected()) {
     <esqExplorer #explorer 
         [esqRestApi]="esqRestApiWrapper()"
-        [esqExplorerCallApi]="esqExplorerCallApiWrapper()">
+        [esqExplorerCallApi]="esqExplorerCallApiWrapper()"
+        [esqCommandMenuItems]="esqCommandMenuItems()">
       </esqExplorer>
       
   } @else {

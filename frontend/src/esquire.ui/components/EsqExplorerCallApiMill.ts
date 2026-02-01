@@ -6,6 +6,9 @@
 *
 * History :
 * 12/24/2025 mir0n kind parameter is requried for esq-cmd, esq-enode
+* 02/01/2026 mir0n added EsqExplorerCallApi:create()
+*                  all method made protected, to let class extendable
+*                  added AccessProfile dialog via command "key"
 */
 import { firstValueFrom } from "rxjs";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
@@ -22,6 +25,7 @@ import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
 import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {EsqTreeNode} from 'src/esquire.ui/api/EsqTreeNode';
+import {EsqAccessProfileDialog} from "./EsqAccessProfileDialog";
 
 export class EsqExplorerCallApiMill {
   dialog:MatDialog;
@@ -37,7 +41,7 @@ export class EsqExplorerCallApiMill {
     return this.esqExplorerCallApi(); 
   }
 
-  private async runDetailsAsync(cmd:string, node : EsqTreeNode, readOnly:boolean) : Promise<void> {
+  protected async runDetailsAsync(cmd:string, node : EsqTreeNode, readOnly:boolean) : Promise<void> {
     var dialogRef:MatDialogRef<any>;
     if (node.type.detailed) {
       dialogRef = this.dialog.open(EsqEntityDetailsDialog, {
@@ -50,7 +54,7 @@ export class EsqExplorerCallApiMill {
           readOnly: readOnly,
         }
       });
-    } else {  
+    } else {
       dialogRef = this.dialog.open(EsqNodeDetailsDialog, {
         autoFocus: false,
         data : {
@@ -66,28 +70,60 @@ export class EsqExplorerCallApiMill {
     return new Promise<void>((resolve)=>resolve());
   }
 
-  /*
-  private _enode_:any = undefined;
-  private async loadEntityNode (entity_id: string, entity_name: string, entity_kind: number) {
-     this._enode_ = await firstValueFrom (this.restApi.esquireEntityNode(entity_id, entity_name, entity_kind));
-  }
-*/
-  private async doExplorerCommand2(cmd: string, entity_id: string, entity_name: string, entity_kind: number) {
-    var _enode_ = await firstValueFrom (this.restApi.esquireEntityNode(entity_kind, entity_id, entity_name))
-                .catch((error)=>console.error(error));
-    if (_enode_) {
-      let enode:EsqTreeNode = new EsqTreeNode(_enode_, undefined);
-      setTimeout(() => { void this.runDetailsAsync(cmd, enode as EsqTreeNode, true).catch(console.error); }, 0);
+    protected async runAccessProfileAsync(id:string, readOnly:boolean) : Promise<void> {
+        var dialogRef:MatDialogRef<any>;
+
+        dialogRef = this.dialog.open(EsqAccessProfileDialog, {
+            autoFocus: false,
+            data: {
+                id: id,
+                restApi: this.restApi,
+                dictionaryApi: this.dictionaryApi,
+                readOnly: readOnly,
+            }
+        });
+        dialogRef.afterClosed().subscribe(result => {
+            console.log(`Dialog result: ${result}`);
+        });
+        return new Promise<void>((resolve)=>resolve());
     }
 
+  protected async doExplorerCommand2(cmd: string, entity_id: string, entity_name: string, entity_kind: number) {
+      if (cmd == "key") {
+          setTimeout(() => {
+              void this.runAccessProfileAsync(entity_id,true).catch(console.error);
+          }, 0);
+      } else {
+          var _enode_ = await firstValueFrom(this.restApi.esquireEntityNode(entity_kind, entity_id, entity_name))
+              .catch((error) => console.error(error));
+          if (_enode_) {
+              let enode: EsqTreeNode = new EsqTreeNode(_enode_, undefined);
+              setTimeout(() => {
+                  void this.runDetailsAsync(cmd, enode as EsqTreeNode, true).catch(console.error);
+              }, 0);
+          }
+      }
   }
 
-  private async doExplorerCommand(cmd:string, node : EsqTreeNode) {
-    //readyOnly for now
-    setTimeout(() => { void this.runDetailsAsync(cmd, node, false).catch(console.error); }, 0);
+  protected async doExplorerCreate(node : EsqTreeNode, typeId?: number) {
+    return new Promise<void>((resolve)=>resolve());
   }
 
-  private esqExplorerCallApi(): EsqExplorerCallApi {
+  protected async doExplorerCommand(cmd:string, node : EsqTreeNode) {
+    //readOnly for now
+    if (cmd == "key") {
+        setTimeout(() => {
+            void this.runAccessProfileAsync(node.entityId,true).catch(console.error);
+        }, 0);
+
+    }  else {
+        setTimeout(() => {
+            void this.runDetailsAsync(cmd, node, true).catch(console.error);
+        }, 0);
+    }
+  }
+
+  protected esqExplorerCallApi(): EsqExplorerCallApi {
     return {
       call : (cmd: string, node :EsqTreeNode) => {
         return this.doExplorerCommand(cmd, node);
@@ -95,6 +131,9 @@ export class EsqExplorerCallApiMill {
       calle: (cmd: string, entity_id: string, entity_name: string, entity_kind: number) => {
         return this.doExplorerCommand2(cmd, entity_id, entity_name, entity_kind);
       },
+      create: (parent_node: EsqTreeNode, typeId?: number) => {
+       return this.doExplorerCreate(parent_node, typeId);
+      }
     }
   };
 }

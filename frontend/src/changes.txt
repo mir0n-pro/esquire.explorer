@@ -1,6 +1,12 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+02/01/2026 
+explorer\flatTree\flatTree\app-explorer.component.ts
+   - EsqRestApi extended with esquireKey()
+   - added EsqCommandMenuItems array with toolbar/context menu definition
+   - EsquireNodeTypes array expanded with children and commands list   
+
 01/25/2026 
 explorer\flatTree\app-explorer.component.ts
   - paper account type added

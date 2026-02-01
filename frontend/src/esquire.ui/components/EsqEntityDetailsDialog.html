@@ -55,21 +55,26 @@
                     <a href="{{details[field.name][0]}}" target="_blank" rel="noopener noreferrer">
                       {{details[field.name][1]}}
                     </a>
-                  </div>                   
+                  </div>
+                } @else if (field.type == 'tab-ikn-list') {
+                    <esq-tab-ikn-list
+                        [esqListElements]="details[field.name]"
+                        [esqListHeader]="field.label"
+                        [esqExplorerCallApi]="callApi"
+                        [esqEnableDetails]="true"
+                    />
                 } @else if (field.type == 'tablist') {
                   <esq-tab-list
                     [esqListElements]="details[field.name]"
                     [esqListNodeType]="nodeTypeFromFormat(field.format)"
                     [esqListHeader]="field.label"
                     [esqExplorerCallApi]="callApi"
-                  >
-                  </esq-tab-list>
+                  />
                 } @else if (field.type == 'tabstring') {
                   <esq-tab-string
                     [value]="details[field.name]"
                     [readOnly]=readOnly
-                  >
-                  </esq-tab-string>
+                  />
                 } @else { <!--if (field.type.toLowerCase() == 'string') { -->
                     <div class="esq-simple-grid2">
                       <b>{{field.label}}:</b>{{details[field.name]}}

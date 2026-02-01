@@ -15,6 +15,9 @@
 * 01/19/2025 mir0n alert on false logon uncommented 
 *                  Error Report added
 * 01/24/2026 mir0n use local esquire.ui instead of library
+* 02/01/2026 mir0n EsqRestApi extended with esquireKey()
+*                  added EsqCommandMenuItems array with toolbar/context menu definition
+*                  EsquireNodeTypes array expanded with children and commands list   
 *
 */
 import {Component,
@@ -63,6 +66,7 @@ import {EsquireService} from '../../rest/api/esquire.service';
 import { KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
 import Keycloak from 'keycloak-js';
 import { Observable } from 'rxjs';
+import {EsqCommandMenuItem, EsqContextMenuBuilder} from "../../esquire.ui/api/EsqContextMenuBuilder";
 
 
 const STATUS_CONNECTED = "Connected";
@@ -250,8 +254,29 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
         }) ;
         return ret;
       },
+      esquireKey: (id?: string, options?:any) => {
+            this.setErrorMessage("");
+            this.errorReport = undefined;
+            if(!this.dataService) {
+                this.setErrorMessage("Data service not initialized");
+                throw new Error("Data service not initialized");
+            }
+            let ret: Observable<any> = this.dataService.esquireKey( id, options) ;
+            ret.subscribe({
+                error : (err: ProblemDetail) => {
+                    console.error(err.detail || err.title);
+                    this.errorReport = err;
+                    this.setErrorMessage( err.detail || err.title);
+                }
+            }) ;
+            return ret;
+        },
     }
   };
+
+  public esqCommandMenuItems() : EsqCommandMenuItem[] {
+      return EsqCommandMenuItems;
+ }
 
   public esqExplorerCallApiWrapper(): EsqExplorerCallApi {
     if (this.callApiMill) {
@@ -276,12 +301,18 @@ public async login(): Promise<void> {
   await this.keycloak.login({
     redirectUri: window.location.origin
   });
-}  
+}
 
-public async showProfile() {
+public async showDetails() {
     if (this.isConnected() && this.profile) {
       this.callApiMill?.instance().calle("details",this.profile.id,"", this.profile.kind);
-    }   
+    }
+}
+
+public async showAccessProfile() {
+    if (this.isConnected() && this.profile) {
+        this.callApiMill?.instance().calle("key",this.profile.id, "", 0);
+    }
 }
 
 public isConnected() : boolean {
@@ -354,26 +385,25 @@ private findIcon(kind:number) : string {
   }
 }
 
-
 export const EsquireNodeTypes = {
-    System:       new EsqNodeType( 0, "System",              "img/folders/system.ico",  true,  [{columnDef:"name", header:"Name"},  {columnDef:"desc", header:"Description"}]),
-    AllAccounts:  new EsqNodeType( 2, "All accounts",        "img/folders/folder.ico",  false, [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]),
-    AllAdmins:    new EsqNodeType( 4, "All admin-s",         "img/folders/folder.ico",  false, [{columnDef:"name", header:"Administrator"},  {columnDef:"desc", header:"Description"}]),
-    AllClients:   new EsqNodeType( 6, "All clients",         "img/folders/folder.ico",  false, [{columnDef:"name", header:"Client"},  {columnDef:"desc", header:"Description"}]),
-    AllMerchants: new EsqNodeType( 8, "All merchants",       "img/folders/folder.ico",  false, [{columnDef:"name", header:"Merchanr"},  {columnDef:"desc", header:"Description"}]),
-    Organization: new EsqNodeType(10, "Organization",        "img/org.ico",             true, [{columnDef:"name", header:"Name"},  {columnDef:"desc", header:"Description"}]),
-    Client:       new EsqNodeType(12, "Client",              "img/client.ico",          true,  [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]),
-    ClientLink:   new EsqNodeType(13, "Client",              "img/client.ico",          true, ),
-    Merchant:     new EsqNodeType(14, "Merchant",            "img/merchant.ico",        true,  [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]), 
-    MerchantLink: new EsqNodeType(15, "Merchant",            "img/merchant.ico",        true, ), 
-    Admin:        new EsqNodeType(16, "Admin",               "img/admin.ico",           true, ), 
-    AdminLink:    new EsqNodeType(17, "Admin",               "img/admin.ico",           true, ),
-    CAccount:     new EsqNodeType(18, "Client Account",      "img/acct.ico",            true, ), 
-    CAccountLink: new EsqNodeType(19, "Client Account",      "img/links/acctl.ico",     true, ),
-    MAccount:     new EsqNodeType(20, "Merchant Account",    "img/macct.ico",           true, ), 
-    MAccountLink: new EsqNodeType(21, "Merchant Account",    "img/links/macctl.ico",    true, ),
-    pAccount:     new EsqNodeType(22, "Paper Client Account", "img/pacct.ico",          true, ), 
-    pAccountLink: new EsqNodeType(23, "Paper Client Account", "img/links/pacctl.ico",   true, ),
+    System:       new EsqNodeType( 0, "System",              "img/folders/system.ico",  true,    [10],              [],  [{columnDef:"name", header:"Name"},  {columnDef:"desc", header:"Description"}]),
+    AllAccounts:  new EsqNodeType( 2, "All accounts",        "img/folders/folder.ico",  false,     [],              [],  [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]),
+    AllAdmins:    new EsqNodeType( 4, "All admin-s",         "img/folders/folder.ico",  false,   [16],              [],  [{columnDef:"name", header:"Administrator"},  {columnDef:"desc", header:"Description"}]),
+    AllClients:   new EsqNodeType( 6, "All clients",         "img/folders/folder.ico",  false,   [12],              [],  [{columnDef:"name", header:"Client"},  {columnDef:"desc", header:"Description"}]),
+    AllMerchants: new EsqNodeType( 8, "All merchants",       "img/folders/folder.ico",  false,   [14],              [],  [{columnDef:"name", header:"Merchant"},  {columnDef:"desc", header:"Description"}]),
+    Organization: new EsqNodeType(10, "Organization",        "img/org.ico",             true,    [10],       ["_move"],  [{columnDef:"name", header:"Name"},  {columnDef:"desc", header:"Description"}]),
+    Client:       new EsqNodeType(12, "Client",              "img/client.ico",          true, [18,22],["_move_","key"],  [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]),
+    ClientLink:   new EsqNodeType(13, "Client",              "img/client.ico",          true,      [],         ["key"],  ),
+    Merchant:     new EsqNodeType(14, "Merchant",            "img/merchant.ico",        true,    [20],["_move_","key"],  [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]),
+    MerchantLink: new EsqNodeType(15, "Merchant",            "img/merchant.ico",        true,      [],         ["key"],  ),
+    Admin:        new EsqNodeType(16, "Admin",               "img/admin.ico",           true,      [],["_mov_e","key"],  ),
+    AdminLink:    new EsqNodeType(17, "Admin",               "img/admin.ico",           true,      [],         ["key"],  ),
+    CAccount:     new EsqNodeType(18, "Client Account",      "img/acct.ico",            true,      [],      ["_acct_"], ),
+    CAccountLink: new EsqNodeType(19, "Client Account",      "img/links/acctl.ico",     true,      [],      ["_acct_"], ),
+    MAccount:     new EsqNodeType(20, "Merchant Account",    "img/macct.ico",           true,      [],      ["_acct_"], ),
+    MAccountLink: new EsqNodeType(21, "Merchant Account",    "img/links/macctl.ico",    true,      [],      ["_acct_"], ),
+    PAccount:     new EsqNodeType(22, "Paper Client Account","img/pacct.ico",           true,      [],      ["_acct_"], ),
+    PAccountLink: new EsqNodeType(23, "Paper Client Account","img/links/pacctl.ico",    true,      [],      ["_acct_"], ),
 } as const;
 
 export const EsquireStatuses = {
@@ -383,3 +413,12 @@ export const EsquireStatuses = {
 //    Good:    new EsqNodeStatus(3,  "Checked",         "img/status/ok.ico"),
 //    Question:new EsqNodeStatus(4,  "Question",        "img/status/question.ico"),
 } as const;
+
+
+export const EsqCommandMenuItems:EsqCommandMenuItem[] = [
+    new EsqCommandMenuItem("Access Profile", "verified_user", "key"),
+    new EsqCommandMenuItem("Accounting", "monetization_on", "acct"),
+    new EsqCommandMenuItem("Move", "reply_all", "move"),
+    new EsqCommandMenuItem("New...", "add_circle", EsqContextMenuBuilder.CMD_NEW),
+] as const;
+

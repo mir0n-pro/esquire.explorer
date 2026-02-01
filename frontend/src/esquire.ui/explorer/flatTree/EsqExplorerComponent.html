@@ -7,7 +7,7 @@
   History:
 -->
 <div class="esq-explorer-container">
-<mat-toolbar class="mat-elevation-z2 esq-toolbar"> 
+<mat-toolbar class="mat-elevation-z2 esq-toolbar" [style.--right-buttons-count]="rightButtonsCount()">
 
   <button matIconButton
     class = "esq-icon-button"
@@ -21,24 +21,24 @@
   <button #esqBtnBack matIconButton 
     class = "esq-icon-button"
     matTooltip="Back"
-    disabled = "{{!canBtnBackClick()}}"
-    (click)="onBtnBackClick()">
+    disabled = "{{!canCmdBackClick()}}"
+    (click)="onCmdBackClick()">
     <mat-icon>arrow_back</mat-icon>
   </button>
 
   <button #esqBtnForward matIconButton 
     class = "esq-icon-button"
     matTooltip="Forward"
-    disabled = "{{!canBtnForwardClick()}}"
-   (click)="onBtnForwardClick()">
+    disabled = "{{!canCmdForwardClick()}}"
+   (click)="onCmdForwardClick()">
     <mat-icon>arrow_forward</mat-icon>
   </button>
 
   <button #esqBtnUp matIconButton 
     class = "esq-icon-button"
     matTooltip="Up one level "
-    disabled = "{{!canBtnUpClick()}}"
-    (click)="onBtnUpClick()">
+    disabled = "{{!canCmdUpClick()}}"
+    (click)="onCmdUpClick()">
     
     <mat-icon>arrow_upward</mat-icon>
   </button>
@@ -53,24 +53,45 @@
       <mat-icon>refresh</mat-icon>
     </button>
   }
+  <div ></div>
 
   <div class="esq-path-bar">
     {{listNodeOwnerPath()}}
   </div>
 
+  @for (item of esqCommandMenuItems.slice().reverse(); track item.cmd) {
+      @if (item.cmd != "new") {
+      <button matIconButton
+        class = "esq-icon-button"
+        matTooltip={{item.label}}
+        [disabled]="!canCmdClick(item.cmd, false)"
+        (click)="onCmdClick(item.cmd, false)">
+        <mat-icon>{{item.icon}}</mat-icon>
+      </button>
+      } @else {
+          <button matIconButton
+              class = "esq-icon-button"
+              matTooltip={{item.label}}
+              [disabled]="!canCmdNewClick(false)"
+              [matMenuTriggerFor]="toolbarNewMenu">
+              <mat-icon>{{item.icon}}</mat-icon>
+          </button>
+      }
+  }
+
   <button #matBtnDetails matIconButton
     class = "esq-icon-button"
     matTooltip="Details"  
-    disabled = "false"  
-    (click)="onBtnDetailsClick()">
+    disabled = "{{!canCmdDetailsClick(false)}}"
+    (click)="onCmdDetailsClick(false)">
     <mat-icon>wysiwyg</mat-icon>
   </button>
 
   <button #esqBtnGoto matIconButton 
     class = "esq-icon-button"
     matTooltip="Go to origin"  
-    disabled = "{{!canBtnGotoClick()}}"
-    (click)="onBtnGotoClick()">
+    disabled = "{{!canCmdGotoClick(false)}}"
+    (click)="onCmdGotoClick(false)">
     <mat-icon>launch</mat-icon>
   </button>
 
@@ -87,6 +108,133 @@
   }
 
 </mat-toolbar>
+
+<div
+  #contextMenuTrigger="matMenuTrigger"
+  class="esq-context-menu-anchor"
+  [style.left.px]="contextMenuPosition.x"
+  [style.top.px]="contextMenuPosition.y"
+  [matMenuTriggerFor]="esqContextMenu">
+</div>
+
+<mat-menu #esqContextMenu="matMenu">
+
+  <button #menuItemOpen mat-menu-item
+      class="esq-menu-item"
+      [disabled]="!canMenuOpenClick()"
+      (click)="onMenuOpenClick()">
+      <p class="esq-menu-grid">
+          <span class="esq-menu-label" [style.font-weight]="contextMenuNode?.expandable() ? 'bold' : 'normal'">Open</span>
+          <span class="esq-menu-hotkey">Enter</span>
+      </p>
+  </button>
+
+  <mat-divider></mat-divider>
+
+  <button mat-menu-item
+    class="esq-menu-item"
+    [disabled]="!canCmdBackClick()"
+    (click)="onCmdBackClick()">
+      <p class="esq-menu-grid">
+          <span class="esq-menu-label">Back</span>
+          <span class="esq-menu-hotkey">Ctrl+⮜</span>
+      </p>
+  </button>
+
+  <button mat-menu-item
+      class="esq-menu-item"
+      [disabled]="!canCmdForwardClick()"
+      (click)="onCmdForwardClick()">
+      <p class="esq-menu-grid">
+          <span class="esq-menu-label">Forward</span>
+          <span class="esq-menu-hotkey">Ctrl+⮞</span>
+      </p>
+  </button>
+
+  <button mat-menu-item
+      class="esq-menu-item"
+      [disabled]="!canCmdUpClick()"
+      (click)="onCmdUpClick()">
+      <p class="esq-menu-grid">
+          <span class="esq-menu-label">Up</span>
+          <span class="esq-menu-hotkey">Ctrl+⮝</span>
+      </p>
+  </button>
+
+  <button mat-menu-item
+    class="esq-menu-item"
+    [disabled]="!canCmdGotoClick(true)"
+    (click)="onCmdGotoClick(true)">
+      <p class="esq-menu-grid">
+          <span class="esq-menu-label">Go to origin</span>
+      </p>
+  </button>
+
+  <mat-divider></mat-divider>
+
+  <button #menuItemDetails mat-menu-item
+      class="esq-menu-item"
+      [disabled]="!canCmdDetailsClick(true)"
+      (click)="onCmdDetailsClick(true)">
+      <p class="esq-menu-grid">
+          <span class="esq-menu-label" [style.font-weight]="contextMenuNode && !contextMenuNode.expandable() ? 'bold' : 'normal'">Details</span>
+          <span class="esq-menu-hotkey">Alt+Enter</span>
+      </p>
+  </button>
+
+  @for (item of esqCommandMenuItems; track item.cmd) {
+      @if (item.cmd !== 'new') {
+          <button mat-menu-item
+                  class="esq-menu-item"
+                  [disabled]="!canCmdClick(item.cmd, true)"
+                  (click)="onCmdClick(item.cmd, true)">
+              <p class="esq-menu-grid">
+                  <span class="esq-menu-label">{{item.label}}</span>
+              </p>
+          </button>
+      }@else {
+          <mat-divider></mat-divider>
+          <button
+                  mat-menu-item
+                  class="esq-menu-item"
+                  [disabled]="!canCmdNewClick(true)"
+                  [matMenuTriggerFor]="contextNewSubmenu">
+              <p class="esq-menu-grid">
+                  <span class="esq-menu-label">{{item.label}}</span>
+              </p>
+          </button>
+      }
+  }
+</mat-menu>
+
+<mat-menu #contextNewSubmenu="matMenu">
+  @for (item of contextNewMenuItems; track item.type.id) {
+    <button
+      mat-menu-item
+      class="esq-menu-item"
+      (click)="onCmdNewClick(item.type.id,true)">
+      @if (item.icon) {
+        <img [src]="item.icon" class="esq-menu-icon"/>
+      }
+      <span class="esq-menu-label">{{item.label}}</span>
+    </button>
+  }
+</mat-menu>
+
+<mat-menu #toolbarNewMenu="matMenu">
+  @for (item of toolbarNewMenuItems; track item.type.id) {
+    <button
+      mat-menu-item
+      class="esq-menu-item"
+      (click)="onCmdNewClick(item.type.id,false)">
+      @if (item.icon) {
+        <img [src]="item.icon" class="esq-menu-icon"/>
+      }
+      <span class="esq-menu-label">{{item.label}}</span>
+    </button>
+  }
+</mat-menu>
+
 <mat-sidenav-container class="esq-sidenav-container" esqResize>
     <mat-sidenav 
       #EsqSidenav
@@ -98,7 +246,9 @@
       [fixedInViewport]= "false" 
       [fixedTopGap]= "0" 
       [fixedBottomGap]= "0"
+      (contextmenu)="onEmptyTreeContextMenu($event)"      
     >
+    
       @if (initialDataLoading()) {
         <div>
           <span style="position:relative; left:18px;">...Loading initial data...</span>
@@ -114,6 +264,7 @@
           matTreeNodePaddingIndent="30"
           class="esq-tree-node"
           (expandedChange)="onTreeNodeExpansion($event,_node)" 
+          (contextmenu)="onTreeContextMenu($event, _node)"
           (click)="onTreeClick(_node)" 
           (dblclick)="onTreeDoubleClick(_node)"
           (mouseenter)="onTreeNodeEnter(_node)" 
@@ -124,7 +275,8 @@
           [ngClass]="{ 'esq-active-node-highlight': treeNodeActive === _node && treeOnFocus,  'esq-active-node-outlight': treeNodeActive === _node && !treeOnFocus, 'esq-mouse-node-highlight': treeNodeEntered === _node}"
         >
           @let node = _node | asEsqTreeNode;
-          <div style="display: flex; flex-direction: row; align-items: left; justify-items: left">
+<!--   align-items: left; -->
+          <div style="display: flex; flex-direction: row; justify-items: left">
             <div 
               style="z-index:0; user-select: none; display: flex; flex-direction: row; align-items: center;" 
             > 
@@ -148,7 +300,7 @@
       </mat-tree>
     </mat-sidenav>
 
-    <mat-sidenav-content>
+    <mat-sidenav-content (contextmenu)="onEmptyListContextMenu($event)">
       <table mat-table
         #EsqExplList 
         [dataSource]="datasource.list" 
@@ -183,6 +335,7 @@
         <tr mat-row
             *matRowDef="let node; let i = index; columns: listColumnsDisplayed;" 
             class="mat-row esq-row"
+            (contextmenu)="onListContextMenu($event, node)"
             (mouseover)="listNodeHoveredIndex = i"
             (mouseout)="listNodeHoveredIndex = -1"
             [ngClass]="{'esq-active-node-highlight': node === listNodeFocused && !treeOnFocus,  'esq-active-node-outlight': node === listNodeFocused && treeOnFocus, 'esq-mouse-node-highlight': listNodeHoveredIndex === i}"

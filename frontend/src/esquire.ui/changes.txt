@@ -1,0 +1,58 @@
+Esquire Frameworks(tm) 2.0
+esquire.ui node.js library of components 
+
+02/01/2026
++ added api\EsqContextMenuBuilder
+api\EsqExplorerCallApi
+  - added create()
+api\EsqNodeTypeFactory
+  - added childTypes array
+  - added commands array
+  - added isCommandAllowed()
+  - added isNewAllowed()
+  - added ACCESSPROFILE virtual note type
+api.EsqRestApi
+  - added esquireKey()
++ added components\EsqAccessProfileDialog
++ added components\EsqTabIknfTableComponent
++ added components\EsqTabIknListComponent
+components\EsqEntityDetailsDialog
+  - EsqTabLStringComponent renamed with EsqTabStringComponent
+  - added use EsqTabIknListComponent
+components\EsqExplorerCallApiMill
+  - added EsqExplorerCallApi:create()
+  - all method made protected, to let class extendable
+  - added AccessProfile dialog via command "key"
+components\EsqSingleEntryDialog
+  - EsqTabLStringComponent renamed with EsqTabStringComponent
+components\EsqTabStringComponent
+  - EsqTabLStringComponent renamed with EsqTabStringComponent
+explorer\flatTree\EsqExplorerComponent
+  - context menu added
+  - dynamic toolbar
+  - toolbar is in synch with context menu
+  - normalized keyboard actions
+
+12/26/2025 Esquire API and types generalization
+   - restructure 
+   - npm package
+
+12/24/2025 Esquire API and types generalization
+api\EsqRestApi.ts
+   - kind parameter is requried for esq-cmd, esq-enode
+types\EsqEntityDictionary.ts   
+  - listvalues_kind moved inside of generic format 
+ui\EsqDictionary.ts  
+  - debug log added
+ui\EsqExplorerCallApiMill.ts  
+   - kind parameter is requried for esq-cmd, esq-enode
+ui\dialog\
+  +  added EsqTabStringComponent.* 
+ui\dialog\EsqEntityDetailsDialog.ts
+  - added processing of tabstring field value type
+  - readOnly made public
+  - kind parameter is requried for esq-cmd, esq-enode
+  - listvalues_kind moved inside of generic format 
+  
+
+12/17/2025 initial  

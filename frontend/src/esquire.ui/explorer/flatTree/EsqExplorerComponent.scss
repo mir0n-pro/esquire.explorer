@@ -25,15 +25,15 @@
 
     border: 1px solid #ccc;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    background-color: #f0f0f0; 
+    background-color: #f0f0f0;
 
     vertical-align: middle;
     font-size: 9pt;
-    font-weight: normal;  
+    font-weight: normal;
     margin: 0px 0px 0px 0px;
     display: grid;
 
-    grid-template-columns: repeat(5, 32px) auto repeat(3, 32px);
+    grid-template-columns: repeat(6, 18px) auto repeat(var(--right-buttons-count, 3), 18px);
     gap: 4px;
 
     .esq-icon-button {
@@ -64,7 +64,7 @@
   }
 
   .esq-toolbar-row {
-    height:30;
+    height:30px;
     border: 4px black;
     background: rgba(235, 235, 235, 0.5);
     justify-content: space-between;
@@ -125,7 +125,7 @@
   .esq-base-icon {
     position:relative;
     height: 24px;
-    width: 24x;
+    width: 24px;
   //   height: 16px;
   //   width: 16px;
     vertical-align :middle;
@@ -189,4 +189,49 @@
     border-bottom: none; /* Removes borders between rows */
   }
 
+  .esq-context-menu-anchor {
+    position: fixed;
+    z-index: 10000;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+
+
 }
+
+// menu items: cannot have under .esq-explorer,
+// because Angular Material renders menus in overlay outside component DOM
+
+.esq-menu-item {
+  line-height: 1 !important;
+  min-height: 12px !important;
+}
+  .esq-menu-grid {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    margin: 0;
+    height: 12px;
+  }
+
+  .esq-menu-label {
+    font-size: 9pt;
+  }
+
+  .esq-menu-hotkey {
+    font-size: 9pt;
+    color: #888;
+  }
+
+  .esq-menu-icon {
+    position:relative;
+    height: 18px !important;
+    width: 18px !important;
+    vertical-align :middle;
+    bottom: 0px;
+    left: 0px;
+    margin-right: 4px !important;
+    z-index: 1; /* Ensure it appears below the overlay icon */
+  }
+
+

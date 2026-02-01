@@ -1,6 +1,13 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.02.01-2602.0115 Toolbar and Context Menu with Access Profile as an option)
+  rest api regenerated: added esquireKey and AccessProfile
+  added dynamic toolbar and context menu
+  cleanup keyboard actions
+  added "Access Profile" command
+  accounts in user profile are in one tab
+
 v1.02.01-2601.2516
   Paper Client Account type added
 

@@ -8,8 +8,12 @@ configuration.ts
 encoder.ts
 git_push.sh
 index.ts
+model/esqAccessProfile.ts
+model/esqAccessProfilePermissions.ts
 model/esqEntityField.ts
 model/esqEntityLayer.ts
+model/esqPermission.ts
+model/esqRole.ts
 model/esqTreeNode.ts
 model/models.ts
 param.ts

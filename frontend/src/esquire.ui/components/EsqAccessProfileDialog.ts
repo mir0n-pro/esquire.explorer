@@ -9,8 +9,6 @@
 *                  readOnly made public
 *                  kind parameter is requried for esq-cmd, esq-enode
 *                  listvalues_kind moved inside of generic format 
-* 02/01/2026 mir0n EsqTabLStringComponent renamed with EsqTabStringComponent
-*                  added use EsqTabIknListComponent
 */
 import {AfterViewInit, 
   Component, 
@@ -32,8 +30,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { firstValueFrom, from, lastValueFrom, Observable } from 'rxjs';
 import { CommonModule } from '@angular/common'
 import {MatTableModule } from '@angular/material/table';
-import { EsqTabListComponent } from "./EsqTabListComponent";
-import { EsqTabStringComponent } from "./EsqTabStringComponent";
 /*
 import { EsqNodeType
   , EsqNodeTypeFactory
@@ -47,58 +43,59 @@ import { EsqNodeType
 import {EsqNodeType} from 'src/esquire.ui/api/EsqNodeTypeFactory';
 import {EsqNodeTypeFactory} from 'src/esquire.ui/api/EsqNodeTypeFactory';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
-import {EsqTreeNode} from 'src/esquire.ui/api/EsqTreeNode';
-import {EsqNodeStatusFactory} from 'src/esquire.ui/api/EsqNodeStatusFactory';
-import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
-import {EsqTabIknListComponent} from "./EsqTabIknListComponent";
+import { EsqTabIknListComponent } from "./EsqTabIknListComponent";
+import { EsqTabIknfTableComponent } from "./EsqTabIknfTableComponent";
+import { EsqTabStringComponent } from "./EsqTabStringComponent";
 
-  @Component({
+@Component({
   selector: 'details-dialog',
-  templateUrl: './EsqEntityDetailsDialog.html',
+  templateUrl: './EsqAccessProfileDialog.html',
   styleUrl: './EsqDetailsDialog.scss',
-      imports: [
-          MatDialogModule,
-          MatButtonModule,
-          MatTooltipModule,
-          DragDropModule,
-          MatIcon,
-          MatToolbarModule,
-          MatTabsModule,
-          MatDividerModule,
-          CommonModule,
-          MatTableModule,
-          EsqTabListComponent,
-          EsqTabStringComponent,
-          EsqTabIknListComponent
-      ],
+    imports: [
+        MatDialogModule,
+        MatButtonModule,
+        MatTooltipModule,
+        DragDropModule,
+        MatIcon,
+        MatToolbarModule,
+        MatTabsModule,
+        MatDividerModule,
+        CommonModule,
+        MatTableModule,
+        EsqTabIknListComponent,
+        EsqTabIknfTableComponent,
+        EsqTabStringComponent,
+    ],
   encapsulation: ViewEncapsulation.None,
 })
 
-export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy {
+export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy {
    @ViewChild('btnClose') btnClose! : MatButton;
-   private dialogRef: MatDialogRef<EsqEntityDetailsDialog>;
-   public node : EsqTreeNode;
+   private dialogRef: MatDialogRef<EsqAccessProfileDialog>;
+//   public node : EsqTreeNode;
    private restApi: EsqRestApi;
    private dictionaryApi: EsqDictionaryApi;
-   public callApi: EsqExplorerCallApi;
+//   public callApi: EsqExplorerCallApi;
 
    public readOnly: boolean = false;
    public details$: Observable<any> | undefined;
    public dictionary$: Observable<EsqEntityLayer[]> | undefined;
-   readonly detailsDialog:MatDialog = inject(MatDialog);   
+//   readonly detailsDialog:MatDialog = inject(MatDialog);
+   public id:string = "";
+   public headerIconValue:string = "";
+   public headerNameValue:string = "";
 
   constructor(
-      dialogRef: MatDialogRef<EsqEntityDetailsDialog>, 
+      dialogRef: MatDialogRef<EsqAccessProfileDialog>,
       @Inject(MAT_DIALOG_DATA) data: any
     ) {
-      this.dialogRef = dialogRef; 
+      this.dialogRef = dialogRef;
+      this.id = data.id;
 
-      this.node = data.node;
       this.restApi = data.restApi;
       this.dictionaryApi = data.dictionaryApi;
-      this.callApi = data.callApi;
       this.readOnly = data.readOnly;
       
       this.dialogRef.disableClose = true;
@@ -111,11 +108,45 @@ export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy
   }
 
   ngOnInit() {
-    if (this.node.type.detailed) {
-      this.dictionary$ = this.dictionaryApi.dictionary(this.node.type.id);
-      this.details$ = this.restApi.esquireCmd(this.node.type.id, this.node.entityId); //from (this.loadDetails());
-    }
+//    if (this.node.type.detailed) {
+      this.dictionary$ = this.dictionaryApi.dictionary(EsqNodeTypeFactory.ACCESSPROFILE.id);
+      this.details$ = this.restApi.esquireKey(this.id); //from (this.loadDetails());
+
+      // Subscribe to details$ and update header values
+      if (this.details$) {
+          this.details$.subscribe(details => {
+              this.headerIconValue = EsqNodeTypeFactory.instanceOf(details.kind).icon;
+              this.headerNameValue = details.loginId || 'No defined';
+          });
+      }
+//    }
   }
+/*
+  async headerIcon(): Promise<string> {
+      let ret: string = '';
+      if (this.details$) {
+          const details = await firstValueFrom(this.details$);
+          ret = EsqNodeTypeFactory.instanceOf(details.kind).icon;
+      }
+      return ret;
+  }
+  async headerName():Promise<string> {
+      let ret: string = '';
+      if (this.details$) {
+          const details = await firstValueFrom(this.details$);
+          ret = details.loginId;
+      }
+      return ret;
+  }
+*/
+    public headerIcon(details: any): string {
+        const kind = details?.kind;
+        return (typeof kind === 'number') ? EsqNodeTypeFactory.instanceOf(kind).icon : '';
+    }
+
+    public headerName(details: any): string {
+        return details?.loginId || 'No defined';
+    }
 
   ngOnDestroy() {
     this.details$ = undefined;
@@ -128,25 +159,8 @@ export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy
     }
   }    
 
-  nodeStatusIcon() {
-    return EsqNodeStatusFactory.instanceOf(this.node.statusCode).icon;
-  }
-  
-  nodeTypeName():string {
-    return this.node.type.name + (this.node.linkId?" (shortcut)" : "");
-  }
   private async loadDetails(): Promise<any> {
-    return await firstValueFrom(this.restApi.esquireCmd(this.node.kind, this.node.entityId));
-  }
-  nodeTypeFromFormat(format:string) : EsqNodeType {
-    var id:number = -1; //unknown
-    if (format) {
-      var ftype:string[] = format.split('=');
-      if (ftype.length > 1 && ftype[0] == 'kind') {
-        id = Number(ftype[1]);
-      }
-    }
-    return EsqNodeTypeFactory.instanceOf(id);
+    return await firstValueFrom(this.restApi.esquireKey(this.id));
   }
 
   tabContent (index:number):string {

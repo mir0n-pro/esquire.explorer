@@ -5,6 +5,7 @@
 *  mailto:mir0n.the.programmer@gmail.com
 *
 *  History:
+* 02/01/2026 mir0n EsqTabLStringComponent renamed with EsqTabStringComponent
 */
 import { NgClass } from '@angular/common';
 import {AfterViewInit, 
@@ -29,7 +30,7 @@ import {AfterViewInit,
   encapsulation: ViewEncapsulation.None,
 })
 
-export class EsqTabLStringComponent implements OnInit,  AfterViewInit, OnDestroy {
+export class EsqTabStringComponent implements OnInit,  AfterViewInit, OnDestroy {
 
   @Input() public value!: string;
   @Input() public readOnly: boolean = true;
