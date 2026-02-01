@@ -1,0 +1,277 @@
+--------------------------------------------------------------------------
+Release notes: from v1.2.0 till HEAD
+--------------------------------------------------------------------------
+Top Commit: 4099a05
+Notes from: doc/release_notes.txt
+v1.02.01-2602.0115 Toolbar and Context Menu with Access Profile as an option)
+  rest api regenerated: added esquireKey and AccessProfile
+  added dynamic toolbar and context menu
+  cleanup keyboard actions
+  added "Access Profile" command
+  accounts in user profile are in one tab
+
+v1.02.01-2601.2516
+  Paper Client Account type added
+
+v1.02.01 
+  - include esquire.ui library
+  - comment out github authentication
+  - move app.ui package to to esquire.ui 
+
+--------------------------------------------------------------------------
+Branch : esquire.explorer/develop
+--------------------------------------------------------------------------
+Code changes:
+--------------------------------------------------------------------------
+Changes from: frontend/src/changes.txt
+02/01/2026 
+explorer\flatTree\flatTree\app-explorer.component.ts
+   - EsqRestApi extended with esquireKey()
+   - added EsqCommandMenuItems array with toolbar/context menu definition
+   - EsquireNodeTypes array expanded with children and commands list   
+
+01/25/2026 
+explorer\flatTree\app-explorer.component.ts
+  - paper account type added
+
+01/24/2026 
+app\interceptor\rfc9457Interceptor.ts
+  - move ui package to esquire.ui
+explorer\flatTree\app-explorer.component.ts
+  - use local esquire.ui instead of library
+
+--------------------------------------------------------------------------
+Changes from: frontend/src/esquire.ui/changes.txt
+Esquire Frameworks(tm) 2.0
+esquire.ui node.js library of components 
+
+02/01/2026
++ added api\EsqContextMenuBuilder
+api\EsqExplorerCallApi
+  - added create()
+api\EsqNodeTypeFactory
+  - added childTypes array
+  - added commands array
+  - added isCommandAllowed()
+  - added isNewAllowed()
+  - added ACCESSPROFILE virtual note type
+api.EsqRestApi
+  - added esquireKey()
++ added components\EsqAccessProfileDialog
++ added components\EsqTabIknfTableComponent
++ added components\EsqTabIknListComponent
+components\EsqEntityDetailsDialog
+  - EsqTabLStringComponent renamed with EsqTabStringComponent
+  - added use EsqTabIknListComponent
+components\EsqExplorerCallApiMill
+  - added EsqExplorerCallApi:create()
+  - all method made protected, to let class extendable
+  - added AccessProfile dialog via command "key"
+components\EsqSingleEntryDialog
+  - EsqTabLStringComponent renamed with EsqTabStringComponent
+components\EsqTabStringComponent
+  - EsqTabLStringComponent renamed with EsqTabStringComponent
+explorer\flatTree\EsqExplorerComponent
+  - context menu added
+  - dynamic toolbar
+  - toolbar is in synch with context menu
+  - normalized keyboard actions
+
+12/26/2025 Esquire API and types generalization
+   - restructure 
+   - npm package
+
+12/24/2025 Esquire API and types generalization
+api\EsqRestApi.ts
+   - kind parameter is requried for esq-cmd, esq-enode
+types\EsqEntityDictionary.ts   
+  - listvalues_kind moved inside of generic format 
+ui\EsqDictionary.ts  
+  - debug log added
+ui\EsqExplorerCallApiMill.ts  
+   - kind parameter is requried for esq-cmd, esq-enode
+ui\dialog\
+  +  added EsqTabStringComponent.* 
+ui\dialog\EsqEntityDetailsDialog.ts
+  - added processing of tabstring field value type
+  - readOnly made public
+  - kind parameter is requried for esq-cmd, esq-enode
+  - listvalues_kind moved inside of generic format 
+  
+
+12/17/2025 initial  
+--------------------------------------------------------------------------
+
+-- 2026-02-01 | commit: 4099a05 | mir0n.the.programmer | v1.2.1 Toolbar and Context Menu with Access Profile as an option) --
+M	README.md
+M	doc/release_notes.txt
+M	frontend/src/changes.txt
+A	frontend/src/esquire.ui/api/EsqContextMenuBuilder.ts
+M	frontend/src/esquire.ui/api/EsqExplorerCallApi.ts
+M	frontend/src/esquire.ui/api/EsqNodeStatusFactory.ts
+M	frontend/src/esquire.ui/api/EsqNodeTypeFactory.ts
+M	frontend/src/esquire.ui/api/EsqRestApi.ts
+M	frontend/src/esquire.ui/api/public-api.ts
+A	frontend/src/esquire.ui/changes.txt
+A	frontend/src/esquire.ui/components/EsqAccessProfileDialog.html
+A	frontend/src/esquire.ui/components/EsqAccessProfileDialog.ts
+M	frontend/src/esquire.ui/components/EsqEntityDetailsDialog.html
+M	frontend/src/esquire.ui/components/EsqEntityDetailsDialog.ts
+M	frontend/src/esquire.ui/components/EsqExplorerCallApiMill.ts
+M	frontend/src/esquire.ui/components/EsqSingleEntryDialog.ts
+A	frontend/src/esquire.ui/components/EsqTabIknListComponent.html
+A	frontend/src/esquire.ui/components/EsqTabIknListComponent.ts
+A	frontend/src/esquire.ui/components/EsqTabIknfTableComponent.html
+A	frontend/src/esquire.ui/components/EsqTabIknfTableComponent.ts
+M	frontend/src/esquire.ui/components/EsqTabListComponent.scss
+M	frontend/src/esquire.ui/components/EsqTabStringComponent.ts
+M	frontend/src/esquire.ui/explorer/flatTree/EsqExplorerComponent.html
+M	frontend/src/esquire.ui/explorer/flatTree/EsqExplorerComponent.scss
+M	frontend/src/esquire.ui/explorer/flatTree/EsqExplorerComponent.ts
+M	frontend/src/explorer/flatTree/app-explorer.component.html
+M	frontend/src/explorer/flatTree/app-explorer.component.ts
+M	frontend/src/rest/.openapi-generator/FILES
+M	frontend/src/rest/api/esquire.service.ts
+A	frontend/src/rest/model/esqAccessProfile.ts
+A	frontend/src/rest/model/esqAccessProfilePermissions.ts
+A	frontend/src/rest/model/esqPermission.ts
+A	frontend/src/rest/model/esqRole.ts
+M	frontend/src/rest/model/models.ts
+A	media/83817d896833ef994ed6cdb2b8ddd63a.jpeg
+M	openapi-generate/esqEsquireApi.yaml
+ 36 files changed, 2120 insertions(+), 239 deletions(-)
+
+-- 2026-01-25 | commit: 850b188 | mir0n.the.programmer | Paper Client Account added --
+M	doc/release_notes.txt
+A	frontend/public/img/links/pacctl.ico
+A	frontend/public/img/pacct.ico
+M	frontend/src/changes.txt
+M	frontend/src/explorer/flatTree/app-explorer.component.ts
+ 5 files changed, 25 insertions(+), 16 deletions(-)
+
+-- 2026-01-24 | commit: 30f963d | mir0n.the.programmer | include esquire.ui library --
+M	doc/release_notes.txt
+M	frontend/Dockerfile
+M	frontend/compose.yaml
+M	frontend/package.json
+M	frontend/src/app/interceptor/rfc9457Interceptor.ts
+M	frontend/src/changes.txt
+A	frontend/src/esquire.ui/api/AsEsqTreeNodePipe.spec.ts
+A	frontend/src/esquire.ui/api/AsEsqTreeNodePipe.ts
+A	frontend/src/esquire.ui/api/EsqDictionaryApi.ts
+A	frontend/src/esquire.ui/api/EsqEntityDictionary.ts
+A	frontend/src/esquire.ui/api/EsqExplorerCallApi.ts
+A	frontend/src/esquire.ui/api/EsqNodeStatusFactory.ts
+A	frontend/src/esquire.ui/api/EsqNodeTypeFactory.ts
+A	frontend/src/esquire.ui/api/EsqRestApi.ts
+A	frontend/src/esquire.ui/api/EsqTreeNode.ts
+A	frontend/src/esquire.ui/api/EsqTreeNodeDto.ts
+R098	frontend/src/ui/api/ProblemDetail.ts	frontend/src/esquire.ui/api/ProblemDetail.ts
+A	frontend/src/esquire.ui/api/ng-package.json
+A	frontend/src/esquire.ui/api/public-api.ts
+R100	frontend/src/ui/components/EsqDetailsDialog.scss	frontend/src/esquire.ui/components/EsqDetailsDialog.scss
+A	frontend/src/esquire.ui/components/EsqDictionary.ts
+A	frontend/src/esquire.ui/components/EsqEntityDetailsDialog.html
+A	frontend/src/esquire.ui/components/EsqEntityDetailsDialog.ts
+A	frontend/src/esquire.ui/components/EsqExplorerCallApiMill.ts
+A	frontend/src/esquire.ui/components/EsqNodeDetailsDialog.html
+A	frontend/src/esquire.ui/components/EsqNodeDetailsDialog.ts
+A	frontend/src/esquire.ui/components/EsqResizeDirective.ts
+R100	frontend/src/ui/components/EsqSingleEntryDialog.html	frontend/src/esquire.ui/components/EsqSingleEntryDialog.html
+R091	frontend/src/ui/components/EsqSingleEntryDialog.ts	frontend/src/esquire.ui/components/EsqSingleEntryDialog.ts
+A	frontend/src/esquire.ui/components/EsqTabListComponent.html
+A	frontend/src/esquire.ui/components/EsqTabListComponent.scss
+A	frontend/src/esquire.ui/components/EsqTabListComponent.ts
+A	frontend/src/esquire.ui/components/EsqTabStringComponent.html
+A	frontend/src/esquire.ui/components/EsqTabStringComponent.scss
+A	frontend/src/esquire.ui/components/EsqTabStringComponent.ts
+A	frontend/src/esquire.ui/components/EsqUtils.ts
+A	frontend/src/esquire.ui/components/ng-package.json
+A	frontend/src/esquire.ui/components/public-api.ts
+A	frontend/src/esquire.ui/explorer/flatTree/EsqExplorerComponent.html
+A	frontend/src/esquire.ui/explorer/flatTree/EsqExplorerComponent.scss
+A	frontend/src/esquire.ui/explorer/flatTree/EsqExplorerComponent.ts
+A	frontend/src/esquire.ui/explorer/flatTree/EsqFlatTreeDatasource.ts
+A	frontend/src/esquire.ui/explorer/flatTree/EsqListViewDatasource.ts
+A	frontend/src/esquire.ui/explorer/flatTree/EsqTreeViewDatasource.ts
+A	frontend/src/esquire.ui/explorer/flatTree/loading.16.gif
+A	frontend/src/esquire.ui/explorer/flatTree/ng-package.json
+A	frontend/src/esquire.ui/explorer/flatTree/public-api.ts
+M	frontend/src/explorer/flatTree/app-explorer.component.ts
+ 48 files changed, 3322 insertions(+), 18 deletions(-)
+--------------------------------------------------------------------------
+List of files modified
+--------------------------------------------------------------------------
+M	README.md
+M	doc/release_notes.txt
+M	frontend/Dockerfile
+M	frontend/compose.yaml
+M	frontend/package.json
+A	frontend/public/img/links/pacctl.ico
+A	frontend/public/img/pacct.ico
+M	frontend/src/app/interceptor/rfc9457Interceptor.ts
+M	frontend/src/changes.txt
+A	frontend/src/esquire.ui/api/AsEsqTreeNodePipe.spec.ts
+A	frontend/src/esquire.ui/api/AsEsqTreeNodePipe.ts
+A	frontend/src/esquire.ui/api/EsqContextMenuBuilder.ts
+A	frontend/src/esquire.ui/api/EsqDictionaryApi.ts
+A	frontend/src/esquire.ui/api/EsqEntityDictionary.ts
+A	frontend/src/esquire.ui/api/EsqExplorerCallApi.ts
+A	frontend/src/esquire.ui/api/EsqNodeStatusFactory.ts
+A	frontend/src/esquire.ui/api/EsqNodeTypeFactory.ts
+A	frontend/src/esquire.ui/api/EsqRestApi.ts
+A	frontend/src/esquire.ui/api/EsqTreeNode.ts
+A	frontend/src/esquire.ui/api/EsqTreeNodeDto.ts
+R098	frontend/src/ui/api/ProblemDetail.ts	frontend/src/esquire.ui/api/ProblemDetail.ts
+A	frontend/src/esquire.ui/api/ng-package.json
+A	frontend/src/esquire.ui/api/public-api.ts
+A	frontend/src/esquire.ui/changes.txt
+A	frontend/src/esquire.ui/components/EsqAccessProfileDialog.html
+A	frontend/src/esquire.ui/components/EsqAccessProfileDialog.ts
+R100	frontend/src/ui/components/EsqDetailsDialog.scss	frontend/src/esquire.ui/components/EsqDetailsDialog.scss
+A	frontend/src/esquire.ui/components/EsqDictionary.ts
+A	frontend/src/esquire.ui/components/EsqEntityDetailsDialog.html
+A	frontend/src/esquire.ui/components/EsqEntityDetailsDialog.ts
+A	frontend/src/esquire.ui/components/EsqExplorerCallApiMill.ts
+A	frontend/src/esquire.ui/components/EsqNodeDetailsDialog.html
+A	frontend/src/esquire.ui/components/EsqNodeDetailsDialog.ts
+A	frontend/src/esquire.ui/components/EsqResizeDirective.ts
+R100	frontend/src/ui/components/EsqSingleEntryDialog.html	frontend/src/esquire.ui/components/EsqSingleEntryDialog.html
+R090	frontend/src/ui/components/EsqSingleEntryDialog.ts	frontend/src/esquire.ui/components/EsqSingleEntryDialog.ts
+A	frontend/src/esquire.ui/components/EsqTabIknListComponent.html
+A	frontend/src/esquire.ui/components/EsqTabIknListComponent.ts
+A	frontend/src/esquire.ui/components/EsqTabIknfTableComponent.html
+A	frontend/src/esquire.ui/components/EsqTabIknfTableComponent.ts
+A	frontend/src/esquire.ui/components/EsqTabListComponent.html
+A	frontend/src/esquire.ui/components/EsqTabListComponent.scss
+A	frontend/src/esquire.ui/components/EsqTabListComponent.ts
+A	frontend/src/esquire.ui/components/EsqTabStringComponent.html
+A	frontend/src/esquire.ui/components/EsqTabStringComponent.scss
+A	frontend/src/esquire.ui/components/EsqTabStringComponent.ts
+A	frontend/src/esquire.ui/components/EsqUtils.ts
+A	frontend/src/esquire.ui/components/ng-package.json
+A	frontend/src/esquire.ui/components/public-api.ts
+A	frontend/src/esquire.ui/explorer/flatTree/EsqExplorerComponent.html
+A	frontend/src/esquire.ui/explorer/flatTree/EsqExplorerComponent.scss
+A	frontend/src/esquire.ui/explorer/flatTree/EsqExplorerComponent.ts
+A	frontend/src/esquire.ui/explorer/flatTree/EsqFlatTreeDatasource.ts
+A	frontend/src/esquire.ui/explorer/flatTree/EsqListViewDatasource.ts
+A	frontend/src/esquire.ui/explorer/flatTree/EsqTreeViewDatasource.ts
+A	frontend/src/esquire.ui/explorer/flatTree/loading.16.gif
+A	frontend/src/esquire.ui/explorer/flatTree/ng-package.json
+A	frontend/src/esquire.ui/explorer/flatTree/public-api.ts
+M	frontend/src/explorer/flatTree/app-explorer.component.html
+M	frontend/src/explorer/flatTree/app-explorer.component.ts
+M	frontend/src/rest/.openapi-generator/FILES
+M	frontend/src/rest/api/esquire.service.ts
+A	frontend/src/rest/model/esqAccessProfile.ts
+A	frontend/src/rest/model/esqAccessProfilePermissions.ts
+A	frontend/src/rest/model/esqPermission.ts
+A	frontend/src/rest/model/esqRole.ts
+M	frontend/src/rest/model/models.ts
+A	media/83817d896833ef994ed6cdb2b8ddd63a.jpeg
+M	openapi-generate/esqEsquireApi.yaml
+ 69 files changed, 5245 insertions(+), 51 deletions(-)
+--------------------------------------------------------------------------
+The End: From v1.2.0 till HEAD
+--------------------------------------------------------------------------
