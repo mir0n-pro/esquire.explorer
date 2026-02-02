@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+02/02/2026 
+explorer\flatTree\flatTree\app-explorer.component.ts
+  "SysAdmin" and "Sys Admin-s" added
+  Gaps in Entity Kind enumeration: system objects <> orgs <> users <> accounts
+
 02/01/2026 
 explorer\flatTree\flatTree\app-explorer.component.ts
    - EsqRestApi extended with esquireKey()

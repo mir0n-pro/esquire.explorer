@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.02.02-2602.0218 
+  "SysAdmin" and "Sys Admin-s" added
+  Gaps in Entity Kind enumeration: system objects <> orgs <> users <> accounts
+
+
 v1.02.01-2602.0115 Toolbar and Context Menu with Access Profile as an option)
   rest api regenerated: added esquireKey and AccessProfile
   added dynamic toolbar and context menu

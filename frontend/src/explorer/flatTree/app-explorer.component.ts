@@ -18,6 +18,9 @@
 * 02/01/2026 mir0n EsqRestApi extended with esquireKey()
 *                  added EsqCommandMenuItems array with toolbar/context menu definition
 *                  EsquireNodeTypes array expanded with children and commands list   
+* 02/02/2026 mir0n "SysAdmin" and "Sys Admin-s" added
+*                  Gaps in Entity Kind enumeration: system objects <> orgs <> users <> accounts
+* 
 *
 */
 import {Component,
@@ -386,24 +389,27 @@ private findIcon(kind:number) : string {
 }
 
 export const EsquireNodeTypes = {
-    System:       new EsqNodeType( 0, "System",              "img/folders/system.ico",  true,    [10],              [],  [{columnDef:"name", header:"Name"},  {columnDef:"desc", header:"Description"}]),
-    AllAccounts:  new EsqNodeType( 2, "All accounts",        "img/folders/folder.ico",  false,     [],              [],  [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]),
-    AllAdmins:    new EsqNodeType( 4, "All admin-s",         "img/folders/folder.ico",  false,   [16],              [],  [{columnDef:"name", header:"Administrator"},  {columnDef:"desc", header:"Description"}]),
-    AllClients:   new EsqNodeType( 6, "All clients",         "img/folders/folder.ico",  false,   [12],              [],  [{columnDef:"name", header:"Client"},  {columnDef:"desc", header:"Description"}]),
-    AllMerchants: new EsqNodeType( 8, "All merchants",       "img/folders/folder.ico",  false,   [14],              [],  [{columnDef:"name", header:"Merchant"},  {columnDef:"desc", header:"Description"}]),
-    Organization: new EsqNodeType(10, "Organization",        "img/org.ico",             true,    [10],       ["_move"],  [{columnDef:"name", header:"Name"},  {columnDef:"desc", header:"Description"}]),
-    Client:       new EsqNodeType(12, "Client",              "img/client.ico",          true, [18,22],["_move_","key"],  [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]),
-    ClientLink:   new EsqNodeType(13, "Client",              "img/client.ico",          true,      [],         ["key"],  ),
-    Merchant:     new EsqNodeType(14, "Merchant",            "img/merchant.ico",        true,    [20],["_move_","key"],  [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]),
-    MerchantLink: new EsqNodeType(15, "Merchant",            "img/merchant.ico",        true,      [],         ["key"],  ),
-    Admin:        new EsqNodeType(16, "Admin",               "img/admin.ico",           true,      [],["_mov_e","key"],  ),
-    AdminLink:    new EsqNodeType(17, "Admin",               "img/admin.ico",           true,      [],         ["key"],  ),
-    CAccount:     new EsqNodeType(18, "Client Account",      "img/acct.ico",            true,      [],      ["_acct_"], ),
-    CAccountLink: new EsqNodeType(19, "Client Account",      "img/links/acctl.ico",     true,      [],      ["_acct_"], ),
-    MAccount:     new EsqNodeType(20, "Merchant Account",    "img/macct.ico",           true,      [],      ["_acct_"], ),
-    MAccountLink: new EsqNodeType(21, "Merchant Account",    "img/links/macctl.ico",    true,      [],      ["_acct_"], ),
-    PAccount:     new EsqNodeType(22, "Paper Client Account","img/pacct.ico",           true,      [],      ["_acct_"], ),
-    PAccountLink: new EsqNodeType(23, "Paper Client Account","img/links/pacctl.ico",    true,      [],      ["_acct_"], ),
+    System:       new EsqNodeType( 0, "System",              "img/folders/system.ico",  true,     [20],              [],  [{columnDef:"name", header:"Name"},  {columnDef:"desc", header:"Description"}]),
+    SysAdmins:    new EsqNodeType( 2, "Sys admin-s",         "img/folders/folder.ico",  false, [30,32],              [],  [{columnDef:"name", header:"Administrator"},  {columnDef:"desc", header:"Description"}]),
+    AllAdmins:    new EsqNodeType( 4, "All admin-s",         "img/folders/folder.ico",  false,    [32],              [],  [{columnDef:"name", header:"Administrator"},  {columnDef:"desc", header:"Description"}]),
+    AllAccounts:  new EsqNodeType( 6, "All accounts",        "img/folders/folder.ico",  false,      [],              [],  [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]),
+    AllClients:   new EsqNodeType( 8, "All clients",         "img/folders/folder.ico",  false,    [34],              [],  [{columnDef:"name", header:"Client"},  {columnDef:"desc", header:"Description"}]),
+    AllMerchants: new EsqNodeType( 10,"All merchants",       "img/folders/folder.ico",  false,    [36],              [],  [{columnDef:"name", header:"Merchant"},  {columnDef:"desc", header:"Description"}]),
+    Organization: new EsqNodeType(20, "Organization",        "img/org.ico",             true,     [20],       ["_move"],  [{columnDef:"name", header:"Name"},  {columnDef:"desc", header:"Description"}]),
+    SysAdmin:     new EsqNodeType(30, "SysAdmin",            "img/sysadmin.ico",        true,       [],["_mov_e","key"],  ),
+    SysAdminLink: new EsqNodeType(31, "SysAdmin",            "img/sysadmin.ico",        true,       [],         ["key"],  ),
+    Admin:        new EsqNodeType(32, "Admin",               "img/admin.ico",           true,       [],["_mov_e","key"],  ),
+    AdminLink:    new EsqNodeType(33, "Admin",               "img/admin.ico",           true,       [],         ["key"],  ),
+    Client:       new EsqNodeType(34, "Client",              "img/client.ico",          true,  [50,54],["_move_","key"],  [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]),
+    ClientLink:   new EsqNodeType(35, "Client",              "img/client.ico",          true,       [],         ["key"],  ),
+    Merchant:     new EsqNodeType(36, "Merchant",            "img/merchant.ico",        true,     [52],["_move_","key"],  [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]),
+    MerchantLink: new EsqNodeType(37, "Merchant",            "img/merchant.ico",        true,       [],         ["key"],  ),
+    CAccount:     new EsqNodeType(50, "Client Account",      "img/acct.ico",            true,       [],      ["_acct_"], ),
+    CAccountLink: new EsqNodeType(51, "Client Account",      "img/links/acctl.ico",     true,       [],      ["_acct_"], ),
+    MAccount:     new EsqNodeType(52, "Merchant Account",    "img/macct.ico",           true,       [],      ["_acct_"], ),
+    MAccountLink: new EsqNodeType(53, "Merchant Account",    "img/links/macctl.ico",    true,       [],      ["_acct_"], ),
+    PAccount:     new EsqNodeType(54, "Paper Client Account","img/pacct.ico",           true,       [],      ["_acct_"], ),
+    PAccountLink: new EsqNodeType(55, "Paper Client Account","img/links/pacctl.ico",    true,       [],      ["_acct_"], ),
 } as const;
 
 export const EsquireStatuses = {
