@@ -1,6 +1,21 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components 
 
+02/04/2026 mir0n
+
+components\EsqNodeDetails renamed with EsqNodeDialog: only node info
+components\EsqEntityDetailsDialog renamed with EsqNodeDetailsDialog: node + entity details
+components\EsqEntityDetailsDialog: only entity details
+   - use ChangeDetectorRef to obntain dialog heading
+   - require id and kind to run, not a tree node
+components\EsqTabIknfTableComponent
+   - no "entityKind" field anymore
+components\EsqTabIknListComponent
+   - no "entityKind" field anymore
+components\EsqAccessProfileDialog
+   - use ChangeDetectorRef to obntain dialog heading
+
+
 02/01/2026
 + added api\EsqContextMenuBuilder
 api\EsqExplorerCallApi

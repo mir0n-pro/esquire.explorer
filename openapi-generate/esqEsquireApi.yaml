@@ -1,4 +1,5 @@
 openapi: 3.0.0
+
 servers:
   - url: 'localhost'
 info:
@@ -148,9 +149,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                items:
-                  $ref: '#/components/schemas/EsqTreeNode'
+                $ref: '#/components/schemas/EsqTreeNode'
         '405':
           description: Invalid input
   /esq-dict:
@@ -199,9 +198,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                items:
-                  $ref: '#/components/schemas/EsqAccessProfile'          
+                $ref: '#/definitions/EsqAccessProfile'
         '405':
           description: Invalid input
 
@@ -216,6 +213,15 @@ components:
           type: string
           description: node id
           example: Pikachu
+        kind:
+          type: integer
+          format: int32
+          description: Node type, odd types are 'short cuts' a link node referencing to origin one
+          example: 13
+        name:
+          type: string
+          description: Node name
+          example: Pikachu
         parentId:
           type: string
           description: Parent node id
@@ -224,15 +230,6 @@ components:
           type: string
           description: For shortcut nodes, reference to the origin node
           example: Pikachu
-        name:
-          type: string
-          description: Node name
-          example: Pikachu
-        kind:
-          type: number
-          format: int32
-          description: Node type, odd types are 'short cuts' a link node referencing to origin one
-          example: 13
         entityId:
           type: string
           description: Entity id (it can be different from node id)
@@ -297,7 +294,7 @@ components:
           description: name of the field
           example: hight
         sort:
-          type: number
+          type: integer
           format: int32
           description: position in the sorting order
           example: 3
@@ -340,12 +337,12 @@ components:
           description: a validation regex for UI input
           example:  '^[Z0-9]+$'
         layer:
-          type: number
+          type: integer
           format: int32
           description: an UI layer of the filed
           example: 1
         readwrite:
-          type: number
+          type: integer
           format: int32
           enum:
             - 0
@@ -362,11 +359,15 @@ components:
       type: object
       properties:
         id:
-          type: number
+          type: integer
           format: int32
           description: Role ID
           example: 100
         name:
+          type: string
+          description: Role Name
+          example: TREE
+        adminFlg:
           type: string
           description: Role Name
           example: TREE
@@ -376,23 +377,22 @@ components:
       type: object
       properties:
         id:
-          type: number
-          format: int32
+          type: string
           description: Permission ID
           example: 112
-        entityKind:
-          type: number
+        kind:
+          type: integer
           format: int32
           description: Kind  of user were access defined
           example: 12
-        type:
-          type: string
-          description: Type of permission
-          example: Admin
         name:
           type: string
           description: Type of permission
           example: Client
+        type:
+          type: string
+          description: Type of permission
+          example: Admin
         flags:
           type: array
           items:
@@ -408,10 +408,14 @@ components:
           description: User ID
           example: 6
         kind:
-          type: number
+          type: integer
           format: int32
           description: Kind  of user
           example: 12
+        name:
+          type: string
+          description: User name
+          example: Vasiia Pupkin
         loginId:
           type: string
           description: User Login ID

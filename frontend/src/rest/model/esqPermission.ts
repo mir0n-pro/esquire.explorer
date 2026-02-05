@@ -17,19 +17,19 @@ export interface EsqPermission {
     /**
      * Permission ID
      */
-    id?: number;
+    id?: string;
     /**
      * Kind  of user were access defined
      */
-    entityKind?: number;
-    /**
-     * Type of permission
-     */
-    type?: string;
+    kind?: number;
     /**
      * Type of permission
      */
     name?: string;
+    /**
+     * Type of permission
+     */
+    type?: string;
     /**
      * Permission Y/N flags: create, update, delete, security, accounting
      */

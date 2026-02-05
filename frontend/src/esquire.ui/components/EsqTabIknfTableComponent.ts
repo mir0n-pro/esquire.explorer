@@ -5,6 +5,7 @@
 *  mailto:mir0n.the.programmer@gmail.com
 *
 *  History:
+* 02/04/2026 mir0n  no "entityKind" field anymore
 */
 import {AfterViewInit, 
   Component, 
@@ -71,7 +72,7 @@ export class EsqTabIknfTableComponent implements OnInit,  AfterViewInit, OnDestr
             this.tabIknfElements[this.tabIknfElements.length] = {
               sort : ++i,
               id : x.id??i,
-              kind : x.kind ?? x.entityKind ?? -1,
+              kind : x.kind ?? -1,
               icon : "",
               name : x.name,
               flag0 : (x.flags?.[0]?.trim() ? x.flags[0] : "N"),

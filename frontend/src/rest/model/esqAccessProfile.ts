@@ -25,6 +25,10 @@ export interface EsqAccessProfile {
      */
     kind?: number;
     /**
+     * User name
+     */
+    name?: string;
+    /**
      * User Login ID
      */
     loginId?: string;

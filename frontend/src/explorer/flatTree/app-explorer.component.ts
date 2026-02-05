@@ -70,13 +70,12 @@ import { KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType } from 'keycloa
 import Keycloak from 'keycloak-js';
 import { Observable } from 'rxjs';
 import {EsqCommandMenuItem, EsqContextMenuBuilder} from "../../esquire.ui/api/EsqContextMenuBuilder";
+import {EsqAccessProfile} from "../../rest/model/esqAccessProfile";
 
 
 const STATUS_CONNECTED = "Connected";
 const STATUS_AUTHENTICATED = "Authenticated";
 const STATUS_READY = "Ready";
-const CMD_PROFILE = "profile";
-
 
 @Component({
   selector: 'app-explorer',
@@ -102,7 +101,7 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
   readonly detailsDialog:MatDialog = inject(MatDialog);
   private callApiMill?:EsqExplorerCallApiMill;
   private dictionary?:EsqDictionaryApi;
-  private profile:any = undefined;
+  private profile?:EsqAccessProfile;
   private profileRequested = false; 
   private errorReport: ProblemDetail |undefined = undefined;
 
@@ -131,7 +130,7 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
             this.authState.set(STATUS_AUTHENTICATED);
             if (was != STATUS_AUTHENTICATED) {
               this.profileRequested = true;
-              this._dataService.esquireCmd( 0, '0', CMD_PROFILE).subscribe({
+              this._dataService.esquireKey().subscribe({
                   next: (value) => {
                     this.profile = value;
                   },
@@ -308,13 +307,13 @@ public async login(): Promise<void> {
 
 public async showDetails() {
     if (this.isConnected() && this.profile) {
-      this.callApiMill?.instance().calle("details",this.profile.id,"", this.profile.kind);
+      this.callApiMill?.instance().calle("details",this.profile.id as string,"", this.profile.kind as number);
     }
 }
 
 public async showAccessProfile() {
     if (this.isConnected() && this.profile) {
-        this.callApiMill?.instance().calle("key",this.profile.id, "", 0);
+        this.callApiMill?.instance().calle("key",this.profile.id as string, "", 0);
     }
 }
 
@@ -325,13 +324,13 @@ public isConnected() : boolean {
 public faceIcon() : string {
   var ret = "img/unknown.ico";
   if (this.isConnected()) {
-    ret = this.findIcon(this.profile.kind);
+    ret = this.findIcon(this.profile?.kind as number);
   }
   return ret;
 }
 public faceName() : string {
   if (this.isConnected()) {
-    return this.profile.name;
+    return this.profile?.name as string;
   }
   return "Diconnected";
 }

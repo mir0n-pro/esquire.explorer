@@ -11,14 +11,17 @@
 *                  listvalues_kind moved inside of generic format 
 * 02/01/2026 mir0n EsqTabLStringComponent renamed with EsqTabStringComponent
 *                  added use EsqTabIknListComponent
+* 02/04/2026 mir0n use ChangeDetectorRef to obtain dialog heading
+*                  require id and kind to run, not a tree node
 */
-import {AfterViewInit, 
-  Component, 
-  inject, 
-  Inject, 
+import {AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  Inject,
   OnDestroy,
-  OnInit, 
-  ViewChild, 
+  OnInit,
+  ViewChild,
   ViewEncapsulation
 } from '@angular/core';
 import {MatButton, MatButtonModule} from '@angular/material/button';
@@ -79,7 +82,7 @@ import {EsqTabIknListComponent} from "./EsqTabIknListComponent";
 export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy {
    @ViewChild('btnClose') btnClose! : MatButton;
    private dialogRef: MatDialogRef<EsqEntityDetailsDialog>;
-   public node : EsqTreeNode;
+
    private restApi: EsqRestApi;
    private dictionaryApi: EsqDictionaryApi;
    public callApi: EsqExplorerCallApi;
@@ -87,23 +90,29 @@ export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy
    public readOnly: boolean = false;
    public details$: Observable<any> | undefined;
    public dictionary$: Observable<EsqEntityLayer[]> | undefined;
-   readonly detailsDialog:MatDialog = inject(MatDialog);   
+   readonly detailsDialog:MatDialog = inject(MatDialog);
+   private givenEntityId:string = "";
+   private givenEntityKind:number = -1;
+   public headerIcon:string = "";
+   public headerName:string = "";
 
   constructor(
-      dialogRef: MatDialogRef<EsqEntityDetailsDialog>, 
-      @Inject(MAT_DIALOG_DATA) data: any
+      dialogRef: MatDialogRef<EsqEntityDetailsDialog>,
+      @Inject(MAT_DIALOG_DATA) data: any,
+      private cdr: ChangeDetectorRef
     ) {
-      this.dialogRef = dialogRef; 
+      this.dialogRef = dialogRef;
 
-      this.node = data.node;
+      this.givenEntityId = data.id;
+      this.givenEntityKind = data.kind;
       this.restApi = data.restApi;
       this.dictionaryApi = data.dictionaryApi;
       this.callApi = data.callApi;
       this.readOnly = data.readOnly;
-      
+
       this.dialogRef.disableClose = true;
       this.dialogRef.addPanelClass('esq-dialog');
-      this.dialogRef.updateSize('60vw', '60vh'); 
+      this.dialogRef.updateSize('60vw', '60vh');
     }      
 
   closeDialog(): void {
@@ -111,10 +120,17 @@ export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy
   }
 
   ngOnInit() {
-    if (this.node.type.detailed) {
-      this.dictionary$ = this.dictionaryApi.dictionary(this.node.type.id);
-      this.details$ = this.restApi.esquireCmd(this.node.type.id, this.node.entityId); //from (this.loadDetails());
-    }
+    this.dictionary$ = this.dictionaryApi.dictionary(this.givenEntityKind);
+    this.details$ = this.restApi.esquireCmd(this.givenEntityKind, this.givenEntityId);
+      // Subscribe to details$ and update header values
+      if (this.details$) {
+          this.details$.subscribe(details => {
+              this.headerIcon = EsqNodeTypeFactory.instanceOf(details.kind).icon;
+              this.headerName = details.name || 'No defined';
+              this.cdr.detectChanges();
+          });
+      }
+
   }
 
   ngOnDestroy() {
@@ -128,16 +144,6 @@ export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy
     }
   }    
 
-  nodeStatusIcon() {
-    return EsqNodeStatusFactory.instanceOf(this.node.statusCode).icon;
-  }
-  
-  nodeTypeName():string {
-    return this.node.type.name + (this.node.linkId?" (shortcut)" : "");
-  }
-  private async loadDetails(): Promise<any> {
-    return await firstValueFrom(this.restApi.esquireCmd(this.node.kind, this.node.entityId));
-  }
   nodeTypeFromFormat(format:string) : EsqNodeType {
     var id:number = -1; //unknown
     if (format) {

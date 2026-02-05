@@ -19,6 +19,14 @@ export interface EsqTreeNode {
      */
     id?: string;
     /**
+     * Node type, odd types are \'short cuts\' a link node referencing to origin one
+     */
+    kind?: number;
+    /**
+     * Node name
+     */
+    name?: string;
+    /**
      * Parent node id
      */
     parentId?: string;
@@ -26,14 +34,6 @@ export interface EsqTreeNode {
      * For shortcut nodes, reference to the origin node
      */
     linkId?: string;
-    /**
-     * Node name
-     */
-    name?: string;
-    /**
-     * Node type, odd types are \'short cuts\' a link node referencing to origin one
-     */
-    kind?: number;
     /**
      * Entity id (it can be different from node id)
      */

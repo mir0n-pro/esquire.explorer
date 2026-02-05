@@ -13,15 +13,13 @@
     cdkDragBoundary=".cdk-overlay-container"
 >
   <div>
-    <img src="{{node.type.icon}}" class="esq-base-icon"/>
-    <img src="{{nodeStatusIcon()}}" class="esq-overlay-icon" />
-    {{node.name}} 
+    <img src="{{headerIcon}}" class="esq-base-icon"/>
+    {{headerName}}
  </div>
   <button matIconButton mat-dialog-close class = "esq-icon-button" matTooltip = "Close">
     <mat-icon>close</mat-icon>
   </button>
 </mat-toolbar>
-
 
 <mat-dialog-content >
   <mat-tab-group class="esq-mat-tab-group">
@@ -30,20 +28,6 @@
         @for (tab of dictionary; track tab.title; let i = $index;) {      
           <mat-tab [label]="tab.title" bodyClass="{{tabContent(i)}}">
             @for (field of tab.fields; track field.name) {
-              @if (field.name == "name") {
-                  <div class="esq-simple-grid2">
-                    <b>{{field.label}}:</b>{{details[field.name]}}
-                  </div>                   
-                  <mat-divider></mat-divider>
-                  <div class="esq-simple-grid2">
-                     <mat-divider></mat-divider>
-                     <mat-divider></mat-divider>
-                    <b>Node Type:</b>{{nodeTypeName()}}      
-                    <b>Node ID:</b>{{node.id}}      
-                    <b>Parent Node:</b>{{node.parent ? node.parent.name : 'n/a'}}
-                  </div>                   
-                  <mat-divider></mat-divider>
-              } @else {
                 @if (field.type == 'image') {
                   <div class="esq-tab-image-container">
                     <img class="esq-tab-image" src="{{details.image}}" alt="{{details.image}}" />
@@ -78,9 +62,8 @@
                 } @else { <!--if (field.type.toLowerCase() == 'string') { -->
                     <div class="esq-simple-grid2">
                       <b>{{field.label}}:</b>{{details[field.name]}}
-                    </div>                   
+                    </div>
                 }
-              }
             }
           </mat-tab>
         }

@@ -22,5 +22,9 @@ export interface EsqRole {
      * Role Name
      */
     name?: string;
+    /**
+     * Role Name
+     */
+    adminFlg?: string;
 }
 

@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+02/24/2026 mir0n
+   explicit use EsqAccessProfile instead of any 
+   load Access Profile at startup (instead of entity details)
+
 02/02/2026 
 explorer\flatTree\flatTree\app-explorer.component.ts
   "SysAdmin" and "Sys Admin-s" added

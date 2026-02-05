@@ -9,14 +9,16 @@
 *                  readOnly made public
 *                  kind parameter is requried for esq-cmd, esq-enode
 *                  listvalues_kind moved inside of generic format 
+* 02/04/2026 mir0n use ChangeDetectorRef to obntain dialog heading
 */
-import {AfterViewInit, 
-  Component, 
-  inject, 
-  Inject, 
+import {AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  Inject,
   OnDestroy,
-  OnInit, 
-  ViewChild, 
+  OnInit,
+  ViewChild,
   ViewEncapsulation
 } from '@angular/core';
 import {MatButton, MatButtonModule} from '@angular/material/button';
@@ -84,12 +86,13 @@ export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy
    public dictionary$: Observable<EsqEntityLayer[]> | undefined;
 //   readonly detailsDialog:MatDialog = inject(MatDialog);
    public id:string = "";
-   public headerIconValue:string = "";
-   public headerNameValue:string = "";
+   public headerIcon:string = "";
+   public headerName:string = "";
 
   constructor(
       dialogRef: MatDialogRef<EsqAccessProfileDialog>,
-      @Inject(MAT_DIALOG_DATA) data: any
+      @Inject(MAT_DIALOG_DATA) data: any,
+      private cdr: ChangeDetectorRef
     ) {
       this.dialogRef = dialogRef;
       this.id = data.id;
@@ -97,10 +100,10 @@ export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy
       this.restApi = data.restApi;
       this.dictionaryApi = data.dictionaryApi;
       this.readOnly = data.readOnly;
-      
+
       this.dialogRef.disableClose = true;
       this.dialogRef.addPanelClass('esq-dialog');
-      this.dialogRef.updateSize('60vw', '60vh'); 
+      this.dialogRef.updateSize('60vw', '60vh');
     }      
 
   closeDialog(): void {
@@ -110,43 +113,18 @@ export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy
   ngOnInit() {
 //    if (this.node.type.detailed) {
       this.dictionary$ = this.dictionaryApi.dictionary(EsqNodeTypeFactory.ACCESSPROFILE.id);
-      this.details$ = this.restApi.esquireKey(this.id); //from (this.loadDetails());
+      this.details$ = this.restApi.esquireKey(this.id);
 
       // Subscribe to details$ and update header values
       if (this.details$) {
           this.details$.subscribe(details => {
-              this.headerIconValue = EsqNodeTypeFactory.instanceOf(details.kind).icon;
-              this.headerNameValue = details.loginId || 'No defined';
+              this.headerIcon = EsqNodeTypeFactory.instanceOf(details.kind).icon;
+              this.headerName = details.name || 'No defined';
+              this.cdr.detectChanges();
           });
       }
-//    }
-  }
-/*
-  async headerIcon(): Promise<string> {
-      let ret: string = '';
-      if (this.details$) {
-          const details = await firstValueFrom(this.details$);
-          ret = EsqNodeTypeFactory.instanceOf(details.kind).icon;
-      }
-      return ret;
-  }
-  async headerName():Promise<string> {
-      let ret: string = '';
-      if (this.details$) {
-          const details = await firstValueFrom(this.details$);
-          ret = details.loginId;
-      }
-      return ret;
-  }
-*/
-    public headerIcon(details: any): string {
-        const kind = details?.kind;
-        return (typeof kind === 'number') ? EsqNodeTypeFactory.instanceOf(kind).icon : '';
-    }
 
-    public headerName(details: any): string {
-        return details?.loginId || 'No defined';
-    }
+  }
 
   ngOnDestroy() {
     this.details$ = undefined;

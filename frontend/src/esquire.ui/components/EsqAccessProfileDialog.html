@@ -14,8 +14,8 @@
 >
     <div>
         @if (details$ | async; as details) {
-            <img [src]="headerIcon(details)" class="esq-base-icon"/>
-            {{ headerName(details) }}
+            <img [src]="headerIcon" class="esq-base-icon"/>
+            {{ headerName }}
         } @else {
             <img src="" class="esq-base-icon"/>
             Loading...

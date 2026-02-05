@@ -12,8 +12,10 @@
 */
 import { firstValueFrom } from "rxjs";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
-import { EsqNodeDetailsDialog }  from "./EsqNodeDetailsDialog";
+import { EsqNodeDialog }  from "./EsqNodeDialog";
 import { EsqEntityDetailsDialog } from "./EsqEntityDetailsDialog";
+import { EsqNodeDetailsDialog } from "./EsqNodeDetailsDialog";
+
 /*
 import { EsqDictionaryApi
   , EsqExplorerCallApi
@@ -44,7 +46,7 @@ export class EsqExplorerCallApiMill {
   protected async runDetailsAsync(cmd:string, node : EsqTreeNode, readOnly:boolean) : Promise<void> {
     var dialogRef:MatDialogRef<any>;
     if (node.type.detailed) {
-      dialogRef = this.dialog.open(EsqEntityDetailsDialog, {
+      dialogRef = this.dialog.open(EsqNodeDetailsDialog, {
         autoFocus: false,
         data: {
           node: node,
@@ -55,7 +57,7 @@ export class EsqExplorerCallApiMill {
         }
       });
     } else {
-      dialogRef = this.dialog.open(EsqNodeDetailsDialog, {
+      dialogRef = this.dialog.open(EsqNodeDialog, {
         autoFocus: false,
         data : {
           node : node,
@@ -88,13 +90,36 @@ export class EsqExplorerCallApiMill {
         return new Promise<void>((resolve)=>resolve());
     }
 
-  protected async doExplorerCommand2(cmd: string, entity_id: string, entity_name: string, entity_kind: number) {
+    protected async runEntityDetailsAsync(id:string, kind:number, readOnly:boolean) : Promise<void> {
+        var dialogRef:MatDialogRef<any>;
+
+        dialogRef = this.dialog.open(EsqEntityDetailsDialog, {
+            autoFocus: false,
+            data: {
+                id: id,
+                kind: kind,
+                restApi: this.restApi,
+                dictionaryApi: this.dictionaryApi,
+                readOnly: readOnly,
+            }
+        });
+        dialogRef.afterClosed().subscribe(result => {
+            console.log(`Dialog result: ${result}`);
+        });
+        return new Promise<void>((resolve)=>resolve());
+    }
+
+  protected async doExplorerCommand2(cmd: string, entity_id: string, entity_name: string, entity_kind:number) {
       if (cmd == "key") {
           setTimeout(() => {
               void this.runAccessProfileAsync(entity_id,true).catch(console.error);
           }, 0);
+      } else if (entity_id.length>0) {
+          setTimeout(() => {
+              void this.runEntityDetailsAsync(entity_id, entity_kind, true).catch(console.error);
+          }, 0);
       } else {
-          var _enode_ = await firstValueFrom(this.restApi.esquireEntityNode(entity_kind, entity_id, entity_name))
+          var _enode_ = await firstValueFrom(this.restApi.esquireEntityNode(entity_kind, "", entity_name))
               .catch((error) => console.error(error));
           if (_enode_) {
               let enode: EsqTreeNode = new EsqTreeNode(_enode_, undefined);

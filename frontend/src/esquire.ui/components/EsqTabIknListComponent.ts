@@ -5,6 +5,7 @@
 *  mailto:mir0n.the.programmer@gmail.com
 *
 *  History:
+* 02/04/2026 mir0n  no "entityKind" field anymore
 */
 import {AfterViewInit, 
   Component, 
@@ -73,7 +74,7 @@ export class EsqTabIknListComponent implements OnInit,  AfterViewInit, OnDestroy
               sort : ++i,
               id : x.id??i,
               name : x.name,
-              kind : x.kind ?? x.entityKind ?? -1,
+              kind : x.kind ?? -1,
               icon : ""
             };
         })
