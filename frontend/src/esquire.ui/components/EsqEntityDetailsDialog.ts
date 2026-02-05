@@ -13,6 +13,7 @@
 *                  added use EsqTabIknListComponent
 * 02/04/2026 mir0n use ChangeDetectorRef to obtain dialog heading
 *                  require id and kind to run, not a tree node
+* 02/05/2026 mir0n use EsqTabFieldComponent
 */
 import {AfterViewInit,
   ChangeDetectorRef,
@@ -32,11 +33,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
-import { firstValueFrom, from, lastValueFrom, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common'
 import {MatTableModule } from '@angular/material/table';
-import { EsqTabListComponent } from "./EsqTabListComponent";
-import { EsqTabStringComponent } from "./EsqTabStringComponent";
 /*
 import { EsqNodeType
   , EsqNodeTypeFactory
@@ -47,15 +46,14 @@ import { EsqNodeType
   , EsqDictionaryApi, EsqEntityLayer 
 } from '@mir0n-pro/esquire.ui/api';
 */
-import {EsqNodeType} from 'src/esquire.ui/api/EsqNodeTypeFactory';
+
 import {EsqNodeTypeFactory} from 'src/esquire.ui/api/EsqNodeTypeFactory';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
-import {EsqTreeNode} from 'src/esquire.ui/api/EsqTreeNode';
-import {EsqNodeStatusFactory} from 'src/esquire.ui/api/EsqNodeStatusFactory';
 import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
-import {EsqTabIknListComponent} from "./EsqTabIknListComponent";
+
+import {EsqTabFieldComponent} from "./EsqTabFieldComponent";
 
   @Component({
   selector: 'details-dialog',
@@ -72,9 +70,7 @@ import {EsqTabIknListComponent} from "./EsqTabIknListComponent";
           MatDividerModule,
           CommonModule,
           MatTableModule,
-          EsqTabListComponent,
-          EsqTabStringComponent,
-          EsqTabIknListComponent
+          EsqTabFieldComponent
       ],
   encapsulation: ViewEncapsulation.None,
 })
@@ -143,17 +139,6 @@ export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy
        this.btnClose.focus();
     }
   }    
-
-  nodeTypeFromFormat(format:string) : EsqNodeType {
-    var id:number = -1; //unknown
-    if (format) {
-      var ftype:string[] = format.split('=');
-      if (ftype.length > 1 && ftype[0] == 'kind') {
-        id = Number(ftype[1]);
-      }
-    }
-    return EsqNodeTypeFactory.instanceOf(id);
-  }
 
   tabContent (index:number):string {
     return index == 0 ? "esq-first-tab-content" :  "esq-other-tab-content";

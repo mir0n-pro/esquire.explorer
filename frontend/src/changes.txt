@@ -1,6 +1,9 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+02/25/2026 mir0n
+  handle KeyCloak Token Renewal events
+  
 02/24/2026 mir0n
    explicit use EsqAccessProfile instead of any 
    load Access Profile at startup (instead of entity details)

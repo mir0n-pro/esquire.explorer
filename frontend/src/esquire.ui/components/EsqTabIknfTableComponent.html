@@ -7,37 +7,6 @@
   History:
 -->
 <div class="esq-tab-list-container">
-<!--
-  <table mat-table
-    [dataSource]="tabIknfDataSource"
-    class="esq-tab-list"
-  >
-    <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef class="mat-elevation-z2  esq-tab-list-elevation-z1" >
-          <div>{{esqListHeader}}</div>
-      </th>
-      <td mat-cell *matCellDef="let element" class="mat-cell esq-tab-list-ellipsis-cell"> 
-          <span class="esq-tab-list-ellipsis-text">
-              @if (element.icon.length > 0) {
-                    <img src="{{element.icon}}" class="esq-tab-list-base-icon"/>
-              }
-              {{element.name}}
-          </span>
-      </td>
-    </ng-container>
-    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="mat-header-row esq-tab-list-header-row"></tr>
-    <tr mat-row *matRowDef="let row; let i = index; columns: displayedColumns;" 
-      class="mat-row esq-tab-list-row"
-          [ngClass]="{'esq-active-list-highlight': i === listElementFocusedIndex,  'esq-mouse-list-highlight': listElementHoveredIndex === i}"
-          (mouseover)="listElementHoveredIndex = i"
-          (mouseout)="listElementHoveredIndex = -1"      
-          (click)="onListClick(i)"
-          (keydown)="onListKeydown($event, i)"
-          [tabindex]="i === listElementFocusedIndex ? 0 : -1"
-
-    ></tr>
-  </table>
--->
     <table mat-table
        [dataSource]="tabIknfDataSource"
        class="esq-tab-list"

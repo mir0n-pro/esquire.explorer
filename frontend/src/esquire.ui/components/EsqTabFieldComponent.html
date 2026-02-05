@@ -1,0 +1,52 @@
+<!--
+  Esquire frameworks (tm)
+ 
+  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
+  mailto:mir0n.the.programmer@gmail.com
+
+  History:
+-->
+<div>
+    @if (field.type == 'tab-ikn-list') {
+        <esq-tab-ikn-list
+            [esqListElements]="details[field.name]"
+            [esqListHeader]="field.label"
+            [esqExplorerCallApi]="callApi"
+            [esqEnableDetails]="enableDetails"
+        />
+    } @else if (field.type === 'tab-iknf-table') {
+        <esq-tab-iknf-table
+            [esqListElements]="details[field.name]"
+            [esqListHeader]="field.label"
+        />
+    } @else if (field.type == 'image') {
+        <div class="esq-tab-image-container">
+            <img class="esq-tab-image" src="{{details[field.name]}" alt="{{details[field.name]}}" />
+        </div>
+        <mat-divider></mat-divider>
+    } @else if (field.type == 'href') {
+        <div class="esq-simple-grid2">
+            <b>{{field.label}}:</b>
+            <a href="{{details[field.name][0]}}" target="_blank" rel="noopener noreferrer">
+                {{details[field.name][1]}}
+            </a>
+        </div>
+    } @else if (field.type == 'tablist') {
+        <esq-tab-list
+            [esqListElements]="details[field.name]"
+            [esqListNodeType]="nodeTypeFromFormat(field.format)"
+            [esqListHeader]="field.label"
+            [esqExplorerCallApi]="callApi"
+        />
+    } @else if (field.type == 'tabstring') {
+        <esq-tab-string
+                [value]="details[field.name]"
+                [readOnly]=readOnly
+        />
+    } @else { <!--if (field.type.toLowerCase() == 'string') { -->
+        <div class="esq-simple-grid2">
+            <b>{{field.label}}:</b>{{details[field.name]}}
+        </div>
+    }
+
+</div>  

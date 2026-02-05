@@ -27,7 +27,6 @@
   </button>
 </mat-toolbar>
 
-
 <mat-dialog-content >
   <mat-tab-group class="esq-mat-tab-group">
     @if (details$ | async; as details) {
@@ -36,26 +35,12 @@
           <mat-tab [label]="tab.title" bodyClass="{{tabContent(i)}}">
             @for (field of tab.fields; track field.name) {
               @if (field.readwrite > 0) {
-                @if (field.type == 'tab-ikn-list') {
-                  <esq-tab-ikn-list
-                      [esqListElements]="details[field.name]"
-                      [esqListHeader]="field.label"
-                  />
-                } @else if (field.type === 'tab-iknf-table') {
-                    <esq-tab-iknf-table
-                        [esqListElements]="details[field.name]"
-                        [esqListHeader]="field.label"
-                    />
-                } @else if (field.type === 'tabstring') {
-                    <esq-tab-string
-                       [value]="details[field.name]"
-                       [readOnly]=readOnly
-                    />
-                } @else { <!--if (field.type.toLowerCase() == 'string') { -->
-                    <div class="esq-simple-grid2">
-                        <b>{{field.label}}:</b>{{details[field.name]}}
-                    </div>
-                }
+                <esq-tab-field
+                    [field]=field
+                    [details]=details
+                    [readOnly]=readOnly
+                    [enableDetails]=true
+                />
               }
             }
             </mat-tab>

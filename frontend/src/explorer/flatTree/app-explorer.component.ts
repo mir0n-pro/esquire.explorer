@@ -20,6 +20,7 @@
 *                  EsquireNodeTypes array expanded with children and commands list   
 * 02/02/2026 mir0n "SysAdmin" and "Sys Admin-s" added
 *                  Gaps in Entity Kind enumeration: system objects <> orgs <> users <> accounts
+* 02/05/2026 mir0n handle KeyCloak Token Renewal events 
 * 
 *
 */
@@ -112,16 +113,22 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
       const event = this.keycloakSignal();
       console.warn('Session status update: ' + event.type);
       if (event.type === KeycloakEventType.TokenExpired) {
-        this.authState.set('Token expired');
+        // Token expired - Keycloak will automatically attempt to refresh
+        console.log('Token expired, attempting refresh...');
       //} else if (event.type === KeycloakEventType.AuthSuccess) {
       //  this.authState.set('Authenticated');
       //  console.log('User successfully authenticated');
       } else if (event.type === KeycloakEventType.AuthError) {
         this.authState.set('Authentication error');
-        this.logout(); 
+        this.logout();
       } else if (event.type === KeycloakEventType.AuthRefreshError) {
       // Handle the case where the refresh token itself expired
-        this.logout();                      
+        this.logout();
+      } else if (event.type === KeycloakEventType.AuthRefreshSuccess) {
+        // Token refreshed successfully - maintain current state if already connected
+        if (this.authState() === STATUS_CONNECTED && this.profile) {
+          console.log('Token refreshed successfully');
+        }
       } else if (event.type === KeycloakEventType.Ready) {
         var good = computed(() => this.keycloak.authenticated ?? false);
         if (good()) {

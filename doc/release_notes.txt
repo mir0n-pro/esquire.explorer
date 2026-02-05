@@ -1,13 +1,18 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+
+
+v1.02.02-2602.0419  
+   handle KeyCloak Token Renewal events
+   generalization of dialogs : a common TabField component to handle any field type
+
 v1.02.02-2602.0419  Preparing for dialog code generalization
    api regenerated (single object vs array)
    Prepare for dialog code generalization
     : Clean set of dialogs: now is clear: NodeDialog, DetailsDialog, NodeDetailsDialog, AccessProfileDialog
     : Simplify with "name" and "kind" fields: any object is an EsqThing
     : At start up load an Access Profile instead of User Details
-   
 
 v1.02.02-2602.0218 
   "SysAdmin" and "Sys Admin-s" added

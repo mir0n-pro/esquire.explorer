@@ -30,36 +30,14 @@
           <mat-tab [label]="tab.title" bodyClass="{{tabContent(i)}}">
             @for (field of tab.fields; track field.name) {
               @if (field.name == "name") {
-                  <div class="esq-simple-grid2">
-                    <b>{{field.label}}:</b>{{details[field.name]}}
-                  </div>                   
-                  <mat-divider></mat-divider>
-              } @else {
-                @if (field.type == 'image') {
-                  <div class="esq-tab-image-container">
-                    <img class="esq-tab-image" src="{{details.image}}" alt="{{details.image}}" />
-                  </div>
-                  <mat-divider></mat-divider>
-                } @else if (field.type == 'href') {
-                  <div class="esq-simple-grid2">
-                    <b>{{field.label}}:</b>
-                    <a href="{{details[field.name][0]}}" target="_blank" rel="noopener noreferrer">
-                      {{details[field.name][1]}}
-                    </a>
-                  </div>                   
-                } @else if (field.type == 'tablist') {
-<!-- Not supported -->                
-                } @else if (field.type == 'tabstring') {
-                  <esq-tab-string
-                    [value]="details[field.name]"
-                    [readOnly]=readOnly
-                  >
-                  </esq-tab-string>
-                } @else { <!--if (field.type.toLowerCase() == 'string') { -->
-                    <div class="esq-simple-grid2">
-                      <b>{{field.label}}:</b>{{details[field.name]}}
-                    </div>                   
-                }
+                  @if (field.readwrite > 0) {
+                      <esq-tab-field
+                          [field]=field
+                          [details]=details
+                          [readOnly]=readOnly
+                          [enableDetails]=true
+                      />
+                  }
               }
             }
           </mat-tab>

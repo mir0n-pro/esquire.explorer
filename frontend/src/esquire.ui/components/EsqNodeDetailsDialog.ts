@@ -12,6 +12,7 @@
 * 02/01/2026 mir0n EsqTabLStringComponent renamed with EsqTabStringComponent
 *                  added use EsqTabIknListComponent
 * 02/04/2024 miron renamed with EsqNodeDetailsDialog (was EsqNodeEntityDetailsDialog)
+* 02/05/2026 mir0n use EsqTabFieldComponent
 */
 import {AfterViewInit, 
   Component, 
@@ -33,8 +34,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { firstValueFrom, from, lastValueFrom, Observable } from 'rxjs';
 import { CommonModule } from '@angular/common'
 import {MatTableModule } from '@angular/material/table';
-import { EsqTabListComponent } from "./EsqTabListComponent";
-import { EsqTabStringComponent } from "./EsqTabStringComponent";
+
 /*
 import { EsqNodeType
   , EsqNodeTypeFactory
@@ -53,7 +53,7 @@ import {EsqNodeStatusFactory} from 'src/esquire.ui/api/EsqNodeStatusFactory';
 import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
-import {EsqTabIknListComponent} from "./EsqTabIknListComponent";
+import {EsqTabFieldComponent} from "./EsqTabFieldComponent";
 
   @Component({
   selector: 'details-dialog',
@@ -70,9 +70,7 @@ import {EsqTabIknListComponent} from "./EsqTabIknListComponent";
           MatDividerModule,
           CommonModule,
           MatTableModule,
-          EsqTabListComponent,
-          EsqTabStringComponent,
-          EsqTabIknListComponent
+          EsqTabFieldComponent
       ],
   encapsulation: ViewEncapsulation.None,
 })

@@ -10,6 +10,7 @@
 *                  kind parameter is requried for esq-cmd, esq-enode
 *                  listvalues_kind moved inside of generic format 
 * 02/04/2026 mir0n use ChangeDetectorRef to obntain dialog heading
+* 02/05/2026 mir0n use EsqTabFieldComponent
 */
 import {AfterViewInit,
   ChangeDetectorRef,
@@ -22,16 +23,18 @@ import {AfterViewInit,
   ViewEncapsulation
 } from '@angular/core';
 import {MatButton, MatButtonModule} from '@angular/material/button';
-import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
-import { firstValueFrom, from, lastValueFrom, Observable } from 'rxjs';
+import { firstValueFrom,Observable } from 'rxjs';
 import { CommonModule } from '@angular/common'
 import {MatTableModule } from '@angular/material/table';
+import {EsqTabFieldComponent} from "./EsqTabFieldComponent";
+
 /*
 import { EsqNodeType
   , EsqNodeTypeFactory
@@ -66,9 +69,7 @@ import { EsqTabStringComponent } from "./EsqTabStringComponent";
         MatDividerModule,
         CommonModule,
         MatTableModule,
-        EsqTabIknListComponent,
-        EsqTabIknfTableComponent,
-        EsqTabStringComponent,
+        EsqTabFieldComponent,
     ],
   encapsulation: ViewEncapsulation.None,
 })
@@ -76,15 +77,12 @@ import { EsqTabStringComponent } from "./EsqTabStringComponent";
 export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy {
    @ViewChild('btnClose') btnClose! : MatButton;
    private dialogRef: MatDialogRef<EsqAccessProfileDialog>;
-//   public node : EsqTreeNode;
    private restApi: EsqRestApi;
    private dictionaryApi: EsqDictionaryApi;
-//   public callApi: EsqExplorerCallApi;
 
    public readOnly: boolean = false;
    public details$: Observable<any> | undefined;
    public dictionary$: Observable<EsqEntityLayer[]> | undefined;
-//   readonly detailsDialog:MatDialog = inject(MatDialog);
    public id:string = "";
    public headerIcon:string = "";
    public headerName:string = "";

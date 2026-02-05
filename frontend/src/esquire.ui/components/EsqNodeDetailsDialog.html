@@ -43,42 +43,15 @@
                   </div>                   
                   <mat-divider></mat-divider>
               } @else {
-                @if (field.type == 'image') {
-                  <div class="esq-tab-image-container">
-                    <img class="esq-tab-image" src="{{details.image}}" alt="{{details.image}}" />
-                  </div>
-                  <mat-divider></mat-divider>
-                } @else if (field.type == 'href') {
-                  <div class="esq-simple-grid2">
-                    <b>{{field.label}}:</b>
-                    <a href="{{details[field.name][0]}}" target="_blank" rel="noopener noreferrer">
-                      {{details[field.name][1]}}
-                    </a>
-                  </div>
-                } @else if (field.type == 'tab-ikn-list') {
-                    <esq-tab-ikn-list
-                        [esqListElements]="details[field.name]"
-                        [esqListHeader]="field.label"
-                        [esqExplorerCallApi]="callApi"
-                        [esqEnableDetails]="true"
-                    />
-                } @else if (field.type == 'tablist') {
-                  <esq-tab-list
-                    [esqListElements]="details[field.name]"
-                    [esqListNodeType]="nodeTypeFromFormat(field.format)"
-                    [esqListHeader]="field.label"
-                    [esqExplorerCallApi]="callApi"
-                  />
-                } @else if (field.type == 'tabstring') {
-                  <esq-tab-string
-                    [value]="details[field.name]"
-                    [readOnly]=readOnly
-                  />
-                } @else { <!--if (field.type.toLowerCase() == 'string') { -->
-                    <div class="esq-simple-grid2">
-                      <b>{{field.label}}:</b>{{details[field.name]}}
-                    </div>                   
-                }
+                  @if (field.readwrite > 0) {
+                      <esq-tab-field
+                          [field]=field
+                          [details]=details
+                          [readOnly]=readOnly
+                          [enableDetails]=true
+                          [callApi]=callApi
+                      />
+                  }
               }
             }
           </mat-tab>

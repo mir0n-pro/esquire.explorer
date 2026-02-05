@@ -6,6 +6,7 @@
 *
 *  History:
 * 02/01/2026 mir0n EsqTabLStringComponent renamed with EsqTabStringComponent
+* 02/05/2026 mir0n use EsqTabFieldComponent
 */
 import {AfterViewInit, 
   Component, 
@@ -33,25 +34,25 @@ import { EsqEntityLayer } from '@mir0n-pro/esquire.ui/api';
 */
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 
-import { EsqTabStringComponent} from './EsqTabStringComponent';
+import {EsqTabFieldComponent} from "./EsqTabFieldComponent";
 
 @Component({
   selector: 'details-dialog',
   templateUrl: './EsqSingleEntryDialog.html',
-  styleUrl: './EsqDetailsDialog.scss',  
-  imports: [
-    MatDialogModule,
-    MatButtonModule,
-    MatTooltipModule,
-    DragDropModule,
-    MatIcon,
-    MatToolbarModule,
-    MatTabsModule,
-    MatDividerModule,
-    CommonModule,
-    MatTableModule,
-    EsqTabStringComponent
-],
+  styleUrl: './EsqDetailsDialog.scss',
+    imports: [
+        MatDialogModule,
+        MatButtonModule,
+        MatTooltipModule,
+        DragDropModule,
+        MatIcon,
+        MatToolbarModule,
+        MatTabsModule,
+        MatDividerModule,
+        CommonModule,
+        MatTableModule,
+        EsqTabFieldComponent
+    ],
   encapsulation: ViewEncapsulation.None,
 })
 
