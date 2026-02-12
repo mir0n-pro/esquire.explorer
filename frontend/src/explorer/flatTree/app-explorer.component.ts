@@ -21,6 +21,10 @@
 * 02/02/2026 mir0n "SysAdmin" and "Sys Admin-s" added
 *                  Gaps in Entity Kind enumeration: system objects <> orgs <> users <> accounts
 * 02/05/2026 mir0n handle KeyCloak Token Renewal events 
+* 02/12/2026 mir0n  EsqNodeType in explicit file
+*                   added EsqRestApi.esquireKinds()
+*                   EsqNodeTypeFactory.init with RestAPI and local exceptions set (define icons and heading)
+*                   EsquireNodeTypes have only icons and heading
 * 
 *
 */
@@ -53,7 +57,8 @@ import { EsqExplorerCallApiMill, EsqDictionary } from '@mir0n-pro/esquire.ui/com
 import { EsqExplorerComponent} from '@mir0n-pro/esquire.ui/explorer/flatTree';
 */
 
-import {EsqNodeType,EsqNodeTypeFactory} from 'src/esquire.ui/api/EsqNodeTypeFactory';
+import {EsqNodeType} from 'src/esquire.ui/api/EsqNodeType';
+import {EsqNodeTypeFactory} from 'src/esquire.ui/api/EsqNodeTypeFactory';
 import {EsqNodeStatus,EsqNodeStatusFactory} from 'src/esquire.ui/api/EsqNodeStatusFactory';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
@@ -72,7 +77,6 @@ import Keycloak from 'keycloak-js';
 import { Observable } from 'rxjs';
 import {EsqCommandMenuItem, EsqContextMenuBuilder} from "../../esquire.ui/api/EsqContextMenuBuilder";
 import {EsqAccessProfile} from "../../rest/model/esqAccessProfile";
-
 
 const STATUS_CONNECTED = "Connected";
 const STATUS_AUTHENTICATED = "Authenticated";
@@ -280,6 +284,23 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
             }) ;
             return ret;
         },
+        esquireKinds: () => {
+            this.setErrorMessage("");
+            this.errorReport = undefined;
+            if(!this.dataService) {
+                this.setErrorMessage("Data service not initialized");
+                throw new Error("Data service not initialized");
+            }
+            let ret: Observable<any> = this.dataService.esquireKinds( ) ;
+            ret.subscribe({
+                error : (err: ProblemDetail) => {
+                    console.error(err.detail || err.title);
+                    this.errorReport = err;
+                    this.setErrorMessage( err.detail || err.title);
+                }
+            }) ;
+            return ret;
+        },
     }
   };
 
@@ -297,7 +318,7 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
 
   async ngOnInit() {
     this.dataService = this._dataService; 
-    EsqNodeTypeFactory.init(Object.values(EsquireNodeTypes));
+    await EsqNodeTypeFactory.init(this.esqRestApiWrapper(), EsquireNodeTypes);
     EsqNodeStatusFactory.init(Object.values(EsquireStatuses));
     this.dictionary = new EsqDictionary(this.esqRestApiWrapper());
     this.callApiMill = new EsqExplorerCallApiMill(this.detailsDialog, this.dictionary, this.esqRestApiWrapper());
@@ -359,11 +380,9 @@ public async logout(): Promise<void> {
 
 private findIcon(kind:number) : string {
   var ret: string = "img/unknown.ico";
-  for (const tp of Object.values(EsquireNodeTypes)) {
-    if (tp.id == kind) {
-      ret = tp.icon;
-      break;
-    }
+  var nodeType: EsqNodeType = EsqNodeTypeFactory.instanceOf(kind);
+  if (nodeType) {
+      ret = nodeType.icon;
   }
   return ret;
 }
@@ -393,30 +412,29 @@ private findIcon(kind:number) : string {
     return new Promise<void>((resolve)=>resolve());
   }
 }
-
-export const EsquireNodeTypes = {
-    System:       new EsqNodeType( 0, "System",              "img/folders/system.ico",  true,     [20],              [],  [{columnDef:"name", header:"Name"},  {columnDef:"desc", header:"Description"}]),
-    SysAdmins:    new EsqNodeType( 2, "Sys admin-s",         "img/folders/folder.ico",  false, [30,32],              [],  [{columnDef:"name", header:"Administrator"},  {columnDef:"desc", header:"Description"}]),
-    AllAdmins:    new EsqNodeType( 4, "All admin-s",         "img/folders/folder.ico",  false,    [32],              [],  [{columnDef:"name", header:"Administrator"},  {columnDef:"desc", header:"Description"}]),
-    AllAccounts:  new EsqNodeType( 6, "All accounts",        "img/folders/folder.ico",  false,      [],              [],  [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]),
-    AllClients:   new EsqNodeType( 8, "All clients",         "img/folders/folder.ico",  false,    [34],              [],  [{columnDef:"name", header:"Client"},  {columnDef:"desc", header:"Description"}]),
-    AllMerchants: new EsqNodeType( 10,"All merchants",       "img/folders/folder.ico",  false,    [36],              [],  [{columnDef:"name", header:"Merchant"},  {columnDef:"desc", header:"Description"}]),
-    Organization: new EsqNodeType(20, "Organization",        "img/org.ico",             true,     [20],       ["_move"],  [{columnDef:"name", header:"Name"},  {columnDef:"desc", header:"Description"}]),
-    SysAdmin:     new EsqNodeType(30, "SysAdmin",            "img/sysadmin.ico",        true,       [],["_mov_e","key"],  ),
-    SysAdminLink: new EsqNodeType(31, "SysAdmin",            "img/sysadmin.ico",        true,       [],         ["key"],  ),
-    Admin:        new EsqNodeType(32, "Admin",               "img/admin.ico",           true,       [],["_mov_e","key"],  ),
-    AdminLink:    new EsqNodeType(33, "Admin",               "img/admin.ico",           true,       [],         ["key"],  ),
-    Client:       new EsqNodeType(34, "Client",              "img/client.ico",          true,  [50,54],["_move_","key"],  [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]),
-    ClientLink:   new EsqNodeType(35, "Client",              "img/client.ico",          true,       [],         ["key"],  ),
-    Merchant:     new EsqNodeType(36, "Merchant",            "img/merchant.ico",        true,     [52],["_move_","key"],  [{columnDef:"name", header:"Account"},  {columnDef:"desc", header:"Description"}]),
-    MerchantLink: new EsqNodeType(37, "Merchant",            "img/merchant.ico",        true,       [],         ["key"],  ),
-    CAccount:     new EsqNodeType(50, "Client Account",      "img/acct.ico",            true,       [],      ["_acct_"], ),
-    CAccountLink: new EsqNodeType(51, "Client Account",      "img/links/acctl.ico",     true,       [],      ["_acct_"], ),
-    MAccount:     new EsqNodeType(52, "Merchant Account",    "img/macct.ico",           true,       [],      ["_acct_"], ),
-    MAccountLink: new EsqNodeType(53, "Merchant Account",    "img/links/macctl.ico",    true,       [],      ["_acct_"], ),
-    PAccount:     new EsqNodeType(54, "Paper Client Account","img/pacct.ico",           true,       [],      ["_acct_"], ),
-    PAccountLink: new EsqNodeType(55, "Paper Client Account","img/links/pacctl.ico",    true,       [],      ["_acct_"], ),
-} as const;
+export const EsquireNodeTypes = [
+    new EsqNodeType({id: 0, name:"system", icon:"img/folders/system.ico", listHeaders: [{columnDef:"name", header:"Name"},  {columnDef:"desc", header:"Description"}]}),
+    new EsqNodeType({id: 2, name:"sysadmins", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Administrator"},  {columnDef:"desc", header:"Description"}]}),
+    new EsqNodeType({id: 4, name:"alladmins", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Administrator"},  {columnDef:"desc", header:"Description"}]}),
+    new EsqNodeType({id: 6, name:"allaccounts", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Account ID"},  {columnDef:"desc", header:"Description"}]}),
+    new EsqNodeType({id: 8, name:"allclients", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Client"},  {columnDef:"desc", header:"Description"}]}),
+    new EsqNodeType({id: 10, name:"allmerchants", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Merchant"},  {columnDef:"desc", header:"Description"}]}),
+    new EsqNodeType({id: 20, name:"organization", icon:"img/org.ico"}),
+    new EsqNodeType({id: 30, name:"sysadmin", icon:"img/sysadmin.ico"}),
+    new EsqNodeType({id: 31, name:"sysadminlnk", icon:"img/sysadmin.ico"}),
+    new EsqNodeType({id: 32, name:"admin", icon:"img/admin.ico"}),
+    new EsqNodeType({id: 33, name:"adminlnk", icon:"img/admin.ico"}),
+    new EsqNodeType({id: 34, name:"client", icon:"img/client.ico"}),
+    new EsqNodeType({id: 35, name:"clientlnk", icon:"img/client.ico"}),
+    new EsqNodeType({id: 36, name:"merchant", icon:"img/merchant.ico", listHeaders: [{columnDef:"name", header:"Account ID"},  {columnDef:"desc", header:"Description"}]}),
+    new EsqNodeType({id: 37, name:"merchantlnk", icon:"img/merchant.ico"}),
+    new EsqNodeType({id: 50, name:"caccount", icon:"img/acct.ico"}),
+    new EsqNodeType({id: 51, name:"caccountlnk", icon:"img/links/acctl.ico"}),
+    new EsqNodeType({id: 52, name:"maccount", icon:"img/macct.ico"}),
+    new EsqNodeType({id: 53, name:"maccountlnk", icon:"img/links/macctl.ico"}),
+    new EsqNodeType({id: 54, name:"paccount", icon:"img/pacct.ico"}),
+    new EsqNodeType({id: 55, name:"paccountlnk", icon:"img/links/pacctl.ico"}),
+] as const;
 
 export const EsquireStatuses = {
     Empty:   new EsqNodeStatus(0,  "Empty",           "img/status/empty.ico"),

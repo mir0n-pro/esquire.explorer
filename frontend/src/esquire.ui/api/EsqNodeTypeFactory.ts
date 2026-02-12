@@ -1,5 +1,3 @@
-import {EsqTreeNode} from "./EsqTreeNode";
-
 /**
 *  Esquire frameworks (tm)
 *
@@ -12,63 +10,84 @@ import {EsqTreeNode} from "./EsqTreeNode";
 *                   added isCommandAllowed()
 *                   added isNewAllowed()
 *                   added ACCESSPROFILE virtual note type
+* 02/12/2026 mir0n  EsqNodeType in explicit file
+*                   init() loading from server and keeps ability to be defined locally
 */
-export interface EsqColumnHeaderDef {
-  columnDef:string;
-  header:string;
-}
 
-export class EsqNodeType {
-  public id:number;
-  public name:string;
-  public icon:string;
-  public detailed:boolean;
-  public listHeaders: EsqColumnHeaderDef[];
-  public childTypes: number[];
-  public commands: string[];
-
-  constructor (id:number, name:string, icon:string, detailed:boolean, childTypes?:number[], commands?:string[], listHeaders?: EsqColumnHeaderDef[]) {
-    this.id = id;
-    this.name = name;
-    this.icon = icon;  
-    this.detailed = detailed;  
-    this.listHeaders = (listHeaders?listHeaders:[]);
-    this.childTypes = (childTypes?childTypes:[]);
-    this.commands =(commands?commands:[] );
-  }
-
-  public isCommandAllowed(cmd:string): boolean {
-        if (!this.commands || this.commands.length == 0) {
-            return false;
-        }
-        return this.commands.includes(cmd);
-    }
-    public isNewAllowed(): boolean {
-        return this.childTypes.length > 0;
-    }
-
-}
+import {EsqTreeNode} from "./EsqTreeNode";
+import {EsqNodeType} from "./EsqNodeType";
+import {EsqRestApi} from "./EsqRestApi";
+import {firstValueFrom} from "rxjs";
 
 export class EsqNodeTypeFactory {
-  private static dictionary:EsqNodeType[] = [];
-  public static UNKNOWN:EsqNodeType =  new EsqNodeType(0, "Unknown", "", false);
-  public static MORE:EsqNodeType =  new EsqNodeType(999, "...", "", false);
-  public static ACCESSPROFILE:EsqNodeType =  new EsqNodeType(998, "Access", "", false);
+  private static kinds:EsqNodeType[] = [];
+  public static UNKNOWN:EsqNodeType = new EsqNodeType({
+        id: -1,
+        name: "unknown"
+    });
 
-  private constructor (dictionary: EsqNodeType[]) {
+  public static MORE:EsqNodeType = new EsqNodeType({
+      id: 999,
+      name: "more",
+      title: "..."
+  });
+
+  public static ACCESSPROFILE:EsqNodeType =  new EsqNodeType({
+      id: 998,
+      name: "accessprofile",
+      title: "Access Profile"
+  });
+
+  private constructor () {
   }
 
-  static init(dictionary: EsqNodeType[]):void {
-    this.dictionary = dictionary;
+    private static update(kind: EsqNodeType, kinds: readonly EsqNodeType[]) {
+        var given:EsqNodeType|null = null;
+        for (const k of kinds) {
+            if (k.id == kind.id) {
+                given = k;
+                break;
+            }
+        }
+        if (given) {
+            if (given.icon && given.icon.length > 0) {
+                kind.icon = given.icon;
+            }
+            if (given.listHeaders && given.listHeaders.length > 0) {
+                kind.listHeaders = given.listHeaders;
+            }
+        }
+    }
+  public static async init(api: EsqRestApi | null | undefined, kinds: readonly EsqNodeType[] | null | undefined){
+
+      if (this.kinds.length == 0 ) {
+          if (api) {
+              const data = await firstValueFrom(api.esquireKinds());
+              const src: any[] = (data as any[]) ?? [];
+              src.forEach(k => {
+                  let kind: EsqNodeType = new EsqNodeType(k);
+                  if (kinds) {
+                      this.update(kind, kinds);
+                  }
+                  this.kinds.push(kind);
+              });
+          } else if (kinds) {
+              this.kinds = kinds.map(k => k);
+          }
+          //await api.esquireKinds().subscribe(kinds => {
+          //    const src: any[] = (kinds as any[]) ?? [];
+          //    this.kinds = src.map(k => (k instanceof EsqNodeType) ? k : new EsqNodeType(k));
+          //});
+      }
   }
 
-  public static instanceOf(tipeId: number): EsqNodeType {
+  public static instanceOf(kind: number): EsqNodeType {
     var ret:EsqNodeType = EsqNodeTypeFactory.UNKNOWN;
-    if (tipeId == 999) {
+    if (kind == 999) {
       ret = EsqNodeTypeFactory.MORE;
     } else {
-      if (this.dictionary.length > 0 ){
-        const res:EsqNodeType[] = this.dictionary.filter((x) => x.id == tipeId) as EsqNodeType[];
+      if (this.kinds.length > 0 ){
+        const res:EsqNodeType[] = this.kinds.filter((x) => x.id == kind) as EsqNodeType[];
         if (res && res.length > 0) {
             ret = res[0];
         } 
@@ -81,11 +100,11 @@ export class EsqNodeTypeFactory {
     if (!parent) {
         return [];
     }
-    const allowedTypeIds= parent.type.childTypes || [];
+    const allowedTypeIds= parent.type.childKinds || [];
     return allowedTypeIds
         .map(id => this.instanceOf(id))
         .filter(type => type !== EsqNodeTypeFactory.UNKNOWN);
- }
+  }
 
 }
 

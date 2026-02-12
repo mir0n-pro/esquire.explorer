@@ -13,6 +13,7 @@
 *                  added use EsqTabIknListComponent
 * 02/04/2024 miron renamed with EsqNodeDetailsDialog (was EsqNodeEntityDetailsDialog)
 * 02/05/2026 mir0n use EsqTabFieldComponent
+* 02/12/2026 mir0n  EsqNodeType in explicit file
 */
 import {AfterViewInit, 
   Component, 
@@ -45,7 +46,7 @@ import { EsqNodeType
   , EsqDictionaryApi, EsqEntityLayer 
 } from '@mir0n-pro/esquire.ui/api';
 */
-import {EsqNodeType} from 'src/esquire.ui/api/EsqNodeTypeFactory';
+import {EsqNodeType} from 'src/esquire.ui/api/EsqNodeType';
 import {EsqNodeTypeFactory} from 'src/esquire.ui/api/EsqNodeTypeFactory';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {EsqTreeNode} from 'src/esquire.ui/api/EsqTreeNode';

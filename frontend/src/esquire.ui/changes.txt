@@ -1,6 +1,34 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components 
 
+02/12/2026 mir0n set of EsqNodeTypes configured on server side
++ added api\EsqNodeType.ts 
+api\EsqContextMenuBuilder.ts
+  - EsqNodeType in explicit file
+api\EsqNodeTypeFactory.ts
+  - EsqNodeType in explicit file
+  - init() loading from server and keeps ability to be defined locally
+api\EsqRestApi.ts
+  - added esquireKinds()
+api\EsqTreeNode.ts
+  - EsqNodeType in explicit file
+components\EsqAccessProfileDialog.ts
+  - EsqNodeType in explicit file
+components\EsqNodeDetailsDialog.ts
+  - EsqNodeType in explicit file
+components\EsqTabFieldComponent.ts
+  - EsqNodeType in explicit file
+components\EsqTabIknfTableComponent.ts
+  - EsqNodeType in explicit file
+components\EsqTabIknListComponent.ts
+  - EsqNodeType in explicit file
+components\EsqTabListComponent.ts
+  - EsqNodeType in explicit file
+explorer\flatTree\EsqExplorerComponent.ts
+  - EsqNodeType in explicit file
+explorer\flatTree\EsqListViewDatasource.ts  
+  - EsqNodeType in explicit file
+
 02/04/2026 mir0n Generalization of dialog entry fields
 + added components\EsqTabFieldComponent
 components\EsqAccessProfileDialog  

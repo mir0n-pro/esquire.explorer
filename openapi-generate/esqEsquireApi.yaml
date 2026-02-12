@@ -178,6 +178,24 @@ paths:
                   $ref: '#/components/schemas/EsqEntityLayer'
         '405':
           description: Invalid input
+  /esq-kinds:
+    get:
+      tags:
+        - esquire
+      summary: Obtain a list of object kinds
+      description: Obtain a list of object kinds
+      operationId: esquireKinds
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EsqObjectKind'
+        '405':
+          description: Invalid input
   /esq-key:
     get:
       tags:
@@ -459,3 +477,83 @@ components:
               items:
                 $ref: '#/components/schemas/EsqPermission'
           additionalProperties: false            
+    EsqObjectKind:
+      title: Object Kind
+      description: Object Kind
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Object Kind id
+          example: 1
+        name:
+          type: string
+          description: Name of kind, in lower case
+          example: system
+        title:
+          type: string
+          description: Verbal name of kind
+          example: System
+        plural:
+          type: string
+          description: Plural name, in lower case
+          example: systems
+        desc:
+          type: string
+          description: Description of kind
+          example: Esquire system root
+        org:
+          type: boolean
+          description: Defines Organization kind
+        usr:
+          type: boolean
+          description: Defines User kind
+        acct:
+          type: boolean
+          description: Defines Account kind
+        icon:
+          type: string
+          description: Name of type icon
+          example: img/system.ico
+        detailed:
+          type: boolean
+          description: Flags an entity, has details
+        childrenDetailed:
+          type: boolean
+          description: Flags that entity has children listed in details screen
+        treeFlags:
+          type: string
+          description: Tree flags
+          example: BTb
+        listHeaders:
+          type: array
+          description: List of heading columns for list view {column name, column header}
+          items:
+            $ref: '#/components/schemas/EsqColumnHeaderDef'
+        childKinds:
+          type: array
+          items:
+            type: integer
+            format: int32
+          description: List of entity kinds can be created within the entity
+          example: [30,32]
+        commands:
+          type: array
+          items:
+            type: string
+          description: List of entity commands
+          example: [move,key]
+    EsqColumnHeaderDef:
+      title: Column Header definition
+      description: Column Header definition
+      type: object
+      properties:
+        columnDef:
+          type: string
+          description: column definition
+          example: name
+        header:
+          type: string
+          description: Header title
+          example: Entity Name

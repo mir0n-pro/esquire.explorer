@@ -307,7 +307,7 @@
         class="mat-table esq-table"
       >
         @for (column of listColumns; track column.columnDef; let i = $index) {
-          <ng-container [matColumnDef]="column.columnDef" >
+          <ng-container [matColumnDef]="column.columnDef!" >
             <th mat-header-cell *matHeaderCellDef  esqResize class="mat-elevation-z2 esq-elevation-z2">
               {{column.header}}
             </th>

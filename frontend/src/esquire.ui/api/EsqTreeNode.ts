@@ -6,11 +6,13 @@
 *  mailto:mir0n.the.programmer@gmail.com
 *
 * History :
+* 02/12/2026 mir0n  EsqNodeType in explicit file
 */
 import {NgModule, signal} from '@angular/core';
 import {EsqTreeNodeDto} from './EsqTreeNodeDto';
 export {EsqTreeNodeDto} from './EsqTreeNodeDto';
-import {EsqNodeType, EsqNodeTypeFactory} from './EsqNodeTypeFactory';
+import {EsqNodeType} from './EsqNodeType';
+import {EsqNodeTypeFactory} from './EsqNodeTypeFactory';
 
 
 export class EsqTreeNode extends EsqTreeNodeDto {

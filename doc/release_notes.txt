@@ -1,6 +1,9 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.2-2602.1217 set of node types configured in server side
+  set of node types configured in server side, keeps ability to be defined/overwritten locally
+  added "/esq-kinds" REST API entry point
 
 
 v1.02.02-2602.0419  

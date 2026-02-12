@@ -12,7 +12,7 @@
        class="esq-tab-list"
     >
         @for (column of listColumns; track column.columnDef; let i = $index) {
-            <ng-container [matColumnDef]="column.columnDef" >
+            <ng-container [matColumnDef]="column.columnDef!" >
                 <th mat-header-cell *matHeaderCellDef  esqResize class="mat-elevation-z2 esq-tab-list-elevation-z1">
                     {{column.header}}
                 </th>
@@ -26,7 +26,7 @@
                         </span>
                     } @else {
                         <span class="esq-tab-list-ellipsis-text">
-                            {{element[column.columnDef] }}
+                            {{element[column.columnDef!] }}
                         </span>
                     }
                 </td>

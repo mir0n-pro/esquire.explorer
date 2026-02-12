@@ -7,6 +7,7 @@
 * History :
 * 12/24/2025 mir0n kind parameter is requried for esq-cmd, esq-enode
 * 02/01/2026 miron added esquireKey()
+* 02/12/2026 miron added esquireKinds()
 */
 import { Observable } from 'rxjs';
 
@@ -17,5 +18,5 @@ export interface EsqRestApi {
  esquireEntityNode: (kind: number, id?: string, name?: string, options?:any) => Observable<any>;
  esquireDictionary: (kind: number, options?:any) => Observable<any>;
  esquireKey:  (id?: string, options?:any) => Observable<any>;
-
+ esquireKinds: () => Observable<any>;
 }

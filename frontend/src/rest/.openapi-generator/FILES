@@ -10,8 +10,10 @@ git_push.sh
 index.ts
 model/esqAccessProfile.ts
 model/esqAccessProfilePermissions.ts
+model/esqColumnHeaderDef.ts
 model/esqEntityField.ts
 model/esqEntityLayer.ts
+model/esqObjectKind.ts
 model/esqPermission.ts
 model/esqRole.ts
 model/esqTreeNode.ts

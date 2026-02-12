@@ -5,6 +5,7 @@
 *  mailto:mir0n.the.programmer@gmail.com
 *
 *  History:
+* 02/12/2026 mir0n  EsqNodeType in explicit file
 */
 import {AfterViewInit, 
   Component, 
@@ -25,7 +26,7 @@ import { DataSource } from '@angular/cdk/collections';
 /*  
 import { EsqNodeType, EsqExplorerCallApi } from '@mir0n-pro/esquire.ui/api';
 */
-import {EsqNodeType} from 'src/esquire.ui/api/EsqNodeTypeFactory';
+import {EsqNodeType} from 'src/esquire.ui/api/EsqNodeType';
 import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqNodeTypeFactory} from "src/esquire.ui/api/EsqNodeTypeFactory";
 import {EsqTabIknListComponent} from "./EsqTabIknListComponent";

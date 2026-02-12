@@ -1,10 +1,17 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
-02/25/2026 mir0n
+02/12/2026 mir0n
+explorer\flatTree\app-explorer.component.ts
+  - EsqNodeType in explicit file
+  - added EsqRestApi.esquireKinds()
+  - EsqNodeTypeFactory.init with RestAPI and local exceptions set (define icons and heading)
+  - EsquireNodeTypes have only icons and heading
+  
+02/05/2026 mir0n
   handle KeyCloak Token Renewal events
   
-02/24/2026 mir0n
+02/04/2026 mir0n
    explicit use EsqAccessProfile instead of any 
    load Access Profile at startup (instead of entity details)
 

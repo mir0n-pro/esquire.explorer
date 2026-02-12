@@ -9,6 +9,7 @@
 *                   context menu added
 *                   toolbar is in synch with context menu
 *                   normalized keyboard actions
+* 02/12/2026 mir0n  EsqNodeType in explicit file
 */
 import {Component,
   ElementRef,
@@ -48,7 +49,7 @@ import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {AsEsqTreeNodePipe}  from 'src/esquire.ui/api/AsEsqTreeNodePipe';
 import {EsqTreeNode}  from 'src/esquire.ui/api/EsqTreeNode';
 import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
-import {EsqColumnHeaderDef} from 'src/esquire.ui/api/EsqNodeTypeFactory';
+import {EsqColumnHeaderDef} from 'src/esquire.ui/api/EsqNodeType';
 import {EsqNodeStatusFactory} from 'src/esquire.ui/api/EsqNodeStatusFactory';
 import {EsqResizeDirective} from 'src/esquire.ui/components/EsqResizeDirective';
 import {EsqUtils} from 'src/esquire.ui/components/EsqUtils';
@@ -171,7 +172,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
         this.listNodeHistoryIndex = 0;
       }
       this.listColumns = (this.listNodeOwner as EsqTreeNode).type.listHeaders;
-      this.listColumnsDisplayed = this.listColumns.map((x)=>x.columnDef);
+      this.listColumnsDisplayed = this.listColumns.map((x)=>x.columnDef!);
       this.treeNodePostFocus = this.treeNodeActive;
       this.initialDataLoading.set(false);
     }
@@ -826,7 +827,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
       await this.datasource.loadChildren(node);
       if ((this.listNodeOwner as EsqTreeNode).type  != node.type) {
         this.listColumns = node.type.listHeaders;
-        this.listColumnsDisplayed = this.listColumns.map((x)=>x.columnDef);
+        this.listColumnsDisplayed = this.listColumns.map((x)=>x.columnDef!);
         this.listColumnsDisplayed = [...this.listColumnsDisplayed]; 
       }
       this.treeNodePostFocus = null;
