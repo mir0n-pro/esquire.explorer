@@ -1,11 +1,12 @@
 /*
 *  Esquire frameworks (tm)
-* 
+*
 *  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
 *  mailto:mir0n.the.programmer@gmail.com
 *
 *  History:
 * 02/12/2026 mir0n  EsqNodeType in explicit file
+* 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
 */
 import {AfterViewInit, 
   Component, 
@@ -26,7 +27,7 @@ import { DataSource } from '@angular/cdk/collections';
 /*  
 import { EsqNodeType, EsqExplorerCallApi } from '@mir0n-pro/esquire.ui/api';
 */
-import {EsqNodeType} from 'src/esquire.ui/api/EsqNodeType';
+import {EsqObjectKind} from 'src/esquire.ui/api/EsqObjectKind';
 import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
 
   @Component({
@@ -51,7 +52,7 @@ export class EsqTabListComponent implements OnInit,  AfterViewInit, OnDestroy {
   @ViewChildren(MatRow, { read: ElementRef }) matRows!: QueryList<ElementRef>; // Assuming MatRow is a directive applied to your rows
 
   @Input() public esqListElements!: string[];
-  @Input() public esqListNodeType!:EsqNodeType;
+  @Input() public esqListNodeType!:EsqObjectKind;
   @Input() public esqListHeader:string = '';
   @Input() public esqEnableAdd:boolean = false;
   @Input() public esqEnableRemove:boolean = false;

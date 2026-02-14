@@ -1,6 +1,6 @@
 /*
 *  Esquire frameworks (tm)
-* 
+*
 *  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
 *  mailto:mir0n.the.programmer@gmail.com
 *
@@ -8,12 +8,13 @@
 * 12/24/2025 mir0n added processing of tabstring field value type
 *                  readOnly made public
 *                  kind parameter is requried for esq-cmd, esq-enode
-*                  listvalues_kind moved inside of generic format 
+*                  listvalues_kind moved inside of generic format
 * 02/01/2026 mir0n EsqTabLStringComponent renamed with EsqTabStringComponent
 *                  added use EsqTabIknListComponent
 * 02/04/2026 mir0n use ChangeDetectorRef to obtain dialog heading
 *                  require id and kind to run, not a tree node
 * 02/05/2026 mir0n use EsqTabFieldComponent
+* 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
 */
 import {AfterViewInit,
   ChangeDetectorRef,
@@ -47,7 +48,7 @@ import { EsqNodeType
 } from '@mir0n-pro/esquire.ui/api';
 */
 
-import {EsqNodeTypeFactory} from 'src/esquire.ui/api/EsqNodeTypeFactory';
+import {EsqObjectKindFactory} from 'src/esquire.ui/api/EsqObjectKindFactory';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
@@ -121,7 +122,7 @@ export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy
       // Subscribe to details$ and update header values
       if (this.details$) {
           this.details$.subscribe(details => {
-              this.headerIcon = EsqNodeTypeFactory.instanceOf(details.kind).icon;
+              this.headerIcon = EsqObjectKindFactory.instanceOf(details.kind).icon;
               this.headerName = details.name || 'No defined';
               this.cdr.detectChanges();
           });

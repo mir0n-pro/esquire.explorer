@@ -1,11 +1,12 @@
 /*
 *  Esquire frameworks (tm)
-* 
+*
 *  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
 *  mailto:mir0n.the.programmer@gmail.com
 *
 *  History:
 * 02/12/2026 mir0n  EsqNodeType in explicit file
+* 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
 */
 import {AfterViewInit, 
   Component, 
@@ -26,9 +27,9 @@ import { DataSource } from '@angular/cdk/collections';
 /*  
 import { EsqNodeType, EsqExplorerCallApi } from '@mir0n-pro/esquire.ui/api';
 */
-import {EsqNodeType} from 'src/esquire.ui/api/EsqNodeType';
+import {EsqObjectKind} from 'src/esquire.ui/api/EsqObjectKind';
 import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
-import {EsqNodeTypeFactory} from "src/esquire.ui/api/EsqNodeTypeFactory";
+import {EsqObjectKindFactory} from "src/esquire.ui/api/EsqObjectKindFactory";
 import {EsqTabIknListComponent} from "./EsqTabIknListComponent";
 import {EsqTabIknfTableComponent} from "./EsqTabIknfTableComponent";
 import {EsqTabStringComponent} from "./EsqTabStringComponent";
@@ -74,7 +75,7 @@ export class EsqTabFieldComponent implements OnInit,  AfterViewInit, OnDestroy {
       }
 
 
-      nodeTypeFromFormat(format:string) : EsqNodeType {
+      nodeTypeFromFormat(format:string) : EsqObjectKind {
           var id:number = -1; //unknown
           if (format) {
               var ftype:string[] = format.split('=');
@@ -82,7 +83,7 @@ export class EsqTabFieldComponent implements OnInit,  AfterViewInit, OnDestroy {
                   id = Number(ftype[1]);
               }
           }
-          return EsqNodeTypeFactory.instanceOf(id);
+          return EsqObjectKindFactory.instanceOf(id);
       }
   }
 

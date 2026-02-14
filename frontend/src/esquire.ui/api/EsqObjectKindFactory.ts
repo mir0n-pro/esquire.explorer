@@ -12,27 +12,28 @@
 *                   added ACCESSPROFILE virtual note type
 * 02/12/2026 mir0n  EsqNodeType in explicit file
 *                   init() loading from server and keeps ability to be defined locally
+* 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
 */
 
 import {EsqTreeNode} from "./EsqTreeNode";
-import {EsqNodeType} from "./EsqNodeType";
+import {EsqObjectKind} from "./EsqObjectKind";
 import {EsqRestApi} from "./EsqRestApi";
 import {firstValueFrom} from "rxjs";
 
-export class EsqNodeTypeFactory {
-  private static kinds:EsqNodeType[] = [];
-  public static UNKNOWN:EsqNodeType = new EsqNodeType({
+export class EsqObjectKindFactory {
+  private static kinds:EsqObjectKind[] = [];
+  public static UNKNOWN:EsqObjectKind = new EsqObjectKind({
         id: -1,
         name: "unknown"
     });
 
-  public static MORE:EsqNodeType = new EsqNodeType({
+  public static MORE:EsqObjectKind = new EsqObjectKind({
       id: 999,
       name: "more",
       title: "..."
   });
 
-  public static ACCESSPROFILE:EsqNodeType =  new EsqNodeType({
+  public static ACCESSPROFILE:EsqObjectKind =  new EsqObjectKind({
       id: 998,
       name: "accessprofile",
       title: "Access Profile"
@@ -41,8 +42,8 @@ export class EsqNodeTypeFactory {
   private constructor () {
   }
 
-    private static update(kind: EsqNodeType, kinds: readonly EsqNodeType[]) {
-        var given:EsqNodeType|null = null;
+    private static update(kind: EsqObjectKind, kinds: readonly EsqObjectKind[]) {
+        var given:EsqObjectKind|null = null;
         for (const k of kinds) {
             if (k.id == kind.id) {
                 given = k;
@@ -58,14 +59,14 @@ export class EsqNodeTypeFactory {
             }
         }
     }
-  public static async init(api: EsqRestApi | null | undefined, kinds: readonly EsqNodeType[] | null | undefined){
+  public static async init(api: EsqRestApi | null | undefined, kinds: readonly EsqObjectKind[] | null | undefined){
 
       if (this.kinds.length == 0 ) {
           if (api) {
               const data = await firstValueFrom(api.esquireKinds());
               const src: any[] = (data as any[]) ?? [];
               src.forEach(k => {
-                  let kind: EsqNodeType = new EsqNodeType(k);
+                  let kind: EsqObjectKind = new EsqObjectKind(k);
                   if (kinds) {
                       this.update(kind, kinds);
                   }
@@ -76,34 +77,34 @@ export class EsqNodeTypeFactory {
           }
           //await api.esquireKinds().subscribe(kinds => {
           //    const src: any[] = (kinds as any[]) ?? [];
-          //    this.kinds = src.map(k => (k instanceof EsqNodeType) ? k : new EsqNodeType(k));
+          //    this.kinds = src.map(k => (k instanceof EsqObjectKind) ? k : new EsqObjectKind(k));
           //});
       }
   }
 
-  public static instanceOf(kind: number): EsqNodeType {
-    var ret:EsqNodeType = EsqNodeTypeFactory.UNKNOWN;
+  public static instanceOf(kind: number): EsqObjectKind {
+    var ret:EsqObjectKind = EsqObjectKindFactory.UNKNOWN;
     if (kind == 999) {
-      ret = EsqNodeTypeFactory.MORE;
+      ret = EsqObjectKindFactory.MORE;
     } else {
       if (this.kinds.length > 0 ){
-        const res:EsqNodeType[] = this.kinds.filter((x) => x.id == kind) as EsqNodeType[];
+        const res:EsqObjectKind[] = this.kinds.filter((x) => x.id == kind) as EsqObjectKind[];
         if (res && res.length > 0) {
             ret = res[0];
-        } 
+        }
       }
     }
     return ret;
   } ;
 
-  public static getAllowedChildTypes(parent: EsqTreeNode | null | undefined): EsqNodeType[] {
+  public static getAllowedChildTypes(parent: EsqTreeNode | null | undefined): EsqObjectKind[] {
     if (!parent) {
         return [];
     }
-    const allowedTypeIds= parent.type.childKinds || [];
+    const allowedTypeIds= parent.kind.childKinds || [];
     return allowedTypeIds
         .map(id => this.instanceOf(id))
-        .filter(type => type !== EsqNodeTypeFactory.UNKNOWN);
+        .filter(type => type.id !== EsqObjectKindFactory.UNKNOWN.id);
   }
 
 }

@@ -1,6 +1,6 @@
 /*
 *  Esquire frameworks (tm)
-* 
+*
 *  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
 *  mailto:mir0n.the.programmer@gmail.com
 *
@@ -10,6 +10,7 @@
 *                   toolbar is in synch with context menu
 *                   normalized keyboard actions
 * 02/12/2026 mir0n  EsqNodeType in explicit file
+* 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
 */
 import {Component,
   ElementRef,
@@ -49,7 +50,7 @@ import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {AsEsqTreeNodePipe}  from 'src/esquire.ui/api/AsEsqTreeNodePipe';
 import {EsqTreeNode}  from 'src/esquire.ui/api/EsqTreeNode';
 import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
-import {EsqColumnHeaderDef} from 'src/esquire.ui/api/EsqNodeType';
+import {EsqColumnHeaderDef} from 'src/esquire.ui/api/EsqObjectKind';
 import {EsqNodeStatusFactory} from 'src/esquire.ui/api/EsqNodeStatusFactory';
 import {EsqResizeDirective} from 'src/esquire.ui/components/EsqResizeDirective';
 import {EsqUtils} from 'src/esquire.ui/components/EsqUtils';
@@ -171,7 +172,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
         this.listNodeHistoryStack[0] = this.listNodeOwner;
         this.listNodeHistoryIndex = 0;
       }
-      this.listColumns = (this.listNodeOwner as EsqTreeNode).type.listHeaders;
+      this.listColumns = (this.listNodeOwner as EsqTreeNode).kind.listHeaders;
       this.listColumnsDisplayed = this.listColumns.map((x)=>x.columnDef!);
       this.treeNodePostFocus = this.treeNodeActive;
       this.initialDataLoading.set(false);
@@ -189,11 +190,11 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   hasIcon(node : EsqTreeNode ) : boolean {
-    return (node.type.icon.length>0);
+    return (node.kind.icon.length>0);
   }
 
   nodeIcon(node : EsqTreeNode ) {
-    return node.type.icon;
+    return node.kind.icon;
   }
   
   nodeStatusIcon(node : EsqTreeNode) {
@@ -315,7 +316,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
         var ret : boolean = false;
         var node :EsqTreeNode|null = this.getSelectedNode(menu);
         if (node) {
-            ret = node.type.isCommandAllowed(cmd);
+            ret = node.kind.isCommandAllowed(cmd);
         }
         return ret;
     }
@@ -825,10 +826,10 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
     EsqUtils.log("doActivateListNode[" + listFocused);
     this.dataLoading.set(true);
       await this.datasource.loadChildren(node);
-      if ((this.listNodeOwner as EsqTreeNode).type  != node.type) {
-        this.listColumns = node.type.listHeaders;
+      if ((this.listNodeOwner as EsqTreeNode).kind  != node.kind) {
+        this.listColumns = node.kind.listHeaders;
         this.listColumnsDisplayed = this.listColumns.map((x)=>x.columnDef!);
-        this.listColumnsDisplayed = [...this.listColumnsDisplayed]; 
+        this.listColumnsDisplayed = [...this.listColumnsDisplayed];
       }
       this.treeNodePostFocus = null;
       if (this.datasource.data4list.length>0) {

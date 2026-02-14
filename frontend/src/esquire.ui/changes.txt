@@ -1,11 +1,48 @@
 Esquire Frameworks(tm) 2.0
-esquire.ui node.js library of components 
+esquire.ui node.js library of components
 
-02/13/2026 mir0n
-api\EsqTreeNodeDto.ts
-  - removed treeFlags 
+02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
+-/+  api\EsqNodeType.ts renamed with api\EsqObjectKind.ts
+-/+  api\EsqNodeTypeFactory.ts renamed with api\EsqObjectKindFactory.ts
+api\EsqContextMenuBuilder.ts
+  - EsqNodeType renamed with EsqObjectKind
+  - EsqNewMenuItem.type renamed with EsqNewMenuItem.kind
+api\EsqEntityDictionary.ts
+  - EsqNodeType renamed with EsqObjectKind (in comment)
 api\EsqTreeNode.ts
-  - removed treeFlags 
+  - EsqTreeNode.type renamed with EsqTreeNode.kind
+  - EsqNodeType renamed with EsqObjectKind
+api\EsqTreeNodeDto.ts
+  - EsqTreeNodeDto.kind renamed with EsqTreeNodeDto.kindId (protected)
+  - EsqNodeType renamed with EsqObjectKind
+api\public-api.ts
+  - export EsqNodeTypeFactory renamed with export EsqObjectKindFactory
+components\EsqAccessProfileDialog.ts
+  - EsqNodeType renamed with EsqObjectKind
+components\EsqEntityDetailsDialog.ts
+  - EsqNodeType renamed with EsqObjectKind
+components\EsqExplorerCallApiMill.ts
+  - EsqNodeType renamed with EsqObjectKind
+components\EsqNodeDetailsDialog.ts
+  - EsqNodeType renamed with EsqObjectKind
+components\EsqTabFieldComponent.ts
+  - EsqNodeType renamed with EsqObjectKind
+components\EsqTabIknfTableComponent.ts
+  - EsqNodeType renamed with EsqObjectKind
+components\EsqTabIknListComponent.ts
+  - EsqNodeType renamed with EsqObjectKind
+components\EsqTabListComponent.ts
+  - EsqNodeType renamed with EsqObjectKind
+explorer\flatTree\EsqExplorerComponent.ts
+  - EsqNodeType renamed with EsqObjectKind
+explorer\flatTree\EsqListViewDatasource.ts
+  - EsqNodeType renamed with EsqObjectKind
+
+02/13/2026 mir0n removed treeFlags
+api\EsqTreeNodeDto.ts
+  - removed treeFlags
+api\EsqTreeNode.ts
+  - removed treeFlags
 explorer\flatTree\EsqTreeViewDatasource.ts
   - treeFlags removed from TreeNode
 

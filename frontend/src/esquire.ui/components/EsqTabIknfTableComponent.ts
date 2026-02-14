@@ -1,12 +1,13 @@
 /*
 *  Esquire frameworks (tm)
-* 
+*
 *  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
 *  mailto:mir0n.the.programmer@gmail.com
 *
 *  History:
 * 02/04/2026 mir0n  no "entityKind" field anymore
 * 02/12/2026 mir0n  EsqNodeType in explicit file
+* 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
 */
 import {AfterViewInit, 
   Component, 
@@ -27,9 +28,9 @@ import { DataSource } from '@angular/cdk/collections';
 /*  
 import { EsqNodeType, EsqExplorerCallApi } from '@mir0n-pro/esquire.ui/api';
 */
-import {EsqColumnHeaderDef, EsqNodeType} from 'src/esquire.ui/api/EsqNodeType';
+import {EsqColumnHeaderDef, EsqObjectKind} from 'src/esquire.ui/api/EsqObjectKind';
 import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
-import {EsqNodeTypeFactory} from "src/esquire.ui/api/EsqNodeTypeFactory";
+import {EsqObjectKindFactory} from "src/esquire.ui/api/EsqObjectKindFactory";
 import {EsqResizeDirective} from './EsqResizeDirective';
 
   @Component({
@@ -88,7 +89,7 @@ export class EsqTabIknfTableComponent implements OnInit,  AfterViewInit, OnDestr
         })
       if(  this.tabIknfElements.length > 0) {
         this.tabIknfElements.forEach((x: any) => {
-          x.icon = (x.kind  < 0) ? "" : EsqNodeTypeFactory.instanceOf(x.kind).icon
+          x.icon = (x.kind  < 0) ? "" : EsqObjectKindFactory.instanceOf(x.kind).icon
         })
         this.listElementFocusedIndex = 0;
         this.tabIknfDataSource = new MatTableDataSource(this.tabIknfElements);

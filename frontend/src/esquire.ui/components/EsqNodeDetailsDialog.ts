@@ -1,6 +1,6 @@
 /*
 *  Esquire frameworks (tm)
-* 
+*
 *  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
 *  mailto:mir0n.the.programmer@gmail.com
 *
@@ -8,12 +8,13 @@
 * 12/24/2025 mir0n added processing of tabstring field value type
 *                  readOnly made public
 *                  kind parameter is requried for esq-cmd, esq-enode
-*                  listvalues_kind moved inside of generic format 
+*                  listvalues_kind moved inside of generic format
 * 02/01/2026 mir0n EsqTabLStringComponent renamed with EsqTabStringComponent
 *                  added use EsqTabIknListComponent
 * 02/04/2024 miron renamed with EsqNodeDetailsDialog (was EsqNodeEntityDetailsDialog)
 * 02/05/2026 mir0n use EsqTabFieldComponent
 * 02/12/2026 mir0n  EsqNodeType in explicit file
+* 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
 */
 import {AfterViewInit, 
   Component, 
@@ -46,8 +47,8 @@ import { EsqNodeType
   , EsqDictionaryApi, EsqEntityLayer 
 } from '@mir0n-pro/esquire.ui/api';
 */
-import {EsqNodeType} from 'src/esquire.ui/api/EsqNodeType';
-import {EsqNodeTypeFactory} from 'src/esquire.ui/api/EsqNodeTypeFactory';
+import {EsqObjectKind} from 'src/esquire.ui/api/EsqObjectKind';
+import {EsqObjectKindFactory} from 'src/esquire.ui/api/EsqObjectKindFactory';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {EsqTreeNode} from 'src/esquire.ui/api/EsqTreeNode';
 import {EsqNodeStatusFactory} from 'src/esquire.ui/api/EsqNodeStatusFactory';
@@ -111,9 +112,9 @@ export class EsqNodeDetailsDialog implements OnInit,  AfterViewInit, OnDestroy {
   }
 
   ngOnInit() {
-    if (this.node.type.detailed) {
-      this.dictionary$ = this.dictionaryApi.dictionary(this.node.type.id);
-      this.details$ = this.restApi.esquireCmd(this.node.type.id, this.node.entityId); //from (this.loadDetails());
+    if (this.node.kind.detailed) {
+      this.dictionary$ = this.dictionaryApi.dictionary(this.node.kind.id);
+      this.details$ = this.restApi.esquireCmd(this.node.kind.id, this.node.entityId); //from (this.loadDetails());
     }
   }
 
@@ -126,19 +127,19 @@ export class EsqNodeDetailsDialog implements OnInit,  AfterViewInit, OnDestroy {
     if (this.btnClose)  {
        this.btnClose.focus();
     }
-  }    
+  }
 
   nodeStatusIcon() {
     return EsqNodeStatusFactory.instanceOf(this.node.statusCode).icon;
   }
-  
+
   nodeTypeName():string {
-    return this.node.type.name + (this.node.linkId?" (shortcut)" : "");
+    return this.node.kind.name + (this.node.linkId?" (shortcut)" : "");
   }
   private async loadDetails(): Promise<any> {
-    return await firstValueFrom(this.restApi.esquireCmd(this.node.kind, this.node.entityId));
+    return await firstValueFrom(this.restApi.esquireCmd(this.node.kind.id, this.node.entityId));
   }
-  nodeTypeFromFormat(format:string) : EsqNodeType {
+  nodeTypeFromFormat(format:string) : EsqObjectKind {
     var id:number = -1; //unknown
     if (format) {
       var ftype:string[] = format.split('=');
@@ -146,7 +147,7 @@ export class EsqNodeDetailsDialog implements OnInit,  AfterViewInit, OnDestroy {
         id = Number(ftype[1]);
       }
     }
-    return EsqNodeTypeFactory.instanceOf(id);
+    return EsqObjectKindFactory.instanceOf(id);
   }
 
   tabContent (index:number):string {

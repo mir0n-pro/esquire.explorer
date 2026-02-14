@@ -208,11 +208,11 @@
 </mat-menu>
 
 <mat-menu #contextNewSubmenu="matMenu">
-  @for (item of contextNewMenuItems; track item.type.id) {
+  @for (item of contextNewMenuItems; track item.kind.id) {
     <button
       mat-menu-item
       class="esq-menu-item"
-      (click)="onCmdNewClick(item.type.id,true)">
+      (click)="onCmdNewClick(item.kind.id,true)">
       @if (item.icon) {
         <img [src]="item.icon" class="esq-menu-icon"/>
       }
@@ -222,11 +222,11 @@
 </mat-menu>
 
 <mat-menu #toolbarNewMenu="matMenu">
-  @for (item of toolbarNewMenuItems; track item.type.id) {
+  @for (item of toolbarNewMenuItems; track item.kind.id) {
     <button
       mat-menu-item
       class="esq-menu-item"
-      (click)="onCmdNewClick(item.type.id,false)">
+      (click)="onCmdNewClick(item.kind.id,false)">
       @if (item.icon) {
         <img [src]="item.icon" class="esq-menu-icon"/>
       }

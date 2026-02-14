@@ -8,12 +8,13 @@
 * History :
 * 02/12/2026 mir0n  EsqNodeType in explicit file
 * 02/13/2026 mir0n removed treeFlags
+* 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
 */
 import {NgModule, signal} from '@angular/core';
 import {EsqTreeNodeDto} from './EsqTreeNodeDto';
 export {EsqTreeNodeDto} from './EsqTreeNodeDto';
-import {EsqNodeType} from './EsqNodeType';
-import {EsqNodeTypeFactory} from './EsqNodeTypeFactory';
+import {EsqObjectKind} from './EsqObjectKind';
+import {EsqObjectKindFactory} from './EsqObjectKindFactory';
 
 
 export class EsqTreeNode extends EsqTreeNodeDto {
@@ -24,18 +25,18 @@ export class EsqTreeNode extends EsqTreeNodeDto {
   public hasChild = signal(false);
   public expanded = signal(false);
 
-  
-  public type: EsqNodeType;
+
+  public kind: EsqObjectKind;
   public parent?: EsqTreeNode;
   //public data?: | string | Array<string>;
   private loadingMutex = new Mutex();
 
   constructor(jsn?:any, parent?:EsqTreeNode) {
     super(jsn);
-    this.type = EsqNodeTypeFactory.instanceOf(this.kind);
+    this.kind = EsqObjectKindFactory.instanceOf(this.kindId);
     this.hasMore.set(this.moreRemaining);
-    this.expandable.set(this.type.treeFlags.includes('B'));
-    this.hasChild.set(this.type.treeFlags.includes('T'));
+    this.expandable.set(this.kind.treeFlags.includes('B'));
+    this.hasChild.set(this.kind.treeFlags.includes('T'));
     if (parent) {
       this.parent = parent as EsqTreeNode;
     }

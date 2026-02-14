@@ -6,6 +6,7 @@
 *  mailto:mir0n.the.programmer@gmail.com
 *
 * History :
+* 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
 */
 
 export class EsqColumnHeaderDef {
@@ -19,7 +20,7 @@ export class EsqColumnHeaderDef {
     }
 }
 
-export class EsqNodeType {
+export class EsqObjectKind {
     id: number = -1;
     name: string ="unknown";
     title: string = "";

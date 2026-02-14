@@ -6,16 +6,17 @@
 *
 * History :
 * 02/12/2026 mir0n  EsqNodeType in explicit file
+* 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
 */
 
-import { EsqNodeType} from './EsqNodeType';
-import { EsqNodeTypeFactory } from './EsqNodeTypeFactory';
+import { EsqObjectKind} from './EsqObjectKind';
+import { EsqObjectKindFactory } from './EsqObjectKindFactory';
 import { EsqTreeNode } from './EsqTreeNode';
 
 export interface EsqNewMenuItem {
     label: string;
     icon: string;
-    type: EsqNodeType;
+    kind: EsqObjectKind;
 }
 
 export class EsqCommandMenuItem {
@@ -34,11 +35,11 @@ export class EsqContextMenuBuilder {
     public static CMD_NEW: string = "new";
 
     public static buildNewMenuItems(parent: EsqTreeNode | null | undefined): EsqNewMenuItem[] {
-        const allowedTypes = EsqNodeTypeFactory.getAllowedChildTypes(parent)
+        const allowedTypes = EsqObjectKindFactory.getAllowedChildTypes(parent)
         return allowedTypes.map(childType => ({
             label: `New ${childType.name}`,
             icon: childType.icon,
-            type: childType
+            kind: childType
         }));
     }
 }

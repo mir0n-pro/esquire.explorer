@@ -1,11 +1,12 @@
 /*
 *  Esquire frameworks (tm)
-* 
+*
 *  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
 *  mailto:mir0n.the.programmer@gmail.com
 *
 *  History:
 * 02/12/2026 mir0n  EsqNodeType in explicit file
+* 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
 */
 import {CollectionViewer, DataSource } from "@angular/cdk/collections";
 import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
@@ -15,7 +16,7 @@ import {EsqTreeNode, EsqColumnHeaderDef} from '@mir0n-pro/esquire.ui/api';
 import {EsqUtils} from '@mir0n-pro/esquire.ui/components';
 */
 import {EsqTreeNode} from 'src/esquire.ui/api/EsqTreeNode';
-import {EsqColumnHeaderDef} from 'src/esquire.ui/api/EsqNodeType';
+import {EsqColumnHeaderDef} from 'src/esquire.ui/api/EsqObjectKind';
 import {EsqUtils} from 'src/esquire.ui/components/EsqUtils';
 
 export class EsqListViewDatasource implements DataSource<EsqTreeNode> {
@@ -47,8 +48,8 @@ export class EsqListViewDatasource implements DataSource<EsqTreeNode> {
     await node.setLoading(true);
     try {
       EsqUtils.log('list.loadChildren[');
-      if (node.type.listHeaders.length > 0 ) {
-        this.header = node.type.listHeaders;
+      if (node.kind.listHeaders.length > 0 ) {
+        this.header = node.kind.listHeaders;
       } else {
           this.header = EsqListViewDatasource.DEFAULT_HEADER;
       }

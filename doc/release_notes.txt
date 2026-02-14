@@ -1,6 +1,12 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+
+1.2.2-2602.1400  Clean Name convention: kind vs type
+   :Kind is for entity/treenode objects, and type is for only any other purpose. 
+   :EsqNodeType renamed with EsqObjectKind to be in synch with services
+ 
+
 v1.2.2-2602.1322 refactoring/cleanup in progress
   treeFlags removed from TreeNode
   api regenerated

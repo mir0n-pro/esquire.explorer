@@ -9,6 +9,7 @@
 * 02/01/2026 mir0n added EsqExplorerCallApi:create()
 *                  all method made protected, to let class extendable
 *                  added AccessProfile dialog via command "key"
+* 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
 */
 import { firstValueFrom } from "rxjs";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
@@ -45,7 +46,7 @@ export class EsqExplorerCallApiMill {
 
   protected async runDetailsAsync(cmd:string, node : EsqTreeNode, readOnly:boolean) : Promise<void> {
     var dialogRef:MatDialogRef<any>;
-    if (node.type.detailed) {
+    if (node.kind.detailed) {
       dialogRef = this.dialog.open(EsqNodeDetailsDialog, {
         autoFocus: false,
         data: {

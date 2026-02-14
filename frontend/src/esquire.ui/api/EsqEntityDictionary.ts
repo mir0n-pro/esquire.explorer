@@ -6,6 +6,7 @@
 *
 * History :
 * 12/24/2025 mir0n listvalues_kind moved inside of generic format 
+* 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
 */
 export class EsqEntityField {
   name:string;              // +
@@ -41,7 +42,7 @@ export class EsqEntityField {
 //      image
 
 export class EsqEntityDictionary {
-  kind:number;            //entity kind, same as EsqNodeType.id  
+  kind:number;            //entity kind, same as EsqObjectKind.id  
   layers:EsqEntityLayer[];  // sorted by [tab][order]
   constructor(entity_kind : number, jsn:any) {
     this.kind = entity_kind;

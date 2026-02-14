@@ -25,7 +25,7 @@
 *                   added EsqRestApi.esquireKinds()
 *                   EsqNodeTypeFactory.init with RestAPI and local exceptions set (define icons and heading)
 *                   EsquireNodeTypes have only icons and heading
-* 
+* 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
 *
 */
 import {Component,
@@ -57,8 +57,8 @@ import { EsqExplorerCallApiMill, EsqDictionary } from '@mir0n-pro/esquire.ui/com
 import { EsqExplorerComponent} from '@mir0n-pro/esquire.ui/explorer/flatTree';
 */
 
-import {EsqNodeType} from 'src/esquire.ui/api/EsqNodeType';
-import {EsqNodeTypeFactory} from 'src/esquire.ui/api/EsqNodeTypeFactory';
+import {EsqObjectKind} from 'src/esquire.ui/api/EsqObjectKind';
+import {EsqObjectKindFactory} from 'src/esquire.ui/api/EsqObjectKindFactory';
 import {EsqNodeStatus,EsqNodeStatusFactory} from 'src/esquire.ui/api/EsqNodeStatusFactory';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
@@ -317,8 +317,8 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
   }
 
   async ngOnInit() {
-    this.dataService = this._dataService; 
-    await EsqNodeTypeFactory.init(this.esqRestApiWrapper(), EsquireNodeTypes);
+    this.dataService = this._dataService;
+    await EsqObjectKindFactory.init(this.esqRestApiWrapper(), EsquireObjectKinds);
     EsqNodeStatusFactory.init(Object.values(EsquireStatuses));
     this.dictionary = new EsqDictionary(this.esqRestApiWrapper());
     this.callApiMill = new EsqExplorerCallApiMill(this.detailsDialog, this.dictionary, this.esqRestApiWrapper());
@@ -380,7 +380,7 @@ public async logout(): Promise<void> {
 
 private findIcon(kind:number) : string {
   var ret: string = "img/unknown.ico";
-  var nodeType: EsqNodeType = EsqNodeTypeFactory.instanceOf(kind);
+  var nodeType: EsqObjectKind = EsqObjectKindFactory.instanceOf(kind);
   if (nodeType) {
       ret = nodeType.icon;
   }
@@ -412,28 +412,28 @@ private findIcon(kind:number) : string {
     return new Promise<void>((resolve)=>resolve());
   }
 }
-export const EsquireNodeTypes = [
-    new EsqNodeType({id: 0, name:"system", icon:"img/folders/system.ico", listHeaders: [{columnDef:"name", header:"Name"},  {columnDef:"desc", header:"Description"}]}),
-    new EsqNodeType({id: 2, name:"sysadmins", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Administrator"},  {columnDef:"desc", header:"Description"}]}),
-    new EsqNodeType({id: 4, name:"alladmins", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Administrator"},  {columnDef:"desc", header:"Description"}]}),
-    new EsqNodeType({id: 6, name:"allaccounts", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Account ID"},  {columnDef:"desc", header:"Description"}]}),
-    new EsqNodeType({id: 8, name:"allclients", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Client"},  {columnDef:"desc", header:"Description"}]}),
-    new EsqNodeType({id: 10, name:"allmerchants", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Merchant"},  {columnDef:"desc", header:"Description"}]}),
-    new EsqNodeType({id: 20, name:"organization", icon:"img/org.ico"}),
-    new EsqNodeType({id: 30, name:"sysadmin", icon:"img/sysadmin.ico"}),
-    new EsqNodeType({id: 31, name:"sysadminlnk", icon:"img/sysadmin.ico"}),
-    new EsqNodeType({id: 32, name:"admin", icon:"img/admin.ico"}),
-    new EsqNodeType({id: 33, name:"adminlnk", icon:"img/admin.ico"}),
-    new EsqNodeType({id: 34, name:"client", icon:"img/client.ico"}),
-    new EsqNodeType({id: 35, name:"clientlnk", icon:"img/client.ico"}),
-    new EsqNodeType({id: 36, name:"merchant", icon:"img/merchant.ico", listHeaders: [{columnDef:"name", header:"Account ID"},  {columnDef:"desc", header:"Description"}]}),
-    new EsqNodeType({id: 37, name:"merchantlnk", icon:"img/merchant.ico"}),
-    new EsqNodeType({id: 50, name:"caccount", icon:"img/acct.ico"}),
-    new EsqNodeType({id: 51, name:"caccountlnk", icon:"img/links/acctl.ico"}),
-    new EsqNodeType({id: 52, name:"maccount", icon:"img/macct.ico"}),
-    new EsqNodeType({id: 53, name:"maccountlnk", icon:"img/links/macctl.ico"}),
-    new EsqNodeType({id: 54, name:"paccount", icon:"img/pacct.ico"}),
-    new EsqNodeType({id: 55, name:"paccountlnk", icon:"img/links/pacctl.ico"}),
+export const EsquireObjectKinds = [
+    new EsqObjectKind({id: 0, name:"system", icon:"img/folders/system.ico", listHeaders: [{columnDef:"name", header:"Name"},  {columnDef:"desc", header:"Description"}]}),
+    new EsqObjectKind({id: 2, name:"sysadmins", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Administrator"},  {columnDef:"desc", header:"Description"}]}),
+    new EsqObjectKind({id: 4, name:"alladmins", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Administrator"},  {columnDef:"desc", header:"Description"}]}),
+    new EsqObjectKind({id: 6, name:"allaccounts", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Account ID"},  {columnDef:"desc", header:"Description"}]}),
+    new EsqObjectKind({id: 8, name:"allclients", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Client"},  {columnDef:"desc", header:"Description"}]}),
+    new EsqObjectKind({id: 10, name:"allmerchants", icon:"img/folders/folder.ico", listHeaders: [{columnDef:"name", header:"Merchant"},  {columnDef:"desc", header:"Description"}]}),
+    new EsqObjectKind({id: 20, name:"organization", icon:"img/org.ico"}),
+    new EsqObjectKind({id: 30, name:"sysadmin", icon:"img/sysadmin.ico"}),
+    new EsqObjectKind({id: 31, name:"sysadminlnk", icon:"img/sysadmin.ico"}),
+    new EsqObjectKind({id: 32, name:"admin", icon:"img/admin.ico"}),
+    new EsqObjectKind({id: 33, name:"adminlnk", icon:"img/admin.ico"}),
+    new EsqObjectKind({id: 34, name:"client", icon:"img/client.ico"}),
+    new EsqObjectKind({id: 35, name:"clientlnk", icon:"img/client.ico"}),
+    new EsqObjectKind({id: 36, name:"merchant", icon:"img/merchant.ico", listHeaders: [{columnDef:"name", header:"Account ID"},  {columnDef:"desc", header:"Description"}]}),
+    new EsqObjectKind({id: 37, name:"merchantlnk", icon:"img/merchant.ico"}),
+    new EsqObjectKind({id: 50, name:"caccount", icon:"img/acct.ico"}),
+    new EsqObjectKind({id: 51, name:"caccountlnk", icon:"img/links/acctl.ico"}),
+    new EsqObjectKind({id: 52, name:"maccount", icon:"img/macct.ico"}),
+    new EsqObjectKind({id: 53, name:"maccountlnk", icon:"img/links/macctl.ico"}),
+    new EsqObjectKind({id: 54, name:"paccount", icon:"img/pacct.ico"}),
+    new EsqObjectKind({id: 55, name:"paccountlnk", icon:"img/links/pacctl.ico"}),
 ] as const;
 
 export const EsquireStatuses = {
