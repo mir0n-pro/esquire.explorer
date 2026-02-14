@@ -39,10 +39,6 @@ export interface EsqTreeNode {
      */
     entityId?: string;
     /**
-     * Flags defining tree/view list node behavior, BTb flags
-     */
-    treeFlags?: string;
-    /**
      * Node Status Code, (0)ok (1)deleted (2)locked, (3)checked (4)question
      */
     statusCode?: EsqTreeNode.StatusCodeEnum;

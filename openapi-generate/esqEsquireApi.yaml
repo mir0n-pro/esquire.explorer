@@ -252,10 +252,6 @@ components:
           type: string
           description: Entity id (it can be different from node id)
           example: Pikachu
-        treeFlags:
-          type: string
-          description: Flags defining tree/view list node behavior, BTb flags
-          example: b
         statusCode:
           type: integer
           format: int32

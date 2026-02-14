@@ -7,6 +7,7 @@
 *
 * History :
 * 02/12/2026 mir0n  EsqNodeType in explicit file
+* 02/13/2026 mir0n removed treeFlags
 */
 import {NgModule, signal} from '@angular/core';
 import {EsqTreeNodeDto} from './EsqTreeNodeDto';
@@ -33,8 +34,8 @@ export class EsqTreeNode extends EsqTreeNodeDto {
     super(jsn);
     this.type = EsqNodeTypeFactory.instanceOf(this.kind);
     this.hasMore.set(this.moreRemaining);
-    this.expandable.set(this.treeFlags.includes('B'));
-    this.hasChild.set(this.treeFlags.includes('T'));
+    this.expandable.set(this.type.treeFlags.includes('B'));
+    this.hasChild.set(this.type.treeFlags.includes('T'));
     if (parent) {
       this.parent = parent as EsqTreeNode;
     }

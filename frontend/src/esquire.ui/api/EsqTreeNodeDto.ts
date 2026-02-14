@@ -6,6 +6,7 @@
 *  mailto:mir0n.the.programmer@gmail.com
 *
 * History :
+* 02/13/2026 mir0n removed treeFlags
 */
 export class EsqTreeNodeDto {
   public id : string = "";
@@ -14,7 +15,6 @@ export class EsqTreeNodeDto {
   public name : string = "";
   public kind : number = 0;
   public entityId : string = "";
-  public treeFlags : string = "";
   public statusCode : number = 0;
   public moreRemaining : boolean = false;
   public level : number = 0;
@@ -30,7 +30,6 @@ export class EsqTreeNodeDto {
         if (jsn.name) this.name = jsn.name;
         if (jsn.kind) this.kind = jsn.kind;
         if (jsn.entityId) this.entityId = jsn.entityId;
-        if (jsn.treeFlags) this.treeFlags = jsn.treeFlags;
         if (jsn.statusCode) this.statusCode = jsn.statusCode;
         if (jsn.moreRemaining) this.moreRemaining = jsn.moreRemaining;
         if (jsn.level) this.level = jsn.level;

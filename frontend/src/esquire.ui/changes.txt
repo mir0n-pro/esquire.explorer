@@ -1,6 +1,14 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components 
 
+02/13/2026 mir0n
+api\EsqTreeNodeDto.ts
+  - removed treeFlags 
+api\EsqTreeNode.ts
+  - removed treeFlags 
+explorer\flatTree\EsqTreeViewDatasource.ts
+  - treeFlags removed from TreeNode
+
 02/12/2026 mir0n set of EsqNodeTypes configured on server side
 + added api\EsqNodeType.ts 
 api\EsqContextMenuBuilder.ts
