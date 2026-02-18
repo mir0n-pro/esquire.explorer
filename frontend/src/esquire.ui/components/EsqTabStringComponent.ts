@@ -6,16 +6,18 @@
 *
 *  History:
 * 02/01/2026 mir0n EsqTabLStringComponent renamed with EsqTabStringComponent
+* 02/17/2026 mir0n made editable with two-way [(value)] binding
+*                  added readOnly, maxLength inputs
 */
 import { NgClass } from '@angular/common';
-import {AfterViewInit, 
-  Component, 
-//  ElementRef, 
-  Input, 
+import { FormsModule } from '@angular/forms';
+import {AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
   OnDestroy,
-  OnInit, 
-//  QueryList, 
-//  ViewChildren, 
+  OnInit,
+  Output,
   ViewEncapsulation
 } from '@angular/core';
 
@@ -25,7 +27,8 @@ import {AfterViewInit,
   templateUrl: './EsqTabStringComponent.html',
   styleUrl: './EsqTabStringComponent.scss',
   imports: [
-    [NgClass]
+    NgClass,
+    FormsModule
   ],
   encapsulation: ViewEncapsulation.None,
 })
@@ -33,7 +36,9 @@ import {AfterViewInit,
 export class EsqTabStringComponent implements OnInit,  AfterViewInit, OnDestroy {
 
   @Input() public value!: string;
-  @Input() public readOnly: boolean = true;
+  @Output() public valueChange = new EventEmitter<string>();
+  @Input() public readOnly: boolean = false;
+  @Input() public maxLength: number = 2000;
 
   constructor() {
   }      

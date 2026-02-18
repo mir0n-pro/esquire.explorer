@@ -7,20 +7,24 @@
 * History :
 * 12/24/2025 mir0n listvalues_kind moved inside of generic format 
 * 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
+* 02/17/2026 mir0n added personal, minmax fields
+*                  nullable changed from boolean to string
 */
 export class EsqEntityField {
   name:string;              // +
   sort:number;              // x
   label:string;             // +
-  type: string;             // +/- (string, integer, number, flag, listvalues, datetime, href, tablist, tabstring, image)
+  type: string;             // +/- (string, number, flag, listvalues, date, datetime, href, tablist, tabstring, image)
   tooltip:string;           // x
   listvalues:string[];      // x in concrete order
-  nullable:boolean;         // x    
+  nullable:string;         // x
   nullmeaning:string;       // x
   validation:string;        // x 
   layer:number;             // +
   readwrite:number;         //(bitmap: 0:hidden,1:view, 3:full)
   format:string;   // +
+  personal:string;
+  minmax:string;   // +
   constructor(jsn : any) {
       this.name = jsn.name;
       this.sort = jsn.sort;
@@ -34,6 +38,8 @@ export class EsqEntityField {
       this.layer = jsn.layer;
       this.readwrite = jsn.readwrite;
       this.format = jsn.format;
+      this.personal = jsn.personal;
+      this.minmax = jsn.minmax;
   }
 };
 

@@ -7,6 +7,7 @@
 *  History:
 * 02/12/2026 mir0n  EsqNodeType in explicit file
 * 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
+* 02/17/2026 mir0n  use CMD_DEFAULT constant from EsqExplorerCallApi
 */
 import {AfterViewInit, 
   Component, 
@@ -158,7 +159,7 @@ export class EsqTabListComponent implements OnInit,  AfterViewInit, OnDestroy {
     if (this.esqExplorerCallApi && !!this.esqListNodeType && this.canDetailsBtn()) {
         var el:TabListElement=this.tabListElements[this.listElementFocusedIndex];
         if(el) {
-          this.esqExplorerCallApi.calle("details",'', el.name, this.esqListNodeType.id);
+          this.esqExplorerCallApi.calle(EsqExplorerCallApi.CMD_DEFAULT,'', el.name, this.esqListNodeType.id, null);
         }
     }
   }

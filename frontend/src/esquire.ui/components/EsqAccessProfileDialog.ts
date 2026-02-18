@@ -13,6 +13,7 @@
 * 02/05/2026 mir0n use EsqTabFieldComponent
 * 02/12/2026 mir0n  EsqNodeType in explicit file
 * 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
+* 02/17/2026 mir0n  added userId field
 */
 import {AfterViewInit,
   ChangeDetectorRef,
@@ -83,6 +84,7 @@ export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy
    private dictionaryApi: EsqDictionaryApi;
 
    public readOnly: boolean = false;
+   public userId:string = "";
    public details$: Observable<any> | undefined;
    public dictionary$: Observable<EsqEntityLayer[]> | undefined;
    public id:string = "";
@@ -100,6 +102,7 @@ export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy
       this.restApi = data.restApi;
       this.dictionaryApi = data.dictionaryApi;
       this.readOnly = data.readOnly;
+      this.userId = data.userId;
 
       this.dialogRef.disableClose = true;
       this.dialogRef.addPanelClass('esq-dialog');

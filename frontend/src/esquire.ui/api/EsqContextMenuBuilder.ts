@@ -7,6 +7,7 @@
 * History :
 * 02/12/2026 mir0n  EsqNodeType in explicit file
 * 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
+* 02/17/2026 mir0n CMD_ constants moved to EsqExplorerCallApi
 */
 
 import { EsqObjectKind} from './EsqObjectKind';
@@ -32,8 +33,6 @@ export class EsqCommandMenuItem {
 }
 
 export class EsqContextMenuBuilder {
-    public static CMD_NEW: string = "new";
-
     public static buildNewMenuItems(parent: EsqTreeNode | null | undefined): EsqNewMenuItem[] {
         const allowedTypes = EsqObjectKindFactory.getAllowedChildTypes(parent)
         return allowedTypes.map(childType => ({

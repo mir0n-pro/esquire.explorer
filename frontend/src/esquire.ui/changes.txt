@@ -1,6 +1,51 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+02/17/2026 mir0n Access profile permissions and command constants
++ added api\EsqAccessProfile.ts
+  - EsqAccessProfile, EsqRole, EsqPermission classes (isolated from REST model)
+  - isCommandAllowed() based on admin permissions flags
+api\EsqContextMenuBuilder.ts
+  - CMD_ constants moved to EsqExplorerCallApi
+api\EsqExplorerCallApi.ts
+  - added CMD_ command constants (CMD_DEFAULT, CMD_NEW, CMD_MOVE, CMD_DELETE, CMD_KEY, CMD_ACCT)
+  - use EsqAccessProfile from esquire.ui/api
+api\EsqEntityDictionary.ts
+  - added personal, minmax fields to EsqEntityField
+  - nullable changed from boolean to string
+api\ProblemDetail.ts
+  - nullable changed from boolean to string
+  - added personal, minmax fields to dictionary
+components\EsqAccessProfileDialog.ts
+  - added userId field
+components\EsqEntityDetailsDialog.ts
+  - added userId field
+components\EsqExplorerCallApiMill.ts
+  - readOnly flag based on access profile permissions
+  - use EsqAccessProfile from esquire.ui/api
+  - use CMD_ constants from EsqExplorerCallApi
+components\EsqNodeDetailsDialog.ts
+  - added fieldReadOnly method with personal flag support
+  - added userId field
+components\EsqTabFieldComponent.ts
+  - added field types: flag (dropdown), number (with format), string with listvalues (dropdown)
+  - added fieldReadOnly with personal flag support
+  - added nullable/nullmeaning handling (placeholder, clear button, grey select)
+  - added clearToNull, formatNumber, onNumberInput methods
+  - added tooltip support via field.tooltip
+components\EsqTabIknListComponent.ts
+  - use CMD_DEFAULT constant from EsqExplorerCallApi
+components\EsqTabListComponent.ts
+  - use CMD_DEFAULT constant from EsqExplorerCallApi
+components\EsqTabStringComponent.ts
+  - made editable with two-way [(value)] binding
+  - added readOnly, maxLength inputs
+components\EsqUtils.ts
+  - added formatNumber and parseNumber static methods
+explorer\flatTree\EsqExplorerComponent.ts
+  - use CMD_DEFAULT constant from EsqExplorerCallApi
+  - use EsqAccessProfile from esquire.ui/api
+
 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
 -/+  api\EsqNodeType.ts renamed with api\EsqObjectKind.ts
 -/+  api\EsqNodeTypeFactory.ts renamed with api\EsqObjectKindFactory.ts

@@ -10,6 +10,9 @@
 *                  all method made protected, to let class extendable
 *                  added AccessProfile dialog via command "key"
 * 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
+* 02/17/2026 mir0n readOnly flag based on access profile permissions
+*                  use EsqAccessProfile from esquire.ui/api
+*                  use CMD_ constants from EsqExplorerCallApi
 */
 import { firstValueFrom } from "rxjs";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
@@ -29,6 +32,7 @@ import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {EsqTreeNode} from 'src/esquire.ui/api/EsqTreeNode';
 import {EsqAccessProfileDialog} from "./EsqAccessProfileDialog";
+import {EsqAccessProfile} from "src/esquire.ui/api/EsqAccessProfile";
 
 export class EsqExplorerCallApiMill {
   dialog:MatDialog;
@@ -44,7 +48,7 @@ export class EsqExplorerCallApiMill {
     return this.esqExplorerCallApi(); 
   }
 
-  protected async runDetailsAsync(cmd:string, node : EsqTreeNode, readOnly:boolean) : Promise<void> {
+  protected async runDetailsAsync(cmd:string, node : EsqTreeNode, readOnly:boolean, userId:string) : Promise<void> {
     var dialogRef:MatDialogRef<any>;
     if (node.kind.detailed) {
       dialogRef = this.dialog.open(EsqNodeDetailsDialog, {
@@ -55,6 +59,7 @@ export class EsqExplorerCallApiMill {
           callApi : this.esqExplorerCallApi(),
           dictionaryApi: this.dictionaryApi,
           readOnly: readOnly,
+          userId: userId,
         }
       });
     } else {
@@ -73,7 +78,7 @@ export class EsqExplorerCallApiMill {
     return new Promise<void>((resolve)=>resolve());
   }
 
-    protected async runAccessProfileAsync(id:string, readOnly:boolean) : Promise<void> {
+    protected async runAccessProfileAsync(id:string, readOnly:boolean, userId:string) : Promise<void> {
         var dialogRef:MatDialogRef<any>;
 
         dialogRef = this.dialog.open(EsqAccessProfileDialog, {
@@ -83,6 +88,7 @@ export class EsqExplorerCallApiMill {
                 restApi: this.restApi,
                 dictionaryApi: this.dictionaryApi,
                 readOnly: readOnly,
+                userId: userId
             }
         });
         dialogRef.afterClosed().subscribe(result => {
@@ -91,7 +97,7 @@ export class EsqExplorerCallApiMill {
         return new Promise<void>((resolve)=>resolve());
     }
 
-    protected async runEntityDetailsAsync(id:string, kind:number, readOnly:boolean) : Promise<void> {
+    protected async runEntityDetailsAsync(id:string, kind:number, readOnly:boolean, userId:string) : Promise<void> {
         var dialogRef:MatDialogRef<any>;
 
         dialogRef = this.dialog.open(EsqEntityDetailsDialog, {
@@ -102,6 +108,7 @@ export class EsqExplorerCallApiMill {
                 restApi: this.restApi,
                 dictionaryApi: this.dictionaryApi,
                 readOnly: readOnly,
+                userId: userId,
             }
         });
         dialogRef.afterClosed().subscribe(result => {
@@ -110,14 +117,15 @@ export class EsqExplorerCallApiMill {
         return new Promise<void>((resolve)=>resolve());
     }
 
-  protected async doExplorerCommand2(cmd: string, entity_id: string, entity_name: string, entity_kind:number) {
-      if (cmd == "key") {
+  protected async doExplorerCommand2(cmd: string, entity_id: string, entity_name: string, entity_kind:number, accessProfile:EsqAccessProfile|null) {
+      var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, entity_kind);
+      if (cmd == EsqExplorerCallApi.CMD_KEY) {
           setTimeout(() => {
-              void this.runAccessProfileAsync(entity_id,true).catch(console.error);
+              void this.runAccessProfileAsync(entity_id, readOnly, accessProfile?.id || '').catch(console.error);
           }, 0);
       } else if (entity_id.length>0) {
           setTimeout(() => {
-              void this.runEntityDetailsAsync(entity_id, entity_kind, true).catch(console.error);
+              void this.runEntityDetailsAsync(entity_id, entity_kind, readOnly, accessProfile?.id || '').catch(console.error);
           }, 0);
       } else {
           var _enode_ = await firstValueFrom(this.restApi.esquireEntityNode(entity_kind, "", entity_name))
@@ -125,7 +133,7 @@ export class EsqExplorerCallApiMill {
           if (_enode_) {
               let enode: EsqTreeNode = new EsqTreeNode(_enode_, undefined);
               setTimeout(() => {
-                  void this.runDetailsAsync(cmd, enode as EsqTreeNode, true).catch(console.error);
+                  void this.runDetailsAsync(cmd, enode as EsqTreeNode, readOnly, accessProfile?.id || '').catch(console.error);
               }, 0);
           }
       }
@@ -135,27 +143,27 @@ export class EsqExplorerCallApiMill {
     return new Promise<void>((resolve)=>resolve());
   }
 
-  protected async doExplorerCommand(cmd:string, node : EsqTreeNode) {
-    //readOnly for now
-    if (cmd == "key") {
+  protected async doExplorerCommand(cmd:string, node : EsqTreeNode, accessProfile:EsqAccessProfile|null) {
+    var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, node.kind.id);
+    if (cmd == EsqExplorerCallApi.CMD_KEY) {
         setTimeout(() => {
-            void this.runAccessProfileAsync(node.entityId,true).catch(console.error);
+            void this.runAccessProfileAsync(node.entityId, readOnly, accessProfile?.id || '').catch(console.error);
         }, 0);
 
     }  else {
         setTimeout(() => {
-            void this.runDetailsAsync(cmd, node, true).catch(console.error);
+            void this.runDetailsAsync(cmd, node, readOnly, accessProfile?.id || '').catch(console.error);
         }, 0);
     }
   }
 
   protected esqExplorerCallApi(): EsqExplorerCallApi {
     return {
-      call : (cmd: string, node :EsqTreeNode) => {
-        return this.doExplorerCommand(cmd, node);
+      call : (cmd: string, node :EsqTreeNode, accessProfile:EsqAccessProfile|null) => {
+        return this.doExplorerCommand(cmd, node, accessProfile);
       },
-      calle: (cmd: string, entity_id: string, entity_name: string, entity_kind: number) => {
-        return this.doExplorerCommand2(cmd, entity_id, entity_name, entity_kind);
+      calle: (cmd: string, entity_id: string, entity_name: string, entity_kind: number, accessProfile:EsqAccessProfile|null) => {
+        return this.doExplorerCommand2(cmd, entity_id, entity_name, entity_kind, accessProfile);
       },
       create: (parent_node: EsqTreeNode, typeId?: number) => {
        return this.doExplorerCreate(parent_node, typeId);

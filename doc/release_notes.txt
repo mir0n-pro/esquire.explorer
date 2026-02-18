@@ -2,6 +2,29 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+v1.2.2-2602.1700  Editable fields and access profile permissions
+  :Editable dialog fields: 
+     field editability controlled by readwrite flag, personal flag, 
+     and access profile permissions.
+  :Field types: 
+     flag (Yes/No dropdown), number (formatted), string with listvalues (dropdown)
+  :Nullable fields: 
+     placeholder with nullmeaning, clear button for text inputs, greyed-out nullmeaning in dropdowns
+  :Readonly/disabled styling: consistent across all input types, bottom border only for readonly, 
+     no border for node properties
+  :Tooltips from field.tooltip on all inputs
+  :EsqTabStringComponent: 
+     editable textarea with two-way binding, readOnly and maxLength support
+  :EsqUtils: 
+     formatNumber and parseNumber utility methods
+  :Access Profile: 
+     isolated from REST model into esquire.ui/api with EsqRole, EsqPermission classes
+  :isCommandAllowed: 
+     permission check based on admin flags per entity kind
+  :Command constants: 
+     CMD_DEFAULT, CMD_NEW, CMD_MOVE, CMD_DELETE, CMD_KEY, CMD_ACCT centralized in EsqExplorerCallApi
+  :ReadOnly flag in dialogs derived from access profile permissions instead of hardcoded
+
 1.2.2-2602.1400  Clean Name convention: kind vs type
    :Kind is for entity/treenode objects, and type is for only any other purpose. 
    :EsqNodeType renamed with EsqObjectKind to be in synch with services

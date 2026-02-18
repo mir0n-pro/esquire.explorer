@@ -8,6 +8,7 @@
 * 02/04/2026 mir0n  no "entityKind" field anymore
 * 02/12/2026 mir0n  EsqNodeType in explicit file
 * 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
+* 02/17/2026 mir0n  use CMD_DEFAULT constant from EsqExplorerCallApi
 */
 import {AfterViewInit, 
   Component, 
@@ -167,7 +168,7 @@ export class EsqTabIknListComponent implements OnInit,  AfterViewInit, OnDestroy
       if (this.canDetailsBtn()) {
          var el:TabIknElement = this.tabIknElements[this.listElementFocusedIndex];
          if(el) {
-           this.esqExplorerCallApi.calle("details", String(el.id), '', el.kind);
+           this.esqExplorerCallApi.calle(EsqExplorerCallApi.CMD_DEFAULT, String(el.id), '', el.kind, null);
          }
       }
   }

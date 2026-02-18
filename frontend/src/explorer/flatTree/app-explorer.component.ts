@@ -26,7 +26,8 @@
 *                   EsqNodeTypeFactory.init with RestAPI and local exceptions set (define icons and heading)
 *                   EsquireNodeTypes have only icons and heading
 * 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
-*
+* 02/17/2026 mir0n  use EsqAccessProfile from esquire.ui/api
+*                   use CMD_ constants from EsqExplorerCallApi
 */
 import {Component,
   OnInit,
@@ -76,7 +77,7 @@ import { KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType } from 'keycloa
 import Keycloak from 'keycloak-js';
 import { Observable } from 'rxjs';
 import {EsqCommandMenuItem, EsqContextMenuBuilder} from "../../esquire.ui/api/EsqContextMenuBuilder";
-import {EsqAccessProfile} from "../../rest/model/esqAccessProfile";
+import {EsqAccessProfile} from "../../esquire.ui/api/EsqAccessProfile";
 
 const STATUS_CONNECTED = "Connected";
 const STATUS_AUTHENTICATED = "Authenticated";
@@ -106,7 +107,7 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
   readonly detailsDialog:MatDialog = inject(MatDialog);
   private callApiMill?:EsqExplorerCallApiMill;
   private dictionary?:EsqDictionaryApi;
-  private profile?:EsqAccessProfile;
+  private profile:EsqAccessProfile|null = null;
   private profileRequested = false; 
   private errorReport: ProblemDetail |undefined = undefined;
 
@@ -143,7 +144,7 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
               this.profileRequested = true;
               this._dataService.esquireKey().subscribe({
                   next: (value) => {
-                    this.profile = value;
+                    this.profile = new EsqAccessProfile(value);
                   },
                   error: (err) => {
                     this.errorReport = err;
@@ -315,6 +316,10 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
       throw new Error("CallApiMill not initialized");
     }
   }
+  public esqAccessProfile() : EsqAccessProfile | null {
+      return this.profile;
+  }
+
 
   async ngOnInit() {
     this.dataService = this._dataService;
@@ -335,13 +340,13 @@ public async login(): Promise<void> {
 
 public async showDetails() {
     if (this.isConnected() && this.profile) {
-      this.callApiMill?.instance().calle("details",this.profile.id as string,"", this.profile.kind as number);
+      this.callApiMill?.instance().calle(EsqExplorerCallApi.CMD_DEFAULT,this.profile.id as string,"", this.profile.kind as number, this.profile);
     }
 }
 
 public async showAccessProfile() {
     if (this.isConnected() && this.profile) {
-        this.callApiMill?.instance().calle("key",this.profile.id as string, "", 0);
+        this.callApiMill?.instance().calle(EsqExplorerCallApi.CMD_KEY,this.profile.id as string, "", 0, this.profile);
     }
 }
 
@@ -372,7 +377,7 @@ public faceNameClass() : string {
 
 public async logout(): Promise<void> {
   this.profileRequested = false;
-  this.profile = undefined;
+  this.profile = null;
   await this.keycloak.logout({
     redirectUri: window.location.origin, // Where to go after
   });
@@ -446,9 +451,9 @@ export const EsquireStatuses = {
 
 
 export const EsqCommandMenuItems:EsqCommandMenuItem[] = [
-    new EsqCommandMenuItem("Access Profile", "verified_user", "key"),
-    new EsqCommandMenuItem("Accounting", "monetization_on", "acct"),
-    new EsqCommandMenuItem("Move", "reply_all", "move"),
-    new EsqCommandMenuItem("New...", "add_circle", EsqContextMenuBuilder.CMD_NEW),
+    new EsqCommandMenuItem("Access Profile", "verified_user", EsqExplorerCallApi.CMD_KEY),
+    new EsqCommandMenuItem("Accounting", "monetization_on", EsqExplorerCallApi.CMD_ACCT),
+    new EsqCommandMenuItem("Move", "reply_all", EsqExplorerCallApi.CMD_MOVE),
+    new EsqCommandMenuItem("New...", "add_circle", EsqExplorerCallApi.CMD_NEW),
 ] as const;
 

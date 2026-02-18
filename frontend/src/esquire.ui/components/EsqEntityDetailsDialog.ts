@@ -15,6 +15,7 @@
 *                  require id and kind to run, not a tree node
 * 02/05/2026 mir0n use EsqTabFieldComponent
 * 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
+* 02/17/2026 mir0n  added userId field
 */
 import {AfterViewInit,
   ChangeDetectorRef,
@@ -85,6 +86,7 @@ export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy
    public callApi: EsqExplorerCallApi;
 
    public readOnly: boolean = false;
+   public userId:string = "";
    public details$: Observable<any> | undefined;
    public dictionary$: Observable<EsqEntityLayer[]> | undefined;
    readonly detailsDialog:MatDialog = inject(MatDialog);
@@ -106,6 +108,7 @@ export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy
       this.dictionaryApi = data.dictionaryApi;
       this.callApi = data.callApi;
       this.readOnly = data.readOnly;
+      this.userId = data.userId;
 
       this.dialogRef.disableClose = true;
       this.dialogRef.addPanelClass('esq-dialog');

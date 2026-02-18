@@ -6,11 +6,23 @@
 *
 * History :
 * 02/01/2026 mir0n  added create()
+* 02/17/2026 mir0n  added CMD_ command constants
+*                   use EsqAccessProfile from esquire.ui/api
 */
 import {  EsqTreeNode} from './EsqTreeNode';
+import {EsqAccessProfile} from "./EsqAccessProfile";
 
 export interface EsqExplorerCallApi {
-  call: (cmd: string, node: EsqTreeNode) => Promise<void>;
-  calle: (cmd: string, entity_id: string, entity_name: string, entity_kind: number) => Promise<void>;
+  call: (cmd: string, node: EsqTreeNode, accessProfile:EsqAccessProfile|null) => Promise<void>;
+  calle: (cmd: string, entity_id: string, entity_name: string, entity_kind: number, accessProfile:EsqAccessProfile|null) => Promise<void>;
   create: (parent_node: EsqTreeNode, typeId?: number) => Promise<void>;
+}
+
+export namespace EsqExplorerCallApi {
+  export const CMD_DEFAULT: string = "details";
+  export const CMD_NEW: string = "new";
+  export const CMD_MOVE: string = "move";
+  export const CMD_DELETE: string = "delete";
+  export const CMD_KEY: string = "key";
+  export const CMD_ACCT: string = "acct";
 }

@@ -11,6 +11,8 @@
 *                   normalized keyboard actions
 * 02/12/2026 mir0n  EsqNodeType in explicit file
 * 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
+* 02/17/2026 mir0n  use CMD_DEFAULT constant from EsqExplorerCallApi
+*                   use EsqAccessProfile from esquire.ui/api
 */
 import {Component,
   ElementRef,
@@ -65,6 +67,7 @@ import { EsqFlatTreeDatasource } from './EsqFlatTreeDatasource';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import {EsquireService} from "../../../rest";
+import {EsqAccessProfile} from "src/esquire.ui/api/EsqAccessProfile";
 
 
 @Component({
@@ -98,7 +101,8 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() public esqRestApi: EsqRestApi | null = null;
   @Input() public esqExplorerCallApi: EsqExplorerCallApi | null = null;
   @Input() public esqCommandMenuItems:EsqCommandMenuItem[] = [];
-   
+  @Input() public esqAccessProfile:EsqAccessProfile | null = null;
+
   treeLevelAccessor = (dataNode: EsqTreeNode)  => dataNode.level;
   datasource!: EsqFlatTreeDatasource;
 
@@ -374,7 +378,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
 
     async onCmdDetailsClick(menu: boolean): Promise<void> {
         EsqUtils.log("onCmdDetailsClick[");
-        await this.doExplorerCommand("default", this.getSelectedNode(menu));
+        await this.doExplorerCommand(EsqExplorerCallApi.CMD_DEFAULT, this.getSelectedNode(menu));
         EsqUtils.log("]onCmdDetailsClick");
     }
 
@@ -493,7 +497,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
       const api:EsqExplorerCallApi = this.esqExplorerCallApi as EsqExplorerCallApi;
       // Note: typeId can be passed to the API call if needed for "create" commands
       // You may need to extend the EsqExplorerCallApi interface to support typeId parameter
-      return api.call(cmd, node as EsqTreeNode);
+      return api.call(cmd, node as EsqTreeNode, this.esqAccessProfile);
     } else {
       return new Promise<void>((resolve)=>resolve());
     }
@@ -586,7 +590,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
         if (this.isOnlyAlt(event)) {
           event.preventDefault();
           if (this.listNodeFocused) {
-            this.doExplorerCommand("default", this.listNodeFocused);
+            this.doExplorerCommand(EsqExplorerCallApi.CMD_DEFAULT, this.listNodeFocused);
           }
         } else if (this.isKeyPlain(event)) {
           event.preventDefault();
@@ -710,7 +714,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
       case 'Enter':
         if (this.isOnlyAlt(event)) {
           event.preventDefault();
-          this.doExplorerCommand("default", node);
+          this.doExplorerCommand(EsqExplorerCallApi.CMD_DEFAULT, node);
         } else if (this.isKeyPlain(event)) {
           event.preventDefault();
           this.toggleTreeActivate(node, false);
@@ -793,7 +797,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     this.dataLoading.set(false);
     if (doDefault) {
-      await this.doExplorerCommand("default", this.listNodeFocused);
+      await this.doExplorerCommand(EsqExplorerCallApi.CMD_DEFAULT, this.listNodeFocused);
     }
     EsqUtils.log(']runDefault');
   }

@@ -15,6 +15,8 @@
 * 02/05/2026 mir0n use EsqTabFieldComponent
 * 02/12/2026 mir0n  EsqNodeType in explicit file
 * 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
+* 02/17/2026 mir0n  added fieldReadOnly method with personal flag support
+*                   added userId field
 */
 import {AfterViewInit, 
   Component, 
@@ -56,6 +58,7 @@ import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 import {EsqTabFieldComponent} from "./EsqTabFieldComponent";
+import {FormsModule} from "@angular/forms";
 
   @Component({
   selector: 'details-dialog',
@@ -72,7 +75,8 @@ import {EsqTabFieldComponent} from "./EsqTabFieldComponent";
           MatDividerModule,
           CommonModule,
           MatTableModule,
-          EsqTabFieldComponent
+          EsqTabFieldComponent,
+          FormsModule
       ],
   encapsulation: ViewEncapsulation.None,
 })
@@ -86,6 +90,7 @@ export class EsqNodeDetailsDialog implements OnInit,  AfterViewInit, OnDestroy {
    public callApi: EsqExplorerCallApi;
 
    public readOnly: boolean = false;
+   public userId:string = "";
    public details$: Observable<any> | undefined;
    public dictionary$: Observable<EsqEntityLayer[]> | undefined;
    readonly detailsDialog:MatDialog = inject(MatDialog);   
@@ -101,7 +106,8 @@ export class EsqNodeDetailsDialog implements OnInit,  AfterViewInit, OnDestroy {
       this.dictionaryApi = data.dictionaryApi;
       this.callApi = data.callApi;
       this.readOnly = data.readOnly;
-      
+      this.userId = data.userId;
+
       this.dialogRef.disableClose = true;
       this.dialogRef.addPanelClass('esq-dialog');
       this.dialogRef.updateSize('60vw', '60vh'); 
@@ -148,6 +154,16 @@ export class EsqNodeDetailsDialog implements OnInit,  AfterViewInit, OnDestroy {
       }
     }
     return EsqObjectKindFactory.instanceOf(id);
+  }
+
+  fieldReadOnly(readwrite: number, personal?: string): boolean {
+      var ret:boolean = true;
+      if (this.node.entityId === this.userId) {
+          // "personal" mode: only applicable fields
+          ret = !("Y" === personal && readwrite == 3);
+      } else {
+          ret = this.readOnly || readwrite < 3;
+      }    return ret;
   }
 
   tabContent (index:number):string {

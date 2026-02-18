@@ -20,7 +20,7 @@
       padding:0 0 0 0;
       border: 2px outset #ccc;
       background: rgb(247, 247, 245);
-  }  
+  }
   .mat-mdc-dialog-container {
       max-width: 100vw !important;
       min-width: 20vw !important;
@@ -41,11 +41,11 @@
 
     border: 1px solid #ccc;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    background-color: #f0f0f0; 
+    background-color: #f0f0f0;
 
     vertical-align: middle;
     font-size: 10pt;
-    font-weight: normal;  
+    font-weight: normal;
     margin: 0px 0px 0px 0px;
     display: grid;
 
@@ -57,39 +57,183 @@
     min-height: 16px;
     vertical-align: middle;
     text-align: left;
+    color: black;
 
     justify-content: flex-start;
     //align-items: flex-start;
     //align-items: flex-start;
-    
+
     white-space: normal;
     word-wrap: break-word;
     font-size: 10pt;
-    font-weight: normal;  
+    font-weight: normal;
     display: grid;
     grid-template-columns:123px auto;
     gap: 4px;
+
   }
 
-//.mat-grid-tile-content {
+  .esq-grid-input {
+    //position: relative;
+    min-height: 16px;
+    vertical-align: middle;
+    text-align: left;
+
+    //align-items: flex-start;
+    //align-items: flex-start;
+
+    white-space: normal;
+    word-wrap: break-word;
+    font-size: 10pt;
+    font-weight: normal;
+    display: grid;
+    grid-template-columns: 123px minmax(0, 1fr);
+    gap: 4px;
+
+    box-sizing: border-box;
+
+      input[type="text"] {
+        max-width: 100%;
+        box-sizing: border-box;
+        padding: 4px 8px;
+        font-size: 10pt;
+        border: 1px solid #ccc;
+        border-radius: 2px;
+      }
+
+      input.esq-number-input {
+        text-align: right;
+      }
+
+      input[readonly] {
+        background-color: #f0f0f0;
+        border: none;
+        border-bottom: 1px solid #ccc;
+        pointer-events: none;
+      }
+
+      input.esq-node-prop {
+        border-bottom: none;
+      }
+
+      input[readonly]:focus {
+        outline: none;
+      }
+
+    /* Keep input + clear "X" on the same row when resized */
+
+    .esq-nullable-input {
+      display: inline-flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .esq-nullable-input > input[type="text"] {
+      flex: 0 1 auto;  /* preferred = width.ch; shrinkable when dialog narrows */
+      min-width: 0;    /* critical for shrinking instead of pushing X to next line */
+      max-width: 100%;
+    }
+
+    .esq-nullable-input > .esq-null-clear {
+      flex: 0 0 auto;
+      width: 12px;
+      height: 18px;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      margin-left: -15px;            /* pull into the input area */
+      position: relative;
+      left: 0px;                    /* your nudge left */
+      font-size: 18px;
+
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .esq-null-clear:hover {
+      background: whitesmoke;
+      //  background: #dcdcdc;
+    }
+    .esq-null-clear:active {
+      background: whitesmoke;
+      //background: #d2d2d2;
+    }
+
+  }
+
+  .esq-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #337ab7;
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  }
+
+  .esq-simple-grid-dropdown {
+    min-height: 16px;
+    vertical-align: middle;
+    text-align: left;
+    white-space: normal;
+    word-wrap: break-word;
+    font-size: 10pt;
+    font-weight: normal;
+    display: inline-grid;
+    grid-template-columns: 123px auto;
+    gap: 4px;
+
+    select {
+      width: auto;
+      padding: 4px 8px;
+      font-size: 10pt;
+      border: 1px solid #ccc;
+      border-radius: 2px;
+      background-color: white;
+      box-sizing: border-box;
+
+      &:disabled {
+        background-color: #f0f0f0;
+        color: black;
+        -webkit-text-fill-color: black;
+        opacity: 1;
+        border: none;
+        border-bottom: 1px solid #ccc;
+        pointer-events: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+      }
+    }
+
+  }
+
+  //.mat-grid-tile-content {
 //  justify-content: flex-start !important;
-//  align-items: flex-start !important; /* for vertical alignment if needed   
+//  align-items: flex-start !important; /* for vertical alignment if needed
 //
   .esq-base-icon {
-    top: 0px; 
+    top: 0px;
     left: 0px;
     position:relative;
     height: 24px;
-    width: 24x;
+    width: 24px;
     vertical-align :middle;
     z-index: 1; /* Ensure it appears below the overlay icon */
   }
   .esq-overlay-icon {
     position:relative;
-    height: 12px; 
-    width: 12px; 
-    top: -4px;
-    left: -6px; 
+    height: 12px;
+    width: 12px;
+    top: 0px;
+    left: -6px;
     z-index: 2; /* Ensure it appears above the base icon */
   }
   .esq-icon-button {
@@ -98,19 +242,19 @@
 
   .esq-tab-image-container {
     display: grid;
-    place-items: center; 
+    place-items: center;
   }
 
   .esq-tab-image {
-    min-height: 120px; 
-    max-height: 240px; 
+    min-height: 120px;
+    max-height: 240px;
   }
 
   .esq-name-image {
-    height: 64px; 
+    height: 64px;
   }
 
-  .esq-mat-tab-group{
+  .esq-mat-tab-group {
     .mdc-tab-indicator .mdc-tab-indicator__content.mdc-tab-indicator__content--underline {
       border-top-width: 0;
     }
@@ -122,6 +266,7 @@
       min-width: auto !important;
 
     }
+
     .mat-mdc-tab.mdc-tab:last-child {
       margin-right: 0;
     }
@@ -130,15 +275,15 @@
       border-top: 2px solid #ccc;
       border-left: 2px solid #ccc;
       border-right: 1px solid #ccc;
-      background-color: #f0f0f0; 
+      background-color: #f0f0f0;
 
     }
-    
+
     .mat-mdc-tab {
       font-size: 10pt;
-      font-weight: normal;  
+      font-weight: normal;
       background-color: #ccc; //#f0f0f0; 
-      border-radius: 10px 10px 0 0; 
+      border-radius: 10px 10px 0 0;
       border-top: 2px solid #aaa;
       border-left: 2px solid #aaa;
       border-right: 1px solid #aaa;
@@ -148,23 +293,24 @@
 
     .esq-other-tab-content .mat-mdc-tab-body-content,
     .esq-other-tab-content .mat-tab-body-content {
-      overflow:hidden !important;
+      overflow: hidden !important;
     }
 
     .esq-first-tab-content .mat-mdc-tab-body-content,
     .esq-first-tab-content .mat-tab-body-content {
-      overflow:auto !important;
+      overflow: auto !important;
     }
 
     .mat-mdc-tab-body-wrapper h3 {
       font-size: 12pt;
-      font-weight: normal;  
+      font-weight: normal;
     }
+
     .mat-mdc-tab-body-wrapper {
       font-size: 10pt;
-      font-weight: normal;  
-     
-      background-color: #f0f0f0; 
+      font-weight: normal;
+
+      background-color: #f0f0f0;
       border-left: 2px solid #ccc;
       border-right: 1px solid #ccc;
       border-bottom: 1px solid #ccc;
@@ -172,6 +318,22 @@
 
       padding: 10px 10px 10px 10px;
     }
+
+  }
+
+  esq-tab-field {
+    display: block;
+    width: 100%;
+  }
+
+  esq-tab-field:has(esq-tab-string) {
+    height: 100%;
+  }
+
+  esq-tab-string {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
   .esq-icon-green {
@@ -183,7 +345,5 @@
   .esq-icon-red {
     color: red;
   }
-
 }
-
 

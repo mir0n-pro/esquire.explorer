@@ -1,6 +1,12 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+02/17/2026 mir0n Access profile permissions and command constants
+explorer\flatTree\app-explorer.component.ts
+  - use EsqAccessProfile from esquire.ui/api (isolated from REST model)
+  - use CMD_ constants from EsqExplorerCallApi
+  - wrap REST response with new EsqAccessProfile constructor
+
 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
 explorer\flatTree\app-explorer.component.ts
   - EsqNodeType renamed with EsqObjectKind

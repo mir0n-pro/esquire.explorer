@@ -5,6 +5,8 @@
 *  mailto:mir0n.the.programmer@gmail.com
 *
 *  History:
+* 02/17/2026 mir0n nullable changed from boolean to string
+*                  added personal, minmax fields to dictionary
 */
 
 import { EsqEntityLayer } from "./EsqEntityDictionary";
@@ -36,64 +38,64 @@ export const problemDetailDictionary:EsqEntityLayer[] = [
     fields: [
       {
         name: "status", sort: 0, label: "status", type: "string", tooltip: "HTTP status code",
-        nullable: false, layer: 0, readwrite: 1, format: "",
-        listvalues: [], nullmeaning: '', validation: ''
+        nullable: 'N', layer: 0, readwrite: 1, format: "",
+        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
       },
       {
         name: "title", sort: 1, label: "title", type: "string", tooltip: "Short, human-readable summary",
-        nullable: false, layer: 0, readwrite: 1, format: "",
-        listvalues: [], nullmeaning: '', validation: ''
+        nullable: 'N', layer: 0, readwrite: 1, format: "",
+        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
       },
       {
         name: "type", sort: 2, label: "type", type: "string", tooltip: "URI identifying the error type",
-        nullable: false, layer: 0, readwrite: 1, format: "",
-        listvalues: [], nullmeaning: '', validation: ''
+        nullable: 'N', layer: 0, readwrite: 1, format: "",
+        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
       },
       {
         name: "traceId", sort: 3, label: "traceId", type: "string", tooltip: "A cross-system trace ID",
-        nullable: false, layer: 0, readwrite: 1, format: "",
-        listvalues: [], nullmeaning: '', validation: ''
+        nullable: 'N', layer: 0, readwrite: 1, format: "",
+        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
       },
   ]},
   { title: "Details",
     fields: [
       {
         name: "detail", sort: 0, label: "detail", type: "string", tooltip: "Detailed, actionable explanation",
-        nullable: false, layer: 1, readwrite: 1, format: "",
-        listvalues: [], nullmeaning: '', validation: ''
+        nullable: 'N', layer: 1, readwrite: 1, format: "",
+        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
       },
       {
         name: "instance", sort: 1, label: "instance", type: "string", tooltip: "URI identifying the specific occurrence",
-        nullable: false, layer: 1, readwrite: 1, format: "",
-        listvalues: [], nullmeaning: '', validation: ''
+        nullable: 'N', layer: 1, readwrite: 1, format: "",
+        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
       },
       {
         name: "timestamp", sort: 2, label: "timestamp", type: "string", tooltip: "Error timestamp in UTC timezone",
-        nullable: false, layer: 1, readwrite: 1, format: "",
-        listvalues: [], nullmeaning: '', validation: ''
+        nullable: 'N', layer: 1, readwrite: 1, format: "",
+        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
       },
       {
         name: "requestId", sort: 3, label: "requestId", type: "string", tooltip: "End-client request ID",
-        nullable: false, layer: 1, readwrite: 1, format: "",
-        listvalues: [], nullmeaning: '', validation: ''
+        nullable: 'N', layer: 1, readwrite: 1, format: "",
+        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
       },
       {
         name: "correlationId", sort: 4, label: "correlationId", type: "string", tooltip: "Server internal correlation ID",
-        nullable: false, layer: 1, readwrite: 1, format: "",
-        listvalues: [], nullmeaning: '', validation: ''
+        nullable: 'N', layer: 1, readwrite: 1, format: "",
+        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
       },
       {
         name: "processingTime", sort: 5, label: "processingTime", type: "string", tooltip: "Only for Gateway errors: Total time the system spent on the request before the error occurred",
-        nullable: false, layer: 1, readwrite: 1, format: "",
-        listvalues: [], nullmeaning: '', validation: ''
+        nullable: 'N', layer: 1, readwrite: 1, format: "",
+        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
       },
   ]},
   { title: "Stack Trace",
     fields: [
       {
         name: "stackTrace", sort: 0, label: "Stack Trace", type: "tabstring", tooltip: "Root cause stack trace.",
-        nullable: false, layer: 2, readwrite: 1, format: "",
-        listvalues: [], nullmeaning: '', validation: ''
+        nullable: 'N', layer: 2, readwrite: 1, format: "",
+        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
       },
   ]}
 ] as const;

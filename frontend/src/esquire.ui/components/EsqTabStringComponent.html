@@ -9,12 +9,15 @@
 <!--    maxlength="15" -->
 <div class="esq-tab-string-container"
     [ngClass] = "{'disabled' : readOnly, 'enabled' : !readOnly}">
-    <textarea 
+    <textarea
         class = "esq-tab-string-textarea"
         [ngClass] = "{'disabled' : readOnly, 'enabled' : !readOnly}"
-        id = "text" 
+        id = "text"
         autofocus
         [readonly]="readOnly"
-    >{{value}}</textarea>
+        [attr.maxlength]="maxLength"
+        [(ngModel)]="value"
+        (ngModelChange)="valueChange.emit($event)"
+    ></textarea>
     
 </div>  
