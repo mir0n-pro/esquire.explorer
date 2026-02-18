@@ -219,9 +219,135 @@ paths:
                 $ref: '#/definitions/EsqAccessProfile'
         '405':
           description: Invalid input
+  /esq-cmd-save:
+    post:
+      tags:
+        - esquire
+      summary: Save entity changes
+      description: Save changed fields of an entity
+      operationId: esquireCmdSave
+      parameters:
+        - name: kind
+          in: query
+          description: an entity type
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: id
+          in: query
+          description: an entity id
+          required: true
+          schema:
+            type: string
+        - name: cmd
+          in: query
+          description: a command to process
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EsqEntity'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EsqEntity'
+        '405':
+          description: Invalid input
+  /esq-cmd-asave:
+    post:
+      tags:
+        - esquire
+      summary: Save account entity changes
+      description: Save changed fields of an account entity
+      operationId: esquireCmdAsave
+      parameters:
+        - name: kind
+          in: query
+          description: an entity type
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: id
+          in: query
+          description: an entity id
+          required: true
+          schema:
+            type: string
+        - name: cmd
+          in: query
+          description: a command to process
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EsqEntity'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EsqEntity'
+        '405':
+          description: Invalid input
+  /esq-key-save:
+    post:
+      tags:
+        - esquire
+      summary: Save access profile changes
+      description: Save changed fields of an access profile
+      operationId: esquireKeySave
+      parameters:
+        - name: id
+          in: query
+          description: a user id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EsqAccessProfile'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EsqAccessProfile'
+        '405':
+          description: Invalid input
 
 components:
   schemas:
+    EsqEntity:
+      title: Entity
+      description: An entity with identity and dynamic fields defined by dictionary
+      type: object
+      properties:
+        id:
+          type: string
+          description: Entity id
+        kind:
+          type: integer
+          format: int32
+          description: Entity kind
+      additionalProperties: true
     EsqTreeNode:
       title: Tree Node
       description: A node with all information for tree navigation

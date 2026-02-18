@@ -2,6 +2,36 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+v1.2.2-2602.1817  Wire Save to REST
+  :Save entity changes:
+     POST /esq-cmd-save for general entities, POST /esq-cmd-asave for account entities
+     routed by EsqObjectKind.acct flag in the wrapper
+  :Save access profile:
+     POST /esq-key-save for access profile changes
+  :OpenAPI spec:
+     added EsqEntity schema (id + kind + additionalProperties)
+     3 new POST endpoints: esquireCmdSave, esquireCmdAsave, esquireKeySave
+     input and output both use typed schemas (EsqEntity / EsqAccessProfile)
+  :Dialog onSave:
+     all 3 detail dialogs wired to REST; save error shown via alert()
+     originalDetails updated only on success, dialog stays open on failure
+     unsaved changes confirmation on Close (OK to save, Cancel to discard)
+  :Field validation on Save:
+     required field check, string pattern validation, number min/max validation
+     focus moves to invalid field and tab on error
+     EsqValidationError type, data-field attributes on all inputs for focus
+  :Change tracking:
+     deepCopy, getChangedFields utility methods in EsqUtils
+     AccessProfile fix: removed async alias in template, use component property
+  :isCommandAllowed:
+     entity_id param with personal mode (own profile always editable)
+     kind rounding for paired entity kinds
+     String() coercion for entityId/userId comparison in fieldReadOnly
+  :ProblemDetail dictionary:
+     minmax defaults set to '100' and '200'
+  :Logging:
+     console.log replaced with EsqUtils.log across components
+
 v1.2.2-2602.1700  Editable fields and access profile permissions
   :Editable dialog fields: 
      field editability controlled by readwrite flag, personal flag, 

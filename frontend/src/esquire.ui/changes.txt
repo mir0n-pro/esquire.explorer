@@ -1,6 +1,52 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+02/18/2026 mir0n Wire Save to REST — esquireCmdSave & esquireKeySave
+api\EsqRestApi.ts
+  - added esquireCmdSave(), esquireKeySave()
+api\EsqEntityDictionary.ts
+  - added personal, minmax fields to EsqEntityField
+  - nullable changed from boolean to string
+api\ProblemDetail.ts
+  - minmax defaults set to '100' and '200'
++ added api\EsqAccessProfile.ts
+  - isCommandAllowed() with entity_id param, personal mode, kind rounding
+components\EsqNodeDetailsDialog.ts
+  - added Save/Refresh buttons with unsaved changes confirmation
+  - added validateFields, hasChanges, deepCopy, loadData pattern
+  - wired onSave() to restApi.esquireCmdSave()
+  - String() coercion for entityId/userId comparison
+components\EsqNodeDetailsDialog.html
+  - Close routes through onClose() with unsaved changes confirm
+  - added Save/Refresh buttons to dialog actions
+  - added tooltip and data-field attributes on name input
+components\EsqEntityDetailsDialog.ts
+  - added Save/Refresh buttons with unsaved changes confirmation
+  - added validateFields, hasChanges, deepCopy, loadData pattern
+  - wired onSave() to restApi.esquireCmdSave()
+components\EsqEntityDetailsDialog.html
+  - Close routes through onClose() with unsaved changes confirm
+  - added Save/Refresh buttons to dialog actions
+components\EsqAccessProfileDialog.ts
+  - added Save/Refresh buttons with change tracking
+  - wired onSave() to restApi.esquireKeySave()
+  - fixed change tracking: use component property instead of async alias
+components\EsqAccessProfileDialog.html
+  - removed async alias for details binding (change tracking fix)
+  - added Save/Refresh buttons to dialog actions
++ components\EsqValidationError.ts
+  - validation error type for field-level validation
+components\EsqUtils.ts
+  - added validateFields, deepCopy, getChangedFields methods
+components\EsqSingleEntryDialog.html
+  - simplified field rendering (removed name special case)
+components\EsqTabFieldComponent.ts
+  - String() coercion for id/userId comparison
+  - added data-field attributes on all inputs for validation focus
+components\EsqExplorerCallApiMill.ts
+  - isCommandAllowed with entity_id param
+  - console.log replaced with EsqUtils.log
+
 02/17/2026 mir0n Access profile permissions and command constants
 + added api\EsqAccessProfile.ts
   - EsqAccessProfile, EsqRole, EsqPermission classes (isolated from REST model)

@@ -14,6 +14,9 @@
 * 02/12/2026 mir0n  EsqNodeType in explicit file
 * 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
 * 02/17/2026 mir0n  added userId field
+* 02/18/2026 mir0n  added Save/Refresh buttons with change tracking
+*                   wired onSave() to restApi.esquireKeySave()
+*                   fixed change tracking: use component property instead of async alias
 */
 import {AfterViewInit,
   ChangeDetectorRef,
@@ -31,12 +34,14 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatTabsModule } from '@angular/material/tabs';
+import { MatTabGroup, MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
-import { firstValueFrom,Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { CommonModule } from '@angular/common'
 import {MatTableModule } from '@angular/material/table';
 import {EsqTabFieldComponent} from "./EsqTabFieldComponent";
+import {EsqUtils} from "./EsqUtils";
+import {EsqValidationError} from "./EsqValidationError";
 
 /*
 import { EsqNodeType
@@ -45,7 +50,7 @@ import { EsqNodeType
   , EsqTreeNode
   , EsqNodeStatusFactory
   , EsqExplorerCallApi
-  , EsqDictionaryApi, EsqEntityLayer 
+  , EsqDictionaryApi, EsqEntityLayer
 } from '@mir0n-pro/esquire.ui/api';
 */
 import {EsqObjectKind} from 'src/esquire.ui/api/EsqObjectKind';
@@ -79,17 +84,22 @@ import { EsqTabStringComponent } from "./EsqTabStringComponent";
 
 export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy {
    @ViewChild('btnClose') btnClose! : MatButton;
+   @ViewChild('btnSave') btnSave! : MatButton;
+   @ViewChild(MatTabGroup) tabGroup! : MatTabGroup;
    private dialogRef: MatDialogRef<EsqAccessProfileDialog>;
    private restApi: EsqRestApi;
    private dictionaryApi: EsqDictionaryApi;
 
    public readOnly: boolean = false;
    public userId:string = "";
+   public details: any = null;
    public details$: Observable<any> | undefined;
    public dictionary$: Observable<EsqEntityLayer[]> | undefined;
+   private dictionary: EsqEntityLayer[] = [];
    public id:string = "";
    public headerIcon:string = "";
    public headerName:string = "";
+   private originalDetails: any = null;
 
   constructor(
       dialogRef: MatDialogRef<EsqAccessProfileDialog>,
@@ -107,29 +117,85 @@ export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy
       this.dialogRef.disableClose = true;
       this.dialogRef.addPanelClass('esq-dialog');
       this.dialogRef.updateSize('60vw', '60vh');
-    }      
+    }
 
   closeDialog(): void {
     this.dialogRef.close();
   }
 
-  ngOnInit() {
-//    if (this.node.kind.detailed) {
-      this.dictionary$ = this.dictionaryApi.dictionary(EsqObjectKindFactory.ACCESSPROFILE.id);
-      this.details$ = this.restApi.esquireKey(this.id);
+  hasChanges(): boolean {
+    return EsqUtils.getChangedFields(this.originalDetails, this.details) !== null;
+  }
 
-      // Subscribe to details$ and update header values
-      if (this.details$) {
-          this.details$.subscribe(details => {
-              this.headerIcon = EsqObjectKindFactory.instanceOf(details.kind).icon;
-              this.headerName = details.name || 'No defined';
-              this.cdr.detectChanges();
-          });
+  onClose(): void {
+    if (this.hasChanges()) {
+      if (confirm('You have unsaved changes. Press OK to save, or Cancel to discard.')) {
+        this.btnSave?.focus();
+        return;
       }
+    }
+    this.dialogRef.close();
+  }
 
+  onSave(): void {
+    var error: EsqValidationError | null = EsqUtils.validateFields(this.details, this.dictionary);
+    if (error) {
+      alert(error.message);
+      this.focusField(error);
+      return;
+    }
+    var changes = EsqUtils.getChangedFields(this.originalDetails, this.details);
+    if (changes) {
+      EsqUtils.log('Save changes:', changes);
+      var body = { id: this.id, ...changes };
+      this.restApi.esquireKeySave(this.id, body).subscribe({
+        next: () => {
+          this.originalDetails = EsqUtils.deepCopy(this.details);
+        },
+        error: (err: any) => {
+          alert('Save failed: ' + (err.detail || err.title || err));
+        }
+      });
+    }
+  }
+
+  private focusField(error: EsqValidationError): void {
+    if (this.tabGroup) {
+      this.tabGroup.selectedIndex = error.tabIndex;
+    }
+    setTimeout(() => {
+      var el = document.querySelector('[data-field="' + error.fieldName + '"]') as HTMLElement;
+      if (el) {
+        el.focus();
+      }
+    }, 100);
+  }
+
+  onRefresh(): void {
+    this.loadData();
+  }
+
+  ngOnInit() {
+      this.dictionary$ = this.dictionaryApi.dictionary(EsqObjectKindFactory.ACCESSPROFILE.id).pipe(
+        tap(dict => { this.dictionary = dict; })
+      );
+      this.loadData();
+  }
+
+  private loadData(): void {
+    this.details$ = this.restApi.esquireKey(this.id).pipe(
+      tap(details => {
+        this.details = details;
+        this.originalDetails = EsqUtils.deepCopy(details);
+        this.headerIcon = EsqObjectKindFactory.instanceOf(details.kind).icon;
+        this.headerName = details.name || 'No defined';
+        this.cdr.detectChanges();
+      })
+    );
   }
 
   ngOnDestroy() {
+    this.details = null;
     this.details$ = undefined;
     this.dictionary$ = undefined;
   }
@@ -138,14 +204,9 @@ export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy
     if (this.btnClose)  {
        this.btnClose.focus();
     }
-  }    
-
-  private async loadDetails(): Promise<any> {
-    return await firstValueFrom(this.restApi.esquireKey(this.id));
   }
 
   tabContent (index:number):string {
     return index == 0 ? "esq-first-tab-content" :  "esq-other-tab-content";
   }
 }
-

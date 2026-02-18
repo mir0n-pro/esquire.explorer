@@ -11,6 +11,7 @@ index.ts
 model/esqAccessProfile.ts
 model/esqAccessProfilePermissions.ts
 model/esqColumnHeaderDef.ts
+model/esqEntity.ts
 model/esqEntityField.ts
 model/esqEntityLayer.ts
 model/esqObjectKind.ts

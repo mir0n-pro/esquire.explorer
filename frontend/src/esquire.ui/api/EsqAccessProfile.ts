@@ -6,6 +6,7 @@
 *
 * History :
 * 02/17/2026 mir0n  isolated from generated rest api
+*                   isCommandAllowed() with entity_id param, personal mode, kind rounding
 */
 import {EsqExplorerCallApi} from './EsqExplorerCallApi';
 export class EsqRole {
@@ -78,14 +79,17 @@ export class EsqAccessProfile {
         [EsqExplorerCallApi.CMD_ACCT]: 4
     };
 
-    public isCommandAllowed(cmd: string, kind: number): boolean {
-        var ret: boolean = false;
-        var effectiveCmd: string = cmd || EsqExplorerCallApi.CMD_DEFAULT;
-        var perm: EsqPermission | undefined = this.admin.find(p => p.kind === kind);
-        if (perm) {
-            var flagIndex: number = EsqAccessProfile.FLAG_INDEX[effectiveCmd];
-            if (flagIndex !== undefined && flagIndex < perm.flags.length) {
-                ret = perm.flags[flagIndex] === 'Y';
+    public isCommandAllowed(cmd: string, entity_id: string, kind: number): boolean {
+        var ret: boolean = String(this.id) === String(entity_id); // xxx: "personal" mode
+        if (!ret) {
+            var knd: number =  Math.floor(kind / 2) * 2;
+            var effectiveCmd: string = cmd || EsqExplorerCallApi.CMD_DEFAULT;
+            var perm: EsqPermission | undefined = this.admin.find(p => p.kind === knd);
+            if (perm) {
+                var flagIndex: number = EsqAccessProfile.FLAG_INDEX[effectiveCmd];
+                if (flagIndex !== undefined && flagIndex < perm.flags.length) {
+                    ret = perm.flags[flagIndex] === 'Y';
+                }
             }
         }
         return ret;

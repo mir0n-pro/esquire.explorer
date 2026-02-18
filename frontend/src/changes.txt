@@ -1,6 +1,12 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+02/18/2026 mir0n Wire Save to REST — esquireCmdSave & esquireKeySave
+explorer\flatTree\app-explorer.component.ts
+  - added esquireCmdSave() wrapper (routes acct entities to /esq-cmd-asave)
+  - added esquireKeySave() wrapper
+  - console.log replaced with EsqUtils.log
+
 02/17/2026 mir0n Access profile permissions and command constants
 explorer\flatTree\app-explorer.component.ts
   - use EsqAccessProfile from esquire.ui/api (isolated from REST model)

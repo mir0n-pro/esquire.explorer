@@ -26,18 +26,16 @@
   <mat-tab-group class="esq-mat-tab-group">
     @if (details) {
       @if (dictionary) {
-        @for (tab of dictionary; track tab.title; let i = $index;) {      
+        @for (tab of dictionary; track tab.title; let i = $index;) {
           <mat-tab [label]="tab.title" bodyClass="{{tabContent(i)}}">
             @for (field of tab.fields; track field.name) {
-              @if (field.name == "name") {
-                  @if (field.readwrite > 0) {
-                      <esq-tab-field
-                          [field]=field
-                          [details]=details
-                          [readOnly]=readOnly
-                          [enableDetails]=true
-                      />
-                  }
+              @if (field.readwrite > 0) {
+                  <esq-tab-field
+                      [field]=field
+                      [details]=details
+                      [readOnly]=readOnly
+                      [enableDetails]=true
+                  />
               }
             }
           </mat-tab>

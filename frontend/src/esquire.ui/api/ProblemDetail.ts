@@ -44,7 +44,7 @@ export const problemDetailDictionary:EsqEntityLayer[] = [
       {
         name: "title", sort: 1, label: "title", type: "string", tooltip: "Short, human-readable summary",
         nullable: 'N', layer: 0, readwrite: 1, format: "",
-        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
+        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:'100'
       },
       {
         name: "type", sort: 2, label: "type", type: "string", tooltip: "URI identifying the error type",
@@ -62,7 +62,7 @@ export const problemDetailDictionary:EsqEntityLayer[] = [
       {
         name: "detail", sort: 0, label: "detail", type: "string", tooltip: "Detailed, actionable explanation",
         nullable: 'N', layer: 1, readwrite: 1, format: "",
-        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
+        listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:'200'
       },
       {
         name: "instance", sort: 1, label: "instance", type: "string", tooltip: "URI identifying the specific occurrence",

@@ -7,7 +7,11 @@
 *
 *  History:
 * 02/17/2026 mir0n added formatNumber and parseNumber static methods
+*                  added validateFields for Save validation
+*                  added deepCopy, getChangedFields methods
 */
+import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
+import {EsqValidationError} from './EsqValidationError';
 export class EsqUtils {
  public static DEBUG:boolean = false;
  public static DELAY:boolean = false;
@@ -66,6 +70,69 @@ export class EsqUtils {
     const cleaned = formatted.replace(/,/g, '');
     const num = Number(cleaned);
     return isNaN(num) ? null : num;
+  }
+
+  public static validateFields(details: any, dictionary: EsqEntityLayer[]): EsqValidationError | null {
+    var ret: EsqValidationError | null = null;
+    for (var tabIndex = 0; tabIndex < dictionary.length && !ret; tabIndex++) {
+      var tab = dictionary[tabIndex];
+      for (var fi = 0; fi < tab.fields.length && !ret; fi++) {
+        var field = tab.fields[fi];
+        if (field.readwrite < 3) {
+          continue;
+        }
+        var value = details[field.name];
+        // required: non-nullable fields must have a value
+        if (field.nullable !== 'Y') {
+          if (value == null || value === '') {
+            ret = { fieldName: field.name, fieldLabel: field.label, message: field.label + ' is required', tabIndex: tabIndex };
+          }
+        }
+        // string pattern validation
+        if (!ret && field.validation && (field.type === 'string' || field.type === 'String')) {
+          if (value != null && value !== '') {
+            var regex = new RegExp(field.validation);
+            if (!regex.test(value)) {
+              ret = { fieldName: field.name, fieldLabel: field.label, message: field.label + ' has invalid format', tabIndex: tabIndex };
+            }
+          }
+        }
+        // number min/max validation
+        if (!ret && field.type === 'number' && field.minmax && field.minmax.includes(',')) {
+          if (value != null && value !== '') {
+            var parts = field.minmax.split(',');
+            var min = Number(parts[0]);
+            var max = Number(parts[1]);
+            var num = Number(value);
+            if (!isNaN(num) && (num < min || num > max)) {
+              ret = { fieldName: field.name, fieldLabel: field.label, message: field.label + ' must be between ' + min + ' and ' + max, tabIndex: tabIndex };
+            }
+          }
+        }
+      }
+    }
+    return ret;
+  }
+
+  public static deepCopy(obj: any): any {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  public static getChangedFields(original: any, current: any): Record<string, any> | null {
+    if (!original || !current) return null;
+    var changes: Record<string, any> = {};
+    var hasChanges: boolean = false;
+    for (var key in current) {
+      if (current.hasOwnProperty(key)) {
+        var origVal = original[key];
+        var currVal = current[key];
+        if (typeof currVal !== 'object' && origVal !== currVal) {
+          changes[key] = currVal;
+          hasChanges = true;
+        }
+      }
+    }
+    return hasChanges ? changes : null;
   }
 
 }

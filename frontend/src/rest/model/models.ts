@@ -1,6 +1,7 @@
 export * from './esqAccessProfile';
 export * from './esqAccessProfilePermissions';
 export * from './esqColumnHeaderDef';
+export * from './esqEntity';
 export * from './esqEntityField';
 export * from './esqEntityLayer';
 export * from './esqObjectKind';

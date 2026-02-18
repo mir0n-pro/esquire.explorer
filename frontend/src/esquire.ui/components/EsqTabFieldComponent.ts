@@ -9,9 +9,11 @@
 * 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
 * 02/17/2026 mir0n  added field types: flag, number, string with listvalues
 *                   added fieldReadOnly with personal flag support
+*                   String() coercion for id/userId comparison
 *                   added nullable/nullmeaning handling
 *                   added clearToNull, formatNumber, onNumberInput
 *                   added tooltip support via field.tooltip
+*                   added data-field attributes on all inputs
 */
 import {AfterViewInit, 
   Component, 
@@ -71,7 +73,6 @@ export class EsqTabFieldComponent implements OnInit,  AfterViewInit, OnDestroy {
       @Input() public enableDetails: boolean = true;
       @Input() public userId: string = "";
 
-
       constructor() {
       }
 
@@ -86,7 +87,7 @@ export class EsqTabFieldComponent implements OnInit,  AfterViewInit, OnDestroy {
 
       fieldReadOnly(readwrite: number, personal?: string): boolean {
           var ret:boolean = true;
-          if ((this.details as any)?.["id"] === this.userId) {
+          if (String((this.details as any)?.["id"]) === String(this.userId)) {
               // "personal" mode: only applicable fields
               ret = !("Y" === personal && readwrite == 3);
           } else {

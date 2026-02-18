@@ -22,14 +22,14 @@
         }
     </div>
 
-  <button matIconButton mat-dialog-close class = "esq-icon-button" matTooltip = "Close">
+  <button matIconButton (click)="onClose()" class = "esq-icon-button" matTooltip = "Close">
     <mat-icon>close</mat-icon>
   </button>
 </mat-toolbar>
 
 <mat-dialog-content >
   <mat-tab-group class="esq-mat-tab-group">
-    @if (details$ | async; as details) {
+    @if (details$ | async) {
       @if (dictionary$ | async; as dictionary) {
         @for (tab of dictionary; track tab.title; let i = $index;) {      
           <mat-tab [label]="tab.title" bodyClass="{{tabContent(i)}}">
@@ -56,5 +56,11 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="center">
-  <button #btnClose mat-raised-button mat-dialog-close >Close</button>
+  @if (readOnly) {
+    <button #btnClose mat-raised-button mat-dialog-close>Close</button>
+  } @else {
+    <button mat-raised-button (click)="onClose()">Close</button>
+    <button #btnSave mat-raised-button (click)="onSave()" [disabled]="!hasChanges()">Save</button>
+    <button mat-raised-button (click)="onRefresh()">Refresh</button>
+  }
 </mat-dialog-actions>

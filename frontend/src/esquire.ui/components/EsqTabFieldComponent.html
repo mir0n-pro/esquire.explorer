@@ -48,7 +48,7 @@
             @if (field.nullable === 'Y') {
                 <span>{{field.label}}:</span>
                 <select [(ngModel)]="details[field.name]" [disabled]="fieldReadOnly(field.readwrite, field.personal)" [title]="field.tooltip || ''"
-                    [style.color]="details[field.name] ? 'black' : 'grey'">
+                    [attr.data-field]="field.name" [style.color]="details[field.name] ? 'black' : 'grey'">
                     @if (field.nullmeaning) {
                         <option value="" style="color: grey">{{field.nullmeaning}}</option>
                     }
@@ -57,7 +57,7 @@
                 </select>
             } @else {
                 <b>{{field.label}}:</b>
-                <select [(ngModel)]="details[field.name]" [disabled]="fieldReadOnly(field.readwrite, field.personal)" [title]="field.tooltip || ''">
+                <select [(ngModel)]="details[field.name]" [disabled]="fieldReadOnly(field.readwrite, field.personal)" [title]="field.tooltip || ''" [attr.data-field]="field.name">
                     <option value="Y">Yes</option>
                     <option value="N">No</option>
                 </select>
@@ -75,6 +75,7 @@
                     [attr.tabindex]="fieldReadOnly(field.readwrite, field.personal) ? -1 : null"
                     [placeholder]="field.nullmeaning || ''"
                     [title]="field.tooltip || ''"
+                    [attr.data-field]="field.name"
                     [attr.list]="field.nullmeaning ? 'dl-' + field.name : null" />
                 @if (field.nullmeaning) {
                     <datalist [id]="'dl-' + field.name">
@@ -89,6 +90,7 @@
                     [style.width.ch]="20"
                     [readonly]="fieldReadOnly(field.readwrite, field.personal)"
                     [attr.tabindex]="fieldReadOnly(field.readwrite, field.personal) ? -1 : null"
+                    [attr.data-field]="field.name"
                     [title]="field.tooltip || ''" />
             }
         </div>
@@ -108,7 +110,7 @@
                     </select>
                 } @else {
                     <b>{{field.label}}:</b>
-                    <select [(ngModel)]="details[field.name]" [disabled]="fieldReadOnly(field.readwrite, field.personal)" [title]="field.tooltip || ''">
+                    <select [(ngModel)]="details[field.name]" [disabled]="fieldReadOnly(field.readwrite, field.personal)" [title]="field.tooltip || ''" [attr.data-field]="field.name">
                         @for (option of field.listvalues; track option) {
                             <option [value]="option.split('~')[0]">{{option.split('~')[1] || option.split('~')[0]}}</option>
                         }
@@ -126,6 +128,7 @@
                                [readonly]="fieldReadOnly(field.readwrite, field.personal)"
                                [attr.tabindex]="fieldReadOnly(field.readwrite, field.personal) ? -1 : null"
                                [placeholder]="field.nullmeaning || ''"
+                               [attr.data-field]="field.name"
                                [title]="field.tooltip || ''" />
                         @if (field.nullmeaning && details[field.name] && !fieldReadOnly(field.readwrite, field.personal)) {
                             <span class="esq-null-clear" (click)="clearToNull(field)" title="{{field.nullmeaning}}">&times;</span>
@@ -138,6 +141,7 @@
                         [style.width.ch]="field.minmax || 50"
                         [readonly]="fieldReadOnly(field.readwrite, field.personal)"
                         [attr.tabindex]="fieldReadOnly(field.readwrite, field.personal) ? -1 : null"
+                        [attr.data-field]="field.name"
                         [title]="field.tooltip || ''" />
                 }
             </div>

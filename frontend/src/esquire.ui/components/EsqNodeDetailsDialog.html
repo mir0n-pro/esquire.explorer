@@ -17,7 +17,7 @@
     <img src="{{nodeStatusIcon()}}" class="esq-overlay-icon" />
     {{node.name}}
  </div>
-  <button matIconButton mat-dialog-close class = "esq-icon-button" matTooltip = "Close">
+  <button matIconButton (click)="onClose()" class = "esq-icon-button" matTooltip = "Close">
     <mat-icon>close</mat-icon>
   </button>
 </mat-toolbar>
@@ -38,6 +38,8 @@
                              [readonly]="fieldReadOnly(field.readwrite, field.personal)"
                              [attr.tabindex]="fieldReadOnly(field.readwrite, field.personal) ? -1 : null"
                              [class.esq-node-prop]="fieldReadOnly(field.readwrite, field.personal)"
+                             [title]="field.tooltip || ''"
+                             [attr.data-field]="field.name"
                       />
                     <!-- input type="text" [value]="details[field.name]" readonly tabindex="-1" /-->
                   </div>
@@ -78,5 +80,11 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="center">
-  <button #btnClose mat-raised-button mat-dialog-close >Close</button>
+  @if (readOnly) {
+    <button #btnClose mat-raised-button mat-dialog-close>Close</button>
+  } @else {
+    <button mat-raised-button (click)="onClose()">Close</button>
+    <button #btnSave mat-raised-button (click)="onSave()" [disabled]="!hasChanges()">Save</button>
+    <button mat-raised-button (click)="onRefresh()">Refresh</button>
+  }
 </mat-dialog-actions>

@@ -28,6 +28,9 @@
 * 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
 * 02/17/2026 mir0n  use EsqAccessProfile from esquire.ui/api
 *                   use CMD_ constants from EsqExplorerCallApi
+* 02/18/2026 mir0n  added esquireCmdSave() wrapper (routes acct to /esq-cmd-asave)
+*                   added esquireKeySave() wrapper
+*                   console.log replaced with EsqUtils.log
 */
 import {Component,
   OnInit,
@@ -67,6 +70,7 @@ import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
 //import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 import {EsqExplorerCallApiMill} from 'src/esquire.ui/components/EsqExplorerCallApiMill';
 import {EsqDictionary} from 'src/esquire.ui/components/EsqDictionary';
+import {EsqUtils} from 'src/esquire.ui/components/EsqUtils';
 import {EsqExplorerComponent} from 'src/esquire.ui/explorer/flatTree/EsqExplorerComponent';
 import { ProblemDetail, problemDetailDictionary } from 'src/esquire.ui/api/ProblemDetail';
 import { EsqSingleEntryDialog } from 'src/esquire.ui/components/EsqSingleEntryDialog';
@@ -119,7 +123,7 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
       console.warn('Session status update: ' + event.type);
       if (event.type === KeycloakEventType.TokenExpired) {
         // Token expired - Keycloak will automatically attempt to refresh
-        console.log('Token expired, attempting refresh...');
+        EsqUtils.log('Token expired, attempting refresh...');
       //} else if (event.type === KeycloakEventType.AuthSuccess) {
       //  this.authState.set('Authenticated');
       //  console.log('User successfully authenticated');
@@ -132,7 +136,7 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
       } else if (event.type === KeycloakEventType.AuthRefreshSuccess) {
         // Token refreshed successfully - maintain current state if already connected
         if (this.authState() === STATUS_CONNECTED && this.profile) {
-          console.log('Token refreshed successfully');
+          EsqUtils.log('Token refreshed successfully');
         }
       } else if (event.type === KeycloakEventType.Ready) {
         var good = computed(() => this.keycloak.authenticated ?? false);
@@ -302,6 +306,43 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
             }) ;
             return ret;
         },
+        esquireCmdSave: (kind: number, id: string, body: any, cmd?: string, options?: any) => {
+            this.setErrorMessage("");
+            this.errorReport = undefined;
+            if(!this.dataService) {
+                this.setErrorMessage("Data service not initialized");
+                throw new Error("Data service not initialized");
+            }
+            var acct: boolean = EsqObjectKindFactory.instanceOf(kind).acct;
+            let ret: Observable<any> = acct
+                ? this.dataService.esquireCmdAsave(kind, encodeURIComponent(id), body, cmd)
+                : this.dataService.esquireCmdSave(kind, encodeURIComponent(id), body, cmd);
+            ret.subscribe({
+                error : (err: ProblemDetail) => {
+                    //console.error(err.detail || err.title);
+                    this.errorReport = err;
+                    this.setErrorMessage( err.detail || err.title);
+                }
+            }) ;
+            return ret;
+        },
+        esquireKeySave: (id: string, body: any, options?: any) => {
+            this.setErrorMessage("");
+            this.errorReport = undefined;
+            if(!this.dataService) {
+                this.setErrorMessage("Data service not initialized");
+                throw new Error("Data service not initialized");
+            }
+            let ret: Observable<any> = this.dataService.esquireKeySave(id, body);
+            ret.subscribe({
+                error : (err: ProblemDetail) => {
+                    //console.error(err.detail || err.title);
+                    this.errorReport = err;
+                    this.setErrorMessage( err.detail || err.title);
+                }
+            }) ;
+            return ret;
+        },
     }
   };
 
@@ -412,7 +453,7 @@ private findIcon(kind:number) : string {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log(`Dialog result: ${result}`);
+      EsqUtils.log(`Dialog result: ${result}`);
     });
     return new Promise<void>((resolve)=>resolve());
   }

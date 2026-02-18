@@ -11,8 +11,10 @@
 *                  added AccessProfile dialog via command "key"
 * 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
 * 02/17/2026 mir0n readOnly flag based on access profile permissions
+*                  isCommandAllowed with entity_id param
 *                  use EsqAccessProfile from esquire.ui/api
 *                  use CMD_ constants from EsqExplorerCallApi
+*                  console.log replaced with EsqUtils.log
 */
 import { firstValueFrom } from "rxjs";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
@@ -33,6 +35,7 @@ import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {EsqTreeNode} from 'src/esquire.ui/api/EsqTreeNode';
 import {EsqAccessProfileDialog} from "./EsqAccessProfileDialog";
 import {EsqAccessProfile} from "src/esquire.ui/api/EsqAccessProfile";
+import {EsqUtils} from "./EsqUtils";
 
 export class EsqExplorerCallApiMill {
   dialog:MatDialog;
@@ -73,7 +76,7 @@ export class EsqExplorerCallApiMill {
     }
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log(`Dialog result: ${result}`);
+      EsqUtils.log(`Dialog result: ${result}`);
     });
     return new Promise<void>((resolve)=>resolve());
   }
@@ -92,7 +95,7 @@ export class EsqExplorerCallApiMill {
             }
         });
         dialogRef.afterClosed().subscribe(result => {
-            console.log(`Dialog result: ${result}`);
+            EsqUtils.log(`Dialog result: ${result}`);
         });
         return new Promise<void>((resolve)=>resolve());
     }
@@ -112,18 +115,19 @@ export class EsqExplorerCallApiMill {
             }
         });
         dialogRef.afterClosed().subscribe(result => {
-            console.log(`Dialog result: ${result}`);
+            EsqUtils.log(`Dialog result: ${result}`);
         });
         return new Promise<void>((resolve)=>resolve());
     }
 
   protected async doExplorerCommand2(cmd: string, entity_id: string, entity_name: string, entity_kind:number, accessProfile:EsqAccessProfile|null) {
-      var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, entity_kind);
       if (cmd == EsqExplorerCallApi.CMD_KEY) {
+          var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, entity_id, entity_kind);
           setTimeout(() => {
               void this.runAccessProfileAsync(entity_id, readOnly, accessProfile?.id || '').catch(console.error);
           }, 0);
       } else if (entity_id.length>0) {
+          var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, entity_id, entity_kind);
           setTimeout(() => {
               void this.runEntityDetailsAsync(entity_id, entity_kind, readOnly, accessProfile?.id || '').catch(console.error);
           }, 0);
@@ -132,6 +136,7 @@ export class EsqExplorerCallApiMill {
               .catch((error) => console.error(error));
           if (_enode_) {
               let enode: EsqTreeNode = new EsqTreeNode(_enode_, undefined);
+              var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, enode.entityId, entity_kind);
               setTimeout(() => {
                   void this.runDetailsAsync(cmd, enode as EsqTreeNode, readOnly, accessProfile?.id || '').catch(console.error);
               }, 0);
@@ -144,7 +149,7 @@ export class EsqExplorerCallApiMill {
   }
 
   protected async doExplorerCommand(cmd:string, node : EsqTreeNode, accessProfile:EsqAccessProfile|null) {
-    var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, node.kind.id);
+    var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, node.entityId, node.kind.id);
     if (cmd == EsqExplorerCallApi.CMD_KEY) {
         setTimeout(() => {
             void this.runAccessProfileAsync(node.entityId, readOnly, accessProfile?.id || '').catch(console.error);
