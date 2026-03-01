@@ -2,6 +2,15 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+v1.2.3-2602.2819  Sub-entity rendering; dialog inheritance; tab restore
+  :Sub-entity inline rendering
+  :Dictionary proactive loading
+  :Dialog inheritance
+  :Tab restore after Save/Refresh
+  :Error handling in dialogs
+  :Null option fix:
+     select placeholder options use value=null instead of value="" for correct null detection
+
 v1.2.2-2602.1817  Wire Save to REST
   :Save entity changes:
      POST /esq-cmd-save for general entities, POST /esq-cmd-asave for account entities

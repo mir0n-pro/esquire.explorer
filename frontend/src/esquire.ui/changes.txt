@@ -1,6 +1,43 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+02/28/2026 mir0n Sub-entity inline rendering; tab restore; dialog inheritance
+api\EsqDictionaryApi.ts
+  - added dictionaryFromCache() to interface
+api\EsqObjectKindFactory.ts
+  - added static kinds: PERSON_PRIMARY (992), ADDRESS_POSTAL (988), ADDRESS_BIZ (990)
+components\EsqEntityDetailsDialog.ts
+  - fields made protected to enable EsqNodeDetailsDialog inheritance
+  - added subdictionary() — sync cache lookup for sub-entity kind
+  - hasChanges() extended to detect changes in sub-entity fields
+  - onSave() extended: validates and collects sub-entity field changes
+  - saveData() refactored as Observable-based with tab restore
+  - loadData() added tab-restore param and catchError/EMPTY error handling
+  - added ngAfterViewChecked() for deferred tab restoration via pendingTabRestore
+  - tabContent() switched from index arg to tab.title
+  - removed ChangeDetectorRef dependency
+components\EsqEntityDetailsDialog.html
+  - added inline sub-entity field rendering for type='subentity' fields
+components\EsqNodeDetailsDialog.ts
+  - refactored to extend EsqEntityDetailsDialog (duplicate save/load/validation removed)
+components\EsqNodeDetailsDialog.html
+  - added inline sub-entity field rendering for type='subentity' fields
+components\EsqAccessProfileDialog.ts
+  - saveData() refactored as Observable-based with tab restore
+  - loadData() added tab-restore param and catchError/EMPTY error handling
+  - added ngAfterViewChecked() for deferred tab restoration via pendingTabRestore
+  - removed ChangeDetectorRef dependency
+  - removed tabContent() (tab bodyClass set to constant 'esq-first-tab-content')
+components\EsqAccessProfileDialog.html
+  - null option: value="" → value=null in select placeholders
+components\EsqDictionary.ts
+  - added loading Set to prevent concurrent duplicate loads
+  - added subRequested flag; proactively loads PERSON_PRIMARY/ADDRESS_POSTAL/ADDRESS_BIZ kinds
+  - added dictionaryFromCache() public method
+components\EsqTabFieldComponent.html
+  - tabContent() now receives tab.title instead of index
+  - added inline sub-entity rendering (iterates sub-dictionary fields per subentity slot)
+
 02/18/2026 mir0n Wire Save to REST — esquireCmdSave & esquireKeySave
 api\EsqRestApi.ts
   - added esquireCmdSave(), esquireKeySave()

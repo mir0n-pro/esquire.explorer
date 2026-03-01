@@ -13,6 +13,7 @@
 * 02/12/2026 mir0n  EsqNodeType in explicit file
 *                   init() loading from server and keeps ability to be defined locally
 * 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
+* 02/28/2026 mir0n  added static kinds: PERSON_PRIMARY (992), ADDRESS_POSTAL (988), ADDRESS_BIZ (990)
 */
 
 import {EsqTreeNode} from "./EsqTreeNode";
@@ -38,6 +39,21 @@ export class EsqObjectKindFactory {
       name: "accessprofile",
       title: "Access Profile"
   });
+  public static PERSON_PRIMARY:EsqObjectKind =  new EsqObjectKind({
+      id: 992,
+      name: "person_primary",
+      title: "Details"
+  });
+  public static ADDRESS_POSTAL:EsqObjectKind =  new EsqObjectKind({
+      id: 988,
+      name: "address_postal",
+      title: "Address"
+  });
+    public static ADDRESS_BIZ:EsqObjectKind =  new EsqObjectKind({
+        id: 990,
+        name: "address_postal",
+        title: "Address"
+    });
 
   private constructor () {
   }

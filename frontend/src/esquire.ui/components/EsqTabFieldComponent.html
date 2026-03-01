@@ -50,7 +50,7 @@
                 <select [(ngModel)]="details[field.name]" [disabled]="fieldReadOnly(field.readwrite, field.personal)" [title]="field.tooltip || ''"
                     [attr.data-field]="field.name" [style.color]="details[field.name] ? 'black' : 'grey'">
                     @if (field.nullmeaning) {
-                        <option value="" style="color: grey">{{field.nullmeaning}}</option>
+                        <option value=null style="color: grey">{{field.nullmeaning}}</option>
                     }
                     <option value="Y" style="color: black">Yes</option>
                     <option value="N" style="color: black">No</option>
@@ -102,7 +102,7 @@
                     <select [(ngModel)]="details[field.name]" [disabled]="fieldReadOnly(field.readwrite, field.personal)" [title]="field.tooltip || ''"
                         [style.color]="details[field.name] ? 'black' : 'grey'">
                         @if (field.nullmeaning) {
-                            <option value="" style="color: grey">{{field.nullmeaning}}</option>
+                            <option value=null style="color: grey">{{field.nullmeaning}}</option>
                         }
                         @for (option of field.listvalues; track option) {
                             <option [value]="option.split('~')[0]" style="color: black">{{option.split('~')[1] || option.split('~')[0]}}</option>

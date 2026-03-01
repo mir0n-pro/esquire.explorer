@@ -27,7 +27,7 @@
     @if (details$ | async; as details) {
       @if (dictionary$ | async; as dictionary) {
         @for (tab of dictionary; track tab.title; let i = $index;) {      
-          <mat-tab [label]="tab.title" bodyClass="{{tabContent(i)}}">
+          <mat-tab [label]="tab.title" bodyClass="{{tabContent(tab.title)}}">
             @for (field of tab.fields; track field.name) {
               @if (field.name == "name") {
                   <div class="esq-grid-input">
@@ -41,7 +41,6 @@
                              [title]="field.tooltip || ''"
                              [attr.data-field]="field.name"
                       />
-                    <!-- input type="text" [value]="details[field.name]" readonly tabindex="-1" /-->
                   </div>
                   <mat-divider></mat-divider>
                   <div class="esq-grid-input">
@@ -56,7 +55,22 @@
                   </div>
                   <mat-divider></mat-divider>
               } @else {
-                  @if (field.readwrite > 0) {
+                  @if (field.type == 'subentity') {
+                     @let sub = subdictionary(details[field.name]["kind"]);
+                     @if (sub[0] && sub[0].fields) {
+                         @for (subfield of sub[0].fields; track subfield.name) {
+                           @if (subfield.readwrite > 0) {
+                             <esq-tab-field
+                                    [field]=subfield
+                                 [details]=details[field.name]
+                                 [readOnly]=readOnly
+                                 [enableDetails]=true
+                                 [userId]=userId
+                             />
+                           }
+                         }
+                     }
+                  } @else if (field.readwrite > 0) {
                       <esq-tab-field
                           [field]=field
                           [details]=details

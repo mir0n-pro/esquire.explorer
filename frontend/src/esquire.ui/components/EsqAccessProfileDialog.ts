@@ -17,9 +17,12 @@
 * 02/18/2026 mir0n  added Save/Refresh buttons with change tracking
 *                   wired onSave() to restApi.esquireKeySave()
 *                   fixed change tracking: use component property instead of async alias
+* 02/28/2026 mir0n  saveData()/loadData() refactored: Observable-based, tab restore, catchError
+*                   added ngAfterViewChecked() with pendingTabRestore
+*                   removed ChangeDetectorRef dependency; removed tabContent()
 */
-import {AfterViewInit,
-  ChangeDetectorRef,
+import {AfterViewChecked,
+  AfterViewInit,
   Component,
   inject,
   Inject,
@@ -36,7 +39,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTabGroup, MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
-import { Observable, tap } from 'rxjs';
+import { catchError, EMPTY, Observable, tap } from 'rxjs';
 import { CommonModule } from '@angular/common'
 import {MatTableModule } from '@angular/material/table';
 import {EsqTabFieldComponent} from "./EsqTabFieldComponent";
@@ -82,7 +85,7 @@ import { EsqTabStringComponent } from "./EsqTabStringComponent";
   encapsulation: ViewEncapsulation.None,
 })
 
-export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy {
+export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
    @ViewChild('btnClose') btnClose! : MatButton;
    @ViewChild('btnSave') btnSave! : MatButton;
    @ViewChild(MatTabGroup) tabGroup! : MatTabGroup;
@@ -100,11 +103,11 @@ export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy
    public headerIcon:string = "";
    public headerName:string = "";
    private originalDetails: any = null;
+   private pendingTabRestore: number | null = null;
 
   constructor(
       dialogRef: MatDialogRef<EsqAccessProfileDialog>,
-      @Inject(MAT_DIALOG_DATA) data: any,
-      private cdr: ChangeDetectorRef
+      @Inject(MAT_DIALOG_DATA) data: any
     ) {
       this.dialogRef = dialogRef;
       this.id = data.id;
@@ -138,6 +141,7 @@ export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy
   }
 
   onSave(): void {
+    var savedTab: number = this.tabGroup?.selectedIndex ?? 0;
     var error: EsqValidationError | null = EsqUtils.validateFields(this.details, this.dictionary);
     if (error) {
       alert(error.message);
@@ -148,14 +152,7 @@ export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy
     if (changes) {
       EsqUtils.log('Save changes:', changes);
       var body = { id: this.id, ...changes };
-      this.restApi.esquireKeySave(this.id, body).subscribe({
-        next: () => {
-          this.originalDetails = EsqUtils.deepCopy(this.details);
-        },
-        error: (err: any) => {
-          alert('Save failed: ' + (err.detail || err.title || err));
-        }
-      });
+      this.saveData(body, savedTab);
     }
   }
 
@@ -172,7 +169,8 @@ export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy
   }
 
   onRefresh(): void {
-    this.loadData();
+    var savedTab: number = this.tabGroup?.selectedIndex ?? 0;
+    this.loadData(savedTab);
   }
 
   ngOnInit() {
@@ -182,14 +180,36 @@ export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy
       this.loadData();
   }
 
-  private loadData(): void {
+  private loadData(restoreTab?: number): void {
     this.details$ = this.restApi.esquireKey(this.id).pipe(
       tap(details => {
         this.details = details;
         this.originalDetails = EsqUtils.deepCopy(details);
         this.headerIcon = EsqObjectKindFactory.instanceOf(details.kind).icon;
         this.headerName = details.name || 'No defined';
-        this.cdr.detectChanges();
+        if (restoreTab) {
+          this.pendingTabRestore = restoreTab;
+        }
+      }),
+      catchError(err => {
+        alert('Load failed: ' + (err.detail || err.title || err));
+        return EMPTY;
+      })
+    );
+  }
+
+  private saveData(body: any, restoreTab?: number): void {
+    this.details$ = this.restApi.esquireKeySave(this.id, body).pipe(
+      tap(details => {
+        this.details = details;
+        this.originalDetails = EsqUtils.deepCopy(details);
+        if (restoreTab) {
+          this.pendingTabRestore = restoreTab;
+        }
+      }),
+      catchError(err => {
+        alert('Save failed: ' + (err.detail || err.title || err));
+        return EMPTY;
       })
     );
   }
@@ -200,13 +220,17 @@ export class EsqAccessProfileDialog implements OnInit,  AfterViewInit, OnDestroy
     this.dictionary$ = undefined;
   }
 
+  ngAfterViewChecked() {
+    if (this.pendingTabRestore !== null) {
+      this.tabGroup.selectedIndex = this.pendingTabRestore;
+      this.pendingTabRestore = null;
+    }
+  }
+
   ngAfterViewInit() {
     if (this.btnClose)  {
        this.btnClose.focus();
     }
   }
 
-  tabContent (index:number):string {
-    return index == 0 ? "esq-first-tab-content" :  "esq-other-tab-content";
-  }
 }

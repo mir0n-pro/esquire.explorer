@@ -32,7 +32,7 @@
     @if (details$ | async) {
       @if (dictionary$ | async; as dictionary) {
         @for (tab of dictionary; track tab.title; let i = $index;) {      
-          <mat-tab [label]="tab.title" bodyClass="{{tabContent(i)}}">
+          <mat-tab [label]="tab.title" bodyClass="esq-first-tab-content">
             @for (field of tab.fields; track field.name) {
               @if (field.readwrite > 0) {
                 <esq-tab-field

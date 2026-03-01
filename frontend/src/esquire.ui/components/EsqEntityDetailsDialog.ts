@@ -18,11 +18,18 @@
 * 02/17/2026 mir0n  added userId field
 * 02/18/2026 mir0n  added Save/Refresh buttons with change tracking
 *                   wired onSave() to restApi.esquireCmdSave()
+* 02/28/2026 mir0n  fields made protected to enable inheritance
+*                   added subdictionary() for sync sub-entity kind lookup
+*                   hasChanges() and onSave() extended for sub-entity fields
+*                   saveData()/loadData() refactored: Observable-based, tab restore, catchError
+*                   added ngAfterViewChecked() with pendingTabRestore
+*                   tabContent() switched from index to tab.title
+*                   removed ChangeDetectorRef dependency
 */
-import {AfterViewInit,
-  ChangeDetectorRef,
+
+import {AfterViewChecked,
+  AfterViewInit,
   Component,
-  inject,
   Inject,
   OnDestroy,
   OnInit,
@@ -37,7 +44,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTabGroup, MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
-import { Observable, tap } from 'rxjs';
+import { catchError, EMPTY, Observable, tap } from 'rxjs';
 import { CommonModule } from '@angular/common'
 import {MatTableModule } from '@angular/material/table';
 /*
@@ -56,7 +63,6 @@ import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
-
 import {EsqTabFieldComponent} from "./EsqTabFieldComponent";
 import {EsqUtils} from "./EsqUtils";
 import {EsqValidationError} from "./EsqValidationError";
@@ -81,14 +87,14 @@ import {EsqValidationError} from "./EsqValidationError";
   encapsulation: ViewEncapsulation.None,
 })
 
-export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy {
+export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
    @ViewChild('btnClose') btnClose! : MatButton;
    @ViewChild('btnSave') btnSave! : MatButton;
    @ViewChild(MatTabGroup) tabGroup! : MatTabGroup;
-   private dialogRef: MatDialogRef<EsqEntityDetailsDialog>;
+   protected dialogRef: MatDialogRef<EsqEntityDetailsDialog>;
 
-   private restApi: EsqRestApi;
-   private dictionaryApi: EsqDictionaryApi;
+   protected restApi: EsqRestApi;
+   protected dictionaryApi: EsqDictionaryApi;
    public callApi: EsqExplorerCallApi;
 
    public readOnly: boolean = false;
@@ -96,40 +102,54 @@ export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy
    public details: any = null;
    public details$: Observable<any> | undefined;
    public dictionary$: Observable<EsqEntityLayer[]> | undefined;
-   private dictionary: EsqEntityLayer[] = [];
-   readonly detailsDialog:MatDialog = inject(MatDialog);
-   private givenEntityId:string = "";
-   private givenEntityKind:number = -1;
+   protected dictionary: EsqEntityLayer[] = [];
+   protected pendingTabRestore: number | null = null;
+   protected originalDetails: any = null;
+
+   protected givenEntityId:string = "";
+   protected givenEntityKind:number = -1;
    public headerIcon:string = "";
    public headerName:string = "";
-   private originalDetails: any = null;
 
   constructor(
       dialogRef: MatDialogRef<EsqEntityDetailsDialog>,
-      @Inject(MAT_DIALOG_DATA) data: any,
-      private cdr: ChangeDetectorRef
+      @Inject(MAT_DIALOG_DATA) data: any
     ) {
-      this.dialogRef = dialogRef;
 
-      this.givenEntityId = data.id;
-      this.givenEntityKind = data.kind;
-      this.restApi = data.restApi;
+      this.dialogRef = dialogRef;
+     this.restApi = data.restApi;
       this.dictionaryApi = data.dictionaryApi;
       this.callApi = data.callApi;
       this.readOnly = data.readOnly;
       this.userId = data.userId;
+
+      this.givenEntityId = data.id;
+      this.givenEntityKind = data.kind;
 
       this.dialogRef.disableClose = true;
       this.dialogRef.addPanelClass('esq-dialog');
       this.dialogRef.updateSize('60vw', '60vh');
     }
 
-  closeDialog(): void {
-    this.dialogRef.close();
-  }
+  //closeDialog(): void {
+  //  this.dialogRef.close();
+  //}
 
   hasChanges(): boolean {
-    return EsqUtils.getChangedFields(this.originalDetails, this.details) !== null;
+    var ret: boolean =  (EsqUtils.getChangedFields(this.originalDetails, this.details) !== null);
+    if (!ret) {
+        for (var tab of this.dictionary) {
+            for (var field of tab.fields) {
+                if (field.type === 'subentity' && !ret) {
+                    ret = EsqUtils.getChangedFields(this.originalDetails?.[field.name], this.details?.[field.name]) !== null;
+                    if (ret) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return ret;
   }
 
   onClose(): void {
@@ -143,28 +163,53 @@ export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy
   }
 
   onSave(): void {
+    var savedTab: number = this.tabGroup?.selectedIndex ?? 0;
+    var changes: Record<string, any>|null = null;
     var error: EsqValidationError | null = EsqUtils.validateFields(this.details, this.dictionary);
+    if (!error) {
+      changes = EsqUtils.getChangedFields(this.originalDetails, this.details) ?? {};
+      for (var tabIndex = 0; tabIndex < this.dictionary.length && !error; tabIndex++) {
+        for (var field of this.dictionary[tabIndex].fields) {
+          if (field.type === 'subentity') {
+            var subDict = this.subdictionary(this.details?.[field.name]?.kind);
+            var subError = EsqUtils.validateFields(this.details?.[field.name], subDict);
+            if (subError) {
+                        error = {
+                            fieldName: subError.fieldName,
+                            fieldLabel: subError.fieldLabel,
+                            message: subError.message,
+                            tabIndex: tabIndex
+                        };
+              break;
+            }
+            var subChanges = EsqUtils.getChangedFields(this.originalDetails?.[field.name], this.details?.[field.name]);
+            if (subChanges) {
+              var subData = this.details[field.name];
+                        changes[field.name] = {id: subData.id, kind: subData.kind, ...subChanges};
+            }
+          }
+        }
+      }
+    }
     if (error) {
       alert(error.message);
       this.focusField(error);
-      return;
-    }
-    var changes = EsqUtils.getChangedFields(this.originalDetails, this.details);
-    if (changes) {
+    } else if (changes && Object.keys(changes).length > 0) {
       EsqUtils.log('Save changes:', changes);
       var body = { id: this.givenEntityId, kind: this.givenEntityKind, ...changes };
-      this.restApi.esquireCmdSave(this.givenEntityKind, this.givenEntityId, body).subscribe({
-        next: () => {
-          this.originalDetails = EsqUtils.deepCopy(this.details);
-        },
-        error: (err: any) => {
-          alert('Save failed: ' + (err.detail || err.title || err));
-        }
-      });
+      this.saveData(body, savedTab);
     }
   }
 
-  private focusField(error: EsqValidationError): void {
+  public subdictionary(kindId: any): EsqEntityLayer[] {
+    var ret: EsqEntityLayer[] = [];
+    if (kindId) {
+      ret = this.dictionaryApi.dictionaryFromCache(kindId as number);
+    }
+    return ret;
+  }
+
+  focusField(error: EsqValidationError): void {
     if (this.tabGroup) {
       this.tabGroup.selectedIndex = error.tabIndex;
     }
@@ -177,32 +222,64 @@ export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy
   }
 
   onRefresh(): void {
-    this.loadData();
+    var savedTab: number = this.tabGroup?.selectedIndex ?? 0;
+    this.loadData(savedTab);
   }
 
   ngOnInit() {
-    this.dictionary$ = this.dictionaryApi.dictionary(this.givenEntityKind).pipe(
-      tap(dict => { this.dictionary = dict; })
-    );
-    this.loadData();
+      this.dictionary$ = this.dictionaryApi.dictionary(this.givenEntityKind).pipe(
+        tap(dict => { this.dictionary = dict; })
+      );
+      this.loadData();
   }
 
-  private loadData(): void {
+
+  loadData(restoreTab?: number): void {
     this.details$ = this.restApi.esquireCmd(this.givenEntityKind, this.givenEntityId).pipe(
       tap(details => {
         this.details = details;
         this.originalDetails = EsqUtils.deepCopy(details);
         this.headerIcon = EsqObjectKindFactory.instanceOf(details.kind).icon;
         this.headerName = details.name || 'No defined';
-        this.cdr.detectChanges();
+        if (restoreTab) {
+          this.pendingTabRestore = restoreTab;
+        }
+      }),
+      catchError(err => {
+        alert('Load failed: ' + (err.detail || err.title || err));
+        return EMPTY;
       })
     );
   }
 
-  ngOnDestroy() {
+  saveData(body: any, restoreTab?: number): void {
+    this.details$ = this.restApi.esquireCmdSave(this.givenEntityKind, this.givenEntityId, body).pipe(
+      tap(details => {
+        this.details = details;
+        this.originalDetails = EsqUtils.deepCopy(details);
+        if (restoreTab) {
+          this.pendingTabRestore = restoreTab;
+        }
+      }),
+      catchError(err => {
+        alert('Save failed: ' + (err.detail || err.title || err));
+        return EMPTY;
+      })
+    );
+  }
+
+
+ngOnDestroy() {
     this.details = null;
     this.details$ = undefined;
     this.dictionary$ = undefined;
+  }
+
+  ngAfterViewChecked() {
+    if (this.pendingTabRestore !== null) {
+      this.tabGroup.selectedIndex = this.pendingTabRestore;
+      this.pendingTabRestore = null;
+    }
   }
 
   ngAfterViewInit() {
@@ -211,7 +288,8 @@ export class EsqEntityDetailsDialog implements OnInit,  AfterViewInit, OnDestroy
     }
   }
 
-  tabContent (index:number):string {
-    return index == 0 ? "esq-first-tab-content" :  "esq-other-tab-content";
+  tabContent (title:string):string {
+    return title == "Description" ? "esq-other-tab-content" : "esq-first-tab-content";
   }
+
 }
