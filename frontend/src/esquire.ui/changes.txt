@@ -1,6 +1,17 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+03/01/2026 mir0n date field type; null change-detection fix
+components\EsqUtils.ts
+  - getChangedFields: null now detected as a change (typeof null === 'object' guard fix)
+components\EsqTabFieldComponent.ts
+  - added provideNativeDateAdapter() provider
+components\EsqTabFieldComponent.html
+  - added date field type rendering (native <input type="date">)
+components\EsqDetailsDialog.scss
+  - added input[type="date"] sizing within .esq-nullable-input (flex, height, border)
+  - added .esq-date-clear styles (flex, font-size, cursor, hover/active)
+
 02/28/2026 mir0n Sub-entity inline rendering; tab restore; dialog inheritance
 api\EsqDictionaryApi.ts
   - added dictionaryFromCache() to interface

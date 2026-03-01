@@ -136,6 +136,20 @@
       max-width: 100%;
     }
 
+   // this would not work to remove embedded "clear" button
+    .esq-nullable-input > input[type="date"]::-webkit-clear-button {
+      display: none;
+    }
+
+    .esq-nullable-input > input[type="date"] {
+      flex: 0 1 auto;  /* preferred = width.ch; shrinkable when dialog narrows */
+      min-width: 0;    /* critical for shrinking instead of pushing X to next line */
+      max-width: 100%;
+      height: 24px;
+      border: 1px solid #ccc;
+    }
+
+
     .esq-nullable-input > .esq-null-clear {
       flex: 0 0 auto;
       width: 12px;
@@ -162,6 +176,33 @@
       background: whitesmoke;
       //background: #d2d2d2;
     }
+
+    .esq-nullable-input > .esq-date-clear {
+      flex: 0 0 auto;
+      width: 12px;
+      height: 18px;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      margin-left: 0px;            /* pull into the input area */
+      position: relative;
+      left: 0px;                    /* your nudge left */
+      font-size: 18px;
+
+      cursor: pointer;
+      user-select: none;
+    }
+    .esq-date-clear:hover {
+      background: whitesmoke;
+      //  background: #dcdcdc;
+    }
+    .esq-date-clear:active {
+      background: whitesmoke;
+      //background: #d2d2d2;
+    }
+
 
   }
 

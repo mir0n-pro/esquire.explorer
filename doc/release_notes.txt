@@ -2,6 +2,11 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+v1.2.3-2603.0115  date field type; null change-detection fix
+  :Null change detection fix:
+  :Date field:
+     native <input type="date"> (Angular Material datepicker skipped: breaks grid structure)
+
 v1.2.3-2602.2819  Sub-entity rendering; dialog inheritance; tab restore
   :Sub-entity inline rendering
   :Dictionary proactive loading

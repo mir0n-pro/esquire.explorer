@@ -14,25 +14,21 @@
 *                   added clearToNull, formatNumber, onNumberInput
 *                   added tooltip support via field.tooltip
 *                   added data-field attributes on all inputs
+* 03/01/2026 mir0n  added provideNativeDateAdapter() provider
 */
 import {AfterViewInit, 
   Component, 
-  ElementRef, 
-  Input, 
+  Input,
   OnDestroy,
   OnInit, 
-  QueryList, 
-  ViewChildren, 
   ViewEncapsulation
 } from '@angular/core';
 import { MatButtonModule} from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'
 import {MatTableModule, MatTableDataSource, MatRow } from '@angular/material/table';
-import { DataSource } from '@angular/cdk/collections';
-/*  
+/*
 import { EsqNodeType, EsqExplorerCallApi } from '@mir0n-pro/esquire.ui/api';
 */
 import {EsqObjectKind} from 'src/esquire.ui/api/EsqObjectKind';
@@ -44,6 +40,7 @@ import {EsqTabIknfTableComponent} from "./EsqTabIknfTableComponent";
 import {EsqTabStringComponent} from "./EsqTabStringComponent";
 import {EsqTabListComponent} from "./EsqTabListComponent";
 import {MatDivider} from "@angular/material/list";
+import {provideNativeDateAdapter} from "@angular/material/core";
 
   @Component({
   selector: 'esq-tab-field',
@@ -52,7 +49,6 @@ import {MatDivider} from "@angular/material/list";
       imports: [
           MatButtonModule,
           MatTooltipModule,
-  //        MatIcon,
           CommonModule,
           FormsModule,
           MatTableModule,
@@ -60,8 +56,9 @@ import {MatDivider} from "@angular/material/list";
           EsqTabIknfTableComponent,
           EsqTabStringComponent,
           EsqTabListComponent,
-          MatDivider
+          MatDivider,
       ],
+      providers: [provideNativeDateAdapter()],
   encapsulation: ViewEncapsulation.None,
 })
 
@@ -98,7 +95,8 @@ export class EsqTabFieldComponent implements OnInit,  AfterViewInit, OnDestroy {
 
 
       clearToNull(field: any): void {
-          this.details[field.name] = '';
+          //this.details[field.name] = '';
+          this.details[field.name] = null;
       }
 
       formatNumber(value: any, format?: string): string {

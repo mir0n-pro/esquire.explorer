@@ -9,6 +9,7 @@
 * 02/17/2026 mir0n added formatNumber and parseNumber static methods
 *                  added validateFields for Save validation
 *                  added deepCopy, getChangedFields methods
+* 03/01/2026 mir0n  getChangedFields: null treated as changed value (typeof null === 'object' fix)
 */
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 import {EsqValidationError} from './EsqValidationError';
@@ -126,7 +127,7 @@ export class EsqUtils {
       if (current.hasOwnProperty(key)) {
         var origVal = original[key];
         var currVal = current[key];
-        if (typeof currVal !== 'object' && origVal !== currVal) {
+        if ((currVal === null || typeof currVal !== 'object') && origVal !== currVal) {
           changes[key] = currVal;
           hasChanges = true;
         }
