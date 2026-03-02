@@ -2,6 +2,9 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+v1.2.3-2603.0120  
+  Wait for initial access profile load
+
 v1.2.3-2603.0115  date field type; null change-detection fix
   :Null change detection fix:
   :Date field:

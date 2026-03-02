@@ -31,6 +31,7 @@
 * 02/18/2026 mir0n  added esquireCmdSave() wrapper (routes acct to /esq-cmd-asave)
 *                   added esquireKeySave() wrapper
 *                   console.log replaced with EsqUtils.log
+* 03/01/2026 mir0n  wait for initial access profile load
 */
 import {Component,
   OnInit,
@@ -176,6 +177,10 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
         this.authState.set('' + event.type);
       }
     });
+  }
+
+  public profileLoaded(): boolean {
+    return this.profile !== null;
   }
 
   private setErrorMessage(msg:string) {

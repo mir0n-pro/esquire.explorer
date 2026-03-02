@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+03/01/2026 mir0n 
+explorer\flatTree\app-explorer.component.ts
+  - Wait for initial access profile load
+
 02/18/2026 mir0n Wire Save to REST — esquireCmdSave & esquireKeySave
 explorer\flatTree\app-explorer.component.ts
   - added esquireCmdSave() wrapper (routes acct entities to /esq-cmd-asave)
