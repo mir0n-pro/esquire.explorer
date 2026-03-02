@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y gettext-base
 
 
 # Only required files !!!
-COPY *.json .
+COPY *.json ./
 COPY ./src/ ./src/
 COPY ./public/ ./public/
 
