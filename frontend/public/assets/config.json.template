@@ -1,6 +1,6 @@
 {
   "apiBasePath": "http://${BACKEND_HOST}:${BACKEND_PORT}",
-  "keycloakConfigUrl": "http://${KEYCLOAK_FACADE_HOST}:${KEYCLOAK_FACADE_PORT}",
-  "keycloakConfigRealm": "${KEYCLOAK_REALM}",
-  "keycloakConfigClientId": "${KEYCLOAK_CLIENT_ID}"
+  "keycloakUrl": "http://${KEYCLOAK_FACADE_HOST}:${KEYCLOAK_FACADE_PORT}",
+  "keycloakRealm": "${KEYCLOAK_REALM}",
+  "keycloakClientId": "${KEYCLOAK_CLIENT_ID}"
 }
