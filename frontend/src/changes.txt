@@ -1,7 +1,12 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
-03/01/2026 mir0n 
+03/03/2026 claude Fix Keycloak SSO iframe timeout in K8s deployment
+main.ts
+  - checkLoginIframe: true → false (cross-port iframe unreliable with self-signed certs)
+  - onLoad stays 'check-sso' — session detection still works via silentCheckSsoRedirectUri
+
+03/01/2026 mir0n
 explorer\flatTree\app-explorer.component.ts
   - Wait for initial access profile load
 

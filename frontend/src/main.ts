@@ -9,6 +9,7 @@
 * 01/08/2026 mir0n assets/config.json is required
 *                  added keyclock init (unfortunately you cannod do it within app.config.ts )
 * 01/10/2026 mir0n complete keyCloak init withAutoRefreshToken
+* 03/03/2026 claude checkLoginIframe: false (cross-port iframe unreliable with self-signed certs)
 */
 
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -40,7 +41,7 @@ import { BASE_PATH } from './rest';
           },
           initOptions: {
             onLoad: 'check-sso',
-            checkLoginIframe: true, 
+            checkLoginIframe: false,
             pkceMethod: 'S256',       
             //flow: 'standard',
             silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
