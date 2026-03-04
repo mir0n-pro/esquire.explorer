@@ -1,6 +1,32 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+03/03/2026 mir0n Add/Remove roles in esq-tab-ikn-list; text field type; array change detection
+components\EsqUtils.ts
+  - getChangedFields: array changes detected via JSON.stringify comparison
+components\EsqTabFieldComponent.ts
+  - added TextFieldModule for cdkTextareaAutosize
+components\EsqTabFieldComponent.html
+  - esq-tab-ikn-list: added esqListElementsChange, esqAddMenuElements, [readonly] bindings
+  - added 'text' field type: <textarea cdkTextareaAutosize cdkAutosizeMinRows="1">
+  - esq-date-clear, esq-null-clear: <span> → <button type="button"> (keyboard accessible)
+components\EsqTabIknListComponent.ts
+  - added esqListElementsChange @Output, esqAddMenuElements and readonly @Inputs
+  - addIknElements built from esqAddMenuElements (with icon) in ngOnInit
+  - canAddBtn(): enabled by esqAddMenuElements presence (not row selection)
+  - canAddMenuItem(): excludes already-present items; admin (kind=980) limited to one
+  - doAddMenuItem(): appends item, emits change, refreshes datasource, re-focuses new row
+  - doRemoveBtn(): filter esqListElements by focused item id (not by index)
+  - canDetailsBtn(): checks kind.detailed flag before enabling
+  - Add button wired to MatMenu; all toolbar buttons use [disabled] binding
+  - comment out sort buttons
+components\EsqDetailsDialog.scss
+  - .esq-grid-input-text textarea: auto-height styles (resize:none, font inherit, read-only border)
+  - input[type="date"]:read-only: border-bottom only (matches readonly convention)
+  - esq-null-clear, esq-date-clear: button reset (border:none, padding:0, focus-visible outline)
+api\ProblemDetail.ts
+  - title and detail field types changed from 'string' to 'text'
+
 03/01/2026 mir0n date field type; null change-detection fix
 components\EsqUtils.ts
   - getChangedFields: null now detected as a change (typeof null === 'object' guard fix)

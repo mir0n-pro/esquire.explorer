@@ -14,19 +14,34 @@
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef class="mat-elevation-z2  esq-tab-list-elevation-z2" >
           <div>{{esqListHeader}}</div>
-          <button matIconButton class = "esq-icon-button" matTooltip = "Details" disabled="{{!canDetailsBtn()}}" (click)="doDetailsBtn()">
+          <button matIconButton class = "esq-icon-button" matTooltip = "Details" [disabled]="!canDetailsBtn()" (click)="doDetailsBtn()">
             <mat-icon  [ngClass]="{'esq-icon-green': canDetailsBtn() }">check_circle_outline</mat-icon>
           </button>
-          <button matIconButton class = "esq-icon-button" matTooltip = "Add"  disabled="{{!canAddBtn()}}" (click)="doAddBtn()">
+          <button matIconButton class = "esq-icon-button" matTooltip = "Add"  [disabled]="!canAddBtn()" [matMenuTriggerFor]="addMenu">
             <mat-icon [ngClass]="{'esq-icon-green': canAddBtn()}">add_circle_outline</mat-icon>
           </button>
-          <button matIconButton  class = "esq-icon-button" matTooltip = "Move up"  disabled="{{!canUpBtn()}}" (click)="doUpBtn()">
+          <mat-menu #addMenu="matMenu">
+            @for (item of addIknElements; track item.id) {
+              <button mat-menu-item
+                class="esq-menu-item"
+                [disabled]="!canAddMenuItem(item)"
+                (click)="doAddMenuItem(item)">
+                @if (item.kind) {
+                  <img [src]="item.icon || ''" class="esq-menu-icon"/>
+                }
+                {{item.name}}
+              </button>
+            }
+          </mat-menu>
+<!--
+          <button matIconButton  class = "esq-icon-button" matTooltip = "Move up"  [disabled]="!canUpBtn()" (click)="doUpBtn()">
             <mat-icon [ngClass]="{'esq-icon-blue': canUpBtn()}">arrow_circle_up</mat-icon>
           </button>            
-          <button matIconButton class = "esq-icon-button" matTooltip = "Move down"  disabled="{{!canDownBtn()}}" (click)="doDownBtn()">
+          <button matIconButton class = "esq-icon-button" matTooltip = "Move down"  [disabled]="!canDownBtn()" (click)="doDownBtn()">
             <mat-icon [ngClass]="{'esq-icon-blue': canDownBtn()}">arrow_circle_down</mat-icon>
         </button>
-        <button matIconButton class = "esq-icon-button" matTooltip = "Remove"  disabled="{{!canRemoveBtn()}}" (click)="doRemoveBtn()">
+-->
+        <button matIconButton class = "esq-icon-button" matTooltip = "Remove"  [disabled]="!canRemoveBtn()" (click)="doRemoveBtn()">
           <mat-icon [ngClass]="{'esq-icon-red': canRemoveBtn()}">remove_circle_outline</mat-icon>
         </button>
         <!-- close_small cancel_presentation cancel close remove_circle_outline-->

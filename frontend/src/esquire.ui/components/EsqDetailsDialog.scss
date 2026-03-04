@@ -73,6 +73,24 @@
 
   }
 
+  .esq-grid-input-text textarea {
+    resize: none;
+    overflow: hidden;
+    width: 100%;
+    min-height: 22px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 1.4;
+    padding: 2px 4px;
+    &:read-only {
+      border: none;
+      border-bottom: 1px solid #ccc;
+      background: transparent;
+    }
+  }
+
   .esq-grid-input {
     //position: relative;
     min-height: 16px;
@@ -147,8 +165,11 @@
       max-width: 100%;
       height: 24px;
       border: 1px solid #ccc;
+      &:read-only {
+        border: none;
+        border-bottom: 1px solid #ccc;
+      }
     }
-
 
     .esq-nullable-input > .esq-null-clear {
       flex: 0 0 auto;
@@ -166,6 +187,12 @@
 
       cursor: pointer;
       user-select: none;
+
+      /* button reset */
+      border: none;
+      padding: 0;
+      outline: none;
+      &:focus-visible { outline: 1px solid #1976d2; border-radius: 2px; }
     }
 
     .esq-null-clear:hover {
@@ -193,6 +220,13 @@
 
       cursor: pointer;
       user-select: none;
+      z-index: 1;
+
+      /* button reset */
+      border: none;
+      padding: 0;
+      outline: none;
+      &:focus-visible { outline: 1px solid #1976d2; border-radius: 2px; }
     }
     .esq-date-clear:hover {
       background: whitesmoke;

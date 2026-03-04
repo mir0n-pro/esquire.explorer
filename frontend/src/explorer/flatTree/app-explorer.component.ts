@@ -485,6 +485,8 @@ export const EsquireObjectKinds = [
     new EsqObjectKind({id: 53, name:"maccountlnk", icon:"img/links/macctl.ico"}),
     new EsqObjectKind({id: 54, name:"paccount", icon:"img/pacct.ico"}),
     new EsqObjectKind({id: 55, name:"paccountlnk", icon:"img/links/pacctl.ico"}),
+    new EsqObjectKind({id: 980, name:"admin", icon:"img/star.ico"}),
+    new EsqObjectKind({id: 982, name:"tools", icon:"img/tools.ico"}),
 ] as const;
 
 export const EsquireStatuses = {

@@ -15,6 +15,7 @@
 *                   added tooltip support via field.tooltip
 *                   added data-field attributes on all inputs
 * 03/01/2026 mir0n  added provideNativeDateAdapter() provider
+* 03/03/2026 mir0n  added TextFieldModule for cdkTextareaAutosize (text field type)
 */
 import {AfterViewInit, 
   Component, 
@@ -41,6 +42,7 @@ import {EsqTabStringComponent} from "./EsqTabStringComponent";
 import {EsqTabListComponent} from "./EsqTabListComponent";
 import {MatDivider} from "@angular/material/list";
 import {provideNativeDateAdapter} from "@angular/material/core";
+import {TextFieldModule} from "@angular/cdk/text-field";
 
   @Component({
   selector: 'esq-tab-field',
@@ -57,6 +59,7 @@ import {provideNativeDateAdapter} from "@angular/material/core";
           EsqTabStringComponent,
           EsqTabListComponent,
           MatDivider,
+          TextFieldModule,
       ],
       providers: [provideNativeDateAdapter()],
   encapsulation: ViewEncapsulation.None,

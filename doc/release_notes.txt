@@ -2,7 +2,17 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
-v1.2.3-2603.0120  
+v1.2.3-2603.0315  Add/Remove roles; text field type
+  :complete the list tab with add button dropdown menu
+  :Array change detection
+  :Text field type
+  :Keyboard-accessible clear button
+  :ProblemDetail:
+     title and detail field types changed from 'string' to 'text' (multi-line textarea)
+  :gateway use default port
+  :comment out sort buttons in the list tab
+
+v1.2.3-2603.0120
   Wait for initial access profile load
 
 v1.2.3-2603.0115  date field type; null change-detection fix

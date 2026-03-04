@@ -9,22 +9,32 @@
 * 02/12/2026 mir0n  EsqNodeType in explicit file
 * 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
 * 02/17/2026 mir0n  use CMD_DEFAULT constant from EsqExplorerCallApi
+* 03/03/2026 mir0n  added esqListElementsChange output; esqAddMenuElements, readonly inputs
+*                   addIknElements built from esqAddMenuElements in ngOnInit
+*                   canAddBtn(): enabled when esqAddMenuElements has items (not index-based)
+*                   canAddMenuItem(): filters already-present and kind-exclusive items
+*                   doAddMenuItem(): appends item, emits change, refreshes view, re-focuses
+*                   doRemoveBtn(): filter by focused item id (not by index)
+*                   canDetailsBtn(): checks kind.detailed flag
+*                   Add button wired to MatMenu; all buttons use [disabled] binding
 */
-import {AfterViewInit, 
-  Component, 
-  ElementRef, 
-  Input, 
-  OnDestroy,
-  OnInit, 
-  QueryList, 
-  ViewChildren, 
-  ViewEncapsulation
+import {
+    AfterViewInit,
+    Component,
+    ElementRef, EventEmitter,
+    Input,
+    OnDestroy,
+    OnInit, Output,
+    QueryList,
+    ViewChildren,
+    ViewEncapsulation
 } from '@angular/core';
 import { MatButtonModule} from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common'
 import {MatTableModule, MatTableDataSource, MatRow } from '@angular/material/table';
+import { MatMenuModule } from '@angular/material/menu';
 import { DataSource } from '@angular/cdk/collections';
 /*  
 import { EsqNodeType, EsqExplorerCallApi } from '@mir0n-pro/esquire.ui/api';
@@ -32,6 +42,7 @@ import { EsqNodeType, EsqExplorerCallApi } from '@mir0n-pro/esquire.ui/api';
 import {EsqObjectKind} from 'src/esquire.ui/api/EsqObjectKind';
 import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqObjectKindFactory} from "src/esquire.ui/api/EsqObjectKindFactory";
+import {EsqNewMenuItem} from "../api/EsqContextMenuBuilder";
 
   @Component({
   selector: 'esq-tab-ikn-list',
@@ -42,7 +53,8 @@ import {EsqObjectKindFactory} from "src/esquire.ui/api/EsqObjectKindFactory";
     MatTooltipModule,
     MatIcon,
     CommonModule,
-    MatTableModule
+    MatTableModule,
+    MatMenuModule,
   ],
   encapsulation: ViewEncapsulation.None,
 })
@@ -55,7 +67,10 @@ export class EsqTabIknListComponent implements OnInit,  AfterViewInit, OnDestroy
   @ViewChildren(MatRow, { read: ElementRef }) matRows!: QueryList<ElementRef>; // Assuming MatRow is a directive applied to your rows
 
   @Input() public esqListElements!: any[];
+  @Output() public esqListElementsChange = new EventEmitter<any[]>();
+  @Input() public esqAddMenuElements!: any[];
   @Input() public esqListHeader:string = '';
+  @Input() public readonly :boolean = false;
   @Input() public esqEnableAdd:boolean = false;
   @Input() public esqEnableRemove:boolean = false;
   @Input() public esqEnableSort:boolean = false;
@@ -64,8 +79,10 @@ export class EsqTabIknListComponent implements OnInit,  AfterViewInit, OnDestroy
 
   public tabIknElements: TabIknElement[] = [];
   public tabListDataSource!:DataSource<TabIknElement>;
+  public addIknElements: TabIknElement[] = [];
 
-  constructor() {
+
+      constructor() {
     this.tabListDataSource = new MatTableDataSource([]);
   }      
 
@@ -87,7 +104,27 @@ export class EsqTabIknListComponent implements OnInit,  AfterViewInit, OnDestroy
         })
         this.listElementFocusedIndex = 0;
         this.tabListDataSource = new MatTableDataSource(this.tabIknElements);
-      }    
+      }
+
+      if (this.esqAddMenuElements && this.esqAddMenuElements.length > 0) {
+        //TODO: create menu items for add button based on esqAddMenuElements
+        this.esqAddMenuElements.forEach ((x: any) => {
+            var eok: EsqObjectKind = EsqObjectKindFactory.instanceOf(x.kind);
+            this.addIknElements[this.addIknElements.length] = ({
+                sort : 0,
+                id : x.id,
+                name : x.name,
+                kind : x.kind,
+                icon : eok.icon
+            });
+        });
+        if (!this.readonly) {
+            this.esqEnableAdd = true;
+            this.esqEnableRemove = true;
+            //this.esqEnableSort = false;
+            //this.esqEnableDetails = false;
+        }
+      }
     }
   }
 
@@ -158,11 +195,16 @@ export class EsqTabIknListComponent implements OnInit,  AfterViewInit, OnDestroy
   }
   
   canDetailsBtn():boolean {
-    return this.esqEnableDetails
+    var ret :boolean = this.esqEnableDetails
       && this.esqExplorerCallApi
       && this.tabIknElements.length > 0
       && this.listElementFocusedIndex >=0;
-
+      if (ret) {
+          var el: TabIknElement = this.tabIknElements[this.listElementFocusedIndex];
+          var kind: EsqObjectKind = EsqObjectKindFactory.instanceOf(el.kind);
+          ret = kind.detailed;
+      }
+    return ret;
   }
   doDetailsBtn() {
       if (this.canDetailsBtn()) {
@@ -174,12 +216,52 @@ export class EsqTabIknListComponent implements OnInit,  AfterViewInit, OnDestroy
   }
 
   canAddBtn():boolean {
-    return this.esqEnableAdd && this.listElementFocusedIndex >=0; 
+    return this.esqEnableAdd && this.esqAddMenuElements?.length > 0;
   }
-  doAddBtn() {
-    if (this.canAddBtn()) {
-      //do nothing for now
+  canAddMenuItem(item: TabIknElement):boolean {
+    var ret:boolean = this.esqEnableAdd && this.esqAddMenuElements?.length > 0;
+    if (ret) {
+        for (var i = 0; i < this.tabIknElements.length; i++) {
+            if (this.tabIknElements[i].name == item.name) {
+                ret = false;
+                break;
+            }
+            //xxx: only one admin role possible : TODO: make is generic
+            if (item.kind == 980 && this.tabIknElements[i].kind == 980) {
+                ret = false;
+                break;
+            }
+        }
     }
+    return ret;
+  }
+
+  doAddMenuItem(item: TabIknElement): void {
+    var tie: TabIknElement = {
+      sort: this.tabIknElements.length + 1,
+      id: item.id,
+      name: item.name,
+      kind: item.kind,
+      icon: item.icon
+    };
+    var element: any = {
+        id: item.id,
+        name: item.name,
+        kind: item.kind
+    };
+    var next = [...(this.esqListElements ?? []), element];
+    this.esqListElementsChange.emit(next);
+
+    this.tabIknElements.push(tie);
+    this.tabListDataSource = new MatTableDataSource(this.tabIknElements);
+    this.listElementFocusedIndex = this.tabIknElements.length - 1;
+      // Re-focus the new line (optional)
+      setTimeout(() => {
+          const rows = this.matRows?.toArray?.() ?? [];
+          const row = rows[this.listElementFocusedIndex];
+          row?.nativeElement?.focus?.();
+      }, 0);
+
   }
 
   canUpBtn():boolean {
@@ -205,7 +287,30 @@ export class EsqTabIknListComponent implements OnInit,  AfterViewInit, OnDestroy
   }
   doRemoveBtn() {
     if (this.canRemoveBtn()) {
-      //do noting for now
+        const index = this.listElementFocusedIndex;
+        var focused: TabIknElement = this.tabIknElements[index];
+
+        // Create a NEW array matched by focused item identity, not by index
+        const next = (this.esqListElements ?? []).filter(x => !(x.id === focused.id));
+
+        // Notify parent: this is what usually enables "Save"
+        this.esqListElementsChange.emit(next);
+        // Update local view model
+        this.tabIknElements.splice(index, 1);
+        // Refresh datasource
+        this.tabListDataSource = new MatTableDataSource(this.tabIknElements);
+        // Fix focus index
+        if (this.tabIknElements.length === 0) {
+            this.listElementFocusedIndex = -1;
+        } else {
+            this.listElementFocusedIndex = Math.min(index, this.tabIknElements.length - 1);
+            // 5) Re-focus the next row (optional)
+            setTimeout(() => {
+                const rows = this.matRows?.toArray?.() ?? [];
+                const row = rows[this.listElementFocusedIndex];
+                row?.nativeElement?.focus?.();
+            }, 0);
+        }
     }
   }
 }

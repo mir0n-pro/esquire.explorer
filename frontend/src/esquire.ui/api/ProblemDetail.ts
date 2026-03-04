@@ -7,6 +7,7 @@
 *  History:
 * 02/17/2026 mir0n nullable changed from boolean to string
 *                  added personal, minmax fields to dictionary
+* 03/03/2026 mir0n  title and detail field types changed from 'string' to 'text'
 */
 
 import { EsqEntityLayer } from "./EsqEntityDictionary";
@@ -42,7 +43,7 @@ export const problemDetailDictionary:EsqEntityLayer[] = [
         listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
       },
       {
-        name: "title", sort: 1, label: "title", type: "string", tooltip: "Short, human-readable summary",
+        name: "title", sort: 1, label: "title", type: "text", tooltip: "Short, human-readable summary",
         nullable: 'N', layer: 0, readwrite: 1, format: "",
         listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:'100'
       },
@@ -60,7 +61,7 @@ export const problemDetailDictionary:EsqEntityLayer[] = [
   { title: "Details",
     fields: [
       {
-        name: "detail", sort: 0, label: "detail", type: "string", tooltip: "Detailed, actionable explanation",
+        name: "detail", sort: 0, label: "detail", type: "text", tooltip: "Detailed, actionable explanation",
         nullable: 'N', layer: 1, readwrite: 1, format: "",
         listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:'200'
       },

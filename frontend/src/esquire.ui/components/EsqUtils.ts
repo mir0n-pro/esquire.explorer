@@ -10,6 +10,7 @@
 *                  added validateFields for Save validation
 *                  added deepCopy, getChangedFields methods
 * 03/01/2026 mir0n  getChangedFields: null treated as changed value (typeof null === 'object' fix)
+* 03/03/2026 mir0n  getChangedFields: array changes detected via JSON.stringify comparison
 */
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 import {EsqValidationError} from './EsqValidationError';
@@ -127,7 +128,12 @@ export class EsqUtils {
       if (current.hasOwnProperty(key)) {
         var origVal = original[key];
         var currVal = current[key];
-        if ((currVal === null || typeof currVal !== 'object') && origVal !== currVal) {
+        if (Array.isArray(currVal) || Array.isArray(origVal)) {
+          if (JSON.stringify(origVal) !== JSON.stringify(currVal)) {
+            changes[key] = currVal;
+            hasChanges = true;
+          }
+        } else if ((currVal === null || typeof currVal !== 'object') && origVal !== currVal) {
           changes[key] = currVal;
           hasChanges = true;
         }

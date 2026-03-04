@@ -9,7 +9,10 @@
     @if (field.type == 'tab-ikn-list') {
         <esq-tab-ikn-list
             [esqListElements]="details[field.name]"
+            (esqListElementsChange)="details[field.name] = $event"
+            [esqAddMenuElements]="($any(details)[(field.name ?? '') + 'All'] ?? [])"
             [esqListHeader]="field.label"
+            [readonly]="fieldReadOnly(field.readwrite, field.personal)"
             [esqExplorerCallApi]="callApi"
             [esqEnableDetails]="enableDetails"
         />
@@ -87,7 +90,7 @@
                            [attr.data-field]="field.name"
                            [title]="field.tooltip || ''" />
                     @if (details[field.name] && !fieldReadOnly(field.readwrite, field.personal)) {
-                        <span class="esq-date-clear" (click)="clearToNull(field)" title="Clear">&times;</span>
+                        <button class="esq-date-clear" type="button" (click)="clearToNull(field)" title="Clear">&times;</button>
                     }
                 </div>
             } @else {
@@ -136,7 +139,7 @@
                 @if (field.nullable === 'Y') {
                     <span>{{field.label}}:</span>
                     <select [(ngModel)]="details[field.name]" [disabled]="fieldReadOnly(field.readwrite, field.personal)" [title]="field.tooltip || ''"
-                        [style.color]="details[field.name] ? 'black' : 'grey'">
+                            [style.color]="details[field.name] ? 'black' : 'grey'">
                         @if (field.nullmeaning) {
                             <option [ngValue]="null" style="color: grey">{{field.nullmeaning}}</option>
                         }
@@ -167,21 +170,37 @@
                                [attr.data-field]="field.name"
                                [title]="field.tooltip || ''" />
                         @if (field.nullmeaning && details[field.name] && !fieldReadOnly(field.readwrite, field.personal)) {
-                            <span class="esq-null-clear" (click)="clearToNull(field)" title="{{field.nullmeaning}}">&times;</span>
+                            <button class="esq-null-clear" type="button" (click)="clearToNull(field)" title="{{field.nullmeaning}}">&times;</button>
                         }
                     </div>
                 } @else {
                     <b>{{field.label}}:</b>
                     <input type="text" [(ngModel)]="details[field.name]"
-                        [maxlength]="field.minmax || 50"
-                        [style.width.ch]="field.minmax || 50"
-                        [readonly]="fieldReadOnly(field.readwrite, field.personal)"
-                        [attr.tabindex]="fieldReadOnly(field.readwrite, field.personal) ? -1 : null"
-                        [attr.data-field]="field.name"
-                        [title]="field.tooltip || ''" />
+                           [maxlength]="field.minmax || 50"
+                           [style.width.ch]="field.minmax || 50"
+                           [readonly]="fieldReadOnly(field.readwrite, field.personal)"
+                           [attr.tabindex]="fieldReadOnly(field.readwrite, field.personal) ? -1 : null"
+                           [attr.data-field]="field.name"
+                           [title]="field.tooltip || ''" />
                 }
             </div>
         }
+    } @else if (field.type == 'text') {
+            <div class="esq-grid-input esq-grid-input-text">
+                @if (field.nullable === 'Y') {
+                    <span>{{field.label}}:</span>
+                } @else {
+                    <b>{{field.label}}:</b>
+                }
+                <textarea cdkTextareaAutosize cdkAutosizeMinRows="1"
+                           [(ngModel)]="details[field.name]"
+                           [maxlength]="field.minmax || 2000"
+                           [readonly]="fieldReadOnly(field.readwrite, field.personal)"
+                           [attr.tabindex]="fieldReadOnly(field.readwrite, field.personal) ? -1 : null"
+                           [placeholder]="field.nullmeaning || ''"
+                           [attr.data-field]="field.name"
+                           [title]="field.tooltip || ''"></textarea>
+            </div>
     } @else {
         <div class="esq-simple-grid2">
             @if (field.nullable === 'Y') {<span>{{field.label}}:</span>} @else {<b>{{field.label}}:</b>}
