@@ -2,6 +2,21 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+v1.2.3-2603.0618  Server-side validation error handling; ikn-list refresh fix
+  :Server validation errors:
+     saveData catchError handles RFC 7807 errors[] from backend
+     alert shows server error message; focus moves to invalid field and tab
+     focusField deferred via setTimeout(0) to run after Angular re-render
+  :AccessProfileDialog double-subscribe fix:
+     second details$ async pipe replaced with details property
+     prevents duplicate HTTP save requests on error
+  :Error Report dialog:
+     errors[] array JSON.stringify'd before display (was showing [object Object])
+     added "Validation Errors" tab in ProblemDetail dictionary
+  :IKN list refresh fix:
+     ngOnChanges rebuilds list when esqListElements changes externally (Refresh button)
+     self-emitted changes (add/remove) skip rebuild to preserve focused row
+
 v1.2.3-2603.0315  Add/Remove roles; text field type
   :complete the list tab with add button dropdown menu
   :Array change detection

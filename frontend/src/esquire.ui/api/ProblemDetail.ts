@@ -8,6 +8,8 @@
 * 02/17/2026 mir0n nullable changed from boolean to string
 *                  added personal, minmax fields to dictionary
 * 03/03/2026 mir0n  title and detail field types changed from 'string' to 'text'
+* 03/06/2026 mir0n  errors[] shape updated to match backend EsqValidationError payload
+*                   added "Validation Errors" tab with errors field (tabstring, nullable)
 */
 
 import { EsqEntityLayer } from "./EsqEntityDictionary";
@@ -21,10 +23,11 @@ export interface ProblemDetail {
   detail: string;     // Detailed, actionable explanation
   instance?: string;   // URI identifying the specific occurrence
   
-  errors?: Array<{     // Common extension for validation errors
-    name?: string;
-    reason: string;
-    pointer?: string;  // JSON Pointer to the invalid field
+  errors?: Array<{     // EsqValidationError entries from backend
+    fieldName: string;
+    fieldLabel: string;
+    message: string;
+    tabIndex: string;  // tab index as string from backend
   }>
 
   timestamp?:string;
@@ -98,6 +101,14 @@ export const problemDetailDictionary:EsqEntityLayer[] = [
         nullable: 'N', layer: 2, readwrite: 1, format: "",
         listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
       },
-  ]}
+  ]},
+    { title: "Errors",
+        fields: [
+            {
+                name: "errors", sort: 0, label: "Errors", type: "tabstring", tooltip: "Validation errors in raw format.",
+                nullable: 'y', layer: 3, readwrite: 1, format: "",
+                listvalues: [], nullmeaning: '', validation: '', personal: '', minmax:''
+            },
+        ]}
 ] as const;
 

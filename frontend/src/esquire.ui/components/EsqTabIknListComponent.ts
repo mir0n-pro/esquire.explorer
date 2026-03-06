@@ -17,15 +17,20 @@
 *                   doRemoveBtn(): filter by focused item id (not by index)
 *                   canDetailsBtn(): checks kind.detailed flag
 *                   Add button wired to MatMenu; all buttons use [disabled] binding
+* 03/06/2026 mir0n  ngOnChanges: rebuild list on external esqListElements change (refresh fix)
+*                   lastEmitted tracking: skip rebuild when change was self-emitted (add/remove)
+*                   buildList() extracted from ngOnInit for reuse
 */
 import {
     AfterViewInit,
     Component,
     ElementRef, EventEmitter,
     Input,
+    OnChanges,
     OnDestroy,
     OnInit, Output,
     QueryList,
+    SimpleChanges,
     ViewChildren,
     ViewEncapsulation
 } from '@angular/core';
@@ -59,7 +64,7 @@ import {EsqNewMenuItem} from "../api/EsqContextMenuBuilder";
   encapsulation: ViewEncapsulation.None,
 })
 
-export class EsqTabIknListComponent implements OnInit,  AfterViewInit, OnDestroy {
+export class EsqTabIknListComponent implements OnInit, OnChanges, AfterViewInit, OnDestroy {
 
   public displayedColumns: string[] = ['name']; 
   public listElementHoveredIndex:number = -1;
@@ -80,51 +85,63 @@ export class EsqTabIknListComponent implements OnInit,  AfterViewInit, OnDestroy
   public tabIknElements: TabIknElement[] = [];
   public tabListDataSource!:DataSource<TabIknElement>;
   public addIknElements: TabIknElement[] = [];
+  private lastEmitted: any[] | null = null;
 
 
       constructor() {
     this.tabListDataSource = new MatTableDataSource([]);
   }      
 
-  ngOnInit() {
+  private buildList(): void {
+    this.tabIknElements = [];
+    this.listElementFocusedIndex = -1;
     if (this.esqListElements) {
-        var i = 0;
-        this.esqListElements.forEach((x: any) => {
-            this.tabIknElements[this.tabIknElements.length] = {
-              sort : ++i,
-              id : x.id??i,
-              name : x.name,
-              kind : x.kind ?? -1,
-              icon : ""
-            };
-        })
-      if(  this.tabIknElements.length > 0) {
+      var i = 0;
+      this.esqListElements.forEach((x: any) => {
+        this.tabIknElements[this.tabIknElements.length] = {
+          sort: ++i,
+          id: x.id ?? i,
+          name: x.name,
+          kind: x.kind ?? -1,
+          icon: ""
+        };
+      });
+      if (this.tabIknElements.length > 0) {
         this.tabIknElements.forEach((x: any) => {
-          x.icon = (x.kind  < 0) ? "" : EsqObjectKindFactory.instanceOf(x.kind).icon
-        })
-        this.listElementFocusedIndex = 0;
-        this.tabListDataSource = new MatTableDataSource(this.tabIknElements);
-      }
-
-      if (this.esqAddMenuElements && this.esqAddMenuElements.length > 0) {
-        //TODO: create menu items for add button based on esqAddMenuElements
-        this.esqAddMenuElements.forEach ((x: any) => {
-            var eok: EsqObjectKind = EsqObjectKindFactory.instanceOf(x.kind);
-            this.addIknElements[this.addIknElements.length] = ({
-                sort : 0,
-                id : x.id,
-                name : x.name,
-                kind : x.kind,
-                icon : eok.icon
-            });
+          x.icon = (x.kind < 0) ? "" : EsqObjectKindFactory.instanceOf(x.kind).icon;
         });
-        if (!this.readonly) {
-            this.esqEnableAdd = true;
-            this.esqEnableRemove = true;
-            //this.esqEnableSort = false;
-            //this.esqEnableDetails = false;
-        }
+        this.listElementFocusedIndex = 0;
       }
+      this.tabListDataSource = new MatTableDataSource(this.tabIknElements);
+    }
+  }
+
+  ngOnInit() {
+    this.buildList();
+    if (this.esqAddMenuElements && this.esqAddMenuElements.length > 0) {
+      this.esqAddMenuElements.forEach((x: any) => {
+        var eok: EsqObjectKind = EsqObjectKindFactory.instanceOf(x.kind);
+        this.addIknElements[this.addIknElements.length] = ({
+          sort: 0,
+          id: x.id,
+          name: x.name,
+          kind: x.kind,
+          icon: eok.icon
+        });
+      });
+      if (!this.readonly) {
+        this.esqEnableAdd = true;
+        this.esqEnableRemove = true;
+      }
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['esqListElements'] && !changes['esqListElements'].firstChange) {
+      if (this.esqListElements !== this.lastEmitted) {
+        this.buildList();
+      }
+      this.lastEmitted = null;
     }
   }
 
@@ -250,6 +267,7 @@ export class EsqTabIknListComponent implements OnInit,  AfterViewInit, OnDestroy
         kind: item.kind
     };
     var next = [...(this.esqListElements ?? []), element];
+    this.lastEmitted = next;
     this.esqListElementsChange.emit(next);
 
     this.tabIknElements.push(tie);
@@ -294,6 +312,7 @@ export class EsqTabIknListComponent implements OnInit,  AfterViewInit, OnDestroy
         const next = (this.esqListElements ?? []).filter(x => !(x.id === focused.id));
 
         // Notify parent: this is what usually enables "Save"
+        this.lastEmitted = next;
         this.esqListElementsChange.emit(next);
         // Update local view model
         this.tabIknElements.splice(index, 1);

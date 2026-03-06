@@ -29,7 +29,7 @@
 
 <mat-dialog-content >
   <mat-tab-group class="esq-mat-tab-group">
-    @if (details$ | async) {
+    @if (details) {
       @if (dictionary$ | async; as dictionary) {
         @for (tab of dictionary; track tab.title; let i = $index;) {      
           <mat-tab [label]="tab.title" bodyClass="esq-first-tab-content">

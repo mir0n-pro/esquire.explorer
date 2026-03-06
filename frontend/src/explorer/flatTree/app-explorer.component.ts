@@ -32,6 +32,7 @@
 *                   added esquireKeySave() wrapper
 *                   console.log replaced with EsqUtils.log
 * 03/01/2026 mir0n  wait for initial access profile load
+* 03/06/2026 mir0n  error report dialog: JSON.stringify errors[] for tabstring display
 */
 import {Component,
   OnInit,
@@ -451,7 +452,7 @@ private findIcon(kind:number) : string {
       data: {
         dictionary : problemDetailDictionary,
         readOnly : true,
-        details : this.errorReport,
+        details : { ...this.errorReport, errors: this.errorReport.errors ? JSON.stringify(this.errorReport.errors, null, 2) : undefined },
         title : "Error Report",
         titleIcon : "./img/error.ico"
       }

@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+03/06/2026 mir0n Server-side validation error focus; error report errors[] display
+explorer\flatTree\app-explorer.component.ts
+  - error report dialog: JSON.stringify errors[] for correct tabstring display (was "[object Object]")
+
 03/03/2026 claude Fix Keycloak SSO iframe timeout in K8s deployment
 main.ts
   - checkLoginIframe: true → false (cross-port iframe unreliable with self-signed certs)

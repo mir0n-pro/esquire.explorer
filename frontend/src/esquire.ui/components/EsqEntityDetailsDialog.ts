@@ -25,6 +25,8 @@
 *                   added ngAfterViewChecked() with pendingTabRestore
 *                   tabContent() switched from index to tab.title
 *                   removed ChangeDetectorRef dependency
+* 03/06/2026 mir0n  saveData catchError: RFC 7807 errors[] — alert + focusField on server validation error
+*                   focusField call wrapped in setTimeout to defer after snapshot re-render
 */
 
 import {AfterViewChecked,
@@ -44,7 +46,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTabGroup, MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
-import { catchError, EMPTY, Observable, tap } from 'rxjs';
+import { catchError, EMPTY, Observable, of, tap } from 'rxjs';
 import { CommonModule } from '@angular/common'
 import {MatTableModule } from '@angular/material/table';
 /*
@@ -253,6 +255,7 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
   }
 
   saveData(body: any, restoreTab?: number): void {
+    var snapshot = this.details;
     this.details$ = this.restApi.esquireCmdSave(this.givenEntityKind, this.givenEntityId, body).pipe(
       tap(details => {
         this.details = details;
@@ -262,8 +265,20 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
         }
       }),
       catchError(err => {
-        alert('Save failed: ' + (err.detail || err.title || err));
-        return EMPTY;
+        if (err.errors && err.errors.length > 0) {
+          var apiErr = err.errors[0];
+          var valError: EsqValidationError = {
+            fieldName: apiErr.fieldName,
+            fieldLabel: apiErr.fieldLabel,
+            message: apiErr.message,
+            tabIndex: parseInt(apiErr.tabIndex, 10) || 0
+          };
+          alert('Save failed: ' + (err.detail || valError.message));
+          setTimeout(() => this.focusField(valError), 0);
+        } else {
+          alert('Save failed: ' + (err.detail || err.title || err));
+        }
+        return of(snapshot);
       })
     );
   }

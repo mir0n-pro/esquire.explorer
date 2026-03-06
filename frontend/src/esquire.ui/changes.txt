@@ -1,6 +1,23 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+03/06/2026 mir0n Server-side validation error handling; refresh fix for ikn-list
+components\EsqEntityDetailsDialog.ts
+  - saveData catchError: RFC 7807 errors[] parsed → alert + focusField on server validation failure
+  - focusField call wrapped in setTimeout(0) to defer after snapshot re-render
+components\EsqAccessProfileDialog.ts
+  - saveData catchError: same RFC 7807 errors[] handling as EsqEntityDetailsDialog
+  - focusField call wrapped in setTimeout(0)
+components\EsqAccessProfileDialog.html
+  - second details$ async pipe replaced with details property (fixes double HTTP request on save error)
+api\ProblemDetail.ts
+  - errors[] shape updated: fieldName, fieldLabel, message, tabIndex (matches backend EsqValidationError)
+  - added "Validation Errors" tab with errors field (type tabstring, nullable)
+components\EsqTabIknListComponent.ts
+  - implemented ngOnChanges: rebuilds list when esqListElements changes externally (refresh fix)
+  - lastEmitted field: self-emitted changes (add/remove) skip rebuild to preserve focus state
+  - buildList() extracted from ngOnInit for reuse
+
 03/03/2026 mir0n Add/Remove roles in esq-tab-ikn-list; text field type; array change detection
 components\EsqUtils.ts
   - getChangedFields: array changes detected via JSON.stringify comparison
