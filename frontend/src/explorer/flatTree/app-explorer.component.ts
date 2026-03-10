@@ -33,6 +33,8 @@
 *                   console.log replaced with EsqUtils.log
 * 03/01/2026 mir0n  wait for initial access profile load
 * 03/06/2026 mir0n  error report dialog: JSON.stringify errors[] for tabstring display
+* 03/09/2026 mir0n  profile converted to signal — fixes NG0100 ExpressionChangedAfterChecked
+*                   callApiMill/dictionary init moved before await — fixes CallApiMill not initialized race
 */
 import {Component,
   OnInit,
@@ -113,7 +115,7 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
   readonly detailsDialog:MatDialog = inject(MatDialog);
   private callApiMill?:EsqExplorerCallApiMill;
   private dictionary?:EsqDictionaryApi;
-  private profile:EsqAccessProfile|null = null;
+  private profile = signal<EsqAccessProfile|null>(null);
   private profileRequested = false; 
   private errorReport: ProblemDetail |undefined = undefined;
 
@@ -137,7 +139,7 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
         this.logout();
       } else if (event.type === KeycloakEventType.AuthRefreshSuccess) {
         // Token refreshed successfully - maintain current state if already connected
-        if (this.authState() === STATUS_CONNECTED && this.profile) {
+        if (this.authState() === STATUS_CONNECTED && this.profile()) {
           EsqUtils.log('Token refreshed successfully');
         }
       } else if (event.type === KeycloakEventType.Ready) {
@@ -150,7 +152,7 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
               this.profileRequested = true;
               this._dataService.esquireKey().subscribe({
                   next: (value) => {
-                    this.profile = new EsqAccessProfile(value);
+                    this.profile.set(new EsqAccessProfile(value));
                   },
                   error: (err) => {
                     this.errorReport = err;
@@ -181,7 +183,7 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
   }
 
   public profileLoaded(): boolean {
-    return this.profile !== null;
+    return this.profile() !== null;
   }
 
   private setErrorMessage(msg:string) {
@@ -364,16 +366,16 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
     }
   }
   public esqAccessProfile() : EsqAccessProfile | null {
-      return this.profile;
+      return this.profile();
   }
 
 
   async ngOnInit() {
     this.dataService = this._dataService;
-    await EsqObjectKindFactory.init(this.esqRestApiWrapper(), EsquireObjectKinds);
-    EsqNodeStatusFactory.init(Object.values(EsquireStatuses));
     this.dictionary = new EsqDictionary(this.esqRestApiWrapper());
     this.callApiMill = new EsqExplorerCallApiMill(this.detailsDialog, this.dictionary, this.esqRestApiWrapper());
+    await EsqObjectKindFactory.init(this.esqRestApiWrapper(), EsquireObjectKinds);
+    EsqNodeStatusFactory.init(Object.values(EsquireStatuses));
   }
 
   async ngAfterViewInit() {
@@ -386,14 +388,16 @@ public async login(): Promise<void> {
 }
 
 public async showDetails() {
-    if (this.isConnected() && this.profile) {
-      this.callApiMill?.instance().calle(EsqExplorerCallApi.CMD_DEFAULT,this.profile.id as string,"", this.profile.kind as number, this.profile);
+    var p = this.profile();
+    if (this.isConnected() && p) {
+      this.callApiMill?.instance().calle(EsqExplorerCallApi.CMD_DEFAULT, p.id as string, "", p.kind as number, p);
     }
 }
 
 public async showAccessProfile() {
-    if (this.isConnected() && this.profile) {
-        this.callApiMill?.instance().calle(EsqExplorerCallApi.CMD_KEY,this.profile.id as string, "", 0, this.profile);
+    var p = this.profile();
+    if (this.isConnected() && p) {
+        this.callApiMill?.instance().calle(EsqExplorerCallApi.CMD_KEY, p.id as string, "", 0, p);
     }
 }
 
@@ -404,13 +408,13 @@ public isConnected() : boolean {
 public faceIcon() : string {
   var ret = "img/unknown.ico";
   if (this.isConnected()) {
-    ret = this.findIcon(this.profile?.kind as number);
+    ret = this.findIcon(this.profile()?.kind as number);
   }
   return ret;
 }
 public faceName() : string {
   if (this.isConnected()) {
-    return this.profile?.name as string;
+    return this.profile()?.name as string;
   }
   return "Diconnected";
 }
@@ -424,7 +428,7 @@ public faceNameClass() : string {
 
 public async logout(): Promise<void> {
   this.profileRequested = false;
-  this.profile = null;
+  this.profile.set(null);
   await this.keycloak.logout({
     redirectUri: window.location.origin, // Where to go after
   });

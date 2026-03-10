@@ -2,6 +2,14 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+v1.2.3-2603.0918  Race condition fixes
+  :NG0100 ExpressionChangedAfterItHasBeenChecked:
+     profile converted to Angular signal
+     faceIcon() and faceName() now reactive — no stale values during change detection
+  :CallApiMill not initialized:
+     callApiMill and dictionary initialized synchronously before async EsqObjectKindFactory.init()
+     profile load can no longer race ahead of component initialization
+
 v1.2.3-2603.0618  Server-side validation error handling; ikn-list refresh fix
   :Server validation errors:
      saveData catchError handles RFC 7807 errors[] from backend
