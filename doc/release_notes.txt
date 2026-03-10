@@ -2,6 +2,18 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+v1.2.3-2603.1017  debug skip flags for development testing
+  :DEBUG_SKIP_VALIDATION:
+     EsqUtils: DEBUG_SKIP_VALIDATION and DEBUG_SKIP_PERMISSION static flags
+     validateFields() returns null immediately when DEBUG_SKIP_VALIDATION is set
+  :DEBUG_SKIP_PERMISSION:
+     EsqAccessProfile: import EsqUtils for flag access
+     isCommandAllowed() returns true immediately when DEBUG_SKIP_PERMISSION is set
+  3 doc drafts added:
+     :fieldType.md
+     :permissions.md
+     :validations.md 
+
 v1.2.3-2603.0918  Race condition fixes
   :NG0100 ExpressionChangedAfterItHasBeenChecked:
      profile converted to Angular signal

@@ -7,8 +7,11 @@
 * History :
 * 02/17/2026 mir0n  isolated from generated rest api
 *                   isCommandAllowed() with entity_id param, personal mode, kind rounding
+* 03/10/2026 mir0n  DEBUG_SKIP_PERMISSION: isCommandAllowed() returns true when flag is set
+*                   import EsqUtils for debug flag access
 */
 import {EsqExplorerCallApi} from './EsqExplorerCallApi';
+import {EsqUtils} from "../components/EsqUtils";
 export class EsqRole {
   id:number;
   name:string;
@@ -80,6 +83,9 @@ export class EsqAccessProfile {
     };
 
     public isCommandAllowed(cmd: string, entity_id: string, kind: number): boolean {
+        if (EsqUtils.DEBUG_SKIP_PERMISSION) {
+            return true;
+        }
         var ret: boolean = String(this.id) === String(entity_id); // xxx: "personal" mode
         if (!ret) {
             var knd: number =  Math.floor(kind / 2) * 2;

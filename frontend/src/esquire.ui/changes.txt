@@ -1,6 +1,14 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+03/10/2026 mir0n  debug skip flags for development testing
+api\EsqAccessProfile.ts
+  - import EsqUtils for debug flag access
+  - isCommandAllowed(): returns true immediately when DEBUG_SKIP_PERMISSION is set
+components\EsqUtils.ts
+  - DEBUG_SKIP_VALIDATION flag: validateFields() returns null (skips all validation) when true
+  - DEBUG_SKIP_PERMISSION flag: referenced by EsqAccessProfile.isCommandAllowed()
+
 03/06/2026 mir0n Server-side validation error handling; refresh fix for ikn-list
 components\EsqEntityDetailsDialog.ts
   - saveData catchError: RFC 7807 errors[] parsed → alert + focusField on server validation failure
