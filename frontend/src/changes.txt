@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+03/09/2026 mir0n Race condition fixes: NG0100 and CallApiMill not initialized
+explorer\flatTree\app-explorer.component.ts
+  - profile converted to Angular signal — fixes NG0100 ExpressionChangedAfterChecked on faceIcon/faceName
+  - callApiMill and dictionary initialized before await EsqObjectKindFactory.init() — fixes "CallApiMill not initialized" race
+
 03/06/2026 mir0n Server-side validation error focus; error report errors[] display
 explorer\flatTree\app-explorer.component.ts
   - error report dialog: JSON.stringify errors[] for correct tabstring display (was "[object Object]")

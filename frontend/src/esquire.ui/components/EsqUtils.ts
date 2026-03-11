@@ -11,12 +11,17 @@
 *                  added deepCopy, getChangedFields methods
 * 03/01/2026 mir0n  getChangedFields: null treated as changed value (typeof null === 'object' fix)
 * 03/03/2026 mir0n  getChangedFields: array changes detected via JSON.stringify comparison
+* 03/10/2026 mir0n  DEBUG_SKIP_VALIDATION and DEBUG_SKIP_PERMISSION debug flags
+*                   validateFields() returns null immediately when DEBUG_SKIP_VALIDATION is true
 */
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 import {EsqValidationError} from './EsqValidationError';
 export class EsqUtils {
  public static DEBUG:boolean = false;
  public static DELAY:boolean = false;
+ public static DEBUG_SKIP_VALIDATION :boolean = false;
+ public static DEBUG_SKIP_PERMISSION :boolean = false;
+
   private constructor () {}
 
   public static log(...par:any) {
@@ -75,6 +80,9 @@ export class EsqUtils {
   }
 
   public static validateFields(details: any, dictionary: EsqEntityLayer[]): EsqValidationError | null {
+    if (this.DEBUG_SKIP_VALIDATION) {
+      return null;
+    }
     var ret: EsqValidationError | null = null;
     for (var tabIndex = 0; tabIndex < dictionary.length && !ret; tabIndex++) {
       var tab = dictionary[tabIndex];
