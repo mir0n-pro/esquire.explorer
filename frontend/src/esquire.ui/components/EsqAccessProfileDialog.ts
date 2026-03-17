@@ -23,6 +23,7 @@
 * 03/06/2026 mir0n  saveData catchError: RFC 7807 errors[] — alert + focusField on server validation error
 *                   focusField call wrapped in setTimeout to defer after snapshot re-render
 *                   fixed double details$ async subscription (second pipe replaced with details property)
+* 03/16/2026 mir0n  saving flag: Save button disabled while save is in progress
 */
 import {AfterViewChecked,
   AfterViewInit,
@@ -107,6 +108,7 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
    public headerName:string = "";
    private originalDetails: any = null;
    private pendingTabRestore: number | null = null;
+   public saving: boolean = false;
 
   constructor(
       dialogRef: MatDialogRef<EsqAccessProfileDialog>,
@@ -203,8 +205,10 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
 
   private saveData(body: any, restoreTab?: number): void {
     var snapshot = this.details;
+    this.saving = true;
     this.details$ = this.restApi.esquireKeySave(this.id, body).pipe(
       tap(details => {
+        this.saving = false;
         this.details = details;
         this.originalDetails = EsqUtils.deepCopy(details);
         if (restoreTab) {
@@ -212,6 +216,7 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
         }
       }),
       catchError(err => {
+        this.saving = false;
         if (err.errors && err.errors.length > 0) {
           var apiErr = err.errors[0];
           var valError: EsqValidationError = {

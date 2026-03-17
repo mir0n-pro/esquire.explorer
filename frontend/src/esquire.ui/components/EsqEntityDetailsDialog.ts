@@ -27,6 +27,7 @@
 *                   removed ChangeDetectorRef dependency
 * 03/06/2026 mir0n  saveData catchError: RFC 7807 errors[] — alert + focusField on server validation error
 *                   focusField call wrapped in setTimeout to defer after snapshot re-render
+* 03/16/2026 mir0n  saving flag: Save button disabled while save is in progress
 */
 
 import {AfterViewChecked,
@@ -106,6 +107,7 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
    public dictionary$: Observable<EsqEntityLayer[]> | undefined;
    protected dictionary: EsqEntityLayer[] = [];
    protected pendingTabRestore: number | null = null;
+   public saving: boolean = false;
    protected originalDetails: any = null;
 
    protected givenEntityId:string = "";
@@ -256,8 +258,10 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
 
   saveData(body: any, restoreTab?: number): void {
     var snapshot = this.details;
+    this.saving = true;
     this.details$ = this.restApi.esquireCmdSave(this.givenEntityKind, this.givenEntityId, body).pipe(
       tap(details => {
+        this.saving = false;
         this.details = details;
         this.originalDetails = EsqUtils.deepCopy(details);
         if (restoreTab) {
@@ -265,6 +269,7 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
         }
       }),
       catchError(err => {
+        this.saving = false;
         if (err.errors && err.errors.length > 0) {
           var apiErr = err.errors[0];
           var valError: EsqValidationError = {

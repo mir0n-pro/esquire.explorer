@@ -70,7 +70,7 @@
     <button #btnClose mat-raised-button mat-dialog-close>Close</button>
   } @else {
     <button mat-raised-button (click)="onClose()">Close</button>
-    <button #btnSave mat-raised-button (click)="onSave()" [disabled]="!hasChanges()">Save</button>
+    <button #btnSave mat-raised-button (click)="onSave()" [disabled]="!hasChanges() || saving">Save</button>
     <button mat-raised-button (click)="onRefresh()">Refresh</button>
   }
 </mat-dialog-actions>

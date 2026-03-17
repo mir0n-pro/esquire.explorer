@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+03/16/2026 mir0n  let → var convention; subscribe error blocks removed
+explorer\flatTree\app-explorer.component.ts
+  - let → var for ret variable (coding convention)
+  - subscribe error blocks removed (error handling done in dialog catchError)
+
 03/09/2026 mir0n Race condition fixes: NG0100 and CallApiMill not initialized
 explorer\flatTree\app-explorer.component.ts
   - profile converted to Angular signal — fixes NG0100 ExpressionChangedAfterChecked on faceIcon/faceName

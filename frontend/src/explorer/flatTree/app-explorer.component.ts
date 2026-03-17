@@ -35,6 +35,7 @@
 * 03/06/2026 mir0n  error report dialog: JSON.stringify errors[] for tabstring display
 * 03/09/2026 mir0n  profile converted to signal — fixes NG0100 ExpressionChangedAfterChecked
 *                   callApiMill/dictionary init moved before await — fixes CallApiMill not initialized race
+* 03/16/2026 mir0n  let → var (convention); subscribe error blocks removed
 */
 import {Component,
   OnInit,
@@ -322,16 +323,9 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
                 throw new Error("Data service not initialized");
             }
             var acct: boolean = EsqObjectKindFactory.instanceOf(kind).acct;
-            let ret: Observable<any> = acct
+            var ret: Observable<any> = acct
                 ? this.dataService.esquireCmdAsave(kind, encodeURIComponent(id), body, cmd)
                 : this.dataService.esquireCmdSave(kind, encodeURIComponent(id), body, cmd);
-            ret.subscribe({
-                error : (err: ProblemDetail) => {
-                    //console.error(err.detail || err.title);
-                    this.errorReport = err;
-                    this.setErrorMessage( err.detail || err.title);
-                }
-            }) ;
             return ret;
         },
         esquireKeySave: (id: string, body: any, options?: any) => {
@@ -341,14 +335,7 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
                 this.setErrorMessage("Data service not initialized");
                 throw new Error("Data service not initialized");
             }
-            let ret: Observable<any> = this.dataService.esquireKeySave(id, body);
-            ret.subscribe({
-                error : (err: ProblemDetail) => {
-                    //console.error(err.detail || err.title);
-                    this.errorReport = err;
-                    this.setErrorMessage( err.detail || err.title);
-                }
-            }) ;
+            var ret: Observable<any> = this.dataService.esquireKeySave(id, body);
             return ret;
         },
     }

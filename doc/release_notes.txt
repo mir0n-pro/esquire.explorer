@@ -2,7 +2,14 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
-v1.2.3-2603.1017  debug skip flags for development testing
+v1.2.2-2603.1620  saving flag; subscribe cleanup
+  :saving:
+     EsqAccessProfileDialog, EsqEntityDetailsDialog: saving flag prevents double-click Save
+     Save button disabled while request is in progress
+  :cleanup:
+     app-explorer.component.ts: let → var convention; subscribe error blocks removed
+
+v1.2.2-2603.1017  debug skip flags for development testing
   :DEBUG_SKIP_VALIDATION:
      EsqUtils: DEBUG_SKIP_VALIDATION and DEBUG_SKIP_PERMISSION static flags
      validateFields() returns null immediately when DEBUG_SKIP_VALIDATION is set
@@ -14,7 +21,7 @@ v1.2.3-2603.1017  debug skip flags for development testing
      :permissions.md
      :validations.md 
 
-v1.2.3-2603.0918  Race condition fixes
+v1.2.2-2603.0918  Race condition fixes
   :NG0100 ExpressionChangedAfterItHasBeenChecked:
      profile converted to Angular signal
      faceIcon() and faceName() now reactive — no stale values during change detection
@@ -22,7 +29,7 @@ v1.2.3-2603.0918  Race condition fixes
      callApiMill and dictionary initialized synchronously before async EsqObjectKindFactory.init()
      profile load can no longer race ahead of component initialization
 
-v1.2.3-2603.0618  Server-side validation error handling; ikn-list refresh fix
+v1.2.2-2603.0618  Server-side validation error handling; ikn-list refresh fix
   :Server validation errors:
      saveData catchError handles RFC 7807 errors[] from backend
      alert shows server error message; focus moves to invalid field and tab
@@ -37,7 +44,7 @@ v1.2.3-2603.0618  Server-side validation error handling; ikn-list refresh fix
      ngOnChanges rebuilds list when esqListElements changes externally (Refresh button)
      self-emitted changes (add/remove) skip rebuild to preserve focused row
 
-v1.2.3-2603.0315  Add/Remove roles; text field type
+v1.2.2-2603.0315  Add/Remove roles; text field type
   :complete the list tab with add button dropdown menu
   :Array change detection
   :Text field type
@@ -47,7 +54,7 @@ v1.2.3-2603.0315  Add/Remove roles; text field type
   :gateway use default port
   :comment out sort buttons in the list tab
 
-v1.2.3-2603.0120
+v1.2.2-2603.0120
   Wait for initial access profile load
 
 v1.2.3-2603.0115  date field type; null change-detection fix
@@ -55,7 +62,7 @@ v1.2.3-2603.0115  date field type; null change-detection fix
   :Date field:
      native <input type="date"> (Angular Material datepicker skipped: breaks grid structure)
 
-v1.2.3-2602.2819  Sub-entity rendering; dialog inheritance; tab restore
+v1.2.2-2602.2819  Sub-entity rendering; dialog inheritance; tab restore
   :Sub-entity inline rendering
   :Dictionary proactive loading
   :Dialog inheritance
