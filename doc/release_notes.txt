@@ -2,6 +2,8 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+v1.2.2-2603.1917  Fix: Entity kind normalization
+
 v1.2.2-2603.1620  saving flag; subscribe cleanup
   :saving:
      EsqAccessProfileDialog, EsqEntityDetailsDialog: saving flag prevents double-click Save

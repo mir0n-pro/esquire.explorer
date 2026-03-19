@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+03/19/2026 mir0n  entity_kind normalization in doExplorerCommand2()
+components\EsqExplorerCallApiMill.ts
+  - entity_kind normalized to even (Math.floor(kind/2)*2) at entry point of doExplorerCommand2()
+
 03/16/2026 mir0n  saving flag: Save button disabled while save is in progress
 components\EsqAccessProfileDialog.ts
   - saving: boolean = false flag added

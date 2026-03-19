@@ -15,6 +15,7 @@
 *                  use EsqAccessProfile from esquire.ui/api
 *                  use CMD_ constants from EsqExplorerCallApi
 *                  console.log replaced with EsqUtils.log
+* 03/19/2026 mir0n entity_kind normalized to even in doExplorerCommand2()
 */
 import { firstValueFrom } from "rxjs";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
@@ -121,6 +122,7 @@ export class EsqExplorerCallApiMill {
     }
 
   protected async doExplorerCommand2(cmd: string, entity_id: string, entity_name: string, entity_kind:number, accessProfile:EsqAccessProfile|null) {
+      entity_kind = Math.floor(entity_kind / 2) * 2;
       if (cmd == EsqExplorerCallApi.CMD_KEY) {
           var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, entity_id, entity_kind);
           setTimeout(() => {
