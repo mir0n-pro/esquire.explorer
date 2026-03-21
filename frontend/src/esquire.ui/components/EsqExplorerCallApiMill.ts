@@ -16,6 +16,7 @@
 *                  use CMD_ constants from EsqExplorerCallApi
 *                  console.log replaced with EsqUtils.log
 * 03/19/2026 mir0n entity_kind normalized to even in doExplorerCommand2()
+* 03/20/2026 mir0n  EsqExplorerHost registration; delayed onTreeRefresh() on 'treeRefresh' dialog result
 */
 import { firstValueFrom } from "rxjs";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
@@ -31,7 +32,7 @@ import { EsqDictionaryApi
 } from "@mir0n-pro/esquire.ui/api";
 */
 import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
-import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
+import {EsqExplorerCallApi, EsqExplorerHost} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {EsqTreeNode} from 'src/esquire.ui/api/EsqTreeNode';
 import {EsqAccessProfileDialog} from "./EsqAccessProfileDialog";
@@ -42,7 +43,8 @@ export class EsqExplorerCallApiMill {
   dialog:MatDialog;
   dictionaryApi:EsqDictionaryApi;
   restApi:EsqRestApi;
-  
+  private host?: EsqExplorerHost;
+
   public constructor (dialog:MatDialog, dictionaryApi:EsqDictionaryApi, restApi:EsqRestApi) {
     this.dialog = dialog;
     this.dictionaryApi = dictionaryApi;
@@ -78,6 +80,9 @@ export class EsqExplorerCallApiMill {
 
     dialogRef.afterClosed().subscribe(result => {
       EsqUtils.log(`Dialog result: ${result}`);
+      if (result === 'treeRefresh' && this.host) {
+        setTimeout(() => this.host!.onTreeRefresh(), 250);
+      }
     });
     return new Promise<void>((resolve)=>resolve());
   }
@@ -174,6 +179,9 @@ export class EsqExplorerCallApiMill {
       },
       create: (parent_node: EsqTreeNode, typeId?: number) => {
        return this.doExplorerCreate(parent_node, typeId);
+      },
+      registerHost: (host: EsqExplorerHost) => {
+        this.host = host;
       }
     }
   };

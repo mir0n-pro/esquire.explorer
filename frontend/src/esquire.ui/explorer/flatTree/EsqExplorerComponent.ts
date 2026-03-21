@@ -13,6 +13,8 @@
 * 02/13/2026 mir0n  EsqNodeType renamed with EsqObjectKind
 * 02/17/2026 mir0n  use CMD_DEFAULT constant from EsqExplorerCallApi
 *                   use EsqAccessProfile from esquire.ui/api
+* 03/20/2026 mir0n  implements EsqExplorerHost; self-registers via registerHost in ngOnInit()
+*                   onBtnRefreshClick: gotoTreeNode fallback for link-variant node restore
 */
 import {Component,
   ElementRef,
@@ -51,7 +53,7 @@ import { EsqResizeDirective, EsqUtils} from '@mir0n-pro/esquire.ui/components';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {AsEsqTreeNodePipe}  from 'src/esquire.ui/api/AsEsqTreeNodePipe';
 import {EsqTreeNode}  from 'src/esquire.ui/api/EsqTreeNode';
-import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
+import {EsqExplorerCallApi, EsqExplorerHost} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqColumnHeaderDef} from 'src/esquire.ui/api/EsqObjectKind';
 import {EsqNodeStatusFactory} from 'src/esquire.ui/api/EsqNodeStatusFactory';
 import {EsqResizeDirective} from 'src/esquire.ui/components/EsqResizeDirective';
@@ -97,7 +99,7 @@ import {EsqAccessProfile} from "src/esquire.ui/api/EsqAccessProfile";
   host: { 'class': 'esq-explorer'}
 })
 
-export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
+export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, EsqExplorerHost {
   @Input() public esqRestApi: EsqRestApi | null = null;
   @Input() public esqExplorerCallApi: EsqExplorerCallApi | null = null;
   @Input() public esqCommandMenuItems:EsqCommandMenuItem[] = [];
@@ -156,10 +158,15 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
     this.treeItself = this._tree;
   }
 
+  onTreeRefresh(): void {
+    void this.onBtnRefreshClick();
+  }
+
   async ngOnInit() {
     if (!this.esqRestApi) {
       console.error("No esqRestApi defined");
     }
+    this.esqExplorerCallApi?.registerHost(this);
     
 //--- todo catch exception : somehow it calls the server without parameters
 
@@ -452,27 +459,48 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
    // ==== rest but only Button commands =====
 
   async onBtnRefreshClick() {
-    EsqUtils.log('onBtnRefreshClick[');   
+    EsqUtils.log('onBtnRefreshClick[');
     this.initialDataLoading.set(true);
-    var node:EsqTreeNode|null = null;
+    var savedFocused: EsqTreeNode|null = null;
+    var savedOwner: EsqTreeNode|null = null;
     if (this.listNodeFocused) {
-      node = this.listNodeFocused;
+      savedFocused = this.listNodeFocused;
       this.listNodeFocused = null;
+    }
+    if (this.listNodeOwner) {
+      savedOwner = this.listNodeOwner;
     }
     this.datasource.clear();
     this.listNodeHistoryIndex = -1;
     this.listNodeHistoryStack = [];
     await this.datasource.loadInitialData();
-    if (node) {
-      let n:any = await this.datasource.gotoListNode(node.id);
+    var restored = false;
+    if (savedFocused) {
+      var n: any = await this.datasource.gotoListNode(savedFocused.id);
       if (n && n instanceof EsqTreeNode) {
-        node = n as EsqTreeNode;
-        this.toggleTreeSelect(node.parent as EsqTreeNode);
-        this.doSelectListNode(node, true);
+        var found = n as EsqTreeNode;
+        this.listNodeOwner = found.parent as EsqTreeNode;
+        this.updatePath();
+        this.updateToolbarNewMenuItems();
+        this.toggleTreeSelect(found.parent as EsqTreeNode);
+        this.doSelectListNode(found, true);
+        restored = true;
+      }
+    }
+    if (!restored && savedOwner) {
+      var ownerResult: any = await this.datasource.gotoTreeNode(savedOwner.id);
+      if (ownerResult && ownerResult instanceof EsqTreeNode) {
+        var ownerNode = ownerResult as EsqTreeNode;
+        if (ownerNode.expandable()) {
+          this.treeItself.expand(ownerNode);
+          this.datasource.selectOnTree(ownerNode);
+          this.treeNodeActive = ownerNode;
+          await this.doActivateListNode(ownerNode, false);
+        }
       }
     }
     this.initialDataLoading.set(false);
-    EsqUtils.log(']onBtnRefreshClick');   
+    EsqUtils.log(']onBtnRefreshClick');
   }
 
     canBtnMoreClick() : boolean {

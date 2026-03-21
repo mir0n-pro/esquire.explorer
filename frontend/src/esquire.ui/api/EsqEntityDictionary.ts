@@ -9,6 +9,7 @@
 * 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
 * 02/17/2026 mir0n added personal, minmax fields
 *                  nullable changed from boolean to string
+* 03/20/2026 mir0n  affects3 optional field added
 */
 export class EsqEntityField {
   name:string;              // +
@@ -19,13 +20,15 @@ export class EsqEntityField {
   listvalues:string[];      // x in concrete order
   nullable:string;         // x
   nullmeaning:string;       // x
-  validation:string;        // x 
+  validation:string;        // x
   layer:number;             // +
   readwrite:number;         //(bitmap: 0:hidden,1:view, 3:full)
   format:string;   // +
   personal:string;
   minmax:string;   // +
-  constructor(jsn : any) {
+  affects3?:string;
+
+    constructor(jsn : any) {
       this.name = jsn.name;
       this.sort = jsn.sort;
       this.label = jsn.label;
@@ -40,6 +43,7 @@ export class EsqEntityField {
       this.format = jsn.format;
       this.personal = jsn.personal;
       this.minmax = jsn.minmax;
+      this.affects3 = jsn.affects3;
   }
 };
 

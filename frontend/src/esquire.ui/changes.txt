@@ -1,6 +1,32 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+03/20/2026 mir0n  tree-selection restore on refresh for link-variant nodes
+explorer\flatTree\EsqFlatTreeDatasource.ts
+  - gotoTreeNode(id): navigates to a tree node by id; expands ancestors; returns the node itself
+explorer\flatTree\EsqExplorerComponent.ts
+  - onBtnRefreshClick: listNodeOwner saved before clear for fallback restore
+  - gotoTreeNode fallback: restores tree owner when focused link-variant node has no server path
+  - success path: listNodeOwner, updatePath(), updateToolbarNewMenuItems() now updated after restore
+api\EsqEntityDictionary.ts
+  - affects3 optional field added; initialized from JSON in constructor
+api\EsqExplorerCallApi.ts
+  - EsqExplorerHost interface added with onTreeRefresh()
+  - registerHost(host) added to EsqExplorerCallApi interface
+components\EsqEntityDetailsDialog.ts
+  - givenEntityKind normalized to even (Math.floor(kind/2)*2) to handle link-variant kinds
+  - needsTreeRefresh flag: set to true on successful save of affects3 field (incl. subentities)
+  - onClose() passes 'treeRefresh' dialog result when needsTreeRefresh is set
+  - saveData() extended with optional treeRefresh parameter
+components\EsqExplorerCallApiMill.ts
+  - host?: EsqExplorerHost field added
+  - registerHost() implemented in esqExplorerCallApi() factory
+  - runDetailsAsync(): afterClosed fires host.onTreeRefresh() with 250ms delay on 'treeRefresh' result
+explorer\flatTree\EsqExplorerComponent.ts
+  - implements EsqExplorerHost; onTreeRefresh() delegates to onBtnRefreshClick()
+  - self-registers as host via esqExplorerCallApi?.registerHost(this) in ngOnInit()
+components\EsqNodeDetailsDialog.ts
+
 03/19/2026 mir0n  entity_kind normalization in doExplorerCommand2()
 components\EsqExplorerCallApiMill.ts
   - entity_kind normalized to even (Math.floor(kind/2)*2) at entry point of doExplorerCommand2()

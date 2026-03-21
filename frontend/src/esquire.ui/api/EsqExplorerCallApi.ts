@@ -8,14 +8,20 @@
 * 02/01/2026 mir0n  added create()
 * 02/17/2026 mir0n  added CMD_ command constants
 *                   use EsqAccessProfile from esquire.ui/api
+* 03/20/2026 mir0n  EsqExplorerHost interface; registerHost added to EsqExplorerCallApi
 */
 import {  EsqTreeNode} from './EsqTreeNode';
 import {EsqAccessProfile} from "./EsqAccessProfile";
+
+export interface EsqExplorerHost {
+  onTreeRefresh(): void;
+}
 
 export interface EsqExplorerCallApi {
   call: (cmd: string, node: EsqTreeNode, accessProfile:EsqAccessProfile|null) => Promise<void>;
   calle: (cmd: string, entity_id: string, entity_name: string, entity_kind: number, accessProfile:EsqAccessProfile|null) => Promise<void>;
   create: (parent_node: EsqTreeNode, typeId?: number) => Promise<void>;
+  registerHost: (host: EsqExplorerHost) => void;
 }
 
 export namespace EsqExplorerCallApi {

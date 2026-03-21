@@ -5,6 +5,7 @@
 *  mailto:mir0n.the.programmer@gmail.com
 *
 *  History:
+* 03/20/2026 mir0n  gotoTreeNode(): navigate to tree node by id; expands ancestors
 */
 import {EsqTreeViewDatasource} from './EsqTreeViewDatasource';
 import {EsqListViewDatasource} from './EsqListViewDatasource';
@@ -91,18 +92,18 @@ export class EsqFlatTreeDatasource {
 
     public async gotoListNode(id: string) {
         await EsqUtils.logDelay(1000,'delay gotoListNode 1s...');
-        EsqUtils.log('gotoListNode[');  
+        EsqUtils.log('gotoListNode[');
         const path: string[] = await this.tree.getPath(id);
         var treeNode: EsqTreeNode |undefined =undefined;
         var listNode: EsqTreeNode |undefined =undefined;
         if (path && path.length > 0) {
-            path[path.length] = id; 
+            path[path.length] = id;
             let res:any = await this.loadNodesPath(path);
             if (res instanceof EsqTreeNode) {
                 listNode = res as EsqTreeNode;
                 treeNode = listNode.parent;
             }
-        }        
+        }
         if (treeNode) {
             var treeNodes:EsqTreeNode[] =[];
             for (let i=0; i < path.length -1; i++) {
@@ -115,8 +116,30 @@ export class EsqFlatTreeDatasource {
             }
             await  this.list.loadChildren(treeNode);
         }
-        EsqUtils.log(']gotoListNode');  
+        EsqUtils.log(']gotoListNode');
         return listNode;
+    }
+
+    public async gotoTreeNode(id: string): Promise<EsqTreeNode|undefined> {
+        await EsqUtils.logDelay(1000, 'delay gotoTreeNode 1s...');
+        EsqUtils.log('gotoTreeNode[');
+        const path: string[] = await this.tree.getPath(id);
+        var treeNode: EsqTreeNode|undefined = undefined;
+        if (path && path.length > 0) {
+            path[path.length] = id;
+            let res: any = await this.loadNodesPath(path);
+            if (res instanceof EsqTreeNode) {
+                treeNode = res as EsqTreeNode;
+                for (let i = 0; i < path.length - 1; i++) {
+                    let ancestor = this.tree.getById(path[i]);
+                    if (ancestor && ancestor.expandable() && !ancestor.expanded()) {
+                        await this.tree.toggleNode(ancestor);
+                    }
+                }
+            }
+        }
+        EsqUtils.log(']gotoTreeNode');
+        return treeNode;
     }
 
     public hasMoreChildren(parent:EsqTreeNode): boolean {

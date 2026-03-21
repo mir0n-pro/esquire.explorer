@@ -21,6 +21,7 @@
 *                   wired onSave() to restApi.esquireCmdSave()
 * 02/28/2026 mir0n  refactored to extend EsqEntityDetailsDialog (duplicate logic removed)
 *                   added inline sub-entity field rendering
+* 03/20/2026 mir0n  entity kind normalized to even (handles link-variant kinds)
 */
 
 import {Component, Inject, ViewEncapsulation} from '@angular/core';
@@ -75,7 +76,7 @@ export class EsqNodeDetailsDialog extends EsqEntityDetailsDialog {
 
       this.node = data.node;
       this.givenEntityId = this.node.entityId;
-      this.givenEntityKind = this.node.kind.id;
+      this.givenEntityKind = Math.floor(this.node.kind.id / 2) * 2;
     }
 
 /// below node nuances

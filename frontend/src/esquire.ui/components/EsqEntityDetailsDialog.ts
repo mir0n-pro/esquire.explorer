@@ -28,6 +28,7 @@
 * 03/06/2026 mir0n  saveData catchError: RFC 7807 errors[] — alert + focusField on server validation error
 *                   focusField call wrapped in setTimeout to defer after snapshot re-render
 * 03/16/2026 mir0n  saving flag: Save button disabled while save is in progress
+* 03/20/2026 mir0n  tree refresh on affects3 save: needsTreeRefresh flag, treeRefresh param on saveData()
 */
 
 import {AfterViewChecked,
@@ -109,6 +110,7 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
    protected pendingTabRestore: number | null = null;
    public saving: boolean = false;
    protected originalDetails: any = null;
+   protected needsTreeRefresh: boolean = false;
 
    protected givenEntityId:string = "";
    protected givenEntityKind:number = -1;
@@ -163,7 +165,7 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
         return;
       }
     }
-    this.dialogRef.close();
+    this.dialogRef.close(this.needsTreeRefresh ? 'treeRefresh' : undefined);
   }
 
   onSave(): void {
@@ -200,8 +202,22 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
       this.focusField(error);
     } else if (changes && Object.keys(changes).length > 0) {
       EsqUtils.log('Save changes:', changes);
+      var treeRefresh = this.dictionary.some(tab =>
+        tab.fields.some(f => {
+          if (f.affects3 === 'Y' && Object.prototype.hasOwnProperty.call(changes, f.name)) {
+            return true;
+          }
+          if (f.type === 'subentity' && Object.prototype.hasOwnProperty.call(changes, f.name)) {
+            var subDict = this.subdictionary(this.details?.[f.name]?.kind);
+            return subDict.some(subTab =>
+              subTab.fields.some(sf => sf.affects3 === 'Y' && Object.prototype.hasOwnProperty.call(changes![f.name], sf.name))
+            );
+          }
+          return false;
+        })
+      );
       var body = { id: this.givenEntityId, kind: this.givenEntityKind, ...changes };
-      this.saveData(body, savedTab);
+      this.saveData(body, savedTab, treeRefresh);
     }
   }
 
@@ -256,7 +272,7 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
     );
   }
 
-  saveData(body: any, restoreTab?: number): void {
+  saveData(body: any, restoreTab?: number, treeRefresh?: boolean): void {
     var snapshot = this.details;
     this.saving = true;
     this.details$ = this.restApi.esquireCmdSave(this.givenEntityKind, this.givenEntityId, body).pipe(
@@ -264,6 +280,9 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
         this.saving = false;
         this.details = details;
         this.originalDetails = EsqUtils.deepCopy(details);
+        if (treeRefresh) {
+          this.needsTreeRefresh = true;
+        }
         if (restoreTab) {
           this.pendingTabRestore = restoreTab;
         }
