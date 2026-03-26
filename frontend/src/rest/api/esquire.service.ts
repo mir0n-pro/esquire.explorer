@@ -179,6 +179,159 @@ export class EsquireService extends BaseService {
     }
 
     /**
+     * Delete an account entity
+     * Permanently delete an account entity by id and kind
+     * @endpoint post /esq-adel
+     * @param kind an entity type
+     * @param id an account entity id to delete
+     * @param cmd a command to process
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public esquireCmdAdel(kind: number, id: string, cmd?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public esquireCmdAdel(kind: number, id: string, cmd?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public esquireCmdAdel(kind: number, id: string, cmd?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public esquireCmdAdel(kind: number, id: string, cmd?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (kind === null || kind === undefined) {
+            throw new Error('Required parameter kind was null or undefined when calling esquireCmdAdel.');
+        }
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling esquireCmdAdel.');
+        }
+
+        let localVarQueryParameters = new HttpParams({encoder: this.encoder});
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>kind, 'kind');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>id, 'id');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>cmd, 'cmd');
+
+        let localVarHeaders = this.defaultHeaders;
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/esq-adel`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<any>('post', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                params: localVarQueryParameters,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Create a new account entity
+     * Create a new account entity under a given parent user; entity id is server-generated
+     * @endpoint post /esq-anew
+     * @param kind an entity type
+     * @param parentId id of the parent user entity
+     * @param esqEntity 
+     * @param cmd a command to process
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public esquireCmdAnew(kind: number, parentId: string, esqEntity: EsqEntity, cmd?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<EsqEntity>;
+    public esquireCmdAnew(kind: number, parentId: string, esqEntity: EsqEntity, cmd?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<EsqEntity>>;
+    public esquireCmdAnew(kind: number, parentId: string, esqEntity: EsqEntity, cmd?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<EsqEntity>>;
+    public esquireCmdAnew(kind: number, parentId: string, esqEntity: EsqEntity, cmd?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (kind === null || kind === undefined) {
+            throw new Error('Required parameter kind was null or undefined when calling esquireCmdAnew.');
+        }
+        if (parentId === null || parentId === undefined) {
+            throw new Error('Required parameter parentId was null or undefined when calling esquireCmdAnew.');
+        }
+        if (esqEntity === null || esqEntity === undefined) {
+            throw new Error('Required parameter esqEntity was null or undefined when calling esquireCmdAnew.');
+        }
+
+        let localVarQueryParameters = new HttpParams({encoder: this.encoder});
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>kind, 'kind');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>parentId, 'parentId');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>cmd, 'cmd');
+
+        let localVarHeaders = this.defaultHeaders;
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/esq-anew`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<EsqEntity>('post', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: esqEntity,
+                params: localVarQueryParameters,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
      * Save account entity changes
      * Save changed fields of an account entity
      * @endpoint post /esq-cmd-asave
@@ -246,6 +399,159 @@ export class EsquireService extends BaseService {
         }
 
         let localVarPath = `/esq-cmd-asave`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<EsqEntity>('post', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: esqEntity,
+                params: localVarQueryParameters,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Delete an org or user entity
+     * Permanently delete an entity by id and kind
+     * @endpoint post /esq-del
+     * @param kind an entity type
+     * @param id an entity id to delete
+     * @param cmd a command to process
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public esquireCmdDel(kind: number, id: string, cmd?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public esquireCmdDel(kind: number, id: string, cmd?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public esquireCmdDel(kind: number, id: string, cmd?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public esquireCmdDel(kind: number, id: string, cmd?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (kind === null || kind === undefined) {
+            throw new Error('Required parameter kind was null or undefined when calling esquireCmdDel.');
+        }
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling esquireCmdDel.');
+        }
+
+        let localVarQueryParameters = new HttpParams({encoder: this.encoder});
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>kind, 'kind');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>id, 'id');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>cmd, 'cmd');
+
+        let localVarHeaders = this.defaultHeaders;
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/esq-del`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<any>('post', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                params: localVarQueryParameters,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Create a new org or user entity
+     * Create a new entity under a given parent; entity id is server-generated
+     * @endpoint post /esq-new
+     * @param kind an entity type
+     * @param parentId id of the parent entity
+     * @param esqEntity 
+     * @param cmd a command to process
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public esquireCmdNew(kind: number, parentId: string, esqEntity: EsqEntity, cmd?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<EsqEntity>;
+    public esquireCmdNew(kind: number, parentId: string, esqEntity: EsqEntity, cmd?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<EsqEntity>>;
+    public esquireCmdNew(kind: number, parentId: string, esqEntity: EsqEntity, cmd?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<EsqEntity>>;
+    public esquireCmdNew(kind: number, parentId: string, esqEntity: EsqEntity, cmd?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (kind === null || kind === undefined) {
+            throw new Error('Required parameter kind was null or undefined when calling esquireCmdNew.');
+        }
+        if (parentId === null || parentId === undefined) {
+            throw new Error('Required parameter parentId was null or undefined when calling esquireCmdNew.');
+        }
+        if (esqEntity === null || esqEntity === undefined) {
+            throw new Error('Required parameter esqEntity was null or undefined when calling esquireCmdNew.');
+        }
+
+        let localVarQueryParameters = new HttpParams({encoder: this.encoder});
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>kind, 'kind');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>parentId, 'parentId');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>cmd, 'cmd');
+
+        let localVarHeaders = this.defaultHeaders;
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/esq-new`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<EsqEntity>('post', `${basePath}${localVarPath}`,
             {

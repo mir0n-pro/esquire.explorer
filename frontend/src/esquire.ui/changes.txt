@@ -1,6 +1,38 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+03/26/2026 mir0n  create entity dialog
+api\EsqExplorerCallApi.ts
+  - onTreeRefreshSelect(entityId), setErrorMessage(msg, err) added to EsqExplorerHost
+api\EsqRestApi.ts
+  - esquireCmdNew added to interface
+components\EsqCreateEntityDialog.ts
+  - new: two-phase Create→Edit dialog extending EsqEntityDetailsDialog
+  - ngOnInit: initializes details={kind}, loads dictionary, auto-initializes subentity placeholders
+  - onCreate(): validates main + subentity fields; POSTs via restApi.esquireCmdNew()
+  - on success: transitions to edit mode; sets needsTreeRefresh and givenEntityId
+  - treeRefreshResult(): returns 'treeRefreshSelect:{entityId}' after creation
+  - closeConfirmMessage(): overrides to "continue with creation" in create mode
+components\EsqEntityDetailsDialog.ts
+  - isCreating()/onCreate() hooks; treeRefreshResult() virtual method
+  - closeConfirmMessage() hook; onClose() calls it instead of hardcoded string
+components\EsqEntityDetailsDialog.html
+  - optional chaining on details[field.name]?.["kind"] for subentity rendering
+  - create button row: @else if (isCreating()) with Create button wired to onCreate()
+components\EsqExplorerCallApiMill.ts
+  - lastUserId: tracks last userId for create dialog
+  - getParentEntityId(): walks tree node ancestors to find nearest entityId
+  - doExplorerCreate(): opens EsqCreateEntityDialog; handles treeRefreshSelect/treeRefresh results
+  - doExplorerCreate() onError callback: propagates dialog errors to host.setErrorMessage()
+explorer\flatTree\EsqExplorerComponent.ts
+  - esqExplorerHost @Input; errorMessage signal; errorReport field
+  - onTreeRefreshSelect(): calls onBtnRefreshClickAndSelect()
+  - setErrorMessage(): delegates to esqExplorerHost
+  - onBtnRefreshClickAndSelect(): refresh tree, navigate to new entity via gotoListNode()
+  - canCreateKind(kindId): isCommandAllowed(CMD_NEW) permission check
+explorer\flatTree\EsqExplorerComponent.html
+  - New submenu buttons: [disabled]="!canCreateKind(item.kind.id)" in context and toolbar menus
+
 03/20/2026 mir0n  tree-selection restore on refresh for link-variant nodes
 explorer\flatTree\EsqFlatTreeDatasource.ts
   - gotoTreeNode(id): navigates to a tree node by id; expands ancestors; returns the node itself

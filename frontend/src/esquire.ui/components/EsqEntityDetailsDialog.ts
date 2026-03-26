@@ -29,6 +29,8 @@
 *                   focusField call wrapped in setTimeout to defer after snapshot re-render
 * 03/16/2026 mir0n  saving flag: Save button disabled while save is in progress
 * 03/20/2026 mir0n  tree refresh on affects3 save: needsTreeRefresh flag, treeRefresh param on saveData()
+* 03/26/2026 mir0n  isCreating()/onCreate() hooks for EsqCreateEntityDialog subclass
+*                   treeRefreshResult() virtual method; closeConfirmMessage() hook
 */
 
 import {AfterViewChecked,
@@ -158,14 +160,22 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
     return ret;
   }
 
+  protected closeConfirmMessage(): string {
+    return 'You have unsaved changes. Press OK to save, or Cancel to discard.';
+  }
+
   onClose(): void {
     if (this.hasChanges()) {
-      if (confirm('You have unsaved changes. Press OK to save, or Cancel to discard.')) {
+      if (confirm(this.closeConfirmMessage())) {
         this.btnSave?.focus();
         return;
       }
     }
-    this.dialogRef.close(this.needsTreeRefresh ? 'treeRefresh' : undefined);
+    this.dialogRef.close(this.needsTreeRefresh ? this.treeRefreshResult() : undefined);
+  }
+
+  protected treeRefreshResult(): string {
+    return 'treeRefresh';
   }
 
   onSave(): void {
@@ -329,6 +339,14 @@ ngOnDestroy() {
 
   tabContent (title:string):string {
     return title == "Description" ? "esq-other-tab-content" : "esq-first-tab-content";
+  }
+
+  public isCreating(): boolean {
+    return false;
+  }
+
+  public onCreate(): void {
+    // overridden in EsqCreateEntityDialog
   }
 
 }

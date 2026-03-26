@@ -29,7 +29,7 @@
           <mat-tab [label]="tab.title" bodyClass="{{tabContent(tab.title)}}">
             @for (field of tab.fields; track field.name) {
                 @if (field.type == 'subentity') {
-                    @let sub = subdictionary(details[field.name]["kind"]);
+                    @let sub = subdictionary(details[field.name]?.["kind"]);
                     @if (sub[0] && sub[0].fields) {
                         @for (subfield of sub[0].fields; track subfield.name) {
                             @if (subfield.readwrite > 0) {
@@ -68,6 +68,9 @@
 <mat-dialog-actions align="center">
   @if (readOnly) {
     <button #btnClose mat-raised-button mat-dialog-close>Close</button>
+  } @else if (isCreating()) {
+    <button mat-raised-button (click)="onClose()">Close</button>
+    <button #btnSave mat-raised-button (click)="onCreate()" [disabled]="saving">Create</button>
   } @else {
     <button mat-raised-button (click)="onClose()">Close</button>
     <button #btnSave mat-raised-button (click)="onSave()" [disabled]="!hasChanges() || saving">Save</button>

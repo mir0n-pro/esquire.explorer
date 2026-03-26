@@ -1,6 +1,20 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+03/26/2026 mir0n  create entity dialog
+rest\api\esquire.service.ts
+  - added esquireCmdNew (/esq-new): create org/user entity under parent
+  - added esquireCmdAnew (/esq-anew): create account entity under parent user
+  - added esquireCmdDel (/esq-del): delete org/user entity by id
+  - added esquireCmdAdel (/esq-adel): delete account entity by id
+explorer\flatTree\app-explorer.component.ts
+  - implements EsqExplorerHost: onTreeRefresh(), onTreeRefreshSelect(), setErrorMessage()
+  - esquireCmdNew() REST wrapper: routes to /esq-anew for acct kinds, /esq-new otherwise
+  - registers mill host via callApiMill.instance().registerHost(this) in ngOnInit()
+  - setErrorMessage(): updates errorMessage signal and stores errorReport
+explorer\flatTree\app-explorer.component.html
+  - [esqExplorerHost]="this" binding on <esqExplorer> component
+
 03/16/2026 mir0n  let → var convention; subscribe error blocks removed
 explorer\flatTree\app-explorer.component.ts
   - let → var for ret variable (coding convention)

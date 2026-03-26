@@ -9,12 +9,15 @@
 * 02/17/2026 mir0n  added CMD_ command constants
 *                   use EsqAccessProfile from esquire.ui/api
 * 03/20/2026 mir0n  EsqExplorerHost interface; registerHost added to EsqExplorerCallApi
+* 03/26/2026 mir0n  onTreeRefreshSelect(), setErrorMessage() added to EsqExplorerHost
 */
 import {  EsqTreeNode} from './EsqTreeNode';
 import {EsqAccessProfile} from "./EsqAccessProfile";
 
 export interface EsqExplorerHost {
   onTreeRefresh(): void;
+  onTreeRefreshSelect(entityId: string): void;
+  setErrorMessage(msg: string, err?: any): void;
 }
 
 export interface EsqExplorerCallApi {

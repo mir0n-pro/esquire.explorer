@@ -332,6 +332,158 @@ paths:
                 $ref: '#/components/schemas/EsqAccessProfile'
         '405':
           description: Invalid input
+  /esq-new:
+    post:
+      tags:
+        - esquire
+      summary: Create a new org or user entity
+      description: Create a new entity under a given parent; entity id is server-generated
+      operationId: esquireCmdNew
+      parameters:
+        - name: kind
+          in: query
+          description: an entity type
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: parentId
+          in: query
+          description: id of the parent entity
+          required: true
+          schema:
+            type: string
+        - name: cmd
+          in: query
+          description: a command to process
+          required: false
+          schema:
+            type: string
+            default: new
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EsqEntity'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EsqEntity'
+        '405':
+          description: Invalid input
+  /esq-anew:
+    post:
+      tags:
+        - esquire
+      summary: Create a new account entity
+      description: Create a new account entity under a given parent user; entity id is server-generated
+      operationId: esquireCmdAnew
+      parameters:
+        - name: kind
+          in: query
+          description: an entity type
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: parentId
+          in: query
+          description: id of the parent user entity
+          required: true
+          schema:
+            type: string
+        - name: cmd
+          in: query
+          description: a command to process
+          required: false
+          schema:
+            type: string
+            default: new
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EsqEntity'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EsqEntity'
+        '405':
+          description: Invalid input
+  /esq-del:
+    post:
+      tags:
+        - esquire
+      summary: Delete an org or user entity
+      description: Permanently delete an entity by id and kind
+      operationId: esquireCmdDel
+      parameters:
+        - name: kind
+          in: query
+          description: an entity type
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: id
+          in: query
+          description: an entity id to delete
+          required: true
+          schema:
+            type: string
+        - name: cmd
+          in: query
+          description: a command to process
+          required: false
+          schema:
+            type: string
+            default: delete
+      responses:
+        '200':
+          description: successful operation
+        '405':
+          description: Invalid input
+  /esq-adel:
+    post:
+      tags:
+        - esquire
+      summary: Delete an account entity
+      description: Permanently delete an account entity by id and kind
+      operationId: esquireCmdAdel
+      parameters:
+        - name: kind
+          in: query
+          description: an entity type
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: id
+          in: query
+          description: an account entity id to delete
+          required: true
+          schema:
+            type: string
+        - name: cmd
+          in: query
+          description: a command to process
+          required: false
+          schema:
+            type: string
+            default: delete
+      responses:
+        '200':
+          description: successful operation
+        '405':
+          description: Invalid input
 
 components:
   schemas:

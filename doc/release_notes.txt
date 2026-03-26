@@ -2,6 +2,27 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+v1.2.2-2603.2618  Create entity dialog, bypass error message to shell footer
+  :Create:
+     EsqCreateEntityDialog: two-phase Create→Edit dialog extending EsqEntityDetailsDialog
+     onCreate(): validates main + subentity fields; POSTs via esquireCmdNew/esquireCmdAnew
+     on success: transitions to edit mode; triggers tree refresh and selects new entity
+  :REST:
+     esquireCmdNew (/esq-new), esquireCmdAnew (/esq-anew): create entity endpoints
+     esquireCmdDel (/esq-del), esquireCmdAdel (/esq-adel): delete entity endpoints
+     EsqRestApi interface: esquireCmdNew added
+     app-explorer: esquireCmdNew() routes to /esq-anew for acct kinds, /esq-new otherwise
+  :Permissions:
+     canCreateKind(): isCommandAllowed(CMD_NEW) gates New submenu items
+  :EsqExplorerHost:
+     onTreeRefreshSelect(), setErrorMessage() added to interface and implemented
+     Mill doExplorerCreate: handles treeRefreshSelect → host.onTreeRefreshSelect(entityId)
+     Mill doExplorerCreate: onError callback → host.setErrorMessage() propagates dialog errors to UI
+  :Fix:
+     onCreate(): subentity validation loop added (same pattern as onSave())
+     onCreate(): early return removed; restructured as if/else
+     closeConfirmMessage() hook: overridable; create mode says "continue with creation"
+
 v1.2.2-2603.2019  tree auto refresh on update of important fields + few fixes
   :EsqExplorerHost:
      new interface with onTreeRefresh(); EsqExplorerCallApi extended with registerHost()

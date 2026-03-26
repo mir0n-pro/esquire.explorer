@@ -212,6 +212,7 @@
     <button
       mat-menu-item
       class="esq-menu-item"
+      [disabled]="!canCreateKind(item.kind.id)"
       (click)="onCmdNewClick(item.kind.id,true)">
       @if (item.icon) {
         <img [src]="item.icon" class="esq-menu-icon"/>
@@ -226,6 +227,7 @@
     <button
       mat-menu-item
       class="esq-menu-item"
+      [disabled]="!canCreateKind(item.kind.id)"
       (click)="onCmdNewClick(item.kind.id,false)">
       @if (item.icon) {
         <img [src]="item.icon" class="esq-menu-icon"/>

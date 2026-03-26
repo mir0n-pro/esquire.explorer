@@ -17,7 +17,7 @@
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 import {EsqValidationError} from './EsqValidationError';
 export class EsqUtils {
- public static DEBUG:boolean = false;
+ public static DEBUG:boolean = true;
  public static DELAY:boolean = false;
  public static DEBUG_SKIP_VALIDATION :boolean = false;
  public static DEBUG_SKIP_PERMISSION :boolean = false;

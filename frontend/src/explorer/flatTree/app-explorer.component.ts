@@ -36,6 +36,8 @@
 * 03/09/2026 mir0n  profile converted to signal — fixes NG0100 ExpressionChangedAfterChecked
 *                   callApiMill/dictionary init moved before await — fixes CallApiMill not initialized race
 * 03/16/2026 mir0n  let → var (convention); subscribe error blocks removed
+* 03/26/2026 mir0n  implements EsqExplorerHost: onTreeRefresh(), onTreeRefreshSelect(), setErrorMessage()
+*                   esquireCmdNew() routes to /esq-anew (acct) or /esq-new; registers mill host
 */
 import {Component,
   OnInit,
@@ -71,7 +73,7 @@ import {EsqObjectKindFactory} from 'src/esquire.ui/api/EsqObjectKindFactory';
 import {EsqNodeStatus,EsqNodeStatusFactory} from 'src/esquire.ui/api/EsqNodeStatusFactory';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
-import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
+import {EsqExplorerCallApi, EsqExplorerHost} from 'src/esquire.ui/api/EsqExplorerCallApi';
 //import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 import {EsqExplorerCallApiMill} from 'src/esquire.ui/components/EsqExplorerCallApiMill';
 import {EsqDictionary} from 'src/esquire.ui/components/EsqDictionary';
@@ -105,7 +107,7 @@ const STATUS_READY = "Ready";
   templateUrl: './app-explorer.component.html',
   styleUrl: './app-explorer.component.scss'
 })
-export class ExplorerComponent implements OnInit, AfterViewInit {
+export class ExplorerComponent implements OnInit, AfterViewInit, EsqExplorerHost {
   private keycloak: Keycloak;
   keycloakSignal: Signal<KeycloakEvent> = inject(KEYCLOAK_EVENT_SIGNAL);
   authState = signal('Initial');
@@ -187,8 +189,13 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
     return this.profile() !== null;
   }
 
-  private setErrorMessage(msg:string) {
+  setErrorMessage(msg: string, err?: any): void {
+    // EsqUtils.log('[4/4] ExplorerComponent.setErrorMessage: FINAL - updating errorMessage signal. Message: ' + msg);
     this.errorMessage.set((msg.length > 64) ? msg.substring(0,61) + '...' : msg);
+    if (err) {
+      this.errorReport = err;
+    }
+    // EsqUtils.log('[4/4] ExplorerComponent.setErrorMessage: errorMessage signal value is now: ' + this.errorMessage());
   }
    
   public esqRestApiWrapper(): EsqRestApi {
@@ -338,6 +345,19 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
             var ret: Observable<any> = this.dataService.esquireKeySave(id, body);
             return ret;
         },
+        esquireCmdNew: (kind: number, parentId: string, body: any, cmd?: string, options?: any) => {
+            this.setErrorMessage("");
+            this.errorReport = undefined;
+            if(!this.dataService) {
+                this.setErrorMessage("Data service not initialized");
+                throw new Error("Data service not initialized");
+            }
+            var acct: boolean = EsqObjectKindFactory.instanceOf(kind).acct;
+            var ret: Observable<any> = acct
+                ? this.dataService.esquireCmdAnew(kind, encodeURIComponent(parentId), body, cmd)
+                : this.dataService.esquireCmdNew(kind, encodeURIComponent(parentId), body, cmd);
+            return ret;
+        },
     }
   };
 
@@ -357,10 +377,19 @@ export class ExplorerComponent implements OnInit, AfterViewInit {
   }
 
 
+  onTreeRefresh(): void {
+    // Explorer child component handles tree refresh
+  }
+
+  onTreeRefreshSelect(entityId: string): void {
+    // Explorer child component handles tree refresh and select
+  }
+
   async ngOnInit() {
     this.dataService = this._dataService;
     this.dictionary = new EsqDictionary(this.esqRestApiWrapper());
     this.callApiMill = new EsqExplorerCallApiMill(this.detailsDialog, this.dictionary, this.esqRestApiWrapper());
+    this.callApiMill.instance().registerHost(this);
     await EsqObjectKindFactory.init(this.esqRestApiWrapper(), EsquireObjectKinds);
     EsqNodeStatusFactory.init(Object.values(EsquireStatuses));
   }

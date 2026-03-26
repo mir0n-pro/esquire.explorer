@@ -15,6 +15,8 @@
 *                   use EsqAccessProfile from esquire.ui/api
 * 03/20/2026 mir0n  implements EsqExplorerHost; self-registers via registerHost in ngOnInit()
 *                   onBtnRefreshClick: gotoTreeNode fallback for link-variant node restore
+* 03/26/2026 mir0n  canCreateKind(); onTreeRefreshSelect(); setErrorMessage() delegation
+*                   onBtnRefreshClickAndSelect(); esqExplorerHost input; errorMessage signal
 */
 import {Component,
   ElementRef,
@@ -104,6 +106,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
   @Input() public esqExplorerCallApi: EsqExplorerCallApi | null = null;
   @Input() public esqCommandMenuItems:EsqCommandMenuItem[] = [];
   @Input() public esqAccessProfile:EsqAccessProfile | null = null;
+  @Input() public esqExplorerHost?: EsqExplorerHost;
 
   treeLevelAccessor = (dataNode: EsqTreeNode)  => dataNode.level;
   datasource!: EsqFlatTreeDatasource;
@@ -116,8 +119,10 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
   listNodeExecuted:EsqTreeNode | null = null;
   listNodeHoveredIndex = -1;
   listNodeOwnerPath = signal("");
+  errorMessage = signal('');
+  errorReport: any = undefined;
 
-  listNodeHistoryStack:EsqTreeNode[] = []; 
+  listNodeHistoryStack:EsqTreeNode[] = [];
   listNodeHistoryIndex:number = -1; 
 
   treeNodePostFocus:EsqTreeNode | null = null; 
@@ -160,6 +165,32 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
 
   onTreeRefresh(): void {
     void this.onBtnRefreshClick();
+  }
+
+  onTreeRefreshSelect(entityId: string): void {
+    void this.onBtnRefreshClickAndSelect(entityId);
+  }
+
+  setErrorMessage(msg: string, err?: any): void {
+    // EsqUtils.log('[3/4] EsqExplorerComponent.setErrorMessage: received error, delegating to parent. esqExplorerHost exists: ' + (this.esqExplorerHost ? 'YES' : 'NO'));
+    if (this.esqExplorerHost) {
+      this.esqExplorerHost.setErrorMessage(msg, err);
+    } // else {
+      // EsqUtils.log('[3/4] EsqExplorerComponent.setErrorMessage: esqExplorerHost is NOT provided!');
+    // }
+  }
+
+  async onBtnRefreshClickAndSelect(entityId: string): Promise<void> {
+    await this.onBtnRefreshClick();
+    var n: any = await this.datasource.gotoListNode(entityId);
+    if (n && n instanceof EsqTreeNode) {
+      var found = n as EsqTreeNode;
+      this.listNodeOwner = found.parent as EsqTreeNode;
+      this.updatePath();
+      this.updateToolbarNewMenuItems();
+      this.toggleTreeSelect(found.parent as EsqTreeNode);
+      this.doSelectListNode(found, true);
+    }
   }
 
   async ngOnInit() {
@@ -329,6 +360,12 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
         if (node) {
             ret = node.kind.isCommandAllowed(cmd);
         }
+        return ret;
+    }
+
+    canCreateKind(kindId: number): boolean {
+        var ret: boolean = !this.esqAccessProfile ||
+            this.esqAccessProfile.isCommandAllowed(EsqExplorerCallApi.CMD_NEW, "", kindId);
         return ret;
     }
 
@@ -533,7 +570,6 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
   async doExplorerCreate(node: EsqTreeNode | null, typeId?: number) {
     if (node && this.esqExplorerCallApi) {
       const api:EsqExplorerCallApi = this.esqExplorerCallApi as EsqExplorerCallApi;
-      alert("new menu item clicked " + node.name + " " + typeId);
       return api.create(node as EsqTreeNode, typeId);
     } else {
       return new Promise<void>((resolve)=>resolve());

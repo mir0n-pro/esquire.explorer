@@ -53,11 +53,12 @@
 
 
   @if (isConnected() && profileLoaded()) {
-    <esqExplorer #explorer 
+    <esqExplorer #explorer
         [esqRestApi]="esqRestApiWrapper()"
         [esqExplorerCallApi]="esqExplorerCallApiWrapper()"
         [esqCommandMenuItems]="esqCommandMenuItems()"
-        [esqAccessProfile]="esqAccessProfile()">
+        [esqAccessProfile]="esqAccessProfile()"
+        [esqExplorerHost]="this">
       </esqExplorer>
       
   } @else {

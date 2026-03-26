@@ -17,12 +17,15 @@
 *                  console.log replaced with EsqUtils.log
 * 03/19/2026 mir0n entity_kind normalized to even in doExplorerCommand2()
 * 03/20/2026 mir0n  EsqExplorerHost registration; delayed onTreeRefresh() on 'treeRefresh' dialog result
+* 03/26/2026 mir0n  doExplorerCreate(): opens EsqCreateEntityDialog; getParentEntityId()
+*                   treeRefreshSelect result → host.onTreeRefreshSelect(); lastUserId tracking
 */
 import { firstValueFrom } from "rxjs";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { EsqNodeDialog }  from "./EsqNodeDialog";
 import { EsqEntityDetailsDialog } from "./EsqEntityDetailsDialog";
 import { EsqNodeDetailsDialog } from "./EsqNodeDetailsDialog";
+import { EsqCreateEntityDialog } from "./EsqCreateEntityDialog";
 
 /*
 import { EsqDictionaryApi
@@ -44,6 +47,7 @@ export class EsqExplorerCallApiMill {
   dictionaryApi:EsqDictionaryApi;
   restApi:EsqRestApi;
   private host?: EsqExplorerHost;
+  protected lastUserId: string = "";
 
   public constructor (dialog:MatDialog, dictionaryApi:EsqDictionaryApi, restApi:EsqRestApi) {
     this.dialog = dialog;
@@ -127,6 +131,7 @@ export class EsqExplorerCallApiMill {
     }
 
   protected async doExplorerCommand2(cmd: string, entity_id: string, entity_name: string, entity_kind:number, accessProfile:EsqAccessProfile|null) {
+      if (accessProfile?.id) { this.lastUserId = accessProfile.id; }
       entity_kind = Math.floor(entity_kind / 2) * 2;
       if (cmd == EsqExplorerCallApi.CMD_KEY) {
           var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, entity_id, entity_kind);
@@ -151,11 +156,54 @@ export class EsqExplorerCallApiMill {
       }
   }
 
+  protected getParentEntityId(node: EsqTreeNode): string {
+    var ret: string = "";
+    if (node.entityId) {
+      ret = node.entityId;
+    } else if (node.parent) {
+      ret = this.getParentEntityId(node.parent);
+    }
+    return ret;
+  }
+
   protected async doExplorerCreate(node : EsqTreeNode, typeId?: number) {
+    var kind: number = Math.floor((typeId ?? node.kind.id) / 2) * 2;
+    var parentId = this.getParentEntityId(node);
+    var dialogRef: MatDialogRef<any> = this.dialog.open(EsqCreateEntityDialog, {
+      autoFocus: false,
+      data: {
+        id: "",
+        kind: kind,
+        parentId: parentId,
+        restApi: this.restApi,
+        dictionaryApi: this.dictionaryApi,
+        callApi: this.esqExplorerCallApi(),
+        readOnly: false,
+        userId: this.lastUserId,
+        onError: (msg: string, err?: any) => {
+          // EsqUtils.log('[2/4] EsqExplorerCallApiMill.onError: received error, calling host.setErrorMessage. Host exists: ' + (this.host ? 'YES' : 'NO'));
+          if (this.host) {
+            this.host.setErrorMessage(msg, err);
+          } // else {
+            // EsqUtils.log('[2/4] EsqExplorerCallApiMill.onError: host is NOT available!');
+          // }
+        }
+      }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      EsqUtils.log(`Create dialog result: ${result}`);
+      if (result && typeof result === 'string' && result.startsWith('treeRefreshSelect:') && this.host) {
+        var entityId = result.substring('treeRefreshSelect:'.length);
+        setTimeout(() => this.host!.onTreeRefreshSelect(entityId), 250);
+      } else if (result === 'treeRefresh' && this.host) {
+        setTimeout(() => this.host!.onTreeRefresh(), 250);
+      }
+    });
     return new Promise<void>((resolve)=>resolve());
   }
 
   protected async doExplorerCommand(cmd:string, node : EsqTreeNode, accessProfile:EsqAccessProfile|null) {
+    if (accessProfile?.id) { this.lastUserId = accessProfile.id; }
     var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, node.entityId, node.kind.id);
     if (cmd == EsqExplorerCallApi.CMD_KEY) {
         setTimeout(() => {
