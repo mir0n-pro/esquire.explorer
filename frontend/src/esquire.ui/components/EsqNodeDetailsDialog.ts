@@ -22,12 +22,14 @@
 * 02/28/2026 mir0n  refactored to extend EsqEntityDetailsDialog (duplicate logic removed)
 *                   added inline sub-entity field rendering
 * 03/20/2026 mir0n  entity kind normalized to even (handles link-variant kinds)
+* 03/27/2026 mir0n  EsqDialogResizeDirective added to imports
 */
 
 import {Component, Inject, ViewEncapsulation} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import {EsqDialogResizeDirective} from './EsqDialogResizeDirective';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -53,6 +55,7 @@ import {EsqEntityDetailsDialog} from "./EsqEntityDetailsDialog";
           MatButtonModule,
           MatTooltipModule,
           DragDropModule,
+          EsqDialogResizeDirective,
           MatIcon,
           MatToolbarModule,
           MatTabsModule,

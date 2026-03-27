@@ -8,6 +8,7 @@
 * 03/26/2026 mir0n  initial: two-phase Create→Edit dialog extending EsqEntityDetailsDialog
 *                   subentity validation in onCreate(); closeConfirmMessage() override
 * 03/26/2026 mir0n  confirmDlg() replaces alert()/confirm(); callApi added
+* 03/27/2026 mir0n  EsqDialogResizeDirective added to imports
 */
 
 import {
@@ -18,6 +19,7 @@ import {
 import {MatButtonModule} from '@angular/material/button';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import {EsqDialogResizeDirective} from './EsqDialogResizeDirective';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -44,6 +46,7 @@ import {EsqEntityField} from 'src/esquire.ui/api/EsqEntityDictionary';
     MatButtonModule,
     MatTooltipModule,
     DragDropModule,
+    EsqDialogResizeDirective,
     MatIcon,
     MatToolbarModule,
     MatTabsModule,

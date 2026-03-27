@@ -7,6 +7,7 @@
 *  History:
 * 02/01/2026 mir0n EsqTabLStringComponent renamed with EsqTabStringComponent
 * 02/05/2026 mir0n use EsqTabFieldComponent
+* 03/27/2026 mir0n  EsqDialogResizeDirective added; userId field for dialog position persistence
 */
 import {AfterViewInit, 
   Component, 
@@ -20,6 +21,7 @@ import {AfterViewInit,
 import {MatButton, MatButtonModule} from '@angular/material/button';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import {EsqDialogResizeDirective} from './EsqDialogResizeDirective';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -45,6 +47,7 @@ import {EsqTabFieldComponent} from "./EsqTabFieldComponent";
         MatButtonModule,
         MatTooltipModule,
         DragDropModule,
+        EsqDialogResizeDirective,
         MatIcon,
         MatToolbarModule,
         MatTabsModule,
@@ -67,6 +70,7 @@ export class EsqSingleEntryDialog implements OnInit,  AfterViewInit, OnDestroy {
    public dictionary: EsqEntityLayer[];
    public title: string;
    public titleIcon: string;
+   public userId: string = '';
 //   readonly detailsDialog:MatDialog = inject(MatDialog);   
 
   constructor(
@@ -80,6 +84,7 @@ export class EsqSingleEntryDialog implements OnInit,  AfterViewInit, OnDestroy {
       this.details = data.details;
       this.title= data.title || "Properties";
       this.titleIcon = data.titleIcon || "./main.ico";
+      this.userId = data.userId ?? '';
 
       this.dialogRef.disableClose = true;
       this.dialogRef.addPanelClass('esq-dialog');

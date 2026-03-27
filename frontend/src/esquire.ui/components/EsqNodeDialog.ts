@@ -6,6 +6,7 @@
 *
 *  History:
 * 02/04/2024 miron renamed with EsqNodeDialog (was EsqNodeDetailsDialog)
+* 03/27/2026 mir0n  EsqDialogResizeDirective added; userId field for dialog position persistence
 */
 import {AfterViewInit, 
   Component, 
@@ -19,6 +20,7 @@ import {AfterViewInit,
 import {MatButton, MatButtonModule} from '@angular/material/button';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import {EsqDialogResizeDirective} from './EsqDialogResizeDirective';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -41,6 +43,7 @@ import {EsqNodeStatusFactory} from 'src/esquire.ui/api/EsqNodeStatusFactory';
     MatButtonModule,
     MatTooltipModule,
     DragDropModule,
+    EsqDialogResizeDirective,
     MatIcon,
     MatToolbarModule,
     MatTabsModule,
@@ -58,6 +61,7 @@ export class EsqNodeDialog implements OnInit,  AfterViewInit, OnDestroy {
    private dialogRef: MatDialogRef<EsqNodeDialog>;
    public node : EsqTreeNode;
    public readOnly : boolean = false;
+   public userId : string = '';
 
   constructor(
       dialogRef: MatDialogRef<EsqNodeDialog>,
@@ -66,6 +70,7 @@ export class EsqNodeDialog implements OnInit,  AfterViewInit, OnDestroy {
       this.dialogRef = dialogRef; 
       this.node = data.node;
       this.readOnly = data.readOnly;
+      this.userId = data.userId ?? '';
       this.dialogRef.disableClose = true;
       this.dialogRef.addPanelClass('esq-dialog');
       this.dialogRef.updateSize('60vw', '60vh'); 

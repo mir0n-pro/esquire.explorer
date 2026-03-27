@@ -6,16 +6,17 @@
 *
 *  History:
 * 03/26/2026 mir0n  initial; focus param; ConfirmFlag type; no X button
+* 03/27/2026 mir0n  EsqDialogResizeDirective added; userId field for dialog position persistence
 */
 import {AfterViewInit, Component, Inject, QueryList, ViewChildren, ViewEncapsulation} from '@angular/core';
 import {MatButton, MatButtonModule} from '@angular/material/button';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {DragDropModule} from '@angular/cdk/drag-drop';
-import {MatIcon} from '@angular/material/icon';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {EsqObjectKind} from 'src/esquire.ui/api/EsqObjectKind';
 import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
+import {EsqDialogResizeDirective} from './EsqDialogResizeDirective';
 
 @Component({
   selector: 'esq-confirm-dialog',
@@ -26,8 +27,8 @@ import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
     MatButtonModule,
     MatTooltipModule,
     DragDropModule,
-    MatIcon,
     MatToolbarModule,
+    EsqDialogResizeDirective,
   ],
   encapsulation: ViewEncapsulation.None,
 })
@@ -41,6 +42,7 @@ export class EsqConfirmDialog implements AfterViewInit {
   public text: string;
   public flag: EsqExplorerCallApi.ConfirmFlag;
   public focus: number;
+  public userId: string;
 
   constructor(
     dialogRef: MatDialogRef<EsqConfirmDialog>,
@@ -52,6 +54,7 @@ export class EsqConfirmDialog implements AfterViewInit {
     this.text = data.text ?? '';
     this.flag = data.flag ?? EsqExplorerCallApi.ConfirmFlag.Ok;
     this.focus = data.focus ?? 0;
+    this.userId = data.userId ?? '';
     this.dialogRef.disableClose = true;
     this.dialogRef.addPanelClass('esq-dialog');
   }

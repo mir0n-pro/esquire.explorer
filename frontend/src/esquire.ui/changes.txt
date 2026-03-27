@@ -1,6 +1,35 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+03/27/2026 mir0n  dialog resize + position/size persistence per user
++ components\EsqDialogResizeDirective.ts
+  - new directive [esqDialogResize]="'key:' + userId" on every dialog toolbar
+  - all 8 edges resizable (N/S/E/W + 4 corners); SE corner indicator
+  - cookie persistence: esq_dlg_{key}_{user}; saves on resize/drag end; restores on open
+  - PERSIST_BOUNDS static flag for global enable/disable
+components\EsqEntityDetailsDialog.ts / .html
+  - EsqDialogResizeDirective added; [esqDialogResize]="'entity-details:' + userId"
+components\EsqNodeDetailsDialog.ts / .html
+  - EsqDialogResizeDirective added; [esqDialogResize]="'node-details:' + userId"
+components\EsqCreateEntityDialog.ts
+  - EsqDialogResizeDirective added to imports
+components\EsqAccessProfileDialog.ts / .html
+  - EsqDialogResizeDirective added; [esqDialogResize]="'access-profile:' + userId"
+components\EsqNodeDialog.ts / .html
+  - EsqDialogResizeDirective added; userId field; [esqDialogResize]="'node:' + userId"
+components\EsqSingleEntryDialog.ts / .html
+  - EsqDialogResizeDirective added; userId field; [esqDialogResize]="'single-entry:' + userId"
+components\EsqConfirmDialog.ts / .html
+  - EsqDialogResizeDirective added; userId field; [esqDialogResize]="'confirm:' + userId"
+components\EsqExplorerCallApiMill.ts
+  - setUserId(): sets lastUserId at logon; removed lazy update from command handlers
+  - userId propagated to EsqNodeDialog and EsqConfirmDialog data
+components\EsqDetailsDialog.scss
+  - flex layout on .mdc-dialog__surface (buttons stay at bottom during resize)
+  - .esq-dialog-resize-se: SE corner triangle indicator; color: black on surface
+components\public-api.ts
+  - export EsqDialogResizeDirective
+
 03/26/2026 mir0n  confirmDlg() pattern: EsqConfirmDialog + ConfirmFlag enum
 api\EsqExplorerCallApi.ts
   - ConfirmFlag enum (Ok/YesNo/OkCancel) added to EsqExplorerCallApi namespace

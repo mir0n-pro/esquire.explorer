@@ -20,6 +20,7 @@
 * 03/26/2026 mir0n  doExplorerCreate(): opens EsqCreateEntityDialog; getParentEntityId()
 *                   treeRefreshSelect result → host.onTreeRefreshSelect(); lastUserId tracking
 * 03/26/2026 mir0n  confirmDlg() added
+* 03/27/2026 mir0n  setUserId() from logon profile; userId propagated to all dialogs; removed lazy lastUserId workaround
 */
 import { firstValueFrom } from "rxjs";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
@@ -58,7 +59,11 @@ export class EsqExplorerCallApiMill {
     this.restApi = restApi;
   }
   public instance():EsqExplorerCallApi {
-    return this.esqExplorerCallApi(); 
+    return this.esqExplorerCallApi();
+  }
+
+  public setUserId(userId: string): void {
+    this.lastUserId = userId;
   }
 
   protected async runDetailsAsync(cmd:string, node : EsqTreeNode, readOnly:boolean, userId:string) : Promise<void> {
@@ -81,6 +86,7 @@ export class EsqExplorerCallApiMill {
         data : {
           node : node,
           readOnly: readOnly,
+          userId: userId,
         }
       });
     }
@@ -136,7 +142,6 @@ export class EsqExplorerCallApiMill {
     }
 
   protected async doExplorerCommand2(cmd: string, entity_id: string, entity_name: string, entity_kind:number, accessProfile:EsqAccessProfile|null) {
-      if (accessProfile?.id) { this.lastUserId = accessProfile.id; }
       entity_kind = Math.floor(entity_kind / 2) * 2;
       if (cmd == EsqExplorerCallApi.CMD_KEY) {
           var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, entity_id, entity_kind);
@@ -208,7 +213,6 @@ export class EsqExplorerCallApiMill {
   }
 
   protected async doExplorerCommand(cmd:string, node : EsqTreeNode, accessProfile:EsqAccessProfile|null) {
-    if (accessProfile?.id) { this.lastUserId = accessProfile.id; }
     var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, node.entityId, node.kind.id);
     if (cmd == EsqExplorerCallApi.CMD_KEY) {
         setTimeout(() => {
@@ -225,7 +229,7 @@ export class EsqExplorerCallApiMill {
   async confirmDlg(kind: EsqObjectKind | null, header: string, text: string, flag: EsqExplorerCallApi.ConfirmFlag, focus: number = 0): Promise<number> {
     var dialogRef = this.dialog.open(EsqConfirmDialog, {
       autoFocus: false,
-      data: { kind, header, text, flag, focus }
+      data: { kind, header, text, flag, focus, userId: this.lastUserId }
     });
     dialogRef.updateSize('28vw');
     return new Promise<number>((resolve) => {

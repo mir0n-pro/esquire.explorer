@@ -2,6 +2,7 @@
 //export const eeee = 'eeee';
 export * from './EsqDictionary';
 export * from './EsqResizeDirective'
+export * from './EsqDialogResizeDirective'
 export * from './EsqUtils';
 export * from './EsqTabStringComponent';
 export * from './EsqTabListComponent';

@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+03/27/2026 mir0n  dialog resize + position/size persistence per user
+explorer\flatTree\app-explorer.component.ts
+  - setUserId() called at profile load — informs mill of logged-in userId at logon
+  - userId passed to EsqSingleEntryDialog data
+
 03/26/2026 mir0n  create entity dialog
 rest\api\esquire.service.ts
   - added esquireCmdNew (/esq-new): create org/user entity under parent

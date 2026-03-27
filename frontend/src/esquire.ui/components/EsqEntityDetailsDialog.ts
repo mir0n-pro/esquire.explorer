@@ -32,6 +32,7 @@
 * 03/26/2026 mir0n  isCreating()/onCreate() hooks for EsqCreateEntityDialog subclass
 *                   treeRefreshResult() virtual method; closeConfirmMessage() hook
 * 03/26/2026 mir0n  confirmDlg() replaces alert()/confirm(); callApi added
+* 03/27/2026 mir0n  EsqDialogResizeDirective added to imports
 */
 
 import {AfterViewChecked,
@@ -46,6 +47,7 @@ import {AfterViewChecked,
 import {MatButton, MatButtonModule} from '@angular/material/button';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import {EsqDialogResizeDirective} from './EsqDialogResizeDirective';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -83,6 +85,7 @@ import {EsqValidationError} from "./EsqValidationError";
           MatButtonModule,
           MatTooltipModule,
           DragDropModule,
+          EsqDialogResizeDirective,
           MatIcon,
           MatToolbarModule,
           MatTabsModule,

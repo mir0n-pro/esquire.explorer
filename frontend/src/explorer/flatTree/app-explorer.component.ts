@@ -38,6 +38,7 @@
 * 03/16/2026 mir0n  let → var (convention); subscribe error blocks removed
 * 03/26/2026 mir0n  implements EsqExplorerHost: onTreeRefresh(), onTreeRefreshSelect(), setErrorMessage()
 *                   esquireCmdNew() routes to /esq-anew (acct) or /esq-new; registers mill host
+* 03/27/2026 mir0n  setUserId() called at profile load; userId passed to EsqSingleEntryDialog
 */
 import {Component,
   OnInit,
@@ -155,7 +156,9 @@ export class ExplorerComponent implements OnInit, AfterViewInit, EsqExplorerHost
               this.profileRequested = true;
               this._dataService.esquireKey().subscribe({
                   next: (value) => {
-                    this.profile.set(new EsqAccessProfile(value));
+                    var ap = new EsqAccessProfile(value);
+                    this.profile.set(ap);
+                    this.callApiMill?.setUserId(ap.id);
                   },
                   error: (err) => {
                     this.errorReport = err;
@@ -474,7 +477,8 @@ private findIcon(kind:number) : string {
         readOnly : true,
         details : { ...this.errorReport, errors: this.errorReport.errors ? JSON.stringify(this.errorReport.errors, null, 2) : undefined },
         title : "Error Report",
-        titleIcon : "./img/error.ico"
+        titleIcon : "./img/error.ico",
+        userId : this.profile()?.id || ''
       }
     });
 
