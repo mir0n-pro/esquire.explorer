@@ -31,6 +31,7 @@
 * 03/20/2026 mir0n  tree refresh on affects3 save: needsTreeRefresh flag, treeRefresh param on saveData()
 * 03/26/2026 mir0n  isCreating()/onCreate() hooks for EsqCreateEntityDialog subclass
 *                   treeRefreshResult() virtual method; closeConfirmMessage() hook
+* 03/26/2026 mir0n  confirmDlg() replaces alert()/confirm(); callApi added
 */
 
 import {AfterViewChecked,
@@ -160,13 +161,14 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
     return ret;
   }
 
-  protected closeConfirmMessage(): string {
-    return 'You have unsaved changes. Press OK to save, or Cancel to discard.';
-  }
-
-  onClose(): void {
+  async onClose(): Promise<void> {
     if (this.hasChanges()) {
-      if (confirm(this.closeConfirmMessage())) {
+      var result = await this.callApi.confirmDlg(EsqObjectKindFactory.instanceOf(this.givenEntityKind),
+          (this.headerName ?? '')  + ' Unsaved Changes',
+          'You have made changes. Do you want to save them?',
+          EsqExplorerCallApi.ConfirmFlag.YesNo,
+          0);
+      if (result === 0) {
         this.btnSave?.focus();
         return;
       }
@@ -178,7 +180,7 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
     return 'treeRefresh';
   }
 
-  onSave(): void {
+  async onSave(): Promise<void> {
     var savedTab: number = this.tabGroup?.selectedIndex ?? 0;
     var changes: Record<string, any>|null = null;
     var error: EsqValidationError | null = EsqUtils.validateFields(this.details, this.dictionary);
@@ -208,7 +210,10 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
       }
     }
     if (error) {
-      alert(error.message);
+      await this.callApi.confirmDlg(EsqObjectKindFactory.instanceOf(this.givenEntityKind),
+          (this.headerName ?? '')  + ' Validation Error',
+          error.message,
+          EsqExplorerCallApi.ConfirmFlag.Ok);
       this.focusField(error);
     } else if (changes && Object.keys(changes).length > 0) {
       EsqUtils.log('Save changes:', changes);
@@ -276,7 +281,10 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
         }
       }),
       catchError(err => {
-        alert('Load failed: ' + (err.detail || err.title || err));
+        void this.callApi?.confirmDlg(EsqObjectKindFactory.instanceOf(this.givenEntityKind),
+            (this.headerName ?? '')  + ' Load Error',
+            'Load failed: ' + (err.detail || err.title || err),
+            EsqExplorerCallApi.ConfirmFlag.Ok);
         return EMPTY;
       })
     );
@@ -307,10 +315,15 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
             message: apiErr.message,
             tabIndex: parseInt(apiErr.tabIndex, 10) || 0
           };
-          alert('Save failed: ' + (err.detail || valError.message));
-          setTimeout(() => this.focusField(valError), 0);
+          void this.callApi?.confirmDlg(EsqObjectKindFactory.instanceOf(this.givenEntityKind),
+              (this.headerName ?? '')  + ' Save Error',
+              'Save failed: ' + (err.detail || valError.message),
+              EsqExplorerCallApi.ConfirmFlag.Ok).then(() => this.focusField(valError));
         } else {
-          alert('Save failed: ' + (err.detail || err.title || err));
+          void this.callApi?.confirmDlg(EsqObjectKindFactory.instanceOf(this.givenEntityKind),
+              (this.headerName ?? '')  + ' disaSave Error',
+              'Save failed: ' + (err.detail || err.title || err),
+              EsqExplorerCallApi.ConfirmFlag.Ok);
         }
         return of(snapshot);
       })

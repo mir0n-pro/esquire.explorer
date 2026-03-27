@@ -24,6 +24,7 @@
 *                   focusField call wrapped in setTimeout to defer after snapshot re-render
 *                   fixed double details$ async subscription (second pipe replaced with details property)
 * 03/16/2026 mir0n  saving flag: Save button disabled while save is in progress
+* 03/26/2026 mir0n  confirmDlg() replaces alert()/confirm(); callApi added
 */
 import {AfterViewChecked,
   AfterViewInit,
@@ -63,6 +64,7 @@ import { EsqNodeType
 import {EsqObjectKind} from 'src/esquire.ui/api/EsqObjectKind';
 import {EsqObjectKindFactory} from 'src/esquire.ui/api/EsqObjectKindFactory';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
+import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 import { EsqTabIknListComponent } from "./EsqTabIknListComponent";
@@ -96,6 +98,7 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
    private dialogRef: MatDialogRef<EsqAccessProfileDialog>;
    private restApi: EsqRestApi;
    private dictionaryApi: EsqDictionaryApi;
+   public callApi: EsqExplorerCallApi;
 
    public readOnly: boolean = false;
    public userId:string = "";
@@ -119,6 +122,7 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
 
       this.restApi = data.restApi;
       this.dictionaryApi = data.dictionaryApi;
+      this.callApi = data.callApi;
       this.readOnly = data.readOnly;
       this.userId = data.userId;
 
@@ -135,9 +139,13 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
     return EsqUtils.getChangedFields(this.originalDetails, this.details) !== null;
   }
 
-  onClose(): void {
+  async onClose(): Promise<void> {
     if (this.hasChanges()) {
-      if (confirm('You have unsaved changes. Press OK to save, or Cancel to discard.')) {
+      var result = await this.callApi.confirmDlg(null,
+          'Unsaved Changes',
+          'You have unsaved changes. Do you want to save them?',
+          EsqExplorerCallApi.ConfirmFlag.YesNo);
+      if (result === 0) {
         this.btnSave?.focus();
         return;
       }
@@ -145,19 +153,19 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
     this.dialogRef.close();
   }
 
-  onSave(): void {
+  async onSave(): Promise<void> {
     var savedTab: number = this.tabGroup?.selectedIndex ?? 0;
     var error: EsqValidationError | null = EsqUtils.validateFields(this.details, this.dictionary);
     if (error) {
-      alert(error.message);
+      await this.callApi.confirmDlg(null, 'Validation Error', error.message, EsqExplorerCallApi.ConfirmFlag.Ok);
       this.focusField(error);
-      return;
-    }
-    var changes = EsqUtils.getChangedFields(this.originalDetails, this.details);
-    if (changes) {
-      EsqUtils.log('Save changes:', changes);
-      var body = { id: this.id, ...changes };
-      this.saveData(body, savedTab);
+    } else {
+      var changes = EsqUtils.getChangedFields(this.originalDetails, this.details);
+      if (changes) {
+        EsqUtils.log('Save changes:', changes);
+        var body = { id: this.id, ...changes };
+        this.saveData(body, savedTab);
+      }
     }
   }
 
@@ -197,7 +205,7 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
         }
       }),
       catchError(err => {
-        alert('Load failed: ' + (err.detail || err.title || err));
+        void this.callApi?.confirmDlg(null, 'Load Error', 'Load failed: ' + (err.detail || err.title || err), EsqExplorerCallApi.ConfirmFlag.Ok);
         return EMPTY;
       })
     );
@@ -225,10 +233,9 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
             message: apiErr.message,
             tabIndex: parseInt(apiErr.tabIndex, 10) || 0
           };
-          alert('Save failed: ' + (err.detail || valError.message));
-          setTimeout(() => this.focusField(valError), 0);
+          void this.callApi?.confirmDlg(null, 'Save Error', 'Save failed: ' + (err.detail || valError.message), EsqExplorerCallApi.ConfirmFlag.Ok).then(() => this.focusField(valError));
         } else {
-          alert('Save failed: ' + (err.detail || err.title || err));
+          void this.callApi?.confirmDlg(null, 'Save Error', 'Save failed: ' + (err.detail || err.title || err), EsqExplorerCallApi.ConfirmFlag.Ok);
         }
         return of(snapshot);
       })

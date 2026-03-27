@@ -19,6 +19,7 @@
 * 03/20/2026 mir0n  EsqExplorerHost registration; delayed onTreeRefresh() on 'treeRefresh' dialog result
 * 03/26/2026 mir0n  doExplorerCreate(): opens EsqCreateEntityDialog; getParentEntityId()
 *                   treeRefreshSelect result → host.onTreeRefreshSelect(); lastUserId tracking
+* 03/26/2026 mir0n  confirmDlg() added
 */
 import { firstValueFrom } from "rxjs";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
@@ -26,6 +27,8 @@ import { EsqNodeDialog }  from "./EsqNodeDialog";
 import { EsqEntityDetailsDialog } from "./EsqEntityDetailsDialog";
 import { EsqNodeDetailsDialog } from "./EsqNodeDetailsDialog";
 import { EsqCreateEntityDialog } from "./EsqCreateEntityDialog";
+import { EsqConfirmDialog } from "./EsqConfirmDialog";
+import {EsqObjectKind} from 'src/esquire.ui/api/EsqObjectKind';
 
 /*
 import { EsqDictionaryApi
@@ -100,6 +103,7 @@ export class EsqExplorerCallApiMill {
                 id: id,
                 restApi: this.restApi,
                 dictionaryApi: this.dictionaryApi,
+                callApi: this.esqExplorerCallApi(),
                 readOnly: readOnly,
                 userId: userId
             }
@@ -120,6 +124,7 @@ export class EsqExplorerCallApiMill {
                 kind: kind,
                 restApi: this.restApi,
                 dictionaryApi: this.dictionaryApi,
+                callApi: this.esqExplorerCallApi(),
                 readOnly: readOnly,
                 userId: userId,
             }
@@ -217,6 +222,19 @@ export class EsqExplorerCallApiMill {
     }
   }
 
+  async confirmDlg(kind: EsqObjectKind | null, header: string, text: string, flag: EsqExplorerCallApi.ConfirmFlag, focus: number = 0): Promise<number> {
+    var dialogRef = this.dialog.open(EsqConfirmDialog, {
+      autoFocus: false,
+      data: { kind, header, text, flag, focus }
+    });
+    dialogRef.updateSize('28vw');
+    return new Promise<number>((resolve) => {
+      dialogRef.afterClosed().subscribe((result: number | undefined) => {
+        resolve(result ?? 1);
+      });
+    });
+  }
+
   protected esqExplorerCallApi(): EsqExplorerCallApi {
     return {
       call : (cmd: string, node :EsqTreeNode, accessProfile:EsqAccessProfile|null) => {
@@ -230,6 +248,9 @@ export class EsqExplorerCallApiMill {
       },
       registerHost: (host: EsqExplorerHost) => {
         this.host = host;
+      },
+      confirmDlg: (kind: EsqObjectKind | null, header: string, text: string, flag: EsqExplorerCallApi.ConfirmFlag, focus?: number) => {
+        return this.confirmDlg(kind, header, text, flag, focus);
       }
     }
   };

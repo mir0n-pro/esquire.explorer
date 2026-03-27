@@ -20,6 +20,7 @@
       padding:0 0 0 0;
       border: 2px outset #ccc;
       background: rgb(247, 247, 245);
+      color: black;
   }
   .mat-mdc-dialog-container {
       max-width: 100vw !important;
@@ -420,5 +421,13 @@
   .esq-icon-red {
     color: red;
   }
-}
 
+  .esq-confirm-content {
+    padding: 16px;
+    min-width: 260px;
+    min-height: 130px;
+    font-size: 10pt;
+    white-space: pre-wrap;
+  }
+
+}

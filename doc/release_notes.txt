@@ -2,6 +2,10 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+v1.2.2-2603.2621  Styled confirm/alert dialog replaces browser alert()/confirm()
+  :EsqConfirmDialog:
+     New component: Ok (alert), YesNo, OkCancel modes via ConfirmFlag enum
+
 v1.2.2-2603.2618  Create entity dialog, bypass error message to shell footer
   :Create:
      EsqCreateEntityDialog: two-phase Create→Edit dialog extending EsqEntityDetailsDialog

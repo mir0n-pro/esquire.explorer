@@ -8,3 +8,4 @@ export * from './EsqTabListComponent';
 export * from './EsqNodeDetailsDialog';
 export * from './EsqEntityDetailsDialog';
 export * from './EsqExplorerCallApiMill';
+export * from './EsqConfirmDialog';

@@ -1,0 +1,38 @@
+<!--
+  Esquire frameworks (tm)
+
+  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
+  mailto:mir0n.the.programmer@gmail.com
+
+  History:
+-->
+<mat-toolbar class="mat-elevation-z2 esq-dialog-toolbar"
+    cdkDrag
+    cdkDragRootElement=".cdk-overlay-pane"
+    cdkDragHandle
+    cdkDragBoundary=".cdk-overlay-container"
+>
+  <div>
+    @if (kind) {
+      <img src="{{kind.icon}}" class="esq-base-icon"/>
+    }
+    {{header}}
+  </div>
+</mat-toolbar>
+
+<div class="esq-confirm-content">
+    <b>{{text}}</b>
+</div>
+
+
+<mat-dialog-actions align="center">
+  @if (flag === 1) {
+    <button mat-raised-button (click)="onOkYes()">Yes</button>
+    <button mat-raised-button (click)="onNoCancel()">No</button>
+  } @else if (flag === 2) {
+    <button mat-raised-button (click)="onOkYes()">OK</button>
+    <button mat-raised-button (click)="onNoCancel()">Cancel</button>
+  } @else {
+    <button mat-raised-button (click)="onOkYes()">OK</button>
+  }
+</mat-dialog-actions>

@@ -7,6 +7,7 @@
 *  History:
 * 03/26/2026 mir0n  initial: two-phase Create→Edit dialog extending EsqEntityDetailsDialog
 *                   subentity validation in onCreate(); closeConfirmMessage() override
+* 03/26/2026 mir0n  confirmDlg() replaces alert()/confirm(); callApi added
 */
 
 import {
@@ -31,6 +32,7 @@ import {EsqTabFieldComponent} from './EsqTabFieldComponent';
 import {EsqUtils} from './EsqUtils';
 import {EsqValidationError} from './EsqValidationError';
 import {EsqEntityDetailsDialog} from './EsqEntityDetailsDialog';
+import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqEntityField} from 'src/esquire.ui/api/EsqEntityDictionary';
 
 @Component({
@@ -109,13 +111,7 @@ export class EsqCreateEntityDialog extends EsqEntityDetailsDialog {
   }
   
   
-  protected override closeConfirmMessage(): string {
-    return this._isCreating
-      ? 'You have unsaved changes. Press OK to continue with creation, or Cancel to discard.'
-      : super.closeConfirmMessage();
-  }
-
-  public override onCreate(): void {
+  public override async onCreate(): Promise<void> {
     var error: EsqValidationError | null = EsqUtils.validateFields(this.details, this.dictionary);
     if (!error) {
       for (var tabIndex = 0; tabIndex < this.dictionary.length && !error; tabIndex++) {
@@ -137,7 +133,7 @@ export class EsqCreateEntityDialog extends EsqEntityDetailsDialog {
       }
     }
     if (error) {
-      alert(error.message);
+      await this.callApi.confirmDlg(null, 'Validation Error', error.message, EsqExplorerCallApi.ConfirmFlag.Ok);
       this.focusField(error);
     } else {
       var body = { ...this.details, kind: this.givenEntityKind };
@@ -166,11 +162,10 @@ export class EsqCreateEntityDialog extends EsqEntityDetailsDialog {
               tabIndex: parseInt(apiErr.tabIndex, 10) || 0
             };
             errorMsg = 'Create failed: ' + (err.detail || valError.message);
-            alert(errorMsg);
-            setTimeout(() => this.focusField(valError), 0);
+            void this.callApi?.confirmDlg(null, 'Create Error', errorMsg, EsqExplorerCallApi.ConfirmFlag.Ok).then(() => this.focusField(valError));
           } else {
             errorMsg = 'Create failed: ' + (err.detail || err.title || err);
-            alert(errorMsg);
+            void this.callApi?.confirmDlg(null, 'Create Error', errorMsg, EsqExplorerCallApi.ConfirmFlag.Ok);
           }
           if (this.onError) {
             this.onError(errorMsg, err);

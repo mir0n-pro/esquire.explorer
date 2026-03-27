@@ -1,6 +1,23 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+03/26/2026 mir0n  confirmDlg() pattern: EsqConfirmDialog + ConfirmFlag enum
+api\EsqExplorerCallApi.ts
+  - ConfirmFlag enum (Ok/YesNo/OkCancel) added to EsqExplorerCallApi namespace
+  - confirmDlg() interface: ConfirmFlag type; optional focus param (default 0)
++ components\EsqConfirmDialog.ts / .html
+  - new dialog component: alert-style (Ok), Yes/No, OkCancel modes
+  - focus param: @ViewChildren(MatButton) + ngAfterViewInit() focuses button at index
+  - no X button — response via action buttons only
+components\EsqExplorerCallApiMill.ts
+  - confirmDlg(): focus param with default 0; callApi wired to runAccessProfileAsync
+components\EsqEntityDetailsDialog.ts
+  - confirmDlg() replaces alert()/confirm(); callApi added
+components\EsqCreateEntityDialog.ts
+  - confirmDlg() replaces alert()/confirm(); callApi added
+components\EsqAccessProfileDialog.ts
+  - confirmDlg() replaces all alert()/confirm() calls; callApi field added
+
 03/26/2026 mir0n  create entity dialog
 api\EsqExplorerCallApi.ts
   - onTreeRefreshSelect(entityId), setErrorMessage(msg, err) added to EsqExplorerHost
