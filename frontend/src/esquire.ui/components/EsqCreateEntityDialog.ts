@@ -9,6 +9,7 @@
 *                   subentity validation in onCreate(); closeConfirmMessage() override
 * 03/26/2026 mir0n  confirmDlg() replaces alert()/confirm(); callApi added
 * 03/27/2026 mir0n  EsqDialogResizeDirective added to imports
+* 03/28/2026 mir0n  inject dictionary defaults for main entity and subentities in ngOnInit()
 */
 
 import {
@@ -25,7 +26,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
-import { catchError, of, tap } from 'rxjs';
+import { catchError, firstValueFrom, of, tap } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 
@@ -35,7 +36,7 @@ import {EsqUtils} from './EsqUtils';
 import {EsqValidationError} from './EsqValidationError';
 import {EsqEntityDetailsDialog} from './EsqEntityDetailsDialog';
 import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
-import {EsqEntityField} from 'src/esquire.ui/api/EsqEntityDictionary';
+import {EsqEntityField, EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 
 @Component({
   selector: 'create-entity-dialog',
@@ -99,8 +100,15 @@ export class EsqCreateEntityDialog extends EsqEntityDetailsDialog {
             }
           }
         }
-        this.originalDetails = EsqUtils.deepCopy(this.details);
-        this.details$ = of(this.details);
+        for (var dtab of dict) {
+          for (var dfield of dtab.fields) {
+            if (dfield.type !== 'subentity' && dfield.nullable !== 'Y'
+                && dfield.default && !(dfield.name in this.details)) {
+              this.details[dfield.name] = dfield.default;
+            }
+          }
+        }
+        void this.injectSubentityDefaults(dict);
       })
     );
   }
@@ -112,8 +120,30 @@ export class EsqCreateEntityDialog extends EsqEntityDetailsDialog {
     }
     return ret;
   }
-  
-  
+
+  protected async injectSubentityDefaults(dict: EsqEntityLayer[]): Promise<void> {
+    var subs: {name: string, kind: number}[] = [];
+    for (var tab of dict) {
+      for (var field of tab.fields) {
+        if (field.type === 'subentity' && this.details[field.name]) {
+          subs.push({name: field.name, kind: this.details[field.name].kind});
+        }
+      }
+    }
+    await Promise.all(subs.map(async (sub) => {
+      var subDict = await firstValueFrom(this.dictionaryApi.dictionary(sub.kind));
+      for (var stab of subDict) {
+        for (var sfield of stab.fields) {
+          if (sfield.nullable !== 'Y' && sfield.default && !(sfield.name in this.details[sub.name])) {
+            this.details[sub.name][sfield.name] = sfield.default;
+          }
+        }
+      }
+    }));
+    this.originalDetails = EsqUtils.deepCopy(this.details);
+    this.details$ = of(this.details);
+  }
+
   public override async onCreate(): Promise<void> {
     var error: EsqValidationError | null = EsqUtils.validateFields(this.details, this.dictionary);
     if (!error) {

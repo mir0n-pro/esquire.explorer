@@ -10,6 +10,7 @@
 * 02/17/2026 mir0n added personal, minmax fields
 *                  nullable changed from boolean to string
 * 03/20/2026 mir0n  affects3 optional field added
+* 03/28/2026 mir0n  default optional field added; mapped from jsn['default']
 */
 export class EsqEntityField {
   name:string;              // +
@@ -27,6 +28,7 @@ export class EsqEntityField {
   personal:string;
   minmax:string;   // +
   affects3?:string;
+  default?:string;
 
     constructor(jsn : any) {
       this.name = jsn.name;
@@ -44,6 +46,7 @@ export class EsqEntityField {
       this.personal = jsn.personal;
       this.minmax = jsn.minmax;
       this.affects3 = jsn.affects3;
+      this.default = jsn['default']; //xxx: "default" is a reserved word
   }
 };
 

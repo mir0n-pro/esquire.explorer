@@ -1,6 +1,15 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+03/28/2026 mir0n  inject dictionary defaults in create entity dialog
+api\EsqEntityDictionary.ts
+  - default optional field added to EsqEntityField; mapped from jsn['default']
+components\EsqCreateEntityDialog.ts
+  - main entity: defaults injected in ngOnInit() for required non-nullable fields with default value
+  - subentities: injectSubentityDefaults() loads sub-dicts in parallel; injects defaults; finalizes originalDetails
+components\EsqDictionary.ts
+  - loading Set replaced with loadingMap: concurrent callers await the same in-flight Promise
+
 03/28/2026 mir0n  delete command
 api\EsqExplorerCallApi.ts
   - EsqExplorerHost: onTreeRefresh(entityId?, asOwner?) consolidates onTreeRefresh() + onTreeRefreshSelect()

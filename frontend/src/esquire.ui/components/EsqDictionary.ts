@@ -9,6 +9,7 @@
 * 02/28/2026 mir0n  added loading Set to prevent concurrent duplicate loads
 *                   added subRequested flag; proactively loads sub-entity kinds
 *                   added dictionaryFromCache() public method
+* 03/28/2026 mir0n  loading Set → loadingMap: concurrent callers await the same in-flight Promise
 */
 import {firstValueFrom, from, Observable, of} from 'rxjs';
 /*
@@ -30,7 +31,7 @@ import {EsqObjectKind} from "../api/EsqObjectKind";
 export class EsqDictionary implements EsqDictionaryApi {
 
     private datastore:EsqEntityDictionary[] = [];
-    private loading:Set<number> = new Set();
+    private loadingMap:Map<number,Promise<void>> = new Map();
     private restApi:EsqRestApi;
     private subRequested:boolean = false;
 
@@ -72,18 +73,26 @@ export class EsqDictionary implements EsqDictionaryApi {
         return ret;
     }
 
-    private async loadDictionary(entity_kind: number)  {
-        EsqUtils.log('loadDictionary[ ');
-        if (!this.loading.has(entity_kind)) {
-            this.loading.add(entity_kind);
-            let _dict = await firstValueFrom(this.restApi.esquireDictionary(entity_kind));
-            if (_dict) {
-                let dict: EsqEntityDictionary = new EsqEntityDictionary(entity_kind, _dict);
-                this.datastore[this.datastore.length] = dict;
-                this.loading.delete(entity_kind);
-            }
+    private loadDictionary(entity_kind: number): Promise<void> {
+        if (this.loadingMap.has(entity_kind)) {
+            return this.loadingMap.get(entity_kind)!;
         }
-        EsqUtils.log(']loadDictionary');
+        EsqUtils.log('loadDictionary[ ');
+        var p: Promise<void> = firstValueFrom(this.restApi.esquireDictionary(entity_kind))
+            .then((_dict: any) => {
+                if (_dict) {
+                    var dict: EsqEntityDictionary = new EsqEntityDictionary(entity_kind, _dict);
+                    this.datastore[this.datastore.length] = dict;
+                }
+                this.loadingMap.delete(entity_kind);
+                EsqUtils.log(']loadDictionary');
+            })
+            .catch((err: any) => {
+                this.loadingMap.delete(entity_kind);
+                console.error(err);
+            });
+        this.loadingMap.set(entity_kind, p);
+        return p;
     }
 
 }

@@ -621,6 +621,9 @@ components:
           type: boolean
           description: Determines whether the field value can be null
           example: false
+        default:
+          type: string
+          description: default value for required (non-nullable) fields
         nullmeaning:
           type: string
           description: a meaning of null value for UI representation

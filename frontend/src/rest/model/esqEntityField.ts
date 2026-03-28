@@ -43,6 +43,10 @@ export interface EsqEntityField {
      */
     nullable?: boolean;
     /**
+     * default value for required (non-nullable) fields
+     */
+    'default'?: string;
+    /**
      * a meaning of null value for UI representation
      */
     nullmeaning?: string;
