@@ -39,6 +39,7 @@
 * 03/26/2026 mir0n  implements EsqExplorerHost: onTreeRefresh(), onTreeRefreshSelect(), setErrorMessage()
 *                   esquireCmdNew() routes to /esq-anew (acct) or /esq-new; registers mill host
 * 03/27/2026 mir0n  setUserId() called at profile load; userId passed to EsqSingleEntryDialog
+* 03/28/2026 mir0n  Delete command: esquireCmdDel() REST wrapper, Delete menu item, onTreeRefresh() consolidated
 */
 import {Component,
   OnInit,
@@ -361,6 +362,19 @@ export class ExplorerComponent implements OnInit, AfterViewInit, EsqExplorerHost
                 : this.dataService.esquireCmdNew(kind, encodeURIComponent(parentId), body, cmd);
             return ret;
         },
+        esquireCmdDel: (kind: number, id: string, cmd?: string, options?: any) => {
+            this.setErrorMessage("");
+            this.errorReport = undefined;
+            if(!this.dataService) {
+                this.setErrorMessage("Data service not initialized");
+                throw new Error("Data service not initialized");
+            }
+            var acct: boolean = EsqObjectKindFactory.instanceOf(kind).acct;
+            var ret: Observable<any> = acct
+                ? this.dataService.esquireCmdAdel(kind, encodeURIComponent(id), cmd)
+                : this.dataService.esquireCmdDel(kind, encodeURIComponent(id), cmd);
+            return ret;
+        },
     }
   };
 
@@ -380,12 +394,8 @@ export class ExplorerComponent implements OnInit, AfterViewInit, EsqExplorerHost
   }
 
 
-  onTreeRefresh(): void {
+  onTreeRefresh(entityId?: string, asOwner?: boolean): void {
     // Explorer child component handles tree refresh
-  }
-
-  onTreeRefreshSelect(entityId: string): void {
-    // Explorer child component handles tree refresh and select
   }
 
   async ngOnInit() {
@@ -526,7 +536,8 @@ export const EsquireStatuses = {
 export const EsqCommandMenuItems:EsqCommandMenuItem[] = [
     new EsqCommandMenuItem("Access Profile", "verified_user", EsqExplorerCallApi.CMD_KEY),
     new EsqCommandMenuItem("Accounting", "monetization_on", EsqExplorerCallApi.CMD_ACCT),
-    new EsqCommandMenuItem("Move", "reply_all", EsqExplorerCallApi.CMD_MOVE),
+    new EsqCommandMenuItem("Move",   "reply_all", EsqExplorerCallApi.CMD_MOVE),
+    new EsqCommandMenuItem("Delete", "cancel",    EsqExplorerCallApi.CMD_DELETE),
     new EsqCommandMenuItem("New...", "add_circle", EsqExplorerCallApi.CMD_NEW),
 ] as const;
 

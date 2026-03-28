@@ -11,14 +11,14 @@
 * 03/20/2026 mir0n  EsqExplorerHost interface; registerHost added to EsqExplorerCallApi
 * 03/26/2026 mir0n  onTreeRefreshSelect(), setErrorMessage() added to EsqExplorerHost
 * 03/26/2026 mir0n  confirmDlg() added to interface; ConfirmFlag enum; focus param
+* 03/28/2026 mir0n  EsqExplorerHost: onTreeRefresh(entityId?, asOwner?) consolidates onTreeRefresh + onTreeRefreshSelect
 */
 import {  EsqTreeNode} from './EsqTreeNode';
 import {EsqAccessProfile} from "./EsqAccessProfile";
 import {EsqObjectKind} from './EsqObjectKind';
 
 export interface EsqExplorerHost {
-  onTreeRefresh(): void;
-  onTreeRefreshSelect(entityId: string): void;
+  onTreeRefresh(entityId?: string, asOwner?: boolean): void;
   setErrorMessage(msg: string, err?: any): void;
 }
 

@@ -1,6 +1,12 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+03/28/2026 mir0n  delete command
+explorer\flatTree\app-explorer.component.ts
+  - esquireCmdDel() REST wrapper: routes to /esq-adel for acct kinds, /esq-del otherwise
+  - onTreeRefresh() consolidated: entityId/asOwner optional params; removed onTreeRefreshSelect()
+  - Delete menu item added to EsqCommandMenuItems
+
 03/27/2026 mir0n  dialog resize + position/size persistence per user
 explorer\flatTree\app-explorer.component.ts
   - setUserId() called at profile load — informs mill of logged-in userId at logon

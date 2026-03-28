@@ -17,6 +17,7 @@
 *                   onBtnRefreshClick: gotoTreeNode fallback for link-variant node restore
 * 03/26/2026 mir0n  canCreateKind(); onTreeRefreshSelect(); setErrorMessage() delegation
 *                   onBtnRefreshClickAndSelect(); esqExplorerHost input; errorMessage signal
+* 03/28/2026 mir0n  onTreeRefresh() consolidated: entityId/asOwner optional params; onBtnRefreshClickAndSelectOwner() added
 */
 import {Component,
   ElementRef,
@@ -163,12 +164,14 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
     this.treeItself = this._tree;
   }
 
-  onTreeRefresh(): void {
-    void this.onBtnRefreshClick();
-  }
-
-  onTreeRefreshSelect(entityId: string): void {
-    void this.onBtnRefreshClickAndSelect(entityId);
+  onTreeRefresh(entityId?: string, asOwner?: boolean): void {
+    if (entityId && asOwner) {
+      void this.onBtnRefreshClickAndSelectOwner(entityId);
+    } else if (entityId) {
+      void this.onBtnRefreshClickAndSelect(entityId);
+    } else {
+      void this.onBtnRefreshClick();
+    }
   }
 
   setErrorMessage(msg: string, err?: any): void {
@@ -190,6 +193,20 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
       this.updateToolbarNewMenuItems();
       this.toggleTreeSelect(found.parent as EsqTreeNode);
       this.doSelectListNode(found, true);
+    }
+  }
+
+  async onBtnRefreshClickAndSelectOwner(entityId: string): Promise<void> {
+    await this.onBtnRefreshClick();
+    var ownerResult: any = await this.datasource.gotoTreeNode(entityId);
+    if (ownerResult && ownerResult instanceof EsqTreeNode) {
+      var ownerNode = ownerResult as EsqTreeNode;
+      if (ownerNode.expandable()) {
+        this.treeItself.expand(ownerNode);
+        this.datasource.selectOnTree(ownerNode);
+        this.treeNodeActive = ownerNode;
+        await this.doActivateListNode(ownerNode, false);
+      }
     }
   }
 
@@ -358,6 +375,11 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
         var ret : boolean = false;
         var node :EsqTreeNode|null = this.getSelectedNode(menu);
         if (node) {
+            if (cmd == EsqExplorerCallApi.CMD_DELETE
+              ||cmd == EsqExplorerCallApi.CMD_MOVE
+            ) {
+              var i = 0;
+            }  
             ret = node.kind.isCommandAllowed(cmd);
         }
         return ret;

@@ -1,6 +1,19 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+03/28/2026 mir0n  delete command
+api\EsqExplorerCallApi.ts
+  - EsqExplorerHost: onTreeRefresh(entityId?, asOwner?) consolidates onTreeRefresh() + onTreeRefreshSelect()
+api\EsqRestApi.ts
+  - esquireCmdDel added to interface
+components\EsqExplorerCallApiMill.ts
+  - doExplorerDelete(): confirm → esquireCmdDel → onTreeRefresh(parentId, true)
+  - CMD_DELETE branch added to doExplorerCommand()
+  - create handler: onTreeRefreshSelect() replaced with onTreeRefresh(entityId)
+explorer\flatTree\EsqExplorerComponent.ts
+  - onTreeRefresh() consolidated: entityId → select, entityId+asOwner → select as owner, no args → plain refresh
+  - onBtnRefreshClickAndSelectOwner(): refresh + expand + select tree owner node
+
 03/27/2026 mir0n  dialog resize + position/size persistence per user
 + components\EsqDialogResizeDirective.ts
   - new directive [esqDialogResize]="'key:' + userId" on every dialog toolbar

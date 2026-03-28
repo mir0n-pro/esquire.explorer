@@ -21,6 +21,7 @@
 *                   treeRefreshSelect result → host.onTreeRefreshSelect(); lastUserId tracking
 * 03/26/2026 mir0n  confirmDlg() added
 * 03/27/2026 mir0n  setUserId() from logon profile; userId propagated to all dialogs; removed lazy lastUserId workaround
+* 03/28/2026 mir0n  doExplorerDelete(): confirm → esquireCmdDel → onTreeRefresh(parentId,true); CMD_DELETE handling
 */
 import { firstValueFrom } from "rxjs";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
@@ -204,7 +205,7 @@ export class EsqExplorerCallApiMill {
       EsqUtils.log(`Create dialog result: ${result}`);
       if (result && typeof result === 'string' && result.startsWith('treeRefreshSelect:') && this.host) {
         var entityId = result.substring('treeRefreshSelect:'.length);
-        setTimeout(() => this.host!.onTreeRefreshSelect(entityId), 250);
+        setTimeout(() => this.host!.onTreeRefresh(entityId), 250);
       } else if (result === 'treeRefresh' && this.host) {
         setTimeout(() => this.host!.onTreeRefresh(), 250);
       }
@@ -212,9 +213,41 @@ export class EsqExplorerCallApiMill {
     return new Promise<void>((resolve)=>resolve());
   }
 
+  protected async doExplorerDelete(node: EsqTreeNode): Promise<void> {
+    var result = await this.confirmDlg(
+        node.kind,
+        node.name + ' Delete',
+        'You about to delete ' + node.name + '. Are you sure to continue?',
+        EsqExplorerCallApi.ConfirmFlag.YesNo
+    );
+    if (result === 0) {
+        var kind: number = Math.floor(node.kind.id / 2) * 2;
+        try {
+            await firstValueFrom(this.restApi.esquireCmdDel(kind, node.entityId));
+            if (this.host) {
+                var parentId = node.parent ? node.parent.id : "";
+                if (parentId) {
+                    setTimeout(() => this.host!.onTreeRefresh(parentId, true), 250);
+                } else {
+                    setTimeout(() => this.host!.onTreeRefresh(), 250);
+                }
+            }
+        } catch (err: any) {
+            await this.confirmDlg(node.kind,
+                node.name + ' Delete Error',
+                'Delete failed: ' + (err.detail || err.title || err),
+                EsqExplorerCallApi.ConfirmFlag.Ok);
+        }
+    }
+  }
+
   protected async doExplorerCommand(cmd:string, node : EsqTreeNode, accessProfile:EsqAccessProfile|null) {
     var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, node.entityId, node.kind.id);
-    if (cmd == EsqExplorerCallApi.CMD_KEY) {
+    if (cmd == EsqExplorerCallApi.CMD_DELETE) {
+        setTimeout(() => {
+            void this.doExplorerDelete(node).catch(console.error);
+        }, 0);
+    } else if (cmd == EsqExplorerCallApi.CMD_KEY) {
         setTimeout(() => {
             void this.runAccessProfileAsync(node.entityId, readOnly, accessProfile?.id || '').catch(console.error);
         }, 0);

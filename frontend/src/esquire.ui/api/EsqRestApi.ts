@@ -10,6 +10,7 @@
 * 02/12/2026 miron added esquireKinds()
 * 02/18/2026 mir0n  added esquireCmdSave(), esquireKeySave()
 * 03/26/2026 mir0n  added esquireCmdNew to interface
+* 03/28/2026 mir0n  added esquireCmdDel to interface
 */
 import { Observable } from 'rxjs';
 
@@ -24,4 +25,5 @@ export interface EsqRestApi {
  esquireCmdSave: (kind: number, id: string, body: any, cmd?: string, options?: any) => Observable<any>;
  esquireKeySave: (id: string, body: any, options?: any) => Observable<any>;
  esquireCmdNew: (kind: number, parentId: string, body: any, cmd?: string, options?: any) => Observable<any>;
+ esquireCmdDel: (kind: number, id: string, cmd?: string, options?: any) => Observable<any>;
 }
