@@ -1,6 +1,15 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+03/31/2026 mir0n  explorer layout fix; confirm dialog keyboard nav
+explorer\flatTree\EsqExplorerComponent.scss
+  - .esq-explorer: height: 100%; min-height: 0; box-sizing: border-box (replaces height: 80vh)
+  - .esq-explorer-container: height: 80vh → height: 100%
+components\EsqConfirmDialog.ts
+  - onButtonKeydown(): ArrowLeft/Right moves focus between dialog buttons
+components\EsqConfirmDialog.html
+  - (keydown) binding on each button wires ArrowLeft/Right navigation
+
 03/28/2026 mir0n  inject dictionary defaults in create entity dialog
 api\EsqEntityDictionary.ts
   - default optional field added to EsqEntityField; mapped from jsn['default']

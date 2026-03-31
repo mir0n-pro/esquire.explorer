@@ -61,10 +61,15 @@
         [esqExplorerHost]="this">
       </esqExplorer>
       
-  } @else {
-    <div style="height: 80vh;">
-      <p class="info-text">Please login to access the explorer features.</p>
+  } @else if (!hideLoginHint()) {
+    <div class="login-hint-row">
+      <div class="login-form-wrapper">
+        <p>Please login to access the explorer features.</p>
+        <p>Seed logon: mainadmin, password: q</p>
+      </div>
     </div>
+  } @else {
+    <div></div>
   }
 
   <mat-toolbar>

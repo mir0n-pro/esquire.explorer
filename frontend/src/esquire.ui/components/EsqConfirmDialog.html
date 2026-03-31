@@ -28,12 +28,12 @@
 
 <mat-dialog-actions align="center">
   @if (flag === 1) {
-    <button mat-raised-button (click)="onOkYes()">Yes</button>
-    <button mat-raised-button (click)="onNoCancel()">No</button>
+    <button mat-raised-button (click)="onOkYes()" (keydown)="onButtonKeydown($event, 0)">Yes</button>
+    <button mat-raised-button (click)="onNoCancel()" (keydown)="onButtonKeydown($event, 1)">No</button>
   } @else if (flag === 2) {
-    <button mat-raised-button (click)="onOkYes()">OK</button>
-    <button mat-raised-button (click)="onNoCancel()">Cancel</button>
+    <button mat-raised-button (click)="onOkYes()" (keydown)="onButtonKeydown($event, 0)">OK</button>
+    <button mat-raised-button (click)="onNoCancel()" (keydown)="onButtonKeydown($event, 1)">Cancel</button>
   } @else {
-    <button mat-raised-button (click)="onOkYes()">OK</button>
+    <button mat-raised-button (click)="onOkYes()" (keydown)="onButtonKeydown($event, 0)">OK</button>
   }
 </mat-dialog-actions>

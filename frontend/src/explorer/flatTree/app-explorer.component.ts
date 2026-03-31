@@ -40,6 +40,8 @@
 *                   esquireCmdNew() routes to /esq-anew (acct) or /esq-new; registers mill host
 * 03/27/2026 mir0n  setUserId() called at profile load; userId passed to EsqSingleEntryDialog
 * 03/28/2026 mir0n  Delete command: esquireCmdDel() REST wrapper, Delete menu item, onTreeRefresh() consolidated
+* 03/31/2026 mir0n  explorer layout fix: 1fr grid row
+*                   login hint callout: hideLoginHint signal, ?from=auth redirect on login/logout
 */
 import {Component,
   OnInit,
@@ -49,6 +51,7 @@ import {Component,
   signal,
   effect,
   computed,
+  ViewEncapsulation,
 } from '@angular/core';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatDialog, MatDialogRef} from '@angular/material/dialog';
@@ -107,13 +110,15 @@ const STATUS_READY = "Ready";
     EsqExplorerComponent
   ],
   templateUrl: './app-explorer.component.html',
-  styleUrl: './app-explorer.component.scss'
+  styleUrl: './app-explorer.component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class ExplorerComponent implements OnInit, AfterViewInit, EsqExplorerHost {
   private keycloak: Keycloak;
   keycloakSignal: Signal<KeycloakEvent> = inject(KEYCLOAK_EVENT_SIGNAL);
   authState = signal('Initial');
   errorMessage = signal('');
+  hideLoginHint = signal(false);
   dataService?: EsquireService;
   _dataService: EsquireService;
 
@@ -400,6 +405,9 @@ export class ExplorerComponent implements OnInit, AfterViewInit, EsqExplorerHost
 
   async ngOnInit() {
     this.dataService = this._dataService;
+    if (new URLSearchParams(window.location.search).get('from') === 'auth') {
+      this.hideLoginHint.set(true);
+    }
     this.dictionary = new EsqDictionary(this.esqRestApiWrapper());
     this.callApiMill = new EsqExplorerCallApiMill(this.detailsDialog, this.dictionary, this.esqRestApiWrapper());
     this.callApiMill.instance().registerHost(this);
@@ -412,7 +420,7 @@ export class ExplorerComponent implements OnInit, AfterViewInit, EsqExplorerHost
 
 public async login(): Promise<void> {
   await this.keycloak.login({
-    redirectUri: window.location.origin
+    redirectUri: window.location.origin + '/?from=auth'
   });
 }
 
@@ -445,7 +453,7 @@ public faceName() : string {
   if (this.isConnected()) {
     return this.profile()?.name as string;
   }
-  return "Diconnected";
+  return "Disconnected";
 }
 public faceNameClass() : string {
   var ret = "name-bar" 
@@ -459,7 +467,7 @@ public async logout(): Promise<void> {
   this.profileRequested = false;
   this.profile.set(null);
   await this.keycloak.logout({
-    redirectUri: window.location.origin, // Where to go after
+    redirectUri: window.location.origin + '/?from=auth',
   });
 }
 

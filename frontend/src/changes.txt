@@ -1,6 +1,19 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+03/31/2026 mir0n  explorer layout fix; login hint callout
+styles.scss
+  - app-root, app-explorer: display: block; height: 100% (propagates height chain to Angular host elements)
+explorer\flatTree\app-explorer.component.scss
+  - grid-template-rows: auto → 1fr (explorer fills space between toolbars on resize)
+  - login-hint-row + login-form-wrapper: callout bubble with triangle arrow pointing to login icon
+explorer\flatTree\app-explorer.component.html
+  - login hint restructured as callout (login-hint-row wrapper, arrow bubble)
+  - empty <div> placeholder keeps 1fr grid row alive when hint is hidden
+explorer\flatTree\app-explorer.component.ts
+  - hideLoginHint signal: suppresses login hint when ?from=auth query param present
+  - login()/logout() redirect to /?from=auth so hint is hidden after Keycloak callback
+
 03/28/2026 mir0n  delete command
 explorer\flatTree\app-explorer.component.ts
   - esquireCmdDel() REST wrapper: routes to /esq-adel for acct kinds, /esq-del otherwise

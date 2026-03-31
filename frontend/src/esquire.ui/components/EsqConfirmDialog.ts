@@ -7,6 +7,7 @@
 *  History:
 * 03/26/2026 mir0n  initial; focus param; ConfirmFlag type; no X button
 * 03/27/2026 mir0n  EsqDialogResizeDirective added; userId field for dialog position persistence
+* 03/31/2026 mir0n  ArrowLeft/Right key navigation between buttons
 */
 import {AfterViewInit, Component, Inject, QueryList, ViewChildren, ViewEncapsulation} from '@angular/core';
 import {MatButton, MatButtonModule} from '@angular/material/button';
@@ -63,6 +64,16 @@ export class EsqConfirmDialog implements AfterViewInit {
     var btn = this.buttons.get(this.focus);
     if (btn) {
       btn.focus();
+    }
+  }
+
+  protected onButtonKeydown(event: KeyboardEvent, idx: number): void {
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault();
+      var count = this.buttons.length;
+      var next = event.key === 'ArrowRight' ? (idx + 1) % count : (idx - 1 + count) % count;
+      var btn = this.buttons.get(next);
+      if (btn) btn.focus();
     }
   }
 
