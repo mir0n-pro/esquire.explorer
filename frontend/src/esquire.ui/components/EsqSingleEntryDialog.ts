@@ -8,11 +8,13 @@
 * 02/01/2026 mir0n EsqTabLStringComponent renamed with EsqTabStringComponent
 * 02/05/2026 mir0n use EsqTabFieldComponent
 * 03/27/2026 mir0n  EsqDialogResizeDirective added; userId field for dialog position persistence
+* 03/31/2026 mir0n  ESC key closes dialog
 */
-import {AfterViewInit, 
-  Component, 
-  inject, 
-  Inject, 
+import {AfterViewInit,
+  Component,
+  HostListener,
+  inject,
+  Inject,
   OnDestroy,
   OnInit, 
   ViewChild, 
@@ -91,6 +93,7 @@ export class EsqSingleEntryDialog implements OnInit,  AfterViewInit, OnDestroy {
       this.dialogRef.updateSize('60vw', '60vh'); 
     }      
 
+  @HostListener('keydown.escape')
   closeDialog(): void {
     this.dialogRef.close();
   }

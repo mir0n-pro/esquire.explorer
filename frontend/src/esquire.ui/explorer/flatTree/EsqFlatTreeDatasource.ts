@@ -6,6 +6,7 @@
 *
 *  History:
 * 03/20/2026 mir0n  gotoTreeNode(): navigate to tree node by id; expands ancestors
+* 03/31/2026 mir0n  getOrgNodes(): filter loaded nodes to org kind
 */
 import {EsqTreeViewDatasource} from './EsqTreeViewDatasource';
 import {EsqListViewDatasource} from './EsqListViewDatasource';
@@ -144,7 +145,12 @@ export class EsqFlatTreeDatasource {
 
     public hasMoreChildren(parent:EsqTreeNode): boolean {
         return this.tree.hasMoreChildren(parent);
-    } 
+    }
+
+    public getOrgNodes(): EsqTreeNode[] {
+        return this.tree.getAll().filter((n: EsqTreeNode) => n.kind.org);
+    }
+
 
     public async loadMoreChildren(parent: EsqTreeNode) {
         var collapse:boolean = parent.expandable() && !parent.expanded();

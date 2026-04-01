@@ -7,12 +7,14 @@
 *  History:
 * 02/04/2024 miron renamed with EsqNodeDialog (was EsqNodeDetailsDialog)
 * 03/27/2026 mir0n  EsqDialogResizeDirective added; userId field for dialog position persistence
+* 03/31/2026 mir0n  ESC key closes dialog
 */
-import {AfterViewInit, 
-  Component, 
-  Inject, 
+import {AfterViewInit,
+  Component,
+  HostListener,
+  Inject,
   OnDestroy,
-  OnInit, 
+  OnInit,
   ViewChild, 
   ViewEncapsulation
 
@@ -76,6 +78,7 @@ export class EsqNodeDialog implements OnInit,  AfterViewInit, OnDestroy {
       this.dialogRef.updateSize('60vw', '60vh'); 
   }      
 
+  @HostListener('keydown.escape')
   closeDialog(): void {
     this.dialogRef.close();
   }

@@ -1,0 +1,75 @@
+/*
+*  Esquire frameworks (tm)
+*
+*  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
+*  mailto:mir0n.the.programmer@gmail.com
+*
+*  History:
+*/
+esq-move-dialog {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  .esq-move-tree-panel {
+    background: white;
+    border: 1px solid #bbb;
+    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.15);
+    margin: 4px 10px;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .esq-move-tree-node {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    min-height: 18px;
+    cursor: pointer;
+  }
+
+  .esq-move-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    line-height: 1;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: inherit;
+    &:hover { background: rgba(0,0,0,0.08); }
+  }
+
+  .esq-move-toggle-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 18px;
+    flex-shrink: 0;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .esq-move-active-node {
+    background-color: lightblue !important;
+  }
+
+  .esq-move-mouse-node {
+    background-color: rgb(232, 245, 250);
+  }
+
+  .esq-move-overlay-text {
+    font-size: 9pt;
+    font-weight: normal;
+    margin-left: 2px;
+  }
+
+  mat-dialog-actions button:first-child {
+    border: 1px solid #888;
+  }
+
+}

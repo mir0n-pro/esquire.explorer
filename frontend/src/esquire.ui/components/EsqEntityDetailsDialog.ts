@@ -33,11 +33,13 @@
 *                   treeRefreshResult() virtual method; closeConfirmMessage() hook
 * 03/26/2026 mir0n  confirmDlg() replaces alert()/confirm(); callApi added
 * 03/27/2026 mir0n  EsqDialogResizeDirective added to imports
+* 03/31/2026 mir0n  ESC key closes dialog (prompts if unsaved changes)
 */
 
 import {AfterViewChecked,
   AfterViewInit,
   Component,
+  HostListener,
   Inject,
   OnDestroy,
   OnInit,
@@ -164,6 +166,7 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
     return ret;
   }
 
+  @HostListener('keydown.escape')
   async onClose(): Promise<void> {
     if (this.hasChanges()) {
       var result = await this.callApi.confirmDlg(EsqObjectKindFactory.instanceOf(this.givenEntityKind),

@@ -1,6 +1,28 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+03/31/2026 mir0n  move command; ESC close for all dialogs
+api\EsqRestApi.ts
+  - esquireCmdMove added to interface
+explorer\flatTree\EsqExplorerComponent.ts
+  - CMD_MOVE: doMoveCommand() opens EsqMoveDialog directly; canCmdClick() refactored; cannot move yourself
+explorer\flatTree\EsqFlatTreeDatasource.ts
+  - getOrgNodes(): returns all loaded org nodes filtered to org kind
+explorer\flatTree\EsqTreeViewDatasource.ts
+  - getAll(): returns copy of internal node list
++ explorer\flatTree\components\EsqMoveDialog.ts
+  - new dialog: org-only tree, confirm, keyboard nav, ESC/X close, Select border
++ explorer\flatTree\components\EsqMoveDialog.html
++ explorer\flatTree\components\EsqMoveDialog.scss
+components\EsqAccessProfileDialog.ts
+  - ESC key closes dialog (same as Close button)
+components\EsqEntityDetailsDialog.ts
+  - ESC key closes dialog (prompts if unsaved changes); covers EsqNodeDetailsDialog via inheritance
+components\EsqNodeDialog.ts
+  - ESC key closes dialog
+components\EsqSingleEntryDialog.ts
+  - ESC key closes dialog
+
 03/31/2026 mir0n  explorer layout fix; confirm dialog keyboard nav
 explorer\flatTree\EsqExplorerComponent.scss
   - .esq-explorer: height: 100%; min-height: 0; box-sizing: border-box (replaces height: 80vh)

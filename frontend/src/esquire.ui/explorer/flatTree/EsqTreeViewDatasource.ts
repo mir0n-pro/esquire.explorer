@@ -6,6 +6,7 @@
 *
 *  History:
 * 02/13/2026 mir0n treeFlags removed from TreeNode
+* 03/31/2026 mir0n  getAll(): returns copy of internal node list
 */
 import {CollectionViewer, DataSource } from "@angular/cdk/collections";
 import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
@@ -368,5 +369,9 @@ export class EsqTreeViewDatasource implements DataSource<EsqTreeNode> {
       return this.dataInternal.filter(x => x.parentId == parent_id);
    }
 
-  
+  public getAll(): EsqTreeNode[] {
+      return [...this.dataInternal];
+  }
+
+
 }

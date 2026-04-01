@@ -18,6 +18,7 @@
 * 03/26/2026 mir0n  canCreateKind(); onTreeRefreshSelect(); setErrorMessage() delegation
 *                   onBtnRefreshClickAndSelect(); esqExplorerHost input; errorMessage signal
 * 03/28/2026 mir0n  onTreeRefresh() consolidated: entityId/asOwner optional params; onBtnRefreshClickAndSelectOwner() added
+* 03/31/2026 mir0n  CMD_MOVE: doMoveCommand() opens EsqMoveDialog; canCmdClick() refactored; cannot move yourself
 */
 import {Component,
   ElementRef,
@@ -69,8 +70,10 @@ import {
 
 
 import { EsqFlatTreeDatasource } from './EsqFlatTreeDatasource';
+import { EsqMoveDialog } from './components/EsqMoveDialog';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog } from '@angular/material/dialog';
 import {EsquireService} from "../../../rest";
 import {EsqAccessProfile} from "src/esquire.ui/api/EsqAccessProfile";
 
@@ -151,7 +154,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
   dataLoading = signal(false);
   treeOnFocus:boolean = false;
 
-  constructor () {
+  constructor(private dialog: MatDialog) {
     afterEveryRender(() => {
       if (this.treeNodePostFocus) {
         this.setFocusTreeNode(this.treeNodePostFocus);
@@ -374,13 +377,17 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
     canCmdClick(cmd: string, menu:boolean) : boolean {
         var ret : boolean = false;
         var node :EsqTreeNode|null = this.getSelectedNode(menu);
-        if (node) {
-            if (cmd == EsqExplorerCallApi.CMD_DELETE
-              ||cmd == EsqExplorerCallApi.CMD_MOVE
-            ) {
-              var i = 0;
-            }  
+        if (node && this.esqAccessProfile) {
             ret = node.kind.isCommandAllowed(cmd);
+            if (ret) {
+                if (cmd == EsqExplorerCallApi.CMD_MOVE &&
+                  node.entityId === this.esqAccessProfile?.id) {
+                    // you cannot move yourself
+                    ret = false;
+                } else {
+                    ret = this.esqAccessProfile.isCommandAllowed(cmd, node.entityId, node.kind.id);
+                }
+            }
         }
         return ret;
     }
@@ -580,13 +587,35 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
 
 
     async doExplorerCommand(cmd:string, node : EsqTreeNode | undefined | null) {
+    var ret = new Promise<void>((resolve) => resolve());
     if (node && this.esqExplorerCallApi) {
-      const api:EsqExplorerCallApi = this.esqExplorerCallApi as EsqExplorerCallApi;
-      // Note: typeId can be passed to the API call if needed for "create" commands
-      // You may need to extend the EsqExplorerCallApi interface to support typeId parameter
-      return api.call(cmd, node as EsqTreeNode, this.esqAccessProfile);
-    } else {
-      return new Promise<void>((resolve)=>resolve());
+      if (cmd === EsqExplorerCallApi.CMD_MOVE) {
+        setTimeout(() => { void this.doMoveCommand(node as EsqTreeNode).catch(console.error); }, 0);
+      } else {
+        const api:EsqExplorerCallApi = this.esqExplorerCallApi as EsqExplorerCallApi;
+        ret = api.call(cmd, node as EsqTreeNode, this.esqAccessProfile);
+      }
+    }
+    return ret;
+  }
+
+  private async doMoveCommand(node: EsqTreeNode): Promise<void> {
+    var dialogRef = this.dialog.open(EsqMoveDialog, {
+      autoFocus: false,
+      panelClass: 'esq-dialog',
+      data: {
+        node,
+        flatDs: this.datasource,
+        restApi: this.esqRestApi,
+        userId: this.esqAccessProfile?.id || ''
+      }
+    });
+    dialogRef.updateSize('280px', '460px');
+    var moved = await new Promise<boolean>(resolve =>
+      dialogRef.afterClosed().subscribe((r: boolean | null | undefined) => resolve(r === true))
+    );
+    if (moved) {
+      setTimeout(() => this.onTreeRefresh(node.entityId), 250);
     }
   }
   async doExplorerCreate(node: EsqTreeNode | null, typeId?: number) {

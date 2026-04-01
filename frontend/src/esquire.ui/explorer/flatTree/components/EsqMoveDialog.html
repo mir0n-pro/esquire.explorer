@@ -1,0 +1,56 @@
+<!--
+  Esquire frameworks (tm)
+
+  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
+  mailto:mir0n.the.programmer@gmail.com
+
+  History:
+  03/31/2026 mir0n  initial
+-->
+<mat-toolbar class="mat-elevation-z2 esq-dialog-toolbar"
+    cdkDrag
+    cdkDragRootElement=".cdk-overlay-pane"
+    cdkDragHandle
+    cdkDragBoundary=".cdk-overlay-container"
+    [esqDialogResize]="'move:' + userId"
+>
+  <div>
+    <img [src]="movingNode.kind.icon" class="esq-base-icon"/>
+    Move: {{movingNode.name}}
+  </div>
+  <button class="esq-move-close-btn" (click)="onCancel()">&#x2715;</button>
+</mat-toolbar>
+
+<div class="esq-move-tree-panel">
+  <mat-tree [dataSource]="moveDs" [levelAccessor]="levelAccessor">
+    <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding matTreeNodePaddingIndent="16"
+        id="move-node-{{node.id}}"
+        class="esq-move-tree-node"
+        tabindex="0"
+        [ngClass]="{
+            'esq-move-active-node': selectedDest === node,
+            'esq-move-mouse-node': hoveredNode === node && selectedDest !== node
+        }"
+        (click)="onNodeClick(node)"
+        (keydown)="onNodeKeydown($event, node)"
+        (mouseenter)="hoveredNode = node"
+        (mouseleave)="hoveredNode = null"
+        (focus)="hoveredNode = node"
+        (blur)="hoveredNode = null">
+      @if (node.expandable()) {
+        <mat-icon class="esq-move-toggle-icon"
+          (click)="onToggleClick(node, $event)"
+          (dblclick)="onToggleDblClick(node, $event)">{{node.expanded() ? 'expand_more' : 'chevron_right'}}</mat-icon>
+      } @else {
+        <span style="width:24px;display:inline-block;flex-shrink:0;"></span>
+      }
+      <img [src]="node.kind.icon" class="esq-base-icon" (dblclick)="onNodeDblClick(node)"/>
+      <span class="esq-move-overlay-text" (dblclick)="onNodeDblClick(node)">{{node.name}}</span>
+    </mat-tree-node>
+  </mat-tree>
+</div>
+
+<mat-dialog-actions align="center">
+  <button mat-raised-button [disabled]="!canSelect()" (click)="onSelect()">Select</button>
+  <button mat-raised-button (click)="onCancel()">Cancel</button>
+</mat-dialog-actions>

@@ -451,6 +451,42 @@ paths:
           description: successful operation
         '405':
           description: Invalid input
+  /esq-move:
+    post:
+      tags:
+        - esquire
+      summary: Move an entity to a new parent org
+      description: Move an org or user entity to a different parent org; destination must be an org
+      operationId: esquireCmdMove
+      parameters:
+        - name: kind
+          in: query
+          description: an entity type
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: id
+          in: query
+          description: id of the entity to move
+          required: true
+          schema:
+            type: string
+        - name: dist_id
+          in: query
+          description: id of the destination org
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+        '403':
+          description: Permission denied or descendant guard violation
+        '404':
+          description: Entity or destination org not found
+        '405':
+          description: Invalid input
   /esq-adel:
     post:
       tags:

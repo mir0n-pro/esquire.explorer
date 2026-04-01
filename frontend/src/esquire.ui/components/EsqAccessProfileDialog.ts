@@ -26,10 +26,12 @@
 * 03/16/2026 mir0n  saving flag: Save button disabled while save is in progress
 * 03/26/2026 mir0n  confirmDlg() replaces alert()/confirm(); callApi added
 * 03/27/2026 mir0n  EsqDialogResizeDirective added to imports
+* 03/31/2026 mir0n  ESC key closes dialog
 */
 import {AfterViewChecked,
   AfterViewInit,
   Component,
+  HostListener,
   inject,
   Inject,
   OnDestroy,
@@ -142,6 +144,7 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
     return EsqUtils.getChangedFields(this.originalDetails, this.details) !== null;
   }
 
+  @HostListener('keydown.escape')
   async onClose(): Promise<void> {
     if (this.hasChanges()) {
       var result = await this.callApi.confirmDlg(null,

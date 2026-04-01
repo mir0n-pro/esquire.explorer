@@ -42,6 +42,7 @@
 * 03/28/2026 mir0n  Delete command: esquireCmdDel() REST wrapper, Delete menu item, onTreeRefresh() consolidated
 * 03/31/2026 mir0n  explorer layout fix: 1fr grid row
 *                   login hint callout: hideLoginHint signal, ?from=auth redirect on login/logout
+*                   esquireCmdMove() REST wrapper: POST /esq-move
 */
 import {Component,
   OnInit,
@@ -379,6 +380,15 @@ export class ExplorerComponent implements OnInit, AfterViewInit, EsqExplorerHost
                 ? this.dataService.esquireCmdAdel(kind, encodeURIComponent(id), cmd)
                 : this.dataService.esquireCmdDel(kind, encodeURIComponent(id), cmd);
             return ret;
+        },
+        esquireCmdMove: (kind: number, id: string, distId: string, options?: any) => {
+            this.setErrorMessage("");
+            this.errorReport = undefined;
+            if(!this.dataService) {
+                this.setErrorMessage("Data service not initialized");
+                throw new Error("Data service not initialized");
+            }
+            return this.dataService.esquireCmdMove(kind, encodeURIComponent(id), encodeURIComponent(distId));
         },
     }
   };
