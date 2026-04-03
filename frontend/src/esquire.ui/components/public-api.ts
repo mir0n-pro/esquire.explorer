@@ -10,3 +10,4 @@ export * from './EsqNodeDetailsDialog';
 export * from './EsqEntityDetailsDialog';
 export * from './EsqExplorerCallApiMill';
 export * from './EsqConfirmDialog';
+export * from './commands/EsqCommandHandlerRegistry';

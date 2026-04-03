@@ -13,6 +13,7 @@
 * 03/03/2026 mir0n  getChangedFields: array changes detected via JSON.stringify comparison
 * 03/10/2026 mir0n  DEBUG_SKIP_VALIDATION and DEBUG_SKIP_PERMISSION debug flags
 *                   validateFields() returns null immediately when DEBUG_SKIP_VALIDATION is true
+* 04/02/2926 mir0n  added errorMessage()
 */
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 import {EsqValidationError} from './EsqValidationError';
@@ -126,6 +127,18 @@ export class EsqUtils {
 
   public static deepCopy(obj: any): any {
     return JSON.parse(JSON.stringify(obj));
+  }
+
+  public static errorMessage(err: any): string {
+    var ret = 'Unknown error';
+    if (err) {
+      if (typeof err === 'string') {
+        ret = err;
+      } else {
+        ret = err.detail || err.title || err.message || String(err);
+      }
+    }
+    return ret;
   }
 
   public static getChangedFields(original: any, current: any): Record<string, any> | null {

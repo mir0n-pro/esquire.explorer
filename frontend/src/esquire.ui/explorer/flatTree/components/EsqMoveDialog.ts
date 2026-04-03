@@ -6,6 +6,8 @@
 *
 *  History:
 * 03/31/2026 mir0n  initial: org-only tree, confirm inside dialog, keyboard/mouse nav
+* 04/02/2026 mir0n  lazy initialization of flatTreeDataSource
+*                   message(s) text corrected
 */
 import {
     Component,
@@ -28,6 +30,7 @@ import { EsqFlatTreeDatasource } from '../EsqFlatTreeDatasource';
 import { EsqDialogResizeDirective } from 'src/esquire.ui/components/EsqDialogResizeDirective';
 import { EsqConfirmDialog } from 'src/esquire.ui/components/EsqConfirmDialog';
 import { EsqExplorerCallApi } from 'src/esquire.ui/api/EsqExplorerCallApi';
+import { EsqUtils } from 'src/esquire.ui/components/EsqUtils';
 
 @Component({
     selector: 'esq-move-dialog',
@@ -51,7 +54,7 @@ import { EsqExplorerCallApi } from 'src/esquire.ui/api/EsqExplorerCallApi';
 })
 export class EsqMoveDialog implements AfterViewInit {
     protected movingNode: EsqTreeNode;
-    private flatDs: EsqFlatTreeDatasource;
+    private getFlatDs: (() => EsqFlatTreeDatasource | undefined) | undefined;
     private restApi: EsqRestApi;
     protected userId: string;
     protected selectedDest: EsqTreeNode | null = null;
@@ -70,25 +73,31 @@ export class EsqMoveDialog implements AfterViewInit {
         @Inject(MAT_DIALOG_DATA) data: any
     ) {
         this.movingNode = data.node;
-        this.flatDs = data.flatDs;
+        this.getFlatDs = data.getFlatDs;
         this.restApi = data.restApi;
         this.userId = data.userId || '';
     }
 
     ngAfterViewInit(): void {
-        this.treeNodes.next(this.flatDs.getOrgNodes());
+        const flatDs = this.getFlatDs ? this.getFlatDs() : undefined;
+        if (!flatDs) {
+            console.error('EsqMoveDialog: flatDs is undefined');
+            this.dialogRef.close(null);
+            return;
+        }
+        this.treeNodes.next(flatDs.getOrgNodes());
         var parent = this.movingNode.parent;
         while (parent && !parent.kind.org) {
             parent = parent.parent;
         }
         if (parent) {
-            var found = this.flatDs.getOrgNodes().find(n => n.id === parent!.id);
+            var found = flatDs.getOrgNodes().find(n => n.id === parent!.id);
             if (found) {
-                this.selectedDest = found;
                 setTimeout(() => {
+                    this.selectedDest = found!;
                     var el = document.getElementById('move-node-' + found!.id);
                     if (el) el.focus();
-                }, 100);
+                }, 0);
             }
         }
     }
@@ -127,8 +136,11 @@ export class EsqMoveDialog implements AfterViewInit {
     }
 
     private async toggleMoveNode(node: EsqTreeNode): Promise<void> {
-        await this.flatDs.toggleOnTree(node);
-        this.treeNodes.next(this.flatDs.getOrgNodes());
+        const flatDs = this.getFlatDs ? this.getFlatDs() : undefined;
+        if (flatDs) {
+            await flatDs.toggleOnTree(node);
+            this.treeNodes.next(flatDs.getOrgNodes());
+        }
     }
 
     protected onNodeClick(node: EsqTreeNode): void {
@@ -187,7 +199,7 @@ export class EsqMoveDialog implements AfterViewInit {
             data: {
                 kind: this.movingNode.kind,
                 header: 'Move ' + this.movingNode.name,
-                text: 'Move to ' + dest.name + '?',
+                text: 'Move "' + this.movingNode.name + '" to "' + dest.name + '". Are you sure?',
                 flag: EsqExplorerCallApi.ConfirmFlag.YesNo,
                 focus: 0,
                 userId: this.userId
@@ -204,13 +216,14 @@ export class EsqMoveDialog implements AfterViewInit {
             await firstValueFrom(this.restApi.esquireCmdMove(knd, this.movingNode.entityId, dest.entityId));
             this.dialogRef.close(true);
         } catch (err: any) {
+            var errMsg = EsqUtils.errorMessage(err);
             var errRef = this.dialog.open(EsqConfirmDialog, {
                 autoFocus: false,
                 panelClass: 'esq-dialog',
                 data: {
                     kind: this.movingNode.kind,
                     header: this.movingNode.name + ' Move Error',
-                    text: 'Move failed: ' + (err?.error?.detail || err?.error?.title || err?.message || String(err)),
+                    text: 'Move failed: ' + errMsg,
                     flag: EsqExplorerCallApi.ConfirmFlag.Ok,
                     focus: 0,
                     userId: this.userId

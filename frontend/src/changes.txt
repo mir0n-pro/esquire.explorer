@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+04/02/2026 mir0n 
+flatTree\app-explorer.component.ts
+  - fix: extra subscription causes double HTTP request
+  - api.calle(): added subCmd, selectMode
+
 03/31/2026 mir0n  move command REST wiring
 explorer\flatTree\app-explorer.component.ts
   - esquireCmdMove() REST wrapper: POST /esq-move with kind, id, dist_id

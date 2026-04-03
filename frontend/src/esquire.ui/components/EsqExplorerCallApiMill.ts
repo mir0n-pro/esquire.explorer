@@ -22,12 +22,12 @@
 * 03/26/2026 mir0n  confirmDlg() added
 * 03/27/2026 mir0n  setUserId() from logon profile; userId propagated to all dialogs; removed lazy lastUserId workaround
 * 03/28/2026 mir0n  doExplorerDelete(): confirm → esquireCmdDel → onTreeRefresh(parentId,true); CMD_DELETE handling
+* 04/02/2026 mir0n  Refactored with EsqEntityCommandHandler implemenations
+*                   call(): added subCmd, selectMode
+*                   calle(): added subCmd, selectMode
+*                   added registerHandler()
 */
-import { firstValueFrom } from "rxjs";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
-import { EsqNodeDialog }  from "./EsqNodeDialog";
-import { EsqEntityDetailsDialog } from "./EsqEntityDetailsDialog";
-import { EsqNodeDetailsDialog } from "./EsqNodeDetailsDialog";
 import { EsqCreateEntityDialog } from "./EsqCreateEntityDialog";
 import { EsqConfirmDialog } from "./EsqConfirmDialog";
 import {EsqObjectKind} from 'src/esquire.ui/api/EsqObjectKind';
@@ -43,9 +43,18 @@ import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
 import {EsqExplorerCallApi, EsqExplorerHost} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {EsqTreeNode} from 'src/esquire.ui/api/EsqTreeNode';
-import {EsqAccessProfileDialog} from "./EsqAccessProfileDialog";
 import {EsqAccessProfile} from "src/esquire.ui/api/EsqAccessProfile";
 import {EsqUtils} from "./EsqUtils";
+import {EsqCommandHandlerRegistry} from "./commands/EsqCommandHandlerRegistry";
+import {
+    EsqEntityCommandHandler,
+    EsqEntityCommandContext,
+    EsqNodeCommandContext,
+    SelectMode
+} from "src/esquire.ui/api/EsqEntityCommandHandler";
+import {EsqKeyCommandHandler} from "./commands/EsqKeyCommandHandler";
+import {EsqDefaultCommandHandler} from "./commands/EsqDefaultCommandHandler";
+import {EsqDeleteCommandHandler} from "./commands/EsqDeleteCommandHandler";
 
 export class EsqExplorerCallApiMill {
   dialog:MatDialog;
@@ -53,12 +62,30 @@ export class EsqExplorerCallApiMill {
   restApi:EsqRestApi;
   private host?: EsqExplorerHost;
   protected lastUserId: string = "";
+  private commandRegistry: EsqCommandHandlerRegistry = new EsqCommandHandlerRegistry();
 
   public constructor (dialog:MatDialog, dictionaryApi:EsqDictionaryApi, restApi:EsqRestApi) {
     this.dialog = dialog;
     this.dictionaryApi = dictionaryApi;
     this.restApi = restApi;
+
+    // Set handler for unregistered commands
+    this.commandRegistry.setNotImplementedHandler(async (cmd: string) => {
+      await this.confirmDlg(
+        null,
+        'Command Not Implemented',
+        `Command "${cmd}" is not implemented yet.`,
+        EsqExplorerCallApi.ConfirmFlag.Ok
+      );
+    });
+
+    // Register built-in command handlers
+    // Specific handlers must be registered before default to take precedence
+    this.commandRegistry.register(new EsqDefaultCommandHandler());
+    this.commandRegistry.register(new EsqKeyCommandHandler());
+    this.commandRegistry.register(new EsqDeleteCommandHandler());
   }
+
   public instance():EsqExplorerCallApi {
     return this.esqExplorerCallApi();
   }
@@ -67,104 +94,28 @@ export class EsqExplorerCallApiMill {
     this.lastUserId = userId;
   }
 
-  protected async runDetailsAsync(cmd:string, node : EsqTreeNode, readOnly:boolean, userId:string) : Promise<void> {
-    var dialogRef:MatDialogRef<any>;
-    if (node.kind.detailed) {
-      dialogRef = this.dialog.open(EsqNodeDetailsDialog, {
-        autoFocus: false,
-        data: {
-          node: node,
-          restApi: this.restApi,
-          callApi : this.esqExplorerCallApi(),
-          dictionaryApi: this.dictionaryApi,
-          readOnly: readOnly,
-          userId: userId,
-        }
-      });
-    } else {
-      dialogRef = this.dialog.open(EsqNodeDialog, {
-        autoFocus: false,
-        data : {
-          node : node,
-          readOnly: readOnly,
-          userId: userId,
-        }
-      });
-    }
-
-    dialogRef.afterClosed().subscribe(result => {
-      EsqUtils.log(`Dialog result: ${result}`);
-      if (result === 'treeRefresh' && this.host) {
-        setTimeout(() => this.host!.onTreeRefresh(), 250);
-      }
-    });
-    return new Promise<void>((resolve)=>resolve());
-  }
-
-    protected async runAccessProfileAsync(id:string, readOnly:boolean, userId:string) : Promise<void> {
-        var dialogRef:MatDialogRef<any>;
-
-        dialogRef = this.dialog.open(EsqAccessProfileDialog, {
-            autoFocus: false,
-            data: {
-                id: id,
-                restApi: this.restApi,
-                dictionaryApi: this.dictionaryApi,
-                callApi: this.esqExplorerCallApi(),
-                readOnly: readOnly,
-                userId: userId
-            }
-        });
-        dialogRef.afterClosed().subscribe(result => {
-            EsqUtils.log(`Dialog result: ${result}`);
-        });
-        return new Promise<void>((resolve)=>resolve());
-    }
-
-    protected async runEntityDetailsAsync(id:string, kind:number, readOnly:boolean, userId:string) : Promise<void> {
-        var dialogRef:MatDialogRef<any>;
-
-        dialogRef = this.dialog.open(EsqEntityDetailsDialog, {
-            autoFocus: false,
-            data: {
-                id: id,
-                kind: kind,
-                restApi: this.restApi,
-                dictionaryApi: this.dictionaryApi,
-                callApi: this.esqExplorerCallApi(),
-                readOnly: readOnly,
-                userId: userId,
-            }
-        });
-        dialogRef.afterClosed().subscribe(result => {
-            EsqUtils.log(`Dialog result: ${result}`);
-        });
-        return new Promise<void>((resolve)=>resolve());
-    }
-
-  protected async doExplorerCommand2(cmd: string, entity_id: string, entity_name: string, entity_kind:number, accessProfile:EsqAccessProfile|null) {
+  protected async doEntityCommand(cmd: string, subCmd: string|null, entity_id: string, entity_name: string, entity_kind:number, accessProfile:EsqAccessProfile|null, selectMode: SelectMode = SelectMode.None) {
       entity_kind = Math.floor(entity_kind / 2) * 2;
-      if (cmd == EsqExplorerCallApi.CMD_KEY) {
-          var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, entity_id, entity_kind);
-          setTimeout(() => {
-              void this.runAccessProfileAsync(entity_id, readOnly, accessProfile?.id || '').catch(console.error);
-          }, 0);
-      } else if (entity_id.length>0) {
-          var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, entity_id, entity_kind);
-          setTimeout(() => {
-              void this.runEntityDetailsAsync(entity_id, entity_kind, readOnly, accessProfile?.id || '').catch(console.error);
-          }, 0);
-      } else {
-          var _enode_ = await firstValueFrom(this.restApi.esquireEntityNode(entity_kind, "", entity_name))
-              .catch((error) => console.error(error));
-          if (_enode_) {
-              let enode: EsqTreeNode = new EsqTreeNode(_enode_, undefined);
-              var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, enode.entityId, entity_kind);
-              setTimeout(() => {
-                  void this.runDetailsAsync(cmd, enode as EsqTreeNode, readOnly, accessProfile?.id || '').catch(console.error);
-              }, 0);
-          }
-      }
+
+      // Build command context
+      var context: EsqEntityCommandContext = {
+          cmd: !cmd ? EsqExplorerCallApi.CMD_DEFAULT : cmd,
+          subCmd,
+          entityId: entity_id,
+          entityName: entity_name,
+          entityKind: entity_kind,
+          accessProfile,
+          selectMode,
+          dialog: this.dialog,
+          restApi: this.restApi,
+          dictionaryApi: this.dictionaryApi,
+          callApi: this.esqExplorerCallApi(),
+          host: this.host,
+          userId: this.lastUserId
+      };
+
+      // Dispatch through registry
+      return this.commandRegistry.executeWithEntity(context.cmd, context);
   }
 
   protected getParentEntityId(node: EsqTreeNode): string {
@@ -177,7 +128,7 @@ export class EsqExplorerCallApiMill {
     return ret;
   }
 
-  protected async doExplorerCreate(node : EsqTreeNode, typeId?: number) {
+  protected async doCreate(node : EsqTreeNode, typeId?: number) {
     var kind: number = Math.floor((typeId ?? node.kind.id) / 2) * 2;
     var parentId = this.getParentEntityId(node);
     var dialogRef: MatDialogRef<any> = this.dialog.open(EsqCreateEntityDialog, {
@@ -213,50 +164,23 @@ export class EsqExplorerCallApiMill {
     return new Promise<void>((resolve)=>resolve());
   }
 
-  protected async doExplorerDelete(node: EsqTreeNode): Promise<void> {
-    var result = await this.confirmDlg(
-        node.kind,
-        node.name + ' Delete',
-        'You about to delete ' + node.name + '. Are you sure to continue?',
-        EsqExplorerCallApi.ConfirmFlag.YesNo
-    );
-    if (result === 0) {
-        var kind: number = Math.floor(node.kind.id / 2) * 2;
-        try {
-            await firstValueFrom(this.restApi.esquireCmdDel(kind, node.entityId));
-            if (this.host) {
-                var parentId = node.parent ? node.parent.id : "";
-                if (parentId) {
-                    setTimeout(() => this.host!.onTreeRefresh(parentId, true), 250);
-                } else {
-                    setTimeout(() => this.host!.onTreeRefresh(), 250);
-                }
-            }
-        } catch (err: any) {
-            await this.confirmDlg(node.kind,
-                node.name + ' Delete Error',
-                'Delete failed: ' + (err.detail || err.title || err),
-                EsqExplorerCallApi.ConfirmFlag.Ok);
-        }
-    }
-  }
-
-  protected async doExplorerCommand(cmd:string, node : EsqTreeNode, accessProfile:EsqAccessProfile|null) {
-    var readOnly:boolean = !accessProfile?.isCommandAllowed(cmd, node.entityId, node.kind.id);
-    if (cmd == EsqExplorerCallApi.CMD_DELETE) {
-        setTimeout(() => {
-            void this.doExplorerDelete(node).catch(console.error);
-        }, 0);
-    } else if (cmd == EsqExplorerCallApi.CMD_KEY) {
-        setTimeout(() => {
-            void this.runAccessProfileAsync(node.entityId, readOnly, accessProfile?.id || '').catch(console.error);
-        }, 0);
-
-    }  else {
-        setTimeout(() => {
-            void this.runDetailsAsync(cmd, node, readOnly, accessProfile?.id || '').catch(console.error);
-        }, 0);
-    }
+  protected async doNodeCommand(cmd:string, subCmd: string|null, node : EsqTreeNode, accessProfile:EsqAccessProfile|null, selectMode: SelectMode = SelectMode.None) {
+    // Build node command context
+    var context: EsqNodeCommandContext = {
+        cmd: !cmd ? EsqExplorerCallApi.CMD_DEFAULT : cmd,
+        subCmd,
+        node,
+        accessProfile,
+        selectMode,
+        dialog: this.dialog,
+        restApi: this.restApi,
+        dictionaryApi: this.dictionaryApi,
+        callApi: this.esqExplorerCallApi(),
+        host: this.host,
+        userId: this.lastUserId
+    };
+    // Dispatch all commands through registry
+    return this.commandRegistry.executeWithNode(context.cmd, context);
   }
 
   async confirmDlg(kind: EsqObjectKind | null, header: string, text: string, flag: EsqExplorerCallApi.ConfirmFlag, focus: number = 0): Promise<number> {
@@ -274,17 +198,20 @@ export class EsqExplorerCallApiMill {
 
   protected esqExplorerCallApi(): EsqExplorerCallApi {
     return {
-      call : (cmd: string, node :EsqTreeNode, accessProfile:EsqAccessProfile|null) => {
-        return this.doExplorerCommand(cmd, node, accessProfile);
+      call : (cmd: string, subCmd: string|null, node :EsqTreeNode, accessProfile:EsqAccessProfile|null, selectMode?: SelectMode) => {
+        return this.doNodeCommand(cmd, subCmd, node, accessProfile, selectMode);
       },
-      calle: (cmd: string, entity_id: string, entity_name: string, entity_kind: number, accessProfile:EsqAccessProfile|null) => {
-        return this.doExplorerCommand2(cmd, entity_id, entity_name, entity_kind, accessProfile);
+      calle: (cmd: string, subCmd: string|null, entity_id: string, entity_name: string, entity_kind: number, accessProfile:EsqAccessProfile|null, selectMode?: SelectMode) => {
+        return this.doEntityCommand(cmd, subCmd, entity_id, entity_name, entity_kind, accessProfile, selectMode);
       },
       create: (parent_node: EsqTreeNode, typeId?: number) => {
-       return this.doExplorerCreate(parent_node, typeId);
+       return this.doCreate(parent_node, typeId);
       },
       registerHost: (host: EsqExplorerHost) => {
         this.host = host;
+      },
+      registerHandler: (handler: EsqEntityCommandHandler): void => {
+          this.commandRegistry.register(handler);
       },
       confirmDlg: (kind: EsqObjectKind | null, header: string, text: string, flag: EsqExplorerCallApi.ConfirmFlag, focus?: number) => {
         return this.confirmDlg(kind, header, text, flag, focus);

@@ -1,6 +1,37 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+04/02/2026 mir0n 
++ added api\EsqEntityCommandHandler.ts
+api\EsqExplorerCallApi.ts
+  - call(): added subCmd, selectMode
+  - calle(): added subCmd, selectMode
+  - added registerHandler()
++ added components\commands\EsqCommandHandlerRegistry.ts
++ added components\commands\EsqDefaultCommandHandler.ts
++ added components\commands\EsqDeleteCommandHandler.ts
++ added components\commands\EsqKeyCommandHandler.ts
+components\components\EsqExplorerCallApiMill.ts
+  - Refactored with EsqEntityCommandHandler implemenations
+  - call(): added subCmd, selectMode
+  - calle(): added subCmd, selectMode
+  - added registerHandler()
+components\EsqTabIknListComponent.ts
+  - calle(): added subCmd, selectMode
+components\EsqTabListComponent.ts
+  - calle(): added subCmd, selectMode
+components\EsqUtils.ts
+  - added errorMessage()
++ added flatTree\components\EsqMoveCommandHandler.ts
+flatTree\components\EsqMoveDialog.ts
+  - lazy initialization of flatTreeDataSource
+  - message(s) text corrected
+explorer\flatTree\EsqExplorerComponent.ts
+  - registration of Move command handler
+  - onCmdClick() : bypass location for refresh selection
+  - api.call(): added subCmd, selectMode
+
+
 03/31/2026 mir0n  move command; ESC close for all dialogs
 api\EsqRestApi.ts
   - esquireCmdMove added to interface

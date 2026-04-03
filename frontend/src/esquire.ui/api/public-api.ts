@@ -8,3 +8,4 @@ export * from './EsqTreeNode';
 export * from './AsEsqTreeNodePipe';
 export * from './EsqTreeNodeDto';
 export * from './EsqContextMenuBuilder';
+export * from './EsqEntityCommandHandler';

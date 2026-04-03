@@ -19,6 +19,9 @@
 *                   onBtnRefreshClickAndSelect(); esqExplorerHost input; errorMessage signal
 * 03/28/2026 mir0n  onTreeRefresh() consolidated: entityId/asOwner optional params; onBtnRefreshClickAndSelectOwner() added
 * 03/31/2026 mir0n  CMD_MOVE: doMoveCommand() opens EsqMoveDialog; canCmdClick() refactored; cannot move yourself
+* 04/02/2026 mir0n  registration of Move command handler
+*                   onCmdClick() : bypass location for refresh selection
+*                   api.call(): added subCmd, selectMode
 */
 import {Component,
   ElementRef,
@@ -70,12 +73,13 @@ import {
 
 
 import { EsqFlatTreeDatasource } from './EsqFlatTreeDatasource';
-import { EsqMoveDialog } from './components/EsqMoveDialog';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
 import {EsquireService} from "../../../rest";
 import {EsqAccessProfile} from "src/esquire.ui/api/EsqAccessProfile";
+import {EsqMoveCommandHandler} from "./components/EsqMoveCommandHandler";
+import {SelectMode} from "../../api/EsqEntityCommandHandler";
 
 
 @Component({
@@ -218,8 +222,8 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
       console.error("No esqRestApi defined");
     }
     this.esqExplorerCallApi?.registerHost(this);
-    
-//--- todo catch exception : somehow it calls the server without parameters
+    const moveHandler = new EsqMoveCommandHandler(() => this.getDatasource());
+    this.esqExplorerCallApi?.registerHandler(moveHandler);
 
     this.datasource = new EsqFlatTreeDatasource(this.esqRestApi as EsqRestApi);
     await this.datasource.loadInitialData();
@@ -245,6 +249,13 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
     if (this.sidenav) {
       this.sidenav!.toggle();
     }
+  }
+
+  /**
+   * Get datasource for external command handler registration
+   */
+  public getDatasource(): EsqFlatTreeDatasource {
+    return this.datasource;
   }
 
   ngOnDestroy(): void {
@@ -400,7 +411,10 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
 
     async onCmdClick(cmd: string, menu:boolean) {
         if (this.canCmdClick(cmd, menu)) {
-            await this.doExplorerCommand(cmd, this.getSelectedNode(menu));
+            var selectMode = this.treeOnFocus
+                ? SelectMode.SelectTree
+                : SelectMode.SelectList;
+            await this.doExplorerCommand(cmd, null, this.getSelectedNode(menu), selectMode);
         }
     }
 
@@ -451,7 +465,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
 
     async onCmdDetailsClick(menu: boolean): Promise<void> {
         EsqUtils.log("onCmdDetailsClick[");
-        await this.doExplorerCommand(EsqExplorerCallApi.CMD_DEFAULT, this.getSelectedNode(menu));
+        await this.doExplorerCommand(EsqExplorerCallApi.CMD_DEFAULT, null, this.getSelectedNode(menu));
         EsqUtils.log("]onCmdDetailsClick");
     }
 
@@ -586,37 +600,13 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
 //  end of UI commands
 
 
-    async doExplorerCommand(cmd:string, node : EsqTreeNode | undefined | null) {
+    async doExplorerCommand(cmd:string, subCmd: string|null, node : EsqTreeNode | undefined | null, selectMode: SelectMode = SelectMode.None) {
     var ret = new Promise<void>((resolve) => resolve());
     if (node && this.esqExplorerCallApi) {
-      if (cmd === EsqExplorerCallApi.CMD_MOVE) {
-        setTimeout(() => { void this.doMoveCommand(node as EsqTreeNode).catch(console.error); }, 0);
-      } else {
-        const api:EsqExplorerCallApi = this.esqExplorerCallApi as EsqExplorerCallApi;
-        ret = api.call(cmd, node as EsqTreeNode, this.esqAccessProfile);
-      }
+      const api:EsqExplorerCallApi = this.esqExplorerCallApi as EsqExplorerCallApi;
+      ret = api.call(cmd, subCmd, node as EsqTreeNode, this.esqAccessProfile, selectMode);
     }
     return ret;
-  }
-
-  private async doMoveCommand(node: EsqTreeNode): Promise<void> {
-    var dialogRef = this.dialog.open(EsqMoveDialog, {
-      autoFocus: false,
-      panelClass: 'esq-dialog',
-      data: {
-        node,
-        flatDs: this.datasource,
-        restApi: this.esqRestApi,
-        userId: this.esqAccessProfile?.id || ''
-      }
-    });
-    dialogRef.updateSize('280px', '460px');
-    var moved = await new Promise<boolean>(resolve =>
-      dialogRef.afterClosed().subscribe((r: boolean | null | undefined) => resolve(r === true))
-    );
-    if (moved) {
-      setTimeout(() => this.onTreeRefresh(node.entityId), 250);
-    }
   }
   async doExplorerCreate(node: EsqTreeNode | null, typeId?: number) {
     if (node && this.esqExplorerCallApi) {
@@ -705,7 +695,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
         if (this.isOnlyAlt(event)) {
           event.preventDefault();
           if (this.listNodeFocused) {
-            this.doExplorerCommand(EsqExplorerCallApi.CMD_DEFAULT, this.listNodeFocused);
+            this.doExplorerCommand(EsqExplorerCallApi.CMD_DEFAULT, null, this.listNodeFocused);
           }
         } else if (this.isKeyPlain(event)) {
           event.preventDefault();
@@ -829,7 +819,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
       case 'Enter':
         if (this.isOnlyAlt(event)) {
           event.preventDefault();
-          this.doExplorerCommand(EsqExplorerCallApi.CMD_DEFAULT, node);
+          this.doExplorerCommand(EsqExplorerCallApi.CMD_DEFAULT, null, node);
         } else if (this.isKeyPlain(event)) {
           event.preventDefault();
           this.toggleTreeActivate(node, false);
@@ -912,7 +902,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
     }
     this.dataLoading.set(false);
     if (doDefault) {
-      await this.doExplorerCommand(EsqExplorerCallApi.CMD_DEFAULT, this.listNodeFocused);
+      await this.doExplorerCommand(EsqExplorerCallApi.CMD_DEFAULT, null, this.listNodeFocused);
     }
     EsqUtils.log(']runDefault');
   }

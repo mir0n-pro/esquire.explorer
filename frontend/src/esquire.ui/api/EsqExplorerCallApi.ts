@@ -12,10 +12,14 @@
 * 03/26/2026 mir0n  onTreeRefreshSelect(), setErrorMessage() added to EsqExplorerHost
 * 03/26/2026 mir0n  confirmDlg() added to interface; ConfirmFlag enum; focus param
 * 03/28/2026 mir0n  EsqExplorerHost: onTreeRefresh(entityId?, asOwner?) consolidates onTreeRefresh + onTreeRefreshSelect
+* 04/02/2026 mir0n  call(): added subCmd, selectMode
+*                   calle(): added subCmd, selectMode
+*                   added registerHandler()
 */
 import {  EsqTreeNode} from './EsqTreeNode';
 import {EsqAccessProfile} from "./EsqAccessProfile";
 import {EsqObjectKind} from './EsqObjectKind';
+import {EsqEntityCommandHandler, SelectMode} from "./EsqEntityCommandHandler";
 
 export interface EsqExplorerHost {
   onTreeRefresh(entityId?: string, asOwner?: boolean): void;
@@ -23,10 +27,11 @@ export interface EsqExplorerHost {
 }
 
 export interface EsqExplorerCallApi {
-  call: (cmd: string, node: EsqTreeNode, accessProfile:EsqAccessProfile|null) => Promise<void>;
-  calle: (cmd: string, entity_id: string, entity_name: string, entity_kind: number, accessProfile:EsqAccessProfile|null) => Promise<void>;
+  call: (cmd: string, subCmd: string|null, node: EsqTreeNode, accessProfile:EsqAccessProfile|null, selectMode?: SelectMode) => Promise<void>;
+  calle: (cmd: string, subCmd: string|null, entity_id: string, entity_name: string, entity_kind: number, accessProfile:EsqAccessProfile|null, selectMode?: SelectMode) => Promise<void>;
   create: (parent_node: EsqTreeNode, typeId?: number) => Promise<void>;
   registerHost: (host: EsqExplorerHost) => void;
+  registerHandler(handler: EsqEntityCommandHandler): void;
   confirmDlg: (kind: EsqObjectKind | null, header: string, text: string, flag: EsqExplorerCallApi.ConfirmFlag, focus?: number) => Promise<number>;
 }
 

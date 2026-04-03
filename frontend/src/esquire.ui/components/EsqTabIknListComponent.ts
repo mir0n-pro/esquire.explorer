@@ -20,6 +20,7 @@
 * 03/06/2026 mir0n  ngOnChanges: rebuild list on external esqListElements change (refresh fix)
 *                   lastEmitted tracking: skip rebuild when change was self-emitted (add/remove)
 *                   buildList() extracted from ngOnInit for reuse
+* 04/02/2026 mir0n  calle(): added subCmd, selectMode
 */
 import {
     AfterViewInit,
@@ -227,7 +228,7 @@ export class EsqTabIknListComponent implements OnInit, OnChanges, AfterViewInit,
       if (this.canDetailsBtn()) {
          var el:TabIknElement = this.tabIknElements[this.listElementFocusedIndex];
          if(el) {
-           this.esqExplorerCallApi.calle(EsqExplorerCallApi.CMD_DEFAULT, String(el.id), '', el.kind, null);
+           this.esqExplorerCallApi.calle(EsqExplorerCallApi.CMD_DEFAULT, null, String(el.id), '', el.kind, null);
          }
       }
   }

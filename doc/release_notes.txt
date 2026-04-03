@@ -1,7 +1,8 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
-
+v1.2.2-2604.0221 Refactoring of menu command handle; Elimination of double HTTP request
+        
 v1.2.2-2603.3121  Move command; ESC close for all dialogs
    : Move: EsqMoveDialog — org-only tree, confirm, keyboard nav, ESC/X close
    : canCmdClick(): cannot move yourself (entityId === profile.id)
