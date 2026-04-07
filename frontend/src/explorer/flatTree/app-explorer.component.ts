@@ -45,6 +45,7 @@
 *                   esquireCmdMove() REST wrapper: POST /esq-move
 * 04/02/2026 mir0n  fix: extra subscription causes double HTTP request
 *                   api.calle(): added subCmd, selectMode
+* 04/07/2026 mir0n  esquireCmdSave/New/Del: removed acct routing (esquireCmdAdel/Anew/Asave eliminated from API)
 */
 import {Component,
   OnInit,
@@ -336,10 +337,7 @@ export class ExplorerComponent implements OnInit, EsqExplorerHost {
                 this.setErrorMessage("Data service not initialized");
                 throw new Error("Data service not initialized");
             }
-            var acct: boolean = EsqObjectKindFactory.instanceOf(kind).acct;
-            var ret: Observable<any> = acct
-                ? this.dataService.esquireCmdAsave(kind, encodeURIComponent(id), body, cmd)
-                : this.dataService.esquireCmdSave(kind, encodeURIComponent(id), body, cmd);
+            var ret: Observable<any> = this.dataService.esquireCmdSave(kind, encodeURIComponent(id), body, cmd);
             return ret;
         },
         esquireKeySave: (id: string, body: any, options?: any) => {
@@ -359,10 +357,7 @@ export class ExplorerComponent implements OnInit, EsqExplorerHost {
                 this.setErrorMessage("Data service not initialized");
                 throw new Error("Data service not initialized");
             }
-            var acct: boolean = EsqObjectKindFactory.instanceOf(kind).acct;
-            var ret: Observable<any> = acct
-                ? this.dataService.esquireCmdAnew(kind, encodeURIComponent(parentId), body, cmd)
-                : this.dataService.esquireCmdNew(kind, encodeURIComponent(parentId), body, cmd);
+            var ret: Observable<any> = this.dataService.esquireCmdNew(kind, encodeURIComponent(parentId), body, cmd);
             return ret;
         },
         esquireCmdDel: (kind: number, id: string, cmd?: string, options?: any) => {
@@ -372,10 +367,7 @@ export class ExplorerComponent implements OnInit, EsqExplorerHost {
                 this.setErrorMessage("Data service not initialized");
                 throw new Error("Data service not initialized");
             }
-            var acct: boolean = EsqObjectKindFactory.instanceOf(kind).acct;
-            var ret: Observable<any> = acct
-                ? this.dataService.esquireCmdAdel(kind, encodeURIComponent(id), cmd)
-                : this.dataService.esquireCmdDel(kind, encodeURIComponent(id), cmd);
+            var ret: Observable<any> = this.dataService.esquireCmdDel(kind, encodeURIComponent(id), cmd);
             return ret.pipe(catchError(err => {
                 this.errorReport = err;
                 this.setErrorMessage(err.detail || err.title || err.message, err);

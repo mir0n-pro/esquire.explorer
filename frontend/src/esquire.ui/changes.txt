@@ -1,7 +1,38 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
-04/02/2026 mir0n 
+04/07/2026 mir0n  kind normalization refactor; entityKind naming
+api\EsqObjectKindFactory.ts
+  - added static normalize(kind): number
+api\EsqEntityCommandHandler.ts
+  - EsqNodeCommandContext: added nodeKind (normalized entity kind for REST calls)
+api\EsqExplorerCallApi.ts
+  - calle() param renamed to entityKind
+api\EsqDictionaryApi.ts
+  - removed stale commented-out interface line
+api\EsqEntityDictionary.ts
+  - constructor param renamed entity_kind → entityKind
+api\EsqAccessProfile.ts
+  - isCommandAllowed(): use EsqObjectKindFactory.normalize()
+components\EsqExplorerCallApiMill.ts
+  - normalization centralized at entry points: doNodeCommand() → context.nodeKind,
+    doEntityCommand() → context.entityKind, doCreate(); all use EsqObjectKindFactory.normalize()
+components\EsqDictionary.ts
+  - entityKind naming (was entity_kind)
+components\EsqNodeDetailsDialog.ts
+  - givenEntityKind set from data.nodeKind (pre-normalized by doNodeCommand)
+components\commands\EsqDefaultCommandHandler.ts
+  - use context.nodeKind / context.entityKind; thread nodeKind into EsqNodeDetailsDialog data
+components\commands\EsqDeleteCommandHandler.ts
+  - use context.nodeKind / context.entityKind
+components\commands\EsqKeyCommandHandler.ts
+  - use context.nodeKind / context.entityKind
+explorer\flatTree\components\EsqMoveCommandHandler.ts
+  - use context.nodeKind / context.entityKind; thread nodeKind to EsqMoveDialog
+explorer\flatTree\components\EsqMoveDialog.ts
+  - movingNodeKind from data.nodeKind; use for esquireCmdMove
+
+04/02/2026 mir0n
 + added api\EsqEntityCommandHandler.ts
 api\EsqExplorerCallApi.ts
   - call(): added subCmd, selectMode

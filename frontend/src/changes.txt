@@ -1,7 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
-04/02/2026 mir0n 
+04/07/2026 mir0n  updated REST API facade; removed acct-endpoint routing
+flatTree\app-explorer.component.ts
+  - esquireCmdSave/New/Del wrappers: removed acct routing (esquireCmdAdel/Anew/Asave eliminated from API)
+
+04/02/2026 mir0n
 flatTree\app-explorer.component.ts
   - fix: extra subscription causes double HTTP request
   - api.calle(): added subCmd, selectMode

@@ -6,6 +6,7 @@
 *
 * History :
 * 04/01/2026 mir0n  initial: default entity details command handler extracted from EsqExplorerCallApiMill
+* 04/07/2026 mir0n  use context.nodeKind / context.entityKind; thread nodeKind into EsqNodeDetailsDialog data
 */
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
@@ -33,32 +34,29 @@ export class EsqDefaultCommandHandler implements EsqEntityCommandHandler {
     var readOnly = !context.accessProfile?.isCommandAllowed(
       context.cmd,
       context.node.entityId,
-      context.node.kind.id
+      context.nodeKind
     );
 
     setTimeout(() => {
-      void this.runDetailsAsync(context.cmd, context.node, readOnly, context.dialog, context.dictionaryApi, context.restApi, context.callApi, context.host, context.userId).catch(console.error);
+      void this.runDetailsAsync(context.cmd, context.node, context.nodeKind, readOnly, context.dialog, context.dictionaryApi, context.restApi, context.callApi, context.host, context.userId).catch(console.error);
     }, 0);
   }
 
   async executeWithEntity(context: EsqEntityCommandContext): Promise<void> {
-    // Normalize kind to even number
-    var entityKind = Math.floor(context.entityKind / 2) * 2;
-
     if (context.entityId.length > 0) {
       // Direct entity details
       var readOnly = !context.accessProfile?.isCommandAllowed(
         context.cmd,
         context.entityId,
-        entityKind
+        context.entityKind
       );
       setTimeout(() => {
-        void this.runEntityDetailsAsync(context.entityId, entityKind, readOnly, context.dialog, context.dictionaryApi, context.restApi, context.callApi, context.userId).catch(console.error);
+        void this.runEntityDetailsAsync(context.entityId, context.entityKind, readOnly, context.dialog, context.dictionaryApi, context.restApi, context.callApi, context.userId).catch(console.error);
       }, 0);
     } else {
       // Fetch node first
       var _enode_ = await firstValueFrom(
-        context.restApi.esquireEntityNode(entityKind, "", context.entityName)
+        context.restApi.esquireEntityNode(context.entityKind, "", context.entityName)
       ).catch(console.error);
 
       if (_enode_) {
@@ -66,10 +64,10 @@ export class EsqDefaultCommandHandler implements EsqEntityCommandHandler {
         var readOnly = !context.accessProfile?.isCommandAllowed(
           context.cmd,
           enode.entityId,
-          entityKind
+          context.entityKind
         );
         setTimeout(() => {
-          void this.runDetailsAsync(context.cmd, enode, readOnly, context.dialog, context.dictionaryApi, context.restApi, context.callApi, context.host, context.userId).catch(console.error);
+          void this.runDetailsAsync(context.cmd, enode, context.entityKind, readOnly, context.dialog, context.dictionaryApi, context.restApi, context.callApi, context.host, context.userId).catch(console.error);
         }, 0);
       }
     }
@@ -77,7 +75,7 @@ export class EsqDefaultCommandHandler implements EsqEntityCommandHandler {
 
   private async runEntityDetailsAsync(
     id: string,
-    kind: number,
+    entityKind: number,
     readOnly: boolean,
     dialog: MatDialog,
     dictionaryApi: EsqDictionaryApi,
@@ -89,7 +87,7 @@ export class EsqDefaultCommandHandler implements EsqEntityCommandHandler {
       autoFocus: false,
       data: {
         id,
-        kind,
+        kind: entityKind,
         restApi,
         dictionaryApi,
         callApi,
@@ -108,6 +106,7 @@ export class EsqDefaultCommandHandler implements EsqEntityCommandHandler {
   private async runDetailsAsync(
     cmd: string,
     node: EsqTreeNode,
+    nodeKind: number,
     readOnly: boolean,
     dialog: MatDialog,
     dictionaryApi: EsqDictionaryApi,
@@ -122,6 +121,7 @@ export class EsqDefaultCommandHandler implements EsqEntityCommandHandler {
         autoFocus: false,
         data: {
           node,
+          nodeKind,
           restApi,
           callApi,
           dictionaryApi,

@@ -1,6 +1,14 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.2-2604.0711  Kind normalization refactor; REST API facade update
+   :Kind:
+      EsqObjectKindFactory.normalize() — single normalization point replacing scattered inline
+   :REST:
+      Removed acct-specific endpoint routing (esquireCmdAdel/Anew/Asave)
+      esquireCmdDel/New/Save now handle all entity kinds uniformly
+   : added doc\kind.context.md
+
 v1.2.2-2604.0221 Refactoring of menu command handle; Elimination of double HTTP request
         
 v1.2.2-2603.3121  Move command; ESC close for all dialogs

@@ -6,6 +6,7 @@
 *
 * History :
 * 04/01/2026 mir0n  initial: delete command handler extracted from EsqExplorerCallApiMill
+* 04/07/2026 mir0n  use context.nodeKind / context.entityKind
 */
 import { firstValueFrom } from 'rxjs';
 import { EsqEntityCommandHandler, EsqEntityCommandContext, EsqNodeCommandContext } from '../../api/EsqEntityCommandHandler';
@@ -25,26 +26,23 @@ export class EsqDeleteCommandHandler implements EsqEntityCommandHandler {
 
   async executeWithNode(context: EsqNodeCommandContext): Promise<void> {
     setTimeout(() => {
-      void this.doDelete(context.node, context.callApi, context.restApi, context.host).catch(console.error);
+      void this.doDelete(context.node, context.nodeKind, context.callApi, context.restApi, context.host).catch(console.error);
     }, 0);
   }
 
   async executeWithEntity(context: EsqEntityCommandContext): Promise<void> {
-    // Fetch node first
+    // Fetch node first (entityKind already normalized by doEntityCommand)
     var node = await this.fetchNode(context.restApi, context.entityKind, context.entityId, context.entityName);
     if (!node) {
       return;
     }
     var nodeRef = node;
     setTimeout(() => {
-      void this.doDelete(nodeRef, context.callApi, context.restApi, context.host).catch(console.error);
+      void this.doDelete(nodeRef, context.entityKind, context.callApi, context.restApi, context.host).catch(console.error);
     }, 0);
   }
 
   private async fetchNode(restApi: EsqRestApi, entityKind: number, entityId: string, entityName: string): Promise<EsqTreeNode | undefined> {
-    // Normalize kind to even number
-    entityKind = Math.floor(entityKind / 2) * 2;
-
     var _enode_;
     if (entityId.length > 0) {
       _enode_ = await firstValueFrom(
@@ -58,7 +56,7 @@ export class EsqDeleteCommandHandler implements EsqEntityCommandHandler {
     return _enode_ ? new EsqTreeNode(_enode_, undefined) : undefined;
   }
 
-  private async doDelete(node: EsqTreeNode, callApi: EsqExplorerCallApi, restApi: EsqRestApi, host: any): Promise<void> {
+  private async doDelete(node: EsqTreeNode, kind: number, callApi: EsqExplorerCallApi, restApi: EsqRestApi, host: any): Promise<void> {
     var result = await callApi.confirmDlg(
       node.kind,
       node.name + ' Delete',
@@ -66,7 +64,6 @@ export class EsqDeleteCommandHandler implements EsqEntityCommandHandler {
       EsqExplorerCallApi.ConfirmFlag.YesNo
     );
     if (result === 0) {
-      var kind: number = Math.floor(node.kind.id / 2) * 2;
       try {
         await firstValueFrom(restApi.esquireCmdDel(kind, node.entityId));
         if (host) {

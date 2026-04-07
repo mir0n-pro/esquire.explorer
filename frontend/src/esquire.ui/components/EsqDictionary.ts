@@ -10,6 +10,7 @@
 *                   added subRequested flag; proactively loads sub-entity kinds
 *                   added dictionaryFromCache() public method
 * 03/28/2026 mir0n  loading Set → loadingMap: concurrent callers await the same in-flight Promise
+* 04/07/2026 mir0n  entityKind naming (was entity_kind)
 */
 import {firstValueFrom, from, Observable, of} from 'rxjs';
 /*
@@ -38,10 +39,10 @@ export class EsqDictionary implements EsqDictionaryApi {
     public constructor(restApi:EsqRestApi) {
         this.restApi = restApi;
     }
-   public dictionary (entity_kind: number): Observable<EsqEntityLayer[]> {
+   public dictionary (entityKind: number): Observable<EsqEntityLayer[]> {
         if (!this.subRequested) {
-            let kind:EsqObjectKind = EsqObjectKindFactory.instanceOf(entity_kind);
-            if (kind.usr && !this.subRequested) {
+            let kindObj:EsqObjectKind = EsqObjectKindFactory.instanceOf(entityKind);
+            if (kindObj.usr && !this.subRequested) {
                 this.subRequested = true;
                 [EsqObjectKindFactory.PERSON_PRIMARY.id, EsqObjectKindFactory.ADDRESS_POSTAL.id, EsqObjectKindFactory.ADDRESS_BIZ.id]
                     .forEach(id => {
@@ -49,49 +50,49 @@ export class EsqDictionary implements EsqDictionaryApi {
                     });
             }
          }
-        return from (this._dictionary (entity_kind));
+        return from (this._dictionary (entityKind));
     }
-    public dictionaryFromCache (entity_kind: number): EsqEntityLayer[] {
-        return this.loadFromCache (entity_kind) ;
+    public dictionaryFromCache (entityKind: number): EsqEntityLayer[] {
+        return this.loadFromCache (entityKind) ;
     }
-    public async _dictionary (entity_kind: number)  {
-        var ret:EsqEntityLayer[] = this.loadFromCache(entity_kind);
+    public async _dictionary (entityKind: number)  {
+        var ret:EsqEntityLayer[] = this.loadFromCache(entityKind);
         if (ret && ret.length == 0 ) {
-            await this.loadDictionary(entity_kind).catch(console.error);
-            ret = this.loadFromCache(entity_kind);
+            await this.loadDictionary(entityKind).catch(console.error);
+            ret = this.loadFromCache(entityKind);
         }
         EsqUtils.log('_dictionary ', ret);
         return ret;
     } 
 
-    private loadFromCache (entity_kind: number) :EsqEntityLayer[]  {
+    private loadFromCache (entityKind: number) :EsqEntityLayer[]  {
         var ret:EsqEntityLayer[] = [];
-        let found:EsqEntityDictionary[] = this.datastore.filter((x)=> x.kind == entity_kind);
+        let found:EsqEntityDictionary[] = this.datastore.filter((x)=> x.kind == entityKind);
         if (found && found.length >0 ) {
             ret = found[0].layers;
         }
         return ret;
     }
 
-    private loadDictionary(entity_kind: number): Promise<void> {
-        if (this.loadingMap.has(entity_kind)) {
-            return this.loadingMap.get(entity_kind)!;
+    private loadDictionary(entityKind: number): Promise<void> {
+        if (this.loadingMap.has(entityKind)) {
+            return this.loadingMap.get(entityKind)!;
         }
         EsqUtils.log('loadDictionary[ ');
-        var p: Promise<void> = firstValueFrom(this.restApi.esquireDictionary(entity_kind))
+        var p: Promise<void> = firstValueFrom(this.restApi.esquireDictionary(entityKind))
             .then((_dict: any) => {
                 if (_dict) {
-                    var dict: EsqEntityDictionary = new EsqEntityDictionary(entity_kind, _dict);
+                    var dict: EsqEntityDictionary = new EsqEntityDictionary(entityKind, _dict);
                     this.datastore[this.datastore.length] = dict;
                 }
-                this.loadingMap.delete(entity_kind);
+                this.loadingMap.delete(entityKind);
                 EsqUtils.log(']loadDictionary');
             })
             .catch((err: any) => {
-                this.loadingMap.delete(entity_kind);
+                this.loadingMap.delete(entityKind);
                 console.error(err);
             });
-        this.loadingMap.set(entity_kind, p);
+        this.loadingMap.set(entityKind, p);
         return p;
     }
 

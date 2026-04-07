@@ -11,6 +11,7 @@
 *                  nullable changed from boolean to string
 * 03/20/2026 mir0n  affects3 optional field added
 * 03/28/2026 mir0n  default optional field added; mapped from jsn['default']
+* 04/07/2026 mir0n  constructor param renamed entity_kind → entityKind
 */
 export class EsqEntityField {
   name:string;              // +
@@ -57,8 +58,8 @@ export class EsqEntityField {
 export class EsqEntityDictionary {
   kind:number;            //entity kind, same as EsqObjectKind.id  
   layers:EsqEntityLayer[];  // sorted by [tab][order]
-  constructor(entity_kind : number, jsn:any) {
-    this.kind = entity_kind;
+  constructor(entityKind : number, jsn:any) {
+    this.kind = entityKind;
     this.layers = [];
     if (jsn) {
       jsn.forEach((x : any) => {

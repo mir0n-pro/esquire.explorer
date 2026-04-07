@@ -6,6 +6,7 @@
 *
 * History :
 * 04/01/2026 mir0n  initial: command handler interface and context type for calle() refactoring
+* 04/07/2026 mir0n  EsqNodeCommandContext: added nodeKind (normalized entity kind for REST calls)
 */
 import { MatDialog } from '@angular/material/dialog';
 import { EsqRestApi } from './EsqRestApi';
@@ -51,6 +52,7 @@ export interface EsqNodeCommandContext {
   cmd: string;
   subCmd: string|null;
   node: EsqTreeNode;
+  nodeKind: number;         // normalized (even) entity kind — use instead of node.kind.id for REST calls
   accessProfile: EsqAccessProfile | null;
   selectMode: SelectMode;
 

@@ -14,6 +14,7 @@
 *                   init() loading from server and keeps ability to be defined locally
 * 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
 * 02/28/2026 mir0n  added static kinds: PERSON_PRIMARY (992), ADDRESS_POSTAL (988), ADDRESS_BIZ (990)
+* 04/07/2026 mir0n  added static normalize(kind): number
 */
 
 import {EsqTreeNode} from "./EsqTreeNode";
@@ -96,6 +97,10 @@ export class EsqObjectKindFactory {
           //    this.kinds = src.map(k => (k instanceof EsqObjectKind) ? k : new EsqObjectKind(k));
           //});
       }
+  }
+
+  public static normalize(kind: number): number {
+    return Math.floor(kind / 2) * 2;
   }
 
   public static instanceOf(kind: number): EsqObjectKind {

@@ -15,6 +15,7 @@
 * 04/02/2026 mir0n  call(): added subCmd, selectMode
 *                   calle(): added subCmd, selectMode
 *                   added registerHandler()
+* 04/07/2026 mir0n  calle() param renamed to entityKind
 */
 import {  EsqTreeNode} from './EsqTreeNode';
 import {EsqAccessProfile} from "./EsqAccessProfile";
@@ -28,7 +29,7 @@ export interface EsqExplorerHost {
 
 export interface EsqExplorerCallApi {
   call: (cmd: string, subCmd: string|null, node: EsqTreeNode, accessProfile:EsqAccessProfile|null, selectMode?: SelectMode) => Promise<void>;
-  calle: (cmd: string, subCmd: string|null, entity_id: string, entity_name: string, entity_kind: number, accessProfile:EsqAccessProfile|null, selectMode?: SelectMode) => Promise<void>;
+  calle: (cmd: string, subCmd: string|null, entity_id: string, entity_name: string, entityKind: number, accessProfile:EsqAccessProfile|null, selectMode?: SelectMode) => Promise<void>;
   create: (parent_node: EsqTreeNode, typeId?: number) => Promise<void>;
   registerHost: (host: EsqExplorerHost) => void;
   registerHandler(handler: EsqEntityCommandHandler): void;

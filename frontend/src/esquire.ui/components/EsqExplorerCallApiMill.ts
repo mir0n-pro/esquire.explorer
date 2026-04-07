@@ -26,6 +26,8 @@
 *                   call(): added subCmd, selectMode
 *                   calle(): added subCmd, selectMode
 *                   added registerHandler()
+* 04/07/2026 mir0n  kind normalization centralized: doNodeCommand() → context.nodeKind,
+*                   doEntityCommand() → context.entityKind, doCreate(); use EsqObjectKindFactory.normalize()
 */
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { EsqCreateEntityDialog } from "./EsqCreateEntityDialog";
@@ -45,6 +47,7 @@ import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
 import {EsqTreeNode} from 'src/esquire.ui/api/EsqTreeNode';
 import {EsqAccessProfile} from "src/esquire.ui/api/EsqAccessProfile";
 import {EsqUtils} from "./EsqUtils";
+import {EsqObjectKindFactory} from 'src/esquire.ui/api/EsqObjectKindFactory';
 import {EsqCommandHandlerRegistry} from "./commands/EsqCommandHandlerRegistry";
 import {
     EsqEntityCommandHandler,
@@ -94,8 +97,8 @@ export class EsqExplorerCallApiMill {
     this.lastUserId = userId;
   }
 
-  protected async doEntityCommand(cmd: string, subCmd: string|null, entity_id: string, entity_name: string, entity_kind:number, accessProfile:EsqAccessProfile|null, selectMode: SelectMode = SelectMode.None) {
-      entity_kind = Math.floor(entity_kind / 2) * 2;
+  protected async doEntityCommand(cmd: string, subCmd: string|null, entity_id: string, entity_name: string, entityKind:number, accessProfile:EsqAccessProfile|null, selectMode: SelectMode = SelectMode.None) {
+      entityKind = EsqObjectKindFactory.normalize(entityKind);
 
       // Build command context
       var context: EsqEntityCommandContext = {
@@ -103,7 +106,7 @@ export class EsqExplorerCallApiMill {
           subCmd,
           entityId: entity_id,
           entityName: entity_name,
-          entityKind: entity_kind,
+          entityKind,
           accessProfile,
           selectMode,
           dialog: this.dialog,
@@ -129,7 +132,7 @@ export class EsqExplorerCallApiMill {
   }
 
   protected async doCreate(node : EsqTreeNode, typeId?: number) {
-    var kind: number = Math.floor((typeId ?? node.kind.id) / 2) * 2;
+    var kind: number = EsqObjectKindFactory.normalize(typeId ?? node.kind.id);
     var parentId = this.getParentEntityId(node);
     var dialogRef: MatDialogRef<any> = this.dialog.open(EsqCreateEntityDialog, {
       autoFocus: false,
@@ -170,6 +173,7 @@ export class EsqExplorerCallApiMill {
         cmd: !cmd ? EsqExplorerCallApi.CMD_DEFAULT : cmd,
         subCmd,
         node,
+        nodeKind: EsqObjectKindFactory.normalize(node.kind.id),
         accessProfile,
         selectMode,
         dialog: this.dialog,
@@ -201,8 +205,8 @@ export class EsqExplorerCallApiMill {
       call : (cmd: string, subCmd: string|null, node :EsqTreeNode, accessProfile:EsqAccessProfile|null, selectMode?: SelectMode) => {
         return this.doNodeCommand(cmd, subCmd, node, accessProfile, selectMode);
       },
-      calle: (cmd: string, subCmd: string|null, entity_id: string, entity_name: string, entity_kind: number, accessProfile:EsqAccessProfile|null, selectMode?: SelectMode) => {
-        return this.doEntityCommand(cmd, subCmd, entity_id, entity_name, entity_kind, accessProfile, selectMode);
+      calle: (cmd: string, subCmd: string|null, entity_id: string, entity_name: string, entityKind: number, accessProfile:EsqAccessProfile|null, selectMode?: SelectMode) => {
+        return this.doEntityCommand(cmd, subCmd, entity_id, entity_name, entityKind, accessProfile, selectMode);
       },
       create: (parent_node: EsqTreeNode, typeId?: number) => {
        return this.doCreate(parent_node, typeId);

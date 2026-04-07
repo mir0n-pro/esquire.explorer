@@ -8,6 +8,7 @@
 * 03/31/2026 mir0n  initial: org-only tree, confirm inside dialog, keyboard/mouse nav
 * 04/02/2026 mir0n  lazy initialization of flatTreeDataSource
 *                   message(s) text corrected
+* 04/07/2026 mir0n  movingNodeKind from data.nodeKind; use for esquireCmdMove
 */
 import {
     Component,
@@ -54,6 +55,7 @@ import { EsqUtils } from 'src/esquire.ui/components/EsqUtils';
 })
 export class EsqMoveDialog implements AfterViewInit {
     protected movingNode: EsqTreeNode;
+    protected movingNodeKind: number = 0;
     private getFlatDs: (() => EsqFlatTreeDatasource | undefined) | undefined;
     private restApi: EsqRestApi;
     protected userId: string;
@@ -73,6 +75,7 @@ export class EsqMoveDialog implements AfterViewInit {
         @Inject(MAT_DIALOG_DATA) data: any
     ) {
         this.movingNode = data.node;
+        this.movingNodeKind = data.nodeKind;
         this.getFlatDs = data.getFlatDs;
         this.restApi = data.restApi;
         this.userId = data.userId || '';
@@ -211,9 +214,8 @@ export class EsqMoveDialog implements AfterViewInit {
         if (confirmed !== 0) {
             return;
         }
-        var knd = Math.floor(this.movingNode.kind.id / 2) * 2;
         try {
-            await firstValueFrom(this.restApi.esquireCmdMove(knd, this.movingNode.entityId, dest.entityId));
+            await firstValueFrom(this.restApi.esquireCmdMove(this.movingNodeKind, this.movingNode.entityId, dest.entityId));
             this.dialogRef.close(true);
         } catch (err: any) {
             var errMsg = EsqUtils.errorMessage(err);

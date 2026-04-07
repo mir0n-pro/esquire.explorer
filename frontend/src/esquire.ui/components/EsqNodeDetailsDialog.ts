@@ -23,6 +23,7 @@
 *                   added inline sub-entity field rendering
 * 03/20/2026 mir0n  entity kind normalized to even (handles link-variant kinds)
 * 03/27/2026 mir0n  EsqDialogResizeDirective added to imports
+* 04/07/2026 mir0n  givenEntityKind set from data.nodeKind (pre-normalized by doNodeCommand)
 */
 
 import {Component, Inject, ViewEncapsulation} from '@angular/core';
@@ -79,7 +80,7 @@ export class EsqNodeDetailsDialog extends EsqEntityDetailsDialog {
 
       this.node = data.node;
       this.givenEntityId = this.node.entityId;
-      this.givenEntityKind = Math.floor(this.node.kind.id / 2) * 2;
+      this.givenEntityKind = data.nodeKind;
     }
 
 /// below node nuances

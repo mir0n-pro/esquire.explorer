@@ -6,6 +6,7 @@
 *
 * History :
 * 04/01/2026 mir0n  initial: access profile command handler extracted from EsqExplorerCallApiMill
+* 04/07/2026 mir0n  use context.nodeKind / context.entityKind
 */
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { EsqEntityCommandHandler, EsqEntityCommandContext, EsqNodeCommandContext } from '../../api/EsqEntityCommandHandler';
@@ -25,7 +26,7 @@ export class EsqKeyCommandHandler implements EsqEntityCommandHandler {
     var readOnly = !context.accessProfile?.isCommandAllowed(
       context.cmd,
       context.node.entityId,
-      context.node.kind.id
+      context.nodeKind
     );
 
     setTimeout(() => {
@@ -37,7 +38,7 @@ export class EsqKeyCommandHandler implements EsqEntityCommandHandler {
     var readOnly = !context.accessProfile?.isCommandAllowed(
       context.cmd,
       context.entityId,
-      context.entityKind
+      context.entityKind  // already normalized by doEntityCommand()
     );
 
     setTimeout(() => {

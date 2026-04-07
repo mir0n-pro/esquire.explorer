@@ -6,6 +6,7 @@
 *
 * History :
 * 04/01/2026 mir0n  initial: move command handler extracted from EsqExplorerComponent
+* 04/07/2026 mir0n  use context.nodeKind / context.entityKind; thread nodeKind to EsqMoveDialog
 */
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
@@ -35,7 +36,7 @@ export class EsqMoveCommandHandler implements EsqEntityCommandHandler {
    */
   async executeWithNode(context: EsqNodeCommandContext): Promise<void> {
     var asOwner = context.selectMode === SelectMode.SelectTree;
-    return this.openMoveDialog(context.node, context.dialog, context.restApi, context.userId,
+    return this.openMoveDialog(context.node, context.nodeKind, context.dialog, context.restApi, context.userId,
       (entityId: string) => context.host?.onTreeRefresh(entityId, asOwner));
   }
 
@@ -44,13 +45,13 @@ export class EsqMoveCommandHandler implements EsqEntityCommandHandler {
    * Fetches node first, then opens dialog
    */
   async executeWithEntity(context: EsqEntityCommandContext): Promise<void> {
-    // Fetch entity node
+    // Fetch entity node (entityKind already normalized by doEntityCommand)
     var node = await this.fetchNode(context.restApi, context.entityKind, context.entityId, context.entityName);
     if (!node) {
       return;
     }
     var asOwner = context.selectMode === SelectMode.SelectTree;
-    return this.openMoveDialog(node, context.dialog, context.restApi, context.userId,
+    return this.openMoveDialog(node, context.entityKind, context.dialog, context.restApi, context.userId,
       (entityId: string) => context.host?.onTreeRefresh(entityId, asOwner));
   }
 
@@ -58,9 +59,6 @@ export class EsqMoveCommandHandler implements EsqEntityCommandHandler {
    * Fetch node from entity parameters
    */
   private async fetchNode(restApi: EsqRestApi, entityKind: number, entityId: string, entityName: string): Promise<EsqTreeNode | undefined> {
-    // Normalize kind to even number
-    entityKind = Math.floor(entityKind / 2) * 2;
-
     var _enode_;
     if (entityId.length > 0) {
       _enode_ = await firstValueFrom(
@@ -77,12 +75,13 @@ export class EsqMoveCommandHandler implements EsqEntityCommandHandler {
   /**
    * Open move dialog and handle result
    */
-  private async openMoveDialog(node: EsqTreeNode, dialog: MatDialog, restApi: EsqRestApi, userId: string, onRefresh: (entityId: string) => void): Promise<void> {
+  private async openMoveDialog(node: EsqTreeNode, nodeKind: number, dialog: MatDialog, restApi: EsqRestApi, userId: string, onRefresh: (entityId: string) => void): Promise<void> {
     var dialogRef = dialog.open(EsqMoveDialog, {
       autoFocus: false,
       panelClass: 'esq-dialog',
       data: {
         node,
+        nodeKind,
         getFlatDs: () => this.getDatasource(),
         restApi,
         userId

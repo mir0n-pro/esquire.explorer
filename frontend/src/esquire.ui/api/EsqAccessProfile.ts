@@ -9,9 +9,11 @@
 *                   isCommandAllowed() with entity_id param, personal mode, kind rounding
 * 03/10/2026 mir0n  DEBUG_SKIP_PERMISSION: isCommandAllowed() returns true when flag is set
 *                   import EsqUtils for debug flag access
+* 04/07/2026 mir0n  isCommandAllowed(): use EsqObjectKindFactory.normalize()
 */
 import {EsqExplorerCallApi} from './EsqExplorerCallApi';
 import {EsqUtils} from "../components/EsqUtils";
+import {EsqObjectKindFactory} from './EsqObjectKindFactory';
 export class EsqRole {
   id:number;
   name:string;
@@ -88,7 +90,7 @@ export class EsqAccessProfile {
         }
         var ret: boolean = String(this.id) === String(entity_id); // xxx: "personal" mode
         if (!ret) {
-            var knd: number =  Math.floor(kind / 2) * 2;
+            var knd: number = EsqObjectKindFactory.normalize(kind);
             var effectiveCmd: string = cmd || EsqExplorerCallApi.CMD_DEFAULT;
             var perm: EsqPermission | undefined = this.admin.find(p => p.kind === knd);
             if (perm) {
