@@ -1,6 +1,8 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.2-2604.0820 Generalization of "loading" indicator; debug delay centralized 
+
 v1.2.2-2604.0711  Kind normalization refactor; REST API facade update
    :Kind:
       EsqObjectKindFactory.normalize() — single normalization point replacing scattered inline

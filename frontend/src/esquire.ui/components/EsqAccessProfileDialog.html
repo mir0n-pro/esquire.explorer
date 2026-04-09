@@ -14,15 +14,13 @@
     [esqDialogResize]="'access-profile:' + userId"
 >
     <div>
-        @if (details$ | async; as details) {
-            <img [src]="headerIcon" class="esq-base-icon"/>
-            {{ headerName }}
+        @if (loading()) {
+            <span class="esq-loading-div"></span>
         } @else {
-            <img src="" class="esq-base-icon"/>
-            Loading...
+            <img [src]="headerIcon" class="esq-base-icon"/>
         }
     </div>
-
+    <div>{{ headerName }}</div>
   <button matIconButton (click)="onClose()" class = "esq-icon-button" matTooltip = "Close">
     <mat-icon>close</mat-icon>
   </button>
@@ -30,7 +28,7 @@
 
 <mat-dialog-content >
   <mat-tab-group class="esq-mat-tab-group">
-    @if (details) {
+    @if (details$ | async; as details) {
       @if (dictionary$ | async; as dictionary) {
         @for (tab of dictionary; track tab.title; let i = $index;) {      
           <mat-tab [label]="tab.title" bodyClass="esq-first-tab-content">

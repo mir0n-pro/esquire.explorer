@@ -28,6 +28,7 @@
 *                   added registerHandler()
 * 04/07/2026 mir0n  kind normalization centralized: doNodeCommand() → context.nodeKind,
 *                   doEntityCommand() → context.entityKind, doCreate(); use EsqObjectKindFactory.normalize()
+* 04/08/2026 mir0n  ExplorerHost registration redesigned : fanout host events to any number of registered hosts 
 */
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { EsqCreateEntityDialog } from "./EsqCreateEntityDialog";
@@ -63,7 +64,7 @@ export class EsqExplorerCallApiMill {
   dialog:MatDialog;
   dictionaryApi:EsqDictionaryApi;
   restApi:EsqRestApi;
-  private host?: EsqExplorerHost;
+  private host: EsqExplorerHostMill;
   protected lastUserId: string = "";
   private commandRegistry: EsqCommandHandlerRegistry = new EsqCommandHandlerRegistry();
 
@@ -71,6 +72,7 @@ export class EsqExplorerCallApiMill {
     this.dialog = dialog;
     this.dictionaryApi = dictionaryApi;
     this.restApi = restApi;
+    this.host = new EsqExplorerHostMill();
 
     // Set handler for unregistered commands
     this.commandRegistry.setNotImplementedHandler(async (cmd: string) => {
@@ -200,6 +202,10 @@ export class EsqExplorerCallApiMill {
     });
   }
 
+  public getHost(): EsqExplorerHost {
+     return this.host;
+  }
+
   protected esqExplorerCallApi(): EsqExplorerCallApi {
     return {
       call : (cmd: string, subCmd: string|null, node :EsqTreeNode, accessProfile:EsqAccessProfile|null, selectMode?: SelectMode) => {
@@ -212,7 +218,10 @@ export class EsqExplorerCallApiMill {
        return this.doCreate(parent_node, typeId);
       },
       registerHost: (host: EsqExplorerHost) => {
-        this.host = host;
+        this.host.addHost(host);
+      },
+      unregisterHost: (host: EsqExplorerHost) => {
+          this.host.removeHost(host);
       },
       registerHandler: (handler: EsqEntityCommandHandler): void => {
           this.commandRegistry.register(handler);
@@ -223,4 +232,36 @@ export class EsqExplorerCallApiMill {
     }
   };
 }
+
+class EsqExplorerHostMill implements EsqExplorerHost {
+    private hosts: EsqExplorerHost[] = [];
+    public onTreeRefresh(entityId?: string, asOwner?: boolean): void {
+        this.hosts.forEach(host => {
+            host.onTreeRefresh(entityId, asOwner);
+        });
+    }
+    public setErrorMessage(msg: string, err?: any): void {
+        this.hosts.forEach(host => {
+            host.setErrorMessage(msg,err);
+        });
+    }
+    public setLoading(on: boolean): void {
+        this.hosts.forEach(host => {
+            host.setLoading(on);
+        });
+    }
+
+    addHost(host: EsqExplorerHost): void {
+        if (!this.hosts.includes(host)) {
+            this.hosts.push(host);
+        }
+    }
+    removeHost(host: EsqExplorerHost): void {
+        var i = this.hosts.indexOf(host);
+        if (i >= 0) {
+            this.hosts.splice(i, 1);
+        }
+    }
+}
+
 

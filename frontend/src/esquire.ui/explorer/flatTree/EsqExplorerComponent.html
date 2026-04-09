@@ -43,7 +43,7 @@
     <mat-icon>arrow_upward</mat-icon>
   </button>
 
-  @if (initialDataLoading()) {
+  @if (initialDataLoading() || dataLoading()) {
     <span class="esq-loading-div" ></span>
   } @else {
     <button matIconButton 
@@ -95,17 +95,13 @@
     <mat-icon>launch</mat-icon>
   </button>
 
-  @if (dataLoading()) {
-    <span class="esq-loading-div" style="width:24px" ></span>
-  } @else {
-    <button #esqBtnMore matIconButton 
-      class = "esq-icon-button"
-      matTooltip="Load more..."  
-      disabled = "{{!canBtnMoreClick()}}"
-      (click)="onBtnMoreClick()">
-      <mat-icon>rotate_right</mat-icon>
-    </button>
-  }
+  <button #esqBtnMore matIconButton
+    class = "esq-icon-button"
+    matTooltip="Load more..."
+    disabled = "{{!canBtnMoreClick()}}"
+    (click)="onBtnMoreClick()">
+    <mat-icon>rotate_right</mat-icon>
+  </button>
 
 </mat-toolbar>
 

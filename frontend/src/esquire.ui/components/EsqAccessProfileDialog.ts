@@ -27,6 +27,8 @@
 * 03/26/2026 mir0n  confirmDlg() replaces alert()/confirm(); callApi added
 * 03/27/2026 mir0n  EsqDialogResizeDirective added to imports
 * 03/31/2026 mir0n  ESC key closes dialog
+* 04/08/2026 mir0n  EsqAccessProfileDialog extends EsqExplorerHostDummy
+*                   handle EsqExplorerHost.setLoading()
 */
 import {AfterViewChecked,
   AfterViewInit,
@@ -36,6 +38,7 @@ import {AfterViewChecked,
   Inject,
   OnDestroy,
   OnInit,
+  signal,
   ViewChild,
   ViewEncapsulation
 } from '@angular/core';
@@ -48,7 +51,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTabGroup, MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
-import { catchError, EMPTY, Observable, of, tap } from 'rxjs';
+import { catchError, EMPTY, finalize, Observable, of, tap } from 'rxjs';
 import { CommonModule } from '@angular/common'
 import {MatTableModule } from '@angular/material/table';
 import {EsqTabFieldComponent} from "./EsqTabFieldComponent";
@@ -68,7 +71,7 @@ import { EsqNodeType
 import {EsqObjectKind} from 'src/esquire.ui/api/EsqObjectKind';
 import {EsqObjectKindFactory} from 'src/esquire.ui/api/EsqObjectKindFactory';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
-import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
+import {EsqExplorerCallApi, EsqExplorerHostDummy} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 import { EsqTabIknListComponent } from "./EsqTabIknListComponent";
@@ -96,7 +99,7 @@ import { EsqTabStringComponent } from "./EsqTabStringComponent";
   encapsulation: ViewEncapsulation.None,
 })
 
-export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
+export class EsqAccessProfileDialog extends EsqExplorerHostDummy implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
    @ViewChild('btnClose') btnClose! : MatButton;
    @ViewChild('btnSave') btnSave! : MatButton;
    @ViewChild(MatTabGroup) tabGroup! : MatTabGroup;
@@ -117,11 +120,13 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
    private originalDetails: any = null;
    private pendingTabRestore: number | null = null;
    public saving: boolean = false;
+   public loading = signal(false);
 
   constructor(
       dialogRef: MatDialogRef<EsqAccessProfileDialog>,
       @Inject(MAT_DIALOG_DATA) data: any
     ) {
+      super();
       this.dialogRef = dialogRef;
       this.id = data.id;
 
@@ -192,10 +197,15 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
     this.loadData(savedTab);
   }
 
+  override setLoading(on: boolean): void {
+    this.loading.set(on);
+  }
+
   ngOnInit() {
       this.dictionary$ = this.dictionaryApi.dictionary(EsqObjectKindFactory.ACCESSPROFILE.id).pipe(
         tap(dict => { this.dictionary = dict; })
       );
+      this.callApi?.registerHost(this);
       this.loadData();
   }
 
@@ -222,7 +232,6 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
     this.saving = true;
     this.details$ = this.restApi.esquireKeySave(this.id, body).pipe(
       tap(details => {
-        this.saving = false;
         this.details = details;
         this.originalDetails = EsqUtils.deepCopy(details);
         if (restoreTab) {
@@ -230,7 +239,6 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
         }
       }),
       catchError(err => {
-        this.saving = false;
         if (err.errors && err.errors.length > 0) {
           var apiErr = err.errors[0];
           var valError: EsqValidationError = {
@@ -244,11 +252,13 @@ export class EsqAccessProfileDialog implements OnInit, AfterViewInit, AfterViewC
           void this.callApi?.confirmDlg(null, 'Save Error', 'Save failed: ' + (err.detail || err.title || err), EsqExplorerCallApi.ConfirmFlag.Ok);
         }
         return of(snapshot);
-      })
+      }),
+      finalize(() => { this.saving = false; })
     );
   }
 
   ngOnDestroy() {
+    this.callApi?.unregisterHost(this);
     this.details = null;
     this.details$ = undefined;
     this.dictionary$ = undefined;

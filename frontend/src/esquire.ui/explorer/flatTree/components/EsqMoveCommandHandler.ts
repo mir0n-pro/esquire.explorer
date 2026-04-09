@@ -36,7 +36,7 @@ export class EsqMoveCommandHandler implements EsqEntityCommandHandler {
    */
   async executeWithNode(context: EsqNodeCommandContext): Promise<void> {
     var asOwner = context.selectMode === SelectMode.SelectTree;
-    return this.openMoveDialog(context.node, context.nodeKind, context.dialog, context.restApi, context.userId,
+    return this.openMoveDialog(context.node, context.nodeKind, context.dialog, context.restApi, context.callApi, context.userId,
       (entityId: string) => context.host?.onTreeRefresh(entityId, asOwner));
   }
 
@@ -51,7 +51,7 @@ export class EsqMoveCommandHandler implements EsqEntityCommandHandler {
       return;
     }
     var asOwner = context.selectMode === SelectMode.SelectTree;
-    return this.openMoveDialog(node, context.entityKind, context.dialog, context.restApi, context.userId,
+    return this.openMoveDialog(node, context.entityKind, context.dialog, context.restApi, context.callApi, context.userId,
       (entityId: string) => context.host?.onTreeRefresh(entityId, asOwner));
   }
 
@@ -75,7 +75,7 @@ export class EsqMoveCommandHandler implements EsqEntityCommandHandler {
   /**
    * Open move dialog and handle result
    */
-  private async openMoveDialog(node: EsqTreeNode, nodeKind: number, dialog: MatDialog, restApi: EsqRestApi, userId: string, onRefresh: (entityId: string) => void): Promise<void> {
+  private async openMoveDialog(node: EsqTreeNode, nodeKind: number, dialog: MatDialog, restApi: EsqRestApi, callApi: EsqExplorerCallApi, userId: string, onRefresh: (entityId: string) => void): Promise<void> {
     var dialogRef = dialog.open(EsqMoveDialog, {
       autoFocus: false,
       panelClass: 'esq-dialog',
@@ -84,6 +84,7 @@ export class EsqMoveCommandHandler implements EsqEntityCommandHandler {
         nodeKind,
         getFlatDs: () => this.getDatasource(),
         restApi,
+        callApi,
         userId
       }
     });

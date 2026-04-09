@@ -13,11 +13,11 @@
     cdkDragBoundary=".cdk-overlay-container"
     [esqDialogResize]="'node:' + userId"
 >
-<div>
+  <div>
     <img src="{{node.kind.icon}}" class="esq-base-icon"/>
     <img src="{{nodeStatusIcon()}}" class="esq-overlay-icon" />
-    {{node.name}}
- </div>
+  </div>
+  <div>{{node.name}}</div>
   <button matIconButton mat-dialog-close class = "esq-icon-button" matTooltip = "Close">
      <mat-icon>close</mat-icon>
   </button>

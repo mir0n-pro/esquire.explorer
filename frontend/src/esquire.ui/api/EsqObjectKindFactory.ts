@@ -15,6 +15,7 @@
 * 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
 * 02/28/2026 mir0n  added static kinds: PERSON_PRIMARY (992), ADDRESS_POSTAL (988), ADDRESS_BIZ (990)
 * 04/07/2026 mir0n  added static normalize(kind): number
+* 04/08/2026 mir0n  init() corrected
 */
 
 import {EsqTreeNode} from "./EsqTreeNode";
@@ -79,6 +80,9 @@ export class EsqObjectKindFactory {
   public static async init(api: EsqRestApi | null | undefined, kinds: readonly EsqObjectKind[] | null | undefined){
 
       if (this.kinds.length == 0 ) {
+          //if (kinds && kinds.length > 0) {
+          //    this.kinds = kinds.map(k => k);
+          //}
           if (api) {
               const data = await firstValueFrom(api.esquireKinds());
               const src: any[] = (data as any[]) ?? [];
@@ -89,13 +93,7 @@ export class EsqObjectKindFactory {
                   }
                   this.kinds.push(kind);
               });
-          } else if (kinds) {
-              this.kinds = kinds.map(k => k);
           }
-          //await api.esquireKinds().subscribe(kinds => {
-          //    const src: any[] = (kinds as any[]) ?? [];
-          //    this.kinds = src.map(k => (k instanceof EsqObjectKind) ? k : new EsqObjectKind(k));
-          //});
       }
   }
 

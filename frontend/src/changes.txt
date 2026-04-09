@@ -1,6 +1,13 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+04/08/2026 mir0n  generalization of "loading" indicator
+flatTree\app-explorer.component.ts
+  - ExplorerComponent extends EsqExplorerHostDummy
+  - static initialization at constructor (moved from ngOnInit)
+  - esqRestApiWrapper() : issue loading envent
+  - esqRestApiWrapper() : EsqUtils.observeWithDelay() to emulate REST API delays
+
 04/07/2026 mir0n  updated REST API facade; removed acct-endpoint routing
 flatTree\app-explorer.component.ts
   - esquireCmdSave/New/Del wrappers: removed acct routing (esquireCmdAdel/Anew/Asave eliminated from API)

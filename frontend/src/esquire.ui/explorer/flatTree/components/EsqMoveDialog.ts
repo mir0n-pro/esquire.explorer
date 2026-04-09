@@ -15,7 +15,9 @@ import {
     AfterViewInit,
     HostListener,
     Inject,
-    ViewEncapsulation,
+    OnDestroy,
+    signal,
+    ViewEncapsulation, OnInit,
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -24,13 +26,13 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { MatTree, MatTreeNode, MatTreeNodeDef, MatTreeNodePadding } from '@angular/material/tree';
 import { MatIconModule } from '@angular/material/icon';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import {BehaviorSubject, firstValueFrom, tap} from 'rxjs';
 import { EsqTreeNode } from 'src/esquire.ui/api/EsqTreeNode';
 import { EsqRestApi } from 'src/esquire.ui/api/EsqRestApi';
 import { EsqFlatTreeDatasource } from '../EsqFlatTreeDatasource';
 import { EsqDialogResizeDirective } from 'src/esquire.ui/components/EsqDialogResizeDirective';
 import { EsqConfirmDialog } from 'src/esquire.ui/components/EsqConfirmDialog';
-import { EsqExplorerCallApi } from 'src/esquire.ui/api/EsqExplorerCallApi';
+import { EsqExplorerCallApi, EsqExplorerHostDummy } from 'src/esquire.ui/api/EsqExplorerCallApi';
 import { EsqUtils } from 'src/esquire.ui/components/EsqUtils';
 
 @Component({
@@ -53,14 +55,16 @@ import { EsqUtils } from 'src/esquire.ui/components/EsqUtils';
     styleUrls: ['../../../components/EsqDetailsDialog.scss', './EsqMoveDialog.scss'],
     encapsulation: ViewEncapsulation.None,
 })
-export class EsqMoveDialog implements AfterViewInit {
+export class EsqMoveDialog extends EsqExplorerHostDummy implements OnInit, AfterViewInit, OnDestroy {
     protected movingNode: EsqTreeNode;
     protected movingNodeKind: number = 0;
     private getFlatDs: (() => EsqFlatTreeDatasource | undefined) | undefined;
     private restApi: EsqRestApi;
+    private callApi: EsqExplorerCallApi | undefined;
     protected userId: string;
     protected selectedDest: EsqTreeNode | null = null;
     protected hoveredNode: EsqTreeNode | null = null;
+    public loading = signal(false);
 
     protected levelAccessor = (node: EsqTreeNode) => node.level;
     private treeNodes = new BehaviorSubject<EsqTreeNode[]>([]);
@@ -74,11 +78,25 @@ export class EsqMoveDialog implements AfterViewInit {
         private dialog: MatDialog,
         @Inject(MAT_DIALOG_DATA) data: any
     ) {
+        super();
         this.movingNode = data.node;
         this.movingNodeKind = data.nodeKind;
         this.getFlatDs = data.getFlatDs;
         this.restApi = data.restApi;
+        this.callApi = data.callApi;
         this.userId = data.userId || '';
+    }
+
+    override setLoading(on: boolean): void {
+        this.loading.set(on);
+    }
+
+    ngOnDestroy(): void {
+        this.callApi?.unregisterHost(this);
+    }
+
+    ngOnInit() {
+        this.callApi?.registerHost(this);
     }
 
     ngAfterViewInit(): void {

@@ -1,6 +1,38 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+
+04/08/2026 mir0n  generalization of "loading" indicator
+api\EsqExplorerCallApi.ts
+  - added EsqExplorerHost.setLoading()
+  - added EsqExplorerCallApi.unregisterHost()
+  - added EsqExplorerHostDummy
+api\EsqObjectKindFactory.ts
+  - init() corrected
+components\EsqAccessProfileDialog.ts
+  - EsqAccessProfileDialog extends EsqExplorerHostDummy
+  - handle EsqExplorerHost.setLoading()
+components\EsqEntityDetailsDialog.ts
+  - EsqEntityDetailsDialog extends EsqExplorerHostDummy
+  - handle EsqExplorerHost.setLoading()
+  - saving() sygnal cleanup
+components\EsqExplorerCallApiMill.ts
+  - ExplorerHost registration redesigned : fanout host events to any number of registered hosts 
+components\EsqUtils.ts
+  - removed logDelay()
+  - removed delay()
+  - added asynchDelay()/observeDelay()
+  - added observeWithDelay()
+flatTree\EsqExplorerComponent.ts
+  - EsqExplorerComponent extends EsqExplorerHostDummy  
+  - handle EsqExplorerHost.setLoading()
+flatTree\EsqFlatTreeDatasource.ts
+  - remove logDelay()
+
+  
+* 04/08/2026 mir0n  ExplorerHost registration redesigned : fanout host events to any number of registered hosts 
+  
+    
 04/07/2026 mir0n  kind normalization refactor; entityKind naming
 api\EsqObjectKindFactory.ts
   - added static normalize(kind): number

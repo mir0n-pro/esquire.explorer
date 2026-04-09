@@ -15,9 +15,13 @@
     [esqDialogResize]="'move:' + userId"
 >
   <div>
-    <img [src]="movingNode.kind.icon" class="esq-base-icon"/>
-    Move: {{movingNode.name}}
+    @if (loading()) {
+      <span class="esq-loading-div"></span>
+    } @else {
+      <img [src]="movingNode.kind.icon" class="esq-base-icon"/>
+    }
   </div>
+  <div>Move: {{movingNode.name}}</div>
   <button class="esq-move-close-btn" (click)="onCancel()">&#x2715;</button>
 </mat-toolbar>
 

@@ -7,6 +7,7 @@
 *  History:
 * 03/20/2026 mir0n  gotoTreeNode(): navigate to tree node by id; expands ancestors
 * 03/31/2026 mir0n  getOrgNodes(): filter loaded nodes to org kind
+* 04/08/2026 mir0n  remove logDelay()
 */
 import {EsqTreeViewDatasource} from './EsqTreeViewDatasource';
 import {EsqListViewDatasource} from './EsqListViewDatasource';
@@ -30,7 +31,6 @@ export class EsqFlatTreeDatasource {
     }
 
     public  async loadInitialData() {
-        await EsqUtils.logDelay(1000, 'delay loadInitialData 1s...');
         return this.tree.loadInitialData();
     }
 
@@ -42,12 +42,10 @@ export class EsqFlatTreeDatasource {
     }
 
     public async loadChildren(node: EsqTreeNode) {
-        await EsqUtils.logDelay(1000, 'delay loadChildren 1s...');
         return this.list.loadChildren(node);
     }
 
     public async toggleOnTree(node: EsqTreeNode) {
-        await EsqUtils.logDelay(1000, 'delay loadChildren 1s...');
         return this.tree.toggleNode(node);
     }
 
@@ -92,7 +90,6 @@ export class EsqFlatTreeDatasource {
     }
 
     public async gotoListNode(id: string) {
-        await EsqUtils.logDelay(1000,'delay gotoListNode 1s...');
         EsqUtils.log('gotoListNode[');
         const path: string[] = await this.tree.getPath(id);
         var treeNode: EsqTreeNode |undefined =undefined;
@@ -122,7 +119,6 @@ export class EsqFlatTreeDatasource {
     }
 
     public async gotoTreeNode(id: string): Promise<EsqTreeNode|undefined> {
-        await EsqUtils.logDelay(1000, 'delay gotoTreeNode 1s...');
         EsqUtils.log('gotoTreeNode[');
         const path: string[] = await this.tree.getPath(id);
         var treeNode: EsqTreeNode|undefined = undefined;

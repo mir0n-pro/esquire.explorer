@@ -22,6 +22,8 @@
 * 04/02/2026 mir0n  registration of Move command handler
 *                   onCmdClick() : bypass location for refresh selection
 *                   api.call(): added subCmd, selectMode
+* 04/08/2026 mir0n  ExplorerHost registration redesigned : fanout host events to any number of registered hosts 
+*                   handle EsqExplorerHost.setLoading()
 */
 import {Component,
   ElementRef,
@@ -80,6 +82,7 @@ import {EsquireService} from "../../../rest";
 import {EsqAccessProfile} from "src/esquire.ui/api/EsqAccessProfile";
 import {EsqMoveCommandHandler} from "./components/EsqMoveCommandHandler";
 import {SelectMode} from "../../api/EsqEntityCommandHandler";
+import {EsqExplorerHostDummy} from "../../api/EsqExplorerCallApi";
 
 
 @Component({
@@ -109,12 +112,11 @@ import {SelectMode} from "../../api/EsqEntityCommandHandler";
   host: { 'class': 'esq-explorer'}
 })
 
-export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, EsqExplorerHost {
+export class EsqExplorerComponent extends EsqExplorerHostDummy implements OnInit, OnDestroy, AfterViewInit{
   @Input() public esqRestApi: EsqRestApi | null = null;
   @Input() public esqExplorerCallApi: EsqExplorerCallApi | null = null;
   @Input() public esqCommandMenuItems:EsqCommandMenuItem[] = [];
   @Input() public esqAccessProfile:EsqAccessProfile | null = null;
-  @Input() public esqExplorerHost?: EsqExplorerHost;
 
   treeLevelAccessor = (dataNode: EsqTreeNode)  => dataNode.level;
   datasource!: EsqFlatTreeDatasource;
@@ -159,6 +161,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
   treeOnFocus:boolean = false;
 
   constructor(private dialog: MatDialog) {
+    super();
     afterEveryRender(() => {
       if (this.treeNodePostFocus) {
         this.setFocusTreeNode(this.treeNodePostFocus);
@@ -171,7 +174,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
     this.treeItself = this._tree;
   }
 
-  onTreeRefresh(entityId?: string, asOwner?: boolean): void {
+  override onTreeRefresh(entityId?: string, asOwner?: boolean): void {
     if (entityId && asOwner) {
       void this.onBtnRefreshClickAndSelectOwner(entityId);
     } else if (entityId) {
@@ -181,13 +184,8 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
     }
   }
 
-  setErrorMessage(msg: string, err?: any): void {
-    // EsqUtils.log('[3/4] EsqExplorerComponent.setErrorMessage: received error, delegating to parent. esqExplorerHost exists: ' + (this.esqExplorerHost ? 'YES' : 'NO'));
-    if (this.esqExplorerHost) {
-      this.esqExplorerHost.setErrorMessage(msg, err);
-    } // else {
-      // EsqUtils.log('[3/4] EsqExplorerComponent.setErrorMessage: esqExplorerHost is NOT provided!');
-    // }
+  override setLoading(on: boolean): void {
+    this.dataLoading.set(on);
   }
 
   async onBtnRefreshClickAndSelect(entityId: string): Promise<void> {
@@ -259,7 +257,7 @@ export class EsqExplorerComponent implements OnInit, OnDestroy, AfterViewInit, E
   }
 
   ngOnDestroy(): void {
-    // dummy for now
+    this.esqExplorerCallApi?.unregisterHost(this);
   }
 
   hasIcon(node : EsqTreeNode ) : boolean {

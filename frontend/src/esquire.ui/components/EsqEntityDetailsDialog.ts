@@ -34,6 +34,9 @@
 * 03/26/2026 mir0n  confirmDlg() replaces alert()/confirm(); callApi added
 * 03/27/2026 mir0n  EsqDialogResizeDirective added to imports
 * 03/31/2026 mir0n  ESC key closes dialog (prompts if unsaved changes)
+* 04/08/2026 mir0n  EsqEntityDetailsDialog extends EsqExplorerHostDummy
+*                   handle EsqExplorerHost.setLoading()
+*                   saving() sygnal cleanup
 */
 
 import {AfterViewChecked,
@@ -44,7 +47,8 @@ import {AfterViewChecked,
   OnDestroy,
   OnInit,
   ViewChild,
-  ViewEncapsulation
+  ViewEncapsulation,
+  signal
 } from '@angular/core';
 import {MatButton, MatButtonModule} from '@angular/material/button';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
@@ -55,7 +59,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTabGroup, MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
-import { catchError, EMPTY, Observable, of, tap } from 'rxjs';
+import { catchError, EMPTY, finalize, Observable, of, tap } from 'rxjs';
 import { CommonModule } from '@angular/common'
 import {MatTableModule } from '@angular/material/table';
 /*
@@ -71,7 +75,7 @@ import { EsqNodeType
 
 import {EsqObjectKindFactory} from 'src/esquire.ui/api/EsqObjectKindFactory';
 import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
-import {EsqExplorerCallApi} from 'src/esquire.ui/api/EsqExplorerCallApi';
+import {EsqExplorerCallApi, EsqExplorerHost, EsqExplorerHostDummy} from 'src/esquire.ui/api/EsqExplorerCallApi';
 import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 import {EsqTabFieldComponent} from "./EsqTabFieldComponent";
@@ -99,7 +103,7 @@ import {EsqValidationError} from "./EsqValidationError";
   encapsulation: ViewEncapsulation.None,
 })
 
-export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
+export class EsqEntityDetailsDialog extends EsqExplorerHostDummy implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
    @ViewChild('btnClose') btnClose! : MatButton;
    @ViewChild('btnSave') btnSave! : MatButton;
    @ViewChild(MatTabGroup) tabGroup! : MatTabGroup;
@@ -117,6 +121,7 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
    protected dictionary: EsqEntityLayer[] = [];
    protected pendingTabRestore: number | null = null;
    public saving: boolean = false;
+   public loading = signal(false);
    protected originalDetails: any = null;
    protected needsTreeRefresh: boolean = false;
 
@@ -129,9 +134,9 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
       dialogRef: MatDialogRef<EsqEntityDetailsDialog>,
       @Inject(MAT_DIALOG_DATA) data: any
     ) {
-
+      super();
       this.dialogRef = dialogRef;
-     this.restApi = data.restApi;
+      this.restApi = data.restApi;
       this.dictionaryApi = data.dictionaryApi;
       this.callApi = data.callApi;
       this.readOnly = data.readOnly;
@@ -271,9 +276,13 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
       this.dictionary$ = this.dictionaryApi.dictionary(this.givenEntityKind).pipe(
         tap(dict => { this.dictionary = dict; })
       );
+      this.callApi?.registerHost(this);
       this.loadData();
   }
 
+  override setLoading(loading: boolean): void {
+    this.loading.set(loading);
+  }
 
   loadData(restoreTab?: number): void {
     this.details$ = this.restApi.esquireCmd(this.givenEntityKind, this.givenEntityId).pipe(
@@ -301,7 +310,6 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
     this.saving = true;
     this.details$ = this.restApi.esquireCmdSave(this.givenEntityKind, this.givenEntityId, body).pipe(
       tap(details => {
-        this.saving = false;
         this.details = details;
         this.originalDetails = EsqUtils.deepCopy(details);
         if (treeRefresh) {
@@ -312,7 +320,6 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
         }
       }),
       catchError(err => {
-        this.saving = false;
         if (err.errors && err.errors.length > 0) {
           var apiErr = err.errors[0];
           var valError: EsqValidationError = {
@@ -332,12 +339,14 @@ export class EsqEntityDetailsDialog implements OnInit, AfterViewInit, AfterViewC
               EsqExplorerCallApi.ConfirmFlag.Ok);
         }
         return of(snapshot);
-      })
+      }),
+      finalize(() => { this.saving = false; })
     );
   }
 
 
 ngOnDestroy() {
+    this.callApi?.unregisterHost(this);
     this.details = null;
     this.details$ = undefined;
     this.dictionary$ = undefined;

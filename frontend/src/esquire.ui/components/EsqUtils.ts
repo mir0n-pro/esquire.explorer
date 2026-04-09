@@ -14,11 +14,16 @@
 * 03/10/2026 mir0n  DEBUG_SKIP_VALIDATION and DEBUG_SKIP_PERMISSION debug flags
 *                   validateFields() returns null immediately when DEBUG_SKIP_VALIDATION is true
 * 04/02/2926 mir0n  added errorMessage()
+* 04/08/2026 mir0n  removed logDelay()
+*                   removed delay()
+*                   added asynchDelay()/observeDelay()
+*                   added observeWithDelay()
 */
+import { concat, EMPTY, ignoreElements, Observable, timer } from 'rxjs';
 import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
 import {EsqValidationError} from './EsqValidationError';
 export class EsqUtils {
- public static DEBUG:boolean = true;
+ public static DEBUG:boolean = false;
  public static DELAY:boolean = false;
  public static DEBUG_SKIP_VALIDATION :boolean = false;
  public static DEBUG_SKIP_PERMISSION :boolean = false;
@@ -31,22 +36,23 @@ export class EsqUtils {
     }
   }
 
-  public static async logDelay(ms:number,...par:any): Promise<void> {
-    if (this.DEBUG) {
-      console.log(...par);
-    }
-    if (this.DELAY) {
-      await this.delay(ms);
-    }
+  public static observeDelay(ms: number): Observable<never> {
+    return (this.DELAY ? timer(ms) : EMPTY).pipe(ignoreElements()) as Observable<never>;
   }
-  
-  public static async delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+
+  public static observeWithDelay<T>(obs: Observable<T>, ms: number): Observable<T> {
+      return (this.DELAY? concat(this.observeDelay(ms), obs) : obs) as Observable<T>;
+  }
+
+  public static async asyncDelay(ms: number): Promise<void> {
+    if (this.DELAY) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
   }
 
   /**
-   * Format number using pattern string.
-   * # = optional digit, 0 = required digit, , = use thousand separators
+   * Format a number using pattern string.
+   * # = optional digit, 0 = required digit, = use thousand separators
    * Examples: #,##0.## (default), #,##0.00, 0, 0.00, #,##0.####
    */
   public static formatNumber(value: any, format?: string): string {

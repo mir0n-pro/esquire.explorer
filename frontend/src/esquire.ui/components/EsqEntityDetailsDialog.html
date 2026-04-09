@@ -14,9 +14,13 @@
     [esqDialogResize]="'entity-details:' + userId"
 >
   <div>
-    <img src="{{headerIcon}}" class="esq-base-icon"/>
-    {{headerName}}
- </div>
+    @if (loading()) {
+      <span class="esq-loading-div"></span>
+    } @else {
+      <img src="{{headerIcon}}" class="esq-base-icon"/>
+    }
+  </div>
+  <div>{{headerName}}</div>
   <button matIconButton (click)="onClose()" class = "esq-icon-button" matTooltip = "Close">
     <mat-icon>close</mat-icon>
   </button>

@@ -16,6 +16,9 @@
 *                   calle(): added subCmd, selectMode
 *                   added registerHandler()
 * 04/07/2026 mir0n  calle() param renamed to entityKind
+* 04/08/2028 mir0n  added EsqExplorerHost.setLoading()
+*                   added EsqExplorerCallApi.unregisterHost()
+*                   added EsqExplorerHostDummy
 */
 import {  EsqTreeNode} from './EsqTreeNode';
 import {EsqAccessProfile} from "./EsqAccessProfile";
@@ -25,6 +28,7 @@ import {EsqEntityCommandHandler, SelectMode} from "./EsqEntityCommandHandler";
 export interface EsqExplorerHost {
   onTreeRefresh(entityId?: string, asOwner?: boolean): void;
   setErrorMessage(msg: string, err?: any): void;
+  setLoading(on: boolean): void;
 }
 
 export interface EsqExplorerCallApi {
@@ -32,8 +36,15 @@ export interface EsqExplorerCallApi {
   calle: (cmd: string, subCmd: string|null, entity_id: string, entity_name: string, entityKind: number, accessProfile:EsqAccessProfile|null, selectMode?: SelectMode) => Promise<void>;
   create: (parent_node: EsqTreeNode, typeId?: number) => Promise<void>;
   registerHost: (host: EsqExplorerHost) => void;
+  unregisterHost: (host: EsqExplorerHost) => void;
   registerHandler(handler: EsqEntityCommandHandler): void;
   confirmDlg: (kind: EsqObjectKind | null, header: string, text: string, flag: EsqExplorerCallApi.ConfirmFlag, focus?: number) => Promise<number>;
+}
+
+export class EsqExplorerHostDummy implements EsqExplorerHost {
+    onTreeRefresh(entityId?: string, asOwner?: boolean) {}
+    setErrorMessage(msg: string, err?: any) {}
+    setLoading(on: boolean) {}
 }
 
 export namespace EsqExplorerCallApi {

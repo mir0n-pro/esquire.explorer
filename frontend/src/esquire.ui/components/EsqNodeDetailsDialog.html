@@ -14,10 +14,16 @@
     [esqDialogResize]="'node-details:' + userId"
 >
   <div>
-    <img src="{{node.kind.icon}}" class="esq-base-icon"/>
-    <img src="{{nodeStatusIcon()}}" class="esq-overlay-icon" />
+    @if (loading()) {
+      <span class="esq-loading-div"></span>
+    } @else {
+      <img src="{{node.kind.icon}}" class="esq-base-icon"/>
+      <img src="{{nodeStatusIcon()}}" class="esq-overlay-icon" />
+    }
+  </div>
+  <div>
     {{node.name}}
- </div>
+  </div>
   <button matIconButton (click)="onClose()" class = "esq-icon-button" matTooltip = "Close">
     <mat-icon>close</mat-icon>
   </button>
