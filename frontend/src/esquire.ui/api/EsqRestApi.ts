@@ -13,6 +13,7 @@
 * 03/28/2026 mir0n  added esquireCmdDel to interface
 * 03/31/2026 mir0n  esquireCmdMove added to interface
 * 04/09/2026 mir0n  esquireCmdAcct added to interface
+* 04/10/2026 mir0n  removed esquireCmdAcct
 */
 import { Observable } from 'rxjs';
 
@@ -29,5 +30,4 @@ export interface EsqRestApi {
  esquireCmdNew: (kind: number, parentId: string, body: any, cmd?: string, options?: any) => Observable<any>;
  esquireCmdDel: (kind: number, id: string, cmd?: string, options?: any) => Observable<any>;
  esquireCmdMove: (kind: number, id: string, distId: string, options?: any) => Observable<any>;
- esquireCmdAcct: (kind: number, id: string, body: any, cmd?: string, options?: any) => Observable<any>;
 }

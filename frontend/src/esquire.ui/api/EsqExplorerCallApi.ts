@@ -19,6 +19,7 @@
 * 04/08/2028 mir0n  added EsqExplorerHost.setLoading()
 *                   added EsqExplorerCallApi.unregisterHost()
 *                   added EsqExplorerHostDummy
+* 04/10/2026 mir0n  removed CMD_ACCT
 */
 import {  EsqTreeNode} from './EsqTreeNode';
 import {EsqAccessProfile} from "./EsqAccessProfile";
@@ -53,7 +54,6 @@ export namespace EsqExplorerCallApi {
   export const CMD_MOVE: string = "move";
   export const CMD_DELETE: string = "delete";
   export const CMD_KEY: string = "key";
-  export const CMD_ACCT: string = "acct";
 
   export enum ConfirmFlag {
     Ok       = 0,   // alert-style: single OK button, no X

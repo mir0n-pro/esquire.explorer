@@ -7,6 +7,7 @@
 * History :
 * 04/09/2026 mir0n  initial: deposit form dialog; dictionary-driven fields (kind 980)
 *                   entity read on init/refresh; stays open after submit
+* 04/10/2026 mir0n  accept external defined REST command submitter
 */
 import {
     Component,
@@ -26,6 +27,7 @@ import { firstValueFrom } from 'rxjs';
 import { EsqRestApi } from 'src/esquire.ui/api/EsqRestApi';
 import { EsqDictionaryApi } from 'src/esquire.ui/api/EsqDictionaryApi';
 
+import { EsqCommandSubmitter } from 'src/esquire.ui/api/EsqEntityCommandHandler';
 import { EsqExplorerCallApi, EsqExplorerHostDummy } from 'src/esquire.ui/api/EsqExplorerCallApi';
 import { EsqDialogResizeDirective } from 'src/esquire.ui/components/EsqDialogResizeDirective';
 import { EsqTabFieldComponent } from 'src/esquire.ui/components/EsqTabFieldComponent';
@@ -33,7 +35,7 @@ import { EsqUtils } from 'src/esquire.ui/components/EsqUtils';
 import { EsqObjectKindFactory } from 'src/esquire.ui/api/EsqObjectKindFactory';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-const ACCT_ACTIVTY_KIND = 980;
+const ACCT_DEPOSIT_KIND = 1000;
 
 @Component({
     selector: 'esq-acct-dialog',
@@ -58,6 +60,7 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
     private dialogRef: MatDialogRef<EsqAcctDialog>;
     private restApi: EsqRestApi;
     private dictionaryApi: EsqDictionaryApi;
+    private submitter?: EsqCommandSubmitter;
     protected callApi: EsqExplorerCallApi;
 
     protected entityKind: number;
@@ -84,6 +87,7 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
         this.entityName = data.entityName;
         this.restApi = data.restApi;
         this.dictionaryApi = data.dictionaryApi;
+        this.submitter = data.submitter;
         this.callApi = data.callApi;
         this.userId = data.userId || '';
         this.headerIcon = EsqObjectKindFactory.instanceOf(this.entityKind).icon;
@@ -98,7 +102,7 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
     ngOnInit(): void {
         this.callApi?.registerHost(this);
         void this.loadEntity();
-        this.dictionaryApi.dictionary(ACCT_ACTIVTY_KIND).subscribe(layers => {
+        this.dictionaryApi.dictionary(ACCT_DEPOSIT_KIND).subscribe(layers => {
             var allFields: any[] = [];
             for (var tab of layers) {
                 for (var field of tab.fields) {
@@ -146,7 +150,7 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
         this.saving.set(true);
         try {
             var body = Object.assign({}, this.details);
-            await firstValueFrom(this.restApi.esquireCmdAcct(this.entityKind, this.entityId, body));
+            await firstValueFrom(this.submitter!.submit(this.entityKind, this.entityId, body));
             this.details = { id: this.entityId, kind: this.entityKind };
             void this.loadEntity();
         } catch (err: any) {

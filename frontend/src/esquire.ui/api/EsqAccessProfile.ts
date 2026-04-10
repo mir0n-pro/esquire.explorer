@@ -10,10 +10,13 @@
 * 03/10/2026 mir0n  DEBUG_SKIP_PERMISSION: isCommandAllowed() returns true when flag is set
 *                   import EsqUtils for debug flag access
 * 04/07/2026 mir0n  isCommandAllowed(): use EsqObjectKindFactory.normalize()
+* 04/10/2026 mir0n  static readonly FLAG_INDEX replaced with customizable flagIndexes
+*                   added static addFlagIndex()
 */
 import {EsqExplorerCallApi} from './EsqExplorerCallApi';
 import {EsqUtils} from "../components/EsqUtils";
 import {EsqObjectKindFactory} from './EsqObjectKindFactory';
+import {EsqObjectKind} from "./EsqObjectKind";
 export class EsqRole {
   id:number;
   name:string;
@@ -75,14 +78,13 @@ export class EsqAccessProfile {
         this.tools = (jsn.tools || []).map((x: any) => new EsqPermission(x));
     }
 
-    private static readonly FLAG_INDEX: Record<string, number> = {
-        [EsqExplorerCallApi.CMD_NEW]: 0,
-        [EsqExplorerCallApi.CMD_DEFAULT]: 1,
-        [EsqExplorerCallApi.CMD_MOVE]: 1,
-        [EsqExplorerCallApi.CMD_DELETE]: 2,
-        [EsqExplorerCallApi.CMD_KEY]: 3,
-        [EsqExplorerCallApi.CMD_ACCT]: 4
-    };
+    private static flagIndexes:Record<string, number>[] = [
+        {[EsqExplorerCallApi.CMD_NEW]: 0},
+        {[EsqExplorerCallApi.CMD_DEFAULT]: 1},
+        {[EsqExplorerCallApi.CMD_MOVE]: 1},
+        {[EsqExplorerCallApi.CMD_DELETE]: 2},
+        {[EsqExplorerCallApi.CMD_KEY]: 3},
+    ];
 
     public isCommandAllowed(cmd: string, entity_id: string, kind: number): boolean {
         if (EsqUtils.DEBUG_SKIP_PERMISSION) {
@@ -94,12 +96,23 @@ export class EsqAccessProfile {
             var effectiveCmd: string = cmd || EsqExplorerCallApi.CMD_DEFAULT;
             var perm: EsqPermission | undefined = this.admin.find(p => p.kind === knd);
             if (perm) {
-                var flagIndex: number = EsqAccessProfile.FLAG_INDEX[effectiveCmd];
-                if (flagIndex !== undefined && flagIndex < perm.flags.length) {
-                    ret = perm.flags[flagIndex] === 'Y';
+                const entry = EsqAccessProfile.flagIndexes.find(item => item[effectiveCmd] !== undefined);
+                const index = entry ? entry[effectiveCmd] : undefined;
+                if (perm && index !== undefined && index < perm.flags.length) {
+                    ret = perm.flags[index] === 'Y';
                 }
             }
         }
         return ret;
     }
+
+    public static addFlagIndex(flag: string, index: number): void {
+        const existing = EsqAccessProfile.flagIndexes.find(obj => obj.hasOwnProperty(flag));
+        if (!existing) {
+            EsqAccessProfile.flagIndexes.push({ [flag]: index });
+        } else {
+            existing[flag] = index; // Update existing instead
+        }
+    }
+
 }

@@ -2,6 +2,18 @@ Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
 
+04/09/2026 mir0n Externalize acct command as custom
+api\EsqAccessProfile.ts
+  - static readonly FLAG_INDEX replaced with customizable flagIndexes
+  - added static addFlagIndex()
+api\EsqEntityCommandHandler.ts
+  - added EsqCommandSubmitter interface
+api\EsqExplorerCallApi.ts
+  - removed CMD_ACCT
+api\EsqRestApi.ts
+ - removed esquireCmdAcct
+
+
 04/09/2026 mir0n  acct deposit command
 api\EsqRestApi.ts
   - esquireCmdAcct added to interface

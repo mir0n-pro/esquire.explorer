@@ -18,6 +18,10 @@ import { CustomHttpParameterCodec }                          from '../encoder';
 import { Observable }                                        from 'rxjs';
 
 // @ts-ignore
+import { AcctTransactionRequest } from '../model/acctTransactionRequest';
+// @ts-ignore
+import { AcctTransactionSimple } from '../model/acctTransactionSimple';
+// @ts-ignore
 import { EsqAccessProfile } from '../model/esqAccessProfile';
 // @ts-ignore
 import { EsqEntity } from '../model/esqEntity';
@@ -167,6 +171,90 @@ export class EsquireService extends BaseService {
         return this.httpClient.request<object>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
+                params: localVarQueryParameters,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Post an account transaction
+     * Post a deposit transaction against an account; locks the account, validates balance, inserts a transaction row and updates the balance atomically
+     * @endpoint post /esq-acct
+     * @param kind account entity kind (50&#x3D;client, 52&#x3D;merchant, 54&#x3D;paper)
+     * @param id account entity id
+     * @param acctTransactionRequest 
+     * @param cmd command code
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public esquireCmdAcct(kind: number, id: string, acctTransactionRequest: AcctTransactionRequest, cmd?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<AcctTransactionSimple>;
+    public esquireCmdAcct(kind: number, id: string, acctTransactionRequest: AcctTransactionRequest, cmd?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AcctTransactionSimple>>;
+    public esquireCmdAcct(kind: number, id: string, acctTransactionRequest: AcctTransactionRequest, cmd?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AcctTransactionSimple>>;
+    public esquireCmdAcct(kind: number, id: string, acctTransactionRequest: AcctTransactionRequest, cmd?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (kind === null || kind === undefined) {
+            throw new Error('Required parameter kind was null or undefined when calling esquireCmdAcct.');
+        }
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling esquireCmdAcct.');
+        }
+        if (acctTransactionRequest === null || acctTransactionRequest === undefined) {
+            throw new Error('Required parameter acctTransactionRequest was null or undefined when calling esquireCmdAcct.');
+        }
+
+        let localVarQueryParameters = new HttpParams({encoder: this.encoder});
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>kind, 'kind');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>id, 'id');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>cmd, 'cmd');
+
+        let localVarHeaders = this.defaultHeaders;
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/esq-acct`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<AcctTransactionSimple>('post', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: acctTransactionRequest,
                 params: localVarQueryParameters,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),

@@ -7,9 +7,15 @@
 * History :
 * 04/01/2026 mir0n  initial: command handler interface and context type for calle() refactoring
 * 04/07/2026 mir0n  EsqNodeCommandContext: added nodeKind (normalized entity kind for REST calls)
+* 04/10/2026 mir0n  added EsqCommandSubmitter interface
 */
+import { Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { EsqRestApi } from './EsqRestApi';
+
+export interface EsqCommandSubmitter {
+    submit(kind: number, id: string, body: any): Observable<any>;
+}
 import { EsqDictionaryApi } from './EsqDictionaryApi';
 import { EsqExplorerCallApi, EsqExplorerHost } from './EsqExplorerCallApi';
 import { EsqAccessProfile } from './EsqAccessProfile';

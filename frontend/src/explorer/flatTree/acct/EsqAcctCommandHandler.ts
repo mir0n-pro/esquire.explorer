@@ -6,13 +6,16 @@
 *
 * History :
 * 04/09/2026 mir0n  initial: acct deposit command handler
+* 04/10/2026 mir0n  use EsqShellConstants.CMD_ACCT 
+*                   accept external defined REST command submitter
 */
 import { MatDialog } from '@angular/material/dialog';
-import { EsqEntityCommandHandler, EsqEntityCommandContext, EsqNodeCommandContext, SelectMode } from 'src/esquire.ui/api/EsqEntityCommandHandler';
+import { EsqEntityCommandHandler, EsqEntityCommandContext, EsqNodeCommandContext, EsqCommandSubmitter, SelectMode } from 'src/esquire.ui/api/EsqEntityCommandHandler';
 import { EsqExplorerCallApi } from 'src/esquire.ui/api/EsqExplorerCallApi';
 import { EsqRestApi } from 'src/esquire.ui/api/EsqRestApi';
 import { EsqDictionaryApi } from 'src/esquire.ui/api/EsqDictionaryApi';
 import { EsqAcctDialog } from './EsqAcctDialog';
+import {EsqShellConstants} from "../app-shell.contants";
 
 /**
  * Handler for CMD_ACCT command
@@ -20,8 +23,10 @@ import { EsqAcctDialog } from './EsqAcctDialog';
  */
 export class EsqAcctCommandHandler implements EsqEntityCommandHandler {
 
+    constructor(private submitter?: EsqCommandSubmitter) {}
+
     canHandle(cmd: string): boolean {
-        return cmd === EsqExplorerCallApi.CMD_ACCT;
+        return cmd === EsqShellConstants.CMD_ACCT;
     }
 
     async executeWithNode(context: EsqNodeCommandContext): Promise<void> {
@@ -68,7 +73,7 @@ export class EsqAcctCommandHandler implements EsqEntityCommandHandler {
         var dialogRef = dialog.open(EsqAcctDialog, {
             autoFocus: false,
             panelClass: 'esq-dialog',
-            data: { entityKind, entityId, entityName, restApi, dictionaryApi, callApi, userId }
+            data: { entityKind, entityId, entityName, restApi, dictionaryApi, callApi, userId, submitter: this.submitter }
         });
         dialogRef.updateSize('360px', 'auto');
 

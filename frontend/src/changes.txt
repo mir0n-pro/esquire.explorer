@@ -1,6 +1,20 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+
+04/10/2026 mir0n Externalize acct command as custom
++ added flatTree\app-shell.contants.ts
+flatTree\app-explorer.component.ts
+  - added generic pipeWithErrorAndDelay() to help REST API wrapper
+  - initialize EsqAccessProfile Flag Indexes
+  - registerHandler(new EsqAcctCommandHandle with inline submitter
+  - use EsqShellConstants.CMD_ACCT 
+flatTree\acct\EsqAcctCommandHandler.ts
+  - use EsqShellConstants.CMD_ACCT 
+  - accept external defined REST command submitter
+flatTree\acct\EsqAcctDialog.ts
+  - accept external defined REST command submitter
+  
 04/09/2026 mir0n  acct deposit command
 flatTree\acct\EsqAcctCommandHandler.ts
   - initial: acct deposit command handler

@@ -52,6 +52,10 @@
 *                   esqRestApiWrapper() : EsqUtils.observeWithDelay() to emulate REST API delays
 * 04/09/2026 mir0n  esquireCmdAcct() REST wrapper: POST /esq-acct
 *                   EsqAcctCommandHandler registered in constructor
+* 04/10/2026 mir0n  added generic pipeWithErrorAndDelay() to help REST API wrapper
+*                   initialize EsqAccessProfile Flag Indexes
+*                   registerHandler(new EsqAcctCommandHandle with inline submitter
+*                   use EsqShellConstants.CMD_ACCT 
 */
 import {Component,
   OnDestroy,
@@ -107,6 +111,7 @@ import Keycloak from 'keycloak-js';
 import { Observable, catchError, throwError, finalize } from 'rxjs';
 import {EsqCommandMenuItem} from "../../esquire.ui/api/EsqContextMenuBuilder";
 import {EsqAccessProfile} from "../../esquire.ui/api/EsqAccessProfile";
+import {EsqShellConstants} from "./app-shell.contants";
 
 const STATUS_CONNECTED = "Connected";
 const STATUS_AUTHENTICATED = "Authenticated";
@@ -158,6 +163,17 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
   private profileRequested = false;
   private errorReport: ProblemDetail |undefined = undefined;
 
+  private pipeWithErrorAndDelay(obsrvbl:Observable<any>): Observable<any> {
+      this.setErrorMessage("");
+      this.errorReport = undefined;
+      this.callHost?.setLoading(true);
+      return EsqUtils.observeWithDelay(obsrvbl, 1000).pipe(catchError(err => {
+          this.errorReport = err;
+          this.setErrorMessage(err.detail || err.title, err);
+          return throwError(() => err);
+      }), finalize(() => this.callHost?.setLoading(false)));
+    }
+
   constructor(dataService: EsquireService) {
     super();
     //EsqUtils.DELAY = true;
@@ -165,12 +181,21 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
     this._dataService = dataService;
     this.keycloak = inject(Keycloak);
 
+    EsqAccessProfile.addFlagIndex(EsqShellConstants.CMD_ACCT,4);
+
     this.dictionary = new EsqDictionary(this.esqRestApiWrapper());
     let callApiMill:EsqExplorerCallApiMill = new EsqExplorerCallApiMill(this.detailsDialog, this.dictionary, this.esqRestApiWrapper());
     this.callApi = callApiMill.instance();
     this.callApi.registerHost(this);
-    this.callApi.registerHandler(new EsqAcctCommandHandler());
     this.callHost = callApiMill.getHost();
+    this.callApi.registerHandler(new EsqAcctCommandHandler({
+        submit: (kind, id, body) => {
+            return this.pipeWithErrorAndDelay(
+                this.dataService?.esquireCmdAcct(kind, encodeURIComponent(id), body) ??
+                throwError(() => new Error('Data Service is not initialized'))
+            );
+        }
+    }));
 
     effect(() => {
       const event = this.keycloakSignal();
@@ -200,7 +225,7 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
             this.authState.set(STATUS_AUTHENTICATED);
             if (was != STATUS_AUTHENTICATED) {
               this.profileRequested = true;
-              this._dataService.esquireKey().subscribe({
+              this.dataService?.esquireKey().subscribe({
                   next: (value) => {
                     var ap = new EsqAccessProfile(value);
                     this.profile.set(ap);
@@ -214,15 +239,15 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
                     if (err.detail) {
                       alert('Something went wrong: ' + err.detail);
                     }
-                    this.logout();     
+                    this.logout();
                   },
                   complete: () =>  {
                     this.authState.set(STATUS_CONNECTED);
                   }
-              });
+              }) ??
+              throwError(() => new Error('Data Service is not initialized'));
             }
           }
-
         } else {
           this.authState.set(STATUS_READY);
         }
@@ -250,193 +275,80 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
   public esqRestApiWrapper(): EsqRestApi {
     return {
       esquire: (id?: string, skip?: number, take?: number, options?:any) => {
-        this.setErrorMessage("");
-        this.errorReport = undefined;
-        this.callHost?.setLoading(true);
-        if(!this.dataService) {
-          this.setErrorMessage("Data service not initialized");
-          throw new Error("Data service not initialized");
-        }
-        let ret: Observable<any> = this.dataService.esquire(id?encodeURIComponent(id):undefined, skip, take, 'body', false, options);
-        return EsqUtils.observeWithDelay(ret, 1000).pipe(catchError(err => {
-          this.errorReport = err;
-          this.setErrorMessage(err.detail || err.title, err);
-          return throwError(() => err);
-        }), finalize(() => this.callHost?.setLoading(false)));
+        return this.pipeWithErrorAndDelay(
+            this.dataService?.esquire(id?encodeURIComponent(id):undefined, skip,
+                take, 'body', false, options) ??
+            throwError(() => new Error('Data Service is not initialized'))
+        );
       },
       esquirePath: (id: string, options?:any) => {
-        this.setErrorMessage("");
-        this.errorReport = undefined;
-        this.callHost?.setLoading(true);
-        if(!this.dataService) {
-          this.setErrorMessage("Data service not initialized");
-          throw new Error("Data service not initialized");
-        }
-        let ret: Observable<any> = this.dataService.esquirePath(encodeURIComponent(id), options);
-        return EsqUtils.observeWithDelay(ret, 1000).pipe(catchError(err => {
-          this.errorReport = err;
-          this.setErrorMessage(err.detail || err.title, err);
-          return throwError(() => err);
-        }), finalize(() => this.callHost?.setLoading(false)));
+        return this.pipeWithErrorAndDelay(
+            this.dataService?.esquirePath(encodeURIComponent(id), options) ??
+            throwError(() => new Error('Data Service is not initialized'))
+        );
       },
       esquireCmd: ( kind: number, id: string, cmd?: string, options?:any) => {
-        this.setErrorMessage("");
-        this.errorReport = undefined;
-        this.callHost?.setLoading(true);
-        if(!this.dataService) {
-          this.setErrorMessage("Data service not initialized");
-          throw new Error("Data service not initialized");
-        }
-        let ret: Observable<any> = this.dataService.esquireCmd( kind, encodeURIComponent(id), cmd, options) ;
-        return EsqUtils.observeWithDelay(ret, 1000).pipe(catchError(err => {
-          this.errorReport = err;
-          this.setErrorMessage(err.detail || err.title, err);
-          return throwError(() => err);
-        }), finalize(() => this.callHost?.setLoading(false)));
+        return this.pipeWithErrorAndDelay(
+            this.dataService?.esquireCmd( kind, encodeURIComponent(id), cmd, options) ??
+            throwError(() => new Error('Data Service is not initialized'))
+        );
       },
      esquireEntityNode: (kind: number, id?: string, name?: string, options?:any) => {
-        this.setErrorMessage("");
-        this.errorReport = undefined;
-        this.callHost?.setLoading(true);
-        if(!this.dataService) {
-          this.setErrorMessage("Data service not initialized");
-          throw new Error("Data service not initialized");
-        }
-        let ret: Observable<any> = this.dataService.esquireEntityNode( kind, (id && id.length >0)? encodeURIComponent(id) : undefined,
-          name?encodeURIComponent(name):undefined,
-          options
+        return this.pipeWithErrorAndDelay(
+            this.dataService?.esquireEntityNode( kind, (id && id.length >0)? encodeURIComponent(id) : undefined,
+                name?encodeURIComponent(name):undefined,
+                options) ??
+            throwError(() => new Error('Data Service is not initialized'))
         );
-        return EsqUtils.observeWithDelay(ret, 1000).pipe(catchError(err => {
-          this.errorReport = err;
-          this.setErrorMessage(err.detail || err.title, err);
-          return throwError(() => err);
-        }), finalize(() => this.callHost?.setLoading(false)));
       },
      esquireDictionary: (kind: number, options?:any) => {
-        this.setErrorMessage("");
-        this.errorReport = undefined;
-        this.callHost?.setLoading(true);
-        if(!this.dataService) {
-          this.setErrorMessage("Data service not initialized");
-          throw new Error("Data service not initialized");
-        }
-        let ret: Observable<any> = this.dataService.esquireDictionary(kind , options);
-        return EsqUtils.observeWithDelay(ret, 1000).pipe(catchError(err => {
-          this.errorReport = err;
-          this.setErrorMessage(err.detail || err.title, err);
-          return throwError(() => err);
-        }), finalize(() => this.callHost?.setLoading(false)));
+        return this.pipeWithErrorAndDelay(
+            this.dataService?.esquireDictionary(kind , options) ??
+            throwError(() => new Error('Data Service is not initialized'))
+        );
       },
       esquireKey: (id?: string, options?:any) => {
-        this.setErrorMessage("");
-        this.errorReport = undefined;
-        this.callHost?.setLoading(true);
-        if(!this.dataService) {
-          this.setErrorMessage("Data service not initialized");
-          throw new Error("Data service not initialized");
-        }
-        let ret: Observable<any> = this.dataService.esquireKey(id, options);
-        return EsqUtils.observeWithDelay(ret, 1000).pipe(catchError(err => {
-          this.errorReport = err;
-          this.setErrorMessage(err.detail || err.title, err);
-          return throwError(() => err);
-        }), finalize(() => this.callHost?.setLoading(false)));
+        return this.pipeWithErrorAndDelay(
+            this.dataService?.esquireKey(id, options) ??
+            throwError(() => new Error('Data Service is not initialized'))
+        );
       },
       esquireKinds: () => {
-        this.setErrorMessage("");
-        this.errorReport = undefined;
-          this.callHost?.setLoading(true);
-        if(!this.dataService) {
-          this.setErrorMessage("Data service not initialized");
-          throw new Error("Data service not initialized");
-        }
-        let ret: Observable<any> = this.dataService.esquireKinds();
-        return EsqUtils.observeWithDelay(ret, 1000).pipe(catchError(err => {
-          this.errorReport = err;
-          this.setErrorMessage(err.detail || err.title, err);
-          return throwError(() => err);
-        }), finalize(() => this.callHost?.setLoading(false)));
+        return this.pipeWithErrorAndDelay(
+            this.dataService?.esquireKinds() ??
+            throwError(() => new Error('Data Service is not initialized'))
+        );
       },
-        esquireCmdSave: (kind: number, id: string, body: any, cmd?: string, options?: any) => {
-            this.setErrorMessage("");
-            this.errorReport = undefined;
-            this.callHost?.setLoading(true);
-                if(!this.dataService) {
-                this.setErrorMessage("Data service not initialized");
-                throw new Error("Data service not initialized");
-            }
-            var ret: Observable<any> = this.dataService.esquireCmdSave(kind, encodeURIComponent(id), body, cmd);
-            return EsqUtils.observeWithDelay(ret, 1000).pipe(finalize(() => this.callHost?.setLoading(false)));
-        },
-        esquireKeySave: (id: string, body: any, options?: any) => {
-            this.setErrorMessage("");
-            this.errorReport = undefined;
-            this.callHost?.setLoading(true);
-                if(!this.dataService) {
-                this.setErrorMessage("Data service not initialized");
-                throw new Error("Data service not initialized");
-            }
-            var ret: Observable<any> = this.dataService.esquireKeySave(id, body);
-            return EsqUtils.observeWithDelay(ret, 1000).pipe(finalize(() => this.callHost?.setLoading(false)));
-        },
-        esquireCmdNew: (kind: number, parentId: string, body: any, cmd?: string, options?: any) => {
-            this.setErrorMessage("");
-            this.errorReport = undefined;
-            this.callHost?.setLoading(true);
-                if(!this.dataService) {
-                this.setErrorMessage("Data service not initialized");
-                throw new Error("Data service not initialized");
-            }
-            var ret: Observable<any> = this.dataService.esquireCmdNew(kind, encodeURIComponent(parentId), body, cmd);
-            return EsqUtils.observeWithDelay(ret, 1000).pipe(finalize(() => this.callHost?.setLoading(false)));
-        },
-        esquireCmdDel: (kind: number, id: string, cmd?: string, options?: any) => {
-            this.setErrorMessage("");
-            this.errorReport = undefined;
-            this.callHost?.setLoading(true);
-                if(!this.dataService) {
-                this.setErrorMessage("Data service not initialized");
-                throw new Error("Data service not initialized");
-            }
-            var ret: Observable<any> = this.dataService.esquireCmdDel(kind, encodeURIComponent(id), cmd);
-            return EsqUtils.observeWithDelay(ret, 1000).pipe(catchError(err => {
-                this.errorReport = err;
-                this.setErrorMessage(err.detail || err.title || err.message, err);
-                return throwError(() => err);
-            }), finalize(() => this.callHost?.setLoading(false)));
-        },
-        esquireCmdMove: (kind: number, id: string, distId: string, options?: any) => {
-            this.setErrorMessage("");
-            this.errorReport = undefined;
-            this.callHost?.setLoading(true);
-                if(!this.dataService) {
-                this.setErrorMessage("Data service not initialized");
-                throw new Error("Data service not initialized");
-            }
-            var ret: Observable<any> = this.dataService.esquireCmdMove(kind, encodeURIComponent(id), encodeURIComponent(distId));
-            return EsqUtils.observeWithDelay(ret, 1000).pipe(
-                catchError(err => {
-                    this.errorReport = err;
-                    this.setErrorMessage(err.detail || err.title || err.message, err);
-                    return throwError(() => err);
-                }), finalize(() => this.callHost?.setLoading(false)));
-        },
-        esquireCmdAcct: (kind: number, id: string, body: any, cmd?: string, options?: any) => {
-            this.setErrorMessage("");
-            this.errorReport = undefined;
-            this.callHost?.setLoading(true);
-            if (!this.dataService) {
-                this.setErrorMessage("Data service not initialized");
-                throw new Error("Data service not initialized");
-            }
-            var ret: Observable<any> = this.dataService.esquireCmdAcct(kind, encodeURIComponent(id), body, cmd);
-            return EsqUtils.observeWithDelay(ret, 1000).pipe(
-                catchError(err => {
-                    this.errorReport = err;
-                    this.setErrorMessage(err.detail || err.title || err.message, err);
-                    return throwError(() => err);
-                }), finalize(() => this.callHost?.setLoading(false)));
-        },
+      esquireCmdSave: (kind: number, id: string, body: any, cmd?: string, options?: any) => {
+        return this.pipeWithErrorAndDelay(
+            this.dataService?.esquireCmdSave(kind, encodeURIComponent(id), body, cmd) ??
+            throwError(() => new Error('Data Service is not initialized'))
+        );
+      },
+      esquireKeySave: (id: string, body: any, options?: any) => {
+        return this.pipeWithErrorAndDelay(
+            this.dataService?.esquireKeySave(id, body) ??
+            throwError(() => new Error('Data Service is not initialized'))
+        );
+      },
+      esquireCmdNew: (kind: number, parentId: string, body: any, cmd?: string, options?: any) => {
+        return this.pipeWithErrorAndDelay(
+            this.dataService?.esquireCmdNew(kind, encodeURIComponent(parentId), body, cmd) ??
+            throwError(() => new Error('Data Service is not initialized'))
+        );
+      },
+      esquireCmdDel: (kind: number, id: string, cmd?: string, options?: any) => {
+        return this.pipeWithErrorAndDelay(
+            this.dataService?.esquireCmdDel(kind, encodeURIComponent(id), cmd) ??
+            throwError(() => new Error('Data Service is not initialized'))
+        );
+      },
+      esquireCmdMove: (kind: number, id: string, distId: string, options?: any) => {
+        return this.pipeWithErrorAndDelay(
+            this.dataService?.esquireCmdMove(kind, encodeURIComponent(id), encodeURIComponent(distId)) ??
+            throwError(() => new Error('Data Service is not initialized'))
+        );
+      },
     }
   };
 
@@ -508,7 +420,7 @@ public faceName() : string {
   return "Disconnected";
 }
 public faceNameClass() : string {
-  var ret = "name-bar" 
+  var ret = "name-bar"
   //if (this.isConnected())) {
   //  return "name-bar";
   //}
@@ -534,7 +446,7 @@ private findIcon(kind:number) : string {
 
  public canShowErrorReport() : boolean {
     return this.errorReport !== undefined;
-  } 
+  }
 
   public async runErrorReport() : Promise<void> {
     if (!this.errorReport) {
@@ -596,7 +508,7 @@ export const EsquireStatuses = {
 
 export const EsqCommandMenuItems:EsqCommandMenuItem[] = [
     new EsqCommandMenuItem("Access Profile", "verified_user", EsqExplorerCallApi.CMD_KEY),
-    new EsqCommandMenuItem("Accounting", "monetization_on", EsqExplorerCallApi.CMD_ACCT),
+    new EsqCommandMenuItem("Accounting", "monetization_on", EsqShellConstants.CMD_ACCT),
     new EsqCommandMenuItem("Move",   "reply_all", EsqExplorerCallApi.CMD_MOVE),
     new EsqCommandMenuItem("Delete", "cancel",    EsqExplorerCallApi.CMD_DELETE),
     new EsqCommandMenuItem("New...", "add_circle", EsqExplorerCallApi.CMD_NEW),
