@@ -1,6 +1,8 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.2-2604.1018 Rename app-explorer.component with app-shell
+
 v1.2.2-2604.1017 Externalize acct command as custom
 
 v1.2.2-2604.0920 Acct deposit command: dialog with dictionary-driven fields, entity refresh, continuous operation

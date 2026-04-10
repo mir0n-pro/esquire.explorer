@@ -17,12 +17,6 @@ import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 import { RUNTIME_CONFIG } from './app/app.tokens';
 import { AutoRefreshTokenService, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, includeBearerTokenInterceptor, provideKeycloak, UserActivityService, withAutoRefreshToken } from 'keycloak-angular';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
-import { routes } from './app/app.routes';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { BASE_PATH } from './rest';
 
   const response = await fetch('/assets/config.json');
   const config = await response.json();

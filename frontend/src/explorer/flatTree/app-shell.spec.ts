@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ExplorerComponent } from './app-explorer.component';
+import { ExplorerComponent } from './app-shell';
 
 describe('ExplorerComponent', () => {
   let component: ExplorerComponent;

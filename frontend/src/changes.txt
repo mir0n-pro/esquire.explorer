@@ -2,6 +2,8 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+04/10/2026 mir0n Rename app-explorer.component with app-shell
+
 04/10/2026 mir0n Externalize acct command as custom
 + added flatTree\app-shell.contants.ts
 flatTree\app-explorer.component.ts

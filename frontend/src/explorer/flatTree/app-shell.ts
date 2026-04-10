@@ -118,7 +118,7 @@ const STATUS_AUTHENTICATED = "Authenticated";
 const STATUS_READY = "Ready";
 
 @Component({
-  selector: 'app-explorer',
+  selector: 'app-shell',
   standalone: true,
   imports: [
     MatToolbar,
@@ -127,25 +127,11 @@ const STATUS_READY = "Ready";
     MatMenuModule,
     EsqExplorerComponent
   ],
-  templateUrl: './app-explorer.component.html',
-  styleUrl: './app-explorer.component.scss',
+  templateUrl: './app-shell.html',
+  styleUrl: './app-shell.scss',
   encapsulation: ViewEncapsulation.None
 })
 export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, OnDestroy {
-/*
-// the way how to register command handler
-  private _moveHandlerRegistered = false;
-  @ViewChild('explorer')
-  set explorerComponent(comp: EsqExplorerComponent | undefined) {
-    if (comp && this.callApiMill && !this._moveHandlerRegistered) {
-      this._moveHandlerRegistered = true;
-      var moveHandler = new EsqMoveCommandHandler(
-        comp.getDatasource()
-      );
-      this.callApiMill.instance().registerHandler(moveHandler);
-    }
-  }
-*/
 
   private keycloak: Keycloak;
   keycloakSignal: Signal<KeycloakEvent> = inject(KEYCLOAK_EVENT_SIGNAL);
