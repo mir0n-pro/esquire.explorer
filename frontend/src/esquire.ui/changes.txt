@@ -2,6 +2,10 @@ Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
 
+04/09/2026 mir0n  acct deposit command
+api\EsqRestApi.ts
+  - esquireCmdAcct added to interface
+
 04/08/2026 mir0n  generalization of "loading" indicator
 api\EsqExplorerCallApi.ts
   - added EsqExplorerHost.setLoading()

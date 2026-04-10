@@ -1,0 +1,46 @@
+<!--
+  Esquire frameworks (tm)
+
+  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
+  mailto:mir0n.the.programmer@gmail.com
+
+  History:
+-->
+<mat-toolbar class="mat-elevation-z2 esq-dialog-toolbar"
+    cdkDrag
+    cdkDragRootElement=".cdk-overlay-pane"
+    cdkDragHandle
+    cdkDragBoundary=".cdk-overlay-container"
+    [esqDialogResize]="'acct:' + userId"
+>
+    <div>
+        @if (loading() || saving()) {
+            <span class="esq-loading-div"></span>
+        } @else {
+            <img [src]="headerIcon" class="esq-base-icon"/>
+        }
+    </div>
+    <div>{{entityName}}: Deposit</div>
+    <button matIconButton (click)="onCancel()" class="esq-icon-button" matTooltip="Close">
+        <mat-icon>close</mat-icon>
+    </button>
+</mat-toolbar>
+
+<mat-dialog-content>
+    @for (field of fields; track field.name) {
+        <esq-tab-field
+            [field]="field"
+            [details]="details"
+            [callApi]="callApi"
+            [readOnly]="false"
+            [enableDetails]="false"
+            [userId]="userId"
+        />
+    }
+</mat-dialog-content>
+
+<mat-dialog-actions align="center">
+    <button mat-raised-button (click)="onCancel()">Close</button>
+    <button mat-raised-button [disabled]="!canSubmit()" (click)="onSubmit()">Submit</button>
+    <button mat-raised-button (click)="loadEntity()">Refresh</button>
+</mat-dialog-actions>

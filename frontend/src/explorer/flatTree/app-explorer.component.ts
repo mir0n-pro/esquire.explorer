@@ -50,6 +50,8 @@
 *                   static initialization at constructor (moved from ngOnInit)
 *                   esqRestApiWrapper() : issue loading envent
 *                   esqRestApiWrapper() : EsqUtils.observeWithDelay() to emulate REST API delays
+* 04/09/2026 mir0n  esquireCmdAcct() REST wrapper: POST /esq-acct
+*                   EsqAcctCommandHandler registered in constructor
 */
 import {Component,
   OnDestroy,
@@ -97,7 +99,7 @@ import {EsqExplorerComponent} from 'src/esquire.ui/explorer/flatTree/EsqExplorer
 import { ProblemDetail, problemDetailDictionary } from 'src/esquire.ui/api/ProblemDetail';
 import { EsqSingleEntryDialog } from 'src/esquire.ui/components/EsqSingleEntryDialog';
 //import {EsqMoveCommandHandler} from 'src/esquire.ui/explorer/flatTree/components/EsqMoveCommandHandler';
-
+import {EsqAcctCommandHandler} from 'src/explorer/flatTree/acct/EsqAcctCommandHandler';
 
 import {EsquireService} from '../../rest/api/esquire.service';
 import { KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
@@ -167,6 +169,7 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
     let callApiMill:EsqExplorerCallApiMill = new EsqExplorerCallApiMill(this.detailsDialog, this.dictionary, this.esqRestApiWrapper());
     this.callApi = callApiMill.instance();
     this.callApi.registerHost(this);
+    this.callApi.registerHandler(new EsqAcctCommandHandler());
     this.callHost = callApiMill.getHost();
 
     effect(() => {
@@ -411,6 +414,22 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
                 throw new Error("Data service not initialized");
             }
             var ret: Observable<any> = this.dataService.esquireCmdMove(kind, encodeURIComponent(id), encodeURIComponent(distId));
+            return EsqUtils.observeWithDelay(ret, 1000).pipe(
+                catchError(err => {
+                    this.errorReport = err;
+                    this.setErrorMessage(err.detail || err.title || err.message, err);
+                    return throwError(() => err);
+                }), finalize(() => this.callHost?.setLoading(false)));
+        },
+        esquireCmdAcct: (kind: number, id: string, body: any, cmd?: string, options?: any) => {
+            this.setErrorMessage("");
+            this.errorReport = undefined;
+            this.callHost?.setLoading(true);
+            if (!this.dataService) {
+                this.setErrorMessage("Data service not initialized");
+                throw new Error("Data service not initialized");
+            }
+            var ret: Observable<any> = this.dataService.esquireCmdAcct(kind, encodeURIComponent(id), body, cmd);
             return EsqUtils.observeWithDelay(ret, 1000).pipe(
                 catchError(err => {
                     this.errorReport = err;

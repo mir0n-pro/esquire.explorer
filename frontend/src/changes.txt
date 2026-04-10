@@ -1,6 +1,18 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+04/09/2026 mir0n  acct deposit command
+flatTree\acct\EsqAcctCommandHandler.ts
+  - initial: acct deposit command handler
+flatTree\acct\EsqAcctDialog.ts
+  - initial: deposit form dialog; dictionary-driven fields (kind 980)
+  - entity read on init/refresh; stays open after submit
+flatTree\acct\EsqAcctDialog.html
+  - initial: deposit form; Close/Submit/Refresh actions
+flatTree\app-explorer.component.ts
+  - esquireCmdAcct() REST wrapper: POST /esq-acct
+  - EsqAcctCommandHandler registered in constructor
+
 04/08/2026 mir0n  generalization of "loading" indicator
 flatTree\app-explorer.component.ts
   - ExplorerComponent extends EsqExplorerHostDummy

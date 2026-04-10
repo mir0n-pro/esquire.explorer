@@ -366,6 +366,53 @@ paths:
           description: successful operation
         '405':
           description: Invalid input
+  /esq-acct:
+    post:
+      tags:
+        - esquire
+      summary: Post an account transaction
+      description: Post a deposit transaction against an account; locks the account, validates balance, inserts a transaction row and updates the balance atomically
+      operationId: esquireCmdAcct
+      parameters:
+        - name: kind
+          in: query
+          description: account entity kind (50=client, 52=merchant, 54=paper)
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: id
+          in: query
+          description: account entity id
+          required: true
+          schema:
+            type: string
+        - name: cmd
+          in: query
+          description: command code
+          required: false
+          schema:
+            type: string
+            default: acct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcctTransactionRequest'
+      responses:
+        '200':
+          description: successful operation; null body when amount is zero (transaction skipped)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcctTransactionSimple'
+        '403':
+          description: Permission denied
+        '404':
+          description: Account not found
+        '422':
+          description: Insufficient balance or invalid amount
   /esq-move:
     post:
       tags:
@@ -752,3 +799,83 @@ components:
           type: string
           description: Header title
           example: Entity Name
+    AcctTransactionRequest:
+      title: Account Transaction Request
+      description: Fields for posting an account transaction (deposit)
+      type: object
+      required:
+        - typeId
+        - amount
+      properties:
+        typeId:
+          type: integer
+          format: int32
+          description: Transaction type ID (from ESQ_ACTIVITY_TYPE table)
+          example: 980
+        amount:
+          type: number
+          format: double
+          description: Transaction amount; must be positive in Phase I
+          example: 100.00
+        desc:
+          type: string
+          description: Transaction description
+          example: Monthly deposit
+        refCode:
+          type: string
+          description: Payment method (cash, check, credit card); null = n/a
+          example: cash
+        refCode2:
+          type: string
+          description: Reference code
+          example: REF-001
+        memo:
+          type: string
+          description: Free-text memo
+          example: Payment received
+        skipValidation:
+          type: boolean
+          description: When true, skips the negative-balance check (requires elevated permission)
+          example: false
+    AcctTransactionSimple:
+      title: Account Transaction Result
+      description: Result of a posted account transaction
+      type: object
+      properties:
+        id:
+          type: string
+          description: acct Id
+          example: '123456789012345'
+        kind:
+          type: integer
+          format: int32
+          description: Account kind
+          example: 980
+        typeId:
+          type: integer
+          format: int32
+          description: Transaction type ID (ATR_AT_PK)
+          example: 980
+        amount:
+          type: number
+          format: double
+          description: Amount posted to account
+          example: 100.00
+        desc:
+          type: string
+          description: Transaction description
+        refCode:
+          type: string
+          description: Payment method
+        refCode2:
+          type: string
+          description: Reference code
+        refCode3:
+          type: string
+          description: Reserved for future use
+        refCode4:
+          type: string
+          description: Reserved for future use
+        memo:
+          type: string
+          description: Transaction memo
