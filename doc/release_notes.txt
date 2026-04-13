@@ -1,6 +1,8 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.2-2604.1319 Acct operations expansion: Deposit/Withdrawal submenu; AmountEffect validation
+
 v1.2.2-2604.1219 Account picker; generic entity select dialog; EsqMoveDialog refactor
 
 v1.2.2-2604.1018 Rename app-explorer.component with app-shell

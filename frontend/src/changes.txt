@@ -2,6 +2,18 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+04/13/2026 mir0n  Acct operations expansion: Deposit/Withdrawal submenu; AmountEffect validation
++ added flatTree\acct\AcctOperation.ts
+flatTree\acct\EsqAcctCommandHandler.ts
+  - pass dictKind (parsed from subCmd) to EsqAcctDialog
+flatTree\acct\EsqAcctDialog.ts
+  - dict-kind driven: header icon/title and dictionary from dictKind param
+  - AmountEffect validation; NEGATIVE ops negate amount on submit
+  - opKind cached; entityId guard in canSubmit; confirmDlg passes opKind
+flatTree\app-shell.ts
+  - kinds 1000/1002 added to EsquireObjectKinds with titles
+  - acct subItems (Deposit/Withdrawal) built in ngOnInit from kind icons
+
 04/12/2026 mir0n  Account picker; EsqAcctDialog fixes; EsqSelectAcctDialog
 + added flatTree\acct\EsqAcctPicker.*
 flatTree\acct\EsqAcctDialog.ts

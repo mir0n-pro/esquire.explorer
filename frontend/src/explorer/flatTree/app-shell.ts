@@ -57,6 +57,8 @@
 *                   registerHandler(new EsqAcctCommandHandle with inline submitter
 *                   use EsqShellConstants.CMD_ACCT
 * 04/12/2026 mir0n  EsqFlatTreeDatasource created in constructor; passed to EsqAcctCommandHandler
+* 04/13/2026 mir0n  kinds 1000/1002 (deposit/withdrawal) in EsquireObjectKinds with titles
+*                   acct subItems built in ngOnInit from dict kind icons
 */
 import {Component,
   OnDestroy,
@@ -105,6 +107,7 @@ import { ProblemDetail, problemDetailDictionary } from 'src/esquire.ui/api/Probl
 import { EsqSingleEntryDialog } from 'src/esquire.ui/components/EsqSingleEntryDialog';
 //import {EsqMoveCommandHandler} from 'src/esquire.ui/explorer/flatTree/components/EsqMoveCommandHandler';
 import {EsqAcctCommandHandler} from 'src/explorer/flatTree/acct/EsqAcctCommandHandler';
+import {AcctOperation} from 'src/explorer/flatTree/acct/AcctOperation';
 import {EsqFlatTreeDatasource} from 'src/esquire.ui/explorer/flatTree/EsqFlatTreeDatasource';
 
 import {EsquireService} from '../../rest/api/esquire.service';
@@ -373,6 +376,13 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
 
     await EsqObjectKindFactory.init(this.esqRestApiWrapper(), EsquireObjectKinds);
     EsqNodeStatusFactory.init(Object.values(EsquireStatuses));
+    var acctItem = EsqCommandMenuItems.find(i => i.cmd === EsqShellConstants.CMD_ACCT);
+    if (acctItem) {
+        acctItem.subItems = [
+            { label: 'Deposit',    icon: EsqObjectKindFactory.instanceOf(AcctOperation.DICT_KIND_DEPOSIT).icon,    subCmd: String(AcctOperation.DICT_KIND_DEPOSIT)    },
+            { label: 'Withdrawal', icon: EsqObjectKindFactory.instanceOf(AcctOperation.DICT_KIND_WITHDRAWAL).icon, subCmd: String(AcctOperation.DICT_KIND_WITHDRAWAL) },
+        ];
+    }
   }
 
 public async login(): Promise<void> {
@@ -486,8 +496,10 @@ export const EsquireObjectKinds = [
     new EsqObjectKind({id: 53, name:"maccountlnk", icon:"img/links/macctl.ico"}),
     new EsqObjectKind({id: 54, name:"paccount", icon:"img/pacct.ico"}),
     new EsqObjectKind({id: 55, name:"paccountlnk", icon:"img/links/pacctl.ico"}),
-    new EsqObjectKind({id: 980, name:"admin", icon:"img/star.ico"}),
-    new EsqObjectKind({id: 982, name:"tools", icon:"img/tools.ico"}),
+    new EsqObjectKind({id: 980,  name:"admin",      icon:"img/star.ico"}),
+    new EsqObjectKind({id: 982,  name:"tools",      icon:"img/tools.ico"}),
+    new EsqObjectKind({id: 1000, name:"deposit",    title:"Deposit",    icon:"img/$sign.ico"}),
+    new EsqObjectKind({id: 1002, name:"withdrawal", title:"Withdrawal", icon:"img/$withdraw.ico"}),
 ] as const;
 
 export const EsquireStatuses = {
@@ -501,7 +513,7 @@ export const EsquireStatuses = {
 
 export const EsqCommandMenuItems:EsqCommandMenuItem[] = [
     new EsqCommandMenuItem("Access Profile", "verified_user", EsqExplorerCallApi.CMD_KEY),
-    new EsqCommandMenuItem("Accounting", "monetization_on", EsqShellConstants.CMD_ACCT),
+    new EsqCommandMenuItem("Accounting", "monetization_on", EsqShellConstants.CMD_ACCT, []),
     new EsqCommandMenuItem("Move",   "reply_all", EsqExplorerCallApi.CMD_MOVE),
     new EsqCommandMenuItem("Delete", "cancel",    EsqExplorerCallApi.CMD_DELETE),
     new EsqCommandMenuItem("New...", "add_circle", EsqExplorerCallApi.CMD_NEW),

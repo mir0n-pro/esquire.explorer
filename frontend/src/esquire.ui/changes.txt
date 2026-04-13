@@ -2,6 +2,15 @@ Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
 
+04/13/2026 mir0n  Acct command submenu; generic subItems submenu support; EsqObjectKindFactory local-kind fix
+api\EsqContextMenuBuilder.ts
+  - EsqSubMenuItem interface; subItems?: EsqSubMenuItem[] on EsqCommandMenuItem
+api\EsqObjectKindFactory.ts
+  - init(): locally-defined kinds not returned by server now registered in kinds[]
+explorer\flatTree\EsqExplorerComponent.ts
+  - generic submenu: esqAcctMenuItems input removed; activeSubItems, prepareSubmenu()
+  - canSubCmdClick(), onSubCmdClick() replacing acct-specific methods
+
 04/12/2026 mir0n  Account picker; generic entity select dialog; EsqMoveDialog refactor; String() id normalization
 + added explorer\flatTree\components\EsqSelectEntityDialog.*
 explorer\flatTree\components\EsqMoveDialog.ts

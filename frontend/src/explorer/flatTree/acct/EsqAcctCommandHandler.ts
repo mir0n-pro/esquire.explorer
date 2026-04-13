@@ -9,6 +9,7 @@
 * 04/10/2026 mir0n  use EsqShellConstants.CMD_ACCT
 *                   accept external defined REST command submitter
 * 04/12/2026 mir0n  selectorFactory param; pass to EsqAcctDialog; dialog size 480px
+* 04/13/2026 mir0n  pass dictKind (parsed from subCmd) to EsqAcctDialog
 */
 import { MatDialog } from '@angular/material/dialog';
 import { EsqEntityCommandHandler, EsqEntityCommandContext, EsqNodeCommandContext, EsqCommandSubmitter, SelectMode } from 'src/esquire.ui/api/EsqEntityCommandHandler';
@@ -40,6 +41,7 @@ export class EsqAcctCommandHandler implements EsqEntityCommandHandler {
             context.nodeKind,
             context.node.entityId,
             context.node.name,
+            Number(context.subCmd),
             context.dialog,
             context.restApi,
             context.dictionaryApi,
@@ -55,6 +57,7 @@ export class EsqAcctCommandHandler implements EsqEntityCommandHandler {
             context.entityKind,
             context.entityId,
             context.entityName,
+            Number(context.subCmd),
             context.dialog,
             context.restApi,
             context.dictionaryApi,
@@ -68,6 +71,7 @@ export class EsqAcctCommandHandler implements EsqEntityCommandHandler {
         entityKind: number,
         entityId: string,
         entityName: string,
+        dictKind: number,
         dialog: MatDialog,
         restApi: EsqRestApi,
         dictionaryApi: EsqDictionaryApi,
@@ -78,7 +82,7 @@ export class EsqAcctCommandHandler implements EsqEntityCommandHandler {
         var dialogRef = dialog.open(EsqAcctDialog, {
             autoFocus: false,
             panelClass: 'esq-dialog',
-            data: { entityKind, entityId, entityName, restApi, dictionaryApi, callApi, userId, submitter: this.submitter, selectorFactory: this.selectorFactory }
+            data: { entityKind, entityId, entityName, dictKind, restApi, dictionaryApi, callApi, userId, submitter: this.submitter, selectorFactory: this.selectorFactory }
         });
         dialogRef.updateSize('480px', 'auto');
 

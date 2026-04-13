@@ -8,6 +8,7 @@
 * 02/12/2026 mir0n  EsqNodeType in explicit file
 * 02/13/2026 mir0n EsqNodeType renamed with EsqObjectKind
 * 02/17/2026 mir0n CMD_ constants moved to EsqExplorerCallApi
+* 04/13/2026 mir0n  EsqSubMenuItem interface; subItems on EsqCommandMenuItem for generic submenu support
 */
 
 import { EsqObjectKind} from './EsqObjectKind';
@@ -20,15 +21,24 @@ export interface EsqNewMenuItem {
     kind: EsqObjectKind;
 }
 
-export class EsqCommandMenuItem {
-    label: string;
-    icon: string;
-    cmd: string;
+export interface EsqSubMenuItem {
+    label:     string;
+    icon:      string;
+    subCmd:    string;    // passed as subCmd to call()/calle()
+    disabled?: boolean;   // optional grey-out; defaults false
+}
 
-    constructor (label:string, icon:string, cmd:string) {
-        this.label = label;
-        this.icon = icon;
-        this.cmd = cmd;
+export class EsqCommandMenuItem {
+    label:     string;
+    icon:      string;
+    cmd:       string;
+    subItems?: EsqSubMenuItem[];   // present = submenu trigger; absent = direct click
+
+    constructor (label:string, icon:string, cmd:string, subItems?: EsqSubMenuItem[]) {
+        this.label    = label;
+        this.icon     = icon;
+        this.cmd      = cmd;
+        this.subItems = subItems;
     }
 }
 

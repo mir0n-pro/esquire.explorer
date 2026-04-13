@@ -16,6 +16,7 @@
 * 02/28/2026 mir0n  added static kinds: PERSON_PRIMARY (992), ADDRESS_POSTAL (988), ADDRESS_BIZ (990)
 * 04/07/2026 mir0n  added static normalize(kind): number
 * 04/08/2026 mir0n  init() corrected
+* 04/13/2026 mir0n  init() registers locally-defined kinds absent from server response
 */
 
 import {EsqTreeNode} from "./EsqTreeNode";
@@ -87,12 +88,19 @@ export class EsqObjectKindFactory {
               const data = await firstValueFrom(api.esquireKinds());
               const src: any[] = (data as any[]) ?? [];
               src.forEach(k => {
-                  let kind: EsqObjectKind = new EsqObjectKind(k);
+                  var kind: EsqObjectKind = new EsqObjectKind(k);
                   if (kinds) {
                       this.update(kind, kinds);
                   }
                   this.kinds.push(kind);
               });
+              if (kinds) {
+                  for (var k of kinds) {
+                      if (!this.kinds.find(existing => existing.id === k.id)) {
+                          this.kinds.push(new EsqObjectKind({ id: k.id, name: k.name, icon: k.icon, listHeaders: k.listHeaders }));
+                      }
+                  }
+              }
           }
       }
   }

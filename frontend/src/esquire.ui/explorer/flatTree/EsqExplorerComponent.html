@@ -60,20 +60,29 @@
   </div>
 
   @for (item of esqCommandMenuItems.slice().reverse(); track item.cmd) {
-      @if (item.cmd != "new") {
-      <button matIconButton
-        class = "esq-icon-button"
-        matTooltip={{item.label}}
-        [disabled]="!canCmdClick(item.cmd, false)"
-        (click)="onCmdClick(item.cmd, false)">
-        <mat-icon>{{item.icon}}</mat-icon>
-      </button>
-      } @else {
+      @if (item.subItems !== undefined) {
+          <button matIconButton
+              class = "esq-icon-button"
+              matTooltip={{item.label}}
+              [disabled]="!canSubCmdClick(item, false)"
+              [matMenuTriggerFor]="toolbarSubMenu"
+              (click)="prepareSubmenu(item)">
+              <mat-icon>{{item.icon}}</mat-icon>
+          </button>
+      } @else if (item.cmd === 'new') {
           <button matIconButton
               class = "esq-icon-button"
               matTooltip={{item.label}}
               [disabled]="!canCmdNewClick(false)"
               [matMenuTriggerFor]="toolbarNewMenu">
+              <mat-icon>{{item.icon}}</mat-icon>
+          </button>
+      } @else {
+          <button matIconButton
+              class = "esq-icon-button"
+              matTooltip={{item.label}}
+              [disabled]="!canCmdClick(item.cmd, false)"
+              (click)="onCmdClick(item.cmd, false)">
               <mat-icon>{{item.icon}}</mat-icon>
           </button>
       }
@@ -179,7 +188,27 @@
   </button>
 
   @for (item of esqCommandMenuItems; track item.cmd) {
-      @if (item.cmd !== 'new') {
+      @if (item.subItems !== undefined) {
+          <button mat-menu-item
+                  class="esq-menu-item"
+                  [disabled]="!canSubCmdClick(item, true)"
+                  [matMenuTriggerFor]="contextSubMenu"
+                  (click)="prepareSubmenu(item)">
+              <p class="esq-menu-grid">
+                  <span class="esq-menu-label">{{item.label}}</span>
+              </p>
+          </button>
+      } @else if (item.cmd === 'new') {
+          <mat-divider></mat-divider>
+          <button mat-menu-item
+                  class="esq-menu-item"
+                  [disabled]="!canCmdNewClick(true)"
+                  [matMenuTriggerFor]="contextNewSubmenu">
+              <p class="esq-menu-grid">
+                  <span class="esq-menu-label">{{item.label}}</span>
+              </p>
+          </button>
+      } @else {
           <button mat-menu-item
                   class="esq-menu-item"
                   [disabled]="!canCmdClick(item.cmd, true)"
@@ -188,18 +217,20 @@
                   <span class="esq-menu-label">{{item.label}}</span>
               </p>
           </button>
-      }@else {
-          <mat-divider></mat-divider>
-          <button
-                  mat-menu-item
-                  class="esq-menu-item"
-                  [disabled]="!canCmdNewClick(true)"
-                  [matMenuTriggerFor]="contextNewSubmenu">
-              <p class="esq-menu-grid">
-                  <span class="esq-menu-label">{{item.label}}</span>
-              </p>
-          </button>
       }
+  }
+</mat-menu>
+
+<mat-menu #contextSubMenu="matMenu">
+  @for (sub of activeSubItems; track sub.subCmd) {
+    <button mat-menu-item class="esq-menu-item"
+        [disabled]="sub.disabled"
+        (click)="onSubCmdClick(sub.subCmd, true)">
+      @if (sub.icon) {
+        <img [src]="sub.icon" class="esq-menu-icon"/>
+      }
+      <span class="esq-menu-label">{{sub.label}}</span>
+    </button>
   }
 </mat-menu>
 
@@ -214,6 +245,19 @@
         <img [src]="item.icon" class="esq-menu-icon"/>
       }
       <span class="esq-menu-label">{{item.label}}</span>
+    </button>
+  }
+</mat-menu>
+
+<mat-menu #toolbarSubMenu="matMenu">
+  @for (sub of activeSubItems; track sub.subCmd) {
+    <button mat-menu-item class="esq-menu-item"
+        [disabled]="sub.disabled"
+        (click)="onSubCmdClick(sub.subCmd, false)">
+      @if (sub.icon) {
+        <img [src]="sub.icon" class="esq-menu-icon"/>
+      }
+      <span class="esq-menu-label">{{sub.label}}</span>
     </button>
   }
 </mat-menu>

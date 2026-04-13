@@ -25,6 +25,7 @@
 * 04/08/2026 mir0n  ExplorerHost registration redesigned : fanout host events to any number of registered hosts 
 *                   handle EsqExplorerHost.setLoading()
 * 04/12/2026 mir0n  esqDatasource @Input: accept external EsqFlatTreeDatasource; backward compatible
+* 04/13/2026 mir0n  generic submenu: EsqSubMenuItem, activeSubItems, prepareSubmenu(), canSubCmdClick(), onSubCmdClick()
 */
 import {Component,
   ElementRef,
@@ -72,6 +73,7 @@ import {
     EsqCommandMenuItem,
     EsqContextMenuBuilder,
     EsqNewMenuItem,
+    EsqSubMenuItem,
 } from 'src/esquire.ui/api/EsqContextMenuBuilder';
 
 
@@ -117,6 +119,8 @@ export class EsqExplorerComponent extends EsqExplorerHostDummy implements OnInit
   @Input() public esqRestApi: EsqRestApi | null = null;
   @Input() public esqExplorerCallApi: EsqExplorerCallApi | null = null;
   @Input() public esqCommandMenuItems:EsqCommandMenuItem[] = [];
+  activeSubItems: EsqSubMenuItem[] = [];
+  activeCmd: string = '';
   @Input() public esqAccessProfile:EsqAccessProfile | null = null;
   @Input() public esqDatasource?: EsqFlatTreeDatasource;
 
@@ -435,6 +439,27 @@ export class EsqExplorerComponent extends EsqExplorerHostDummy implements OnInit
                 EsqUtils.log("]onCmdDetailsClick");
             }
         }
+    }
+
+    // ===== optional submenu commands on context menu and toolbar =====
+    canSubCmdClick(item: EsqCommandMenuItem, menu: boolean): boolean {
+        var ret = (item.subItems?.length ?? 0) > 0;
+        if (ret) {
+            ret = this.canCmdClick(item.cmd, menu);
+        }
+        return ret;
+    }
+
+    prepareSubmenu(item: EsqCommandMenuItem): void {
+        this.activeCmd      = item.cmd;
+        this.activeSubItems = item.subItems ?? [];
+    }
+
+    async onSubCmdClick(subCmd: string, menu: boolean): Promise<void> {
+        var selectMode = this.treeOnFocus
+            ? SelectMode.SelectTree
+            : SelectMode.SelectList;
+        await this.doExplorerCommand(this.activeCmd, subCmd, this.getSelectedNode(menu), selectMode);
     }
 
    // ===== default actions : Open and Details =====

@@ -10,6 +10,9 @@
 * 04/10/2026 mir0n  accept external defined REST command submitter
 * 04/12/2026 mir0n  extract account picker to EsqAcctPicker; idLabel from dict field 'id';
 *                   validateFields() before submit; onEnterKey event: Event
+* 04/13/2026 mir0n  dict-kind driven: header icon/title and dictionary from dictKind param
+*                   AmountEffect validation; NEGATIVE ops: user types positive, submit negated
+*                   opKind cached; entityId guard in canSubmit; confirmDlg passes opKind
 */
 import {
     Component,
@@ -41,7 +44,8 @@ import { MatIcon } from '@angular/material/icon';
 import { EsqFlatTreeSelectorFactory } from 'src/esquire.ui/explorer/flatTree/EsqFlatTreeSelector';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { EsqAcctPicker } from './EsqAcctPicker';
-const ACCT_DEPOSIT_KIND = 1000;
+import { EsqObjectKindFactory } from 'src/esquire.ui/api/EsqObjectKindFactory';
+import { AcctOperation } from './AcctOperation';
 
 @Component({
     selector: 'esq-acct-dialog',
@@ -74,8 +78,10 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
     protected entityId: string;
     protected entityName: string;
     protected userId: string;
+    protected dictKind: number;
     protected selectorFactory?: EsqFlatTreeSelectorFactory;
 
+    private opKind = EsqObjectKindFactory.UNKNOWN;
     protected headerIcon: string = 'img/$sign.ico';
     protected headerText: string = '';
     protected idLabel: string = '';
@@ -103,9 +109,13 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
         this.submitter = data.submitter;
         this.callApi = data.callApi;
         this.userId = data.userId || '';
+        this.dictKind = data.dictKind || 0;
         this.selectorFactory = data.selectorFactory;
         this.details = { id: this.entityId, kind: this.entityKind };
         this.dialogRef.disableClose = true;
+        this.opKind = EsqObjectKindFactory.instanceOf(this.dictKind);
+        this.headerIcon = this.opKind.icon || 'img/$sign.ico';
+        this.headerText = this.opKind.title || this.opKind.name;
     }
 
     override setLoading(on: boolean): void {
@@ -114,11 +124,8 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
 
     ngOnInit(): void {
         this.callApi?.registerHost(this);
-        this.dictionaryApi.dictionary(ACCT_DEPOSIT_KIND).subscribe(layers => {
+        this.dictionaryApi.dictionary(this.dictKind).subscribe(layers => {
             this.dictLayers = layers;
-            if (layers.length > 0) {
-                this.headerText = layers[0].title;
-            }
             var allFields: any[] = [];
             for (var tab of layers) {
                 for (var field of tab.fields) {
@@ -180,8 +187,17 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
         this.dialogRef.close(null);
     }
 
+    private get amountEffect(): AcctOperation.AmountEffect {
+        return AcctOperation.valueOf(Number(this.details.typeId)).effect;
+    }
+
     protected canSubmit(): boolean {
-        return !this.saving() && !!this.details.amount && Number(this.details.amount) !== 0;
+        var amount = Number(this.details.amount);
+        var ok = !this.saving() && !!this.entityId && !!this.details.amount && amount !== 0;
+        if (ok && this.amountEffect !== AcctOperation.AmountEffect.ANY) {
+            ok = amount > 0;
+        }
+        return ok;
     }
 
     async onSubmit(): Promise<void> {
@@ -190,7 +206,7 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
         }
         var error = EsqUtils.validateFields(this.details, this.dictLayers);
         if (error) {
-            await this.callApi.confirmDlg(null, this.headerText + ' Validation Error',
+            await this.callApi.confirmDlg(this.opKind, this.headerText + ' Validation Error',
                 error.message, EsqExplorerCallApi.ConfirmFlag.Ok);
             setTimeout(() => {
                 var el = document.querySelector('[data-field="' + error!.fieldName + '"]') as HTMLElement;
@@ -198,6 +214,8 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
             }, 100);
             return;
         }
+        var amount = Number(this.details.amount);
+        var submitAmount = this.amountEffect === AcctOperation.AmountEffect.NEGATIVE ? -amount : amount;
         var operationName = this.headerText;
         var rows: string[] = [];
         for (var field of this.fields) {
@@ -207,6 +225,10 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
                     var matched = (field.listvalues as string[]).find((o: string) => o.split('~')[0] === String(val));
                     if (matched) operationName = matched.split('~')[1] || matched.split('~')[0];
                 }
+                continue;
+            }
+            if (field.name === 'amount') {
+                rows.push(field.label + ': ' + EsqUtils.formatNumber(submitAmount, field.format));
                 continue;
             }
             if (val === null || val === undefined || val === '' || val === 0 || val === '0') continue;
@@ -220,11 +242,11 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
         ];
         lines.push('');
         lines.push('Are you sure to continue?');
-        var result = await this.callApi.confirmDlg(null, 'Confirm Deposit', lines.join('\n'), EsqExplorerCallApi.ConfirmFlag.YesNo, 1);
+        var result = await this.callApi.confirmDlg(this.opKind, 'Confirm ' + operationName, lines.join('\n'), EsqExplorerCallApi.ConfirmFlag.YesNo, 1);
         if (result !== 0) return;
         this.saving.set(true);
         try {
-            var body = Object.assign({}, this.details);
+            var body = Object.assign({}, this.details, { amount: submitAmount });
             await firstValueFrom(this.submitter!.submit(this.entityKind, this.entityId, body));
             this.resetDetails();
             void this.loadEntity();
@@ -243,7 +265,7 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
                     message: apiErr.message,
                     tabIndex: 0,
                 };
-                await this.callApi.confirmDlg(null, operationName + ' Error',
+                await this.callApi.confirmDlg(this.opKind, operationName + ' Error',
                     operationName + ' failed: ' + (err.detail || valError.message), EsqExplorerCallApi.ConfirmFlag.Ok);
                 setTimeout(() => {
                     var el = document.querySelector('[data-field="' + valError.fieldName + '"]') as HTMLElement;
@@ -251,7 +273,7 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
                 }, 100);
             } else {
                 var errMsg = EsqUtils.errorMessage(err);
-                await this.callApi.confirmDlg(null, operationName + ' Error', operationName + ' failed: ' + errMsg, EsqExplorerCallApi.ConfirmFlag.Ok);
+                await this.callApi.confirmDlg(this.opKind, operationName + ' Error', operationName + ' failed: ' + errMsg, EsqExplorerCallApi.ConfirmFlag.Ok);
             }
         } finally {
             this.saving.set(false);
