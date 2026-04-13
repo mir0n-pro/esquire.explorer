@@ -55,7 +55,8 @@
 * 04/10/2026 mir0n  added generic pipeWithErrorAndDelay() to help REST API wrapper
 *                   initialize EsqAccessProfile Flag Indexes
 *                   registerHandler(new EsqAcctCommandHandle with inline submitter
-*                   use EsqShellConstants.CMD_ACCT 
+*                   use EsqShellConstants.CMD_ACCT
+* 04/12/2026 mir0n  EsqFlatTreeDatasource created in constructor; passed to EsqAcctCommandHandler
 */
 import {Component,
   OnDestroy,
@@ -104,6 +105,7 @@ import { ProblemDetail, problemDetailDictionary } from 'src/esquire.ui/api/Probl
 import { EsqSingleEntryDialog } from 'src/esquire.ui/components/EsqSingleEntryDialog';
 //import {EsqMoveCommandHandler} from 'src/esquire.ui/explorer/flatTree/components/EsqMoveCommandHandler';
 import {EsqAcctCommandHandler} from 'src/explorer/flatTree/acct/EsqAcctCommandHandler';
+import {EsqFlatTreeDatasource} from 'src/esquire.ui/explorer/flatTree/EsqFlatTreeDatasource';
 
 import {EsquireService} from '../../rest/api/esquire.service';
 import { KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
@@ -134,6 +136,7 @@ const STATUS_READY = "Ready";
 export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, OnDestroy {
 
   private keycloak: Keycloak;
+  protected flatDs!: EsqFlatTreeDatasource;
   keycloakSignal: Signal<KeycloakEvent> = inject(KEYCLOAK_EVENT_SIGNAL);
   authState = signal('Initial');
   errorMessage = signal('');
@@ -174,14 +177,18 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
     this.callApi = callApiMill.instance();
     this.callApi.registerHost(this);
     this.callHost = callApiMill.getHost();
-    this.callApi.registerHandler(new EsqAcctCommandHandler({
-        submit: (kind, id, body) => {
-            return this.pipeWithErrorAndDelay(
-                this.dataService?.esquireCmdAcct(kind, encodeURIComponent(id), body) ??
-                throwError(() => new Error('Data Service is not initialized'))
-            );
-        }
-    }));
+    this.flatDs = new EsqFlatTreeDatasource(this.esqRestApiWrapper());
+    this.callApi.registerHandler(new EsqAcctCommandHandler(
+        {
+            submit: (kind, id, body) => {
+                return this.pipeWithErrorAndDelay(
+                    this.dataService?.esquireCmdAcct(kind, encodeURIComponent(id), body) ??
+                    throwError(() => new Error('Data Service is not initialized'))
+                );
+            }
+        },
+        this.flatDs
+    ));
 
     effect(() => {
       const event = this.keycloakSignal();

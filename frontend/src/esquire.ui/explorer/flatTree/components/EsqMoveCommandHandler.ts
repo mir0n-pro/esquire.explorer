@@ -7,6 +7,7 @@
 * History :
 * 04/01/2026 mir0n  initial: move command handler extracted from EsqExplorerComponent
 * 04/07/2026 mir0n  use context.nodeKind / context.entityKind; thread nodeKind to EsqMoveDialog
+* 04/12/2026 mir0n  use EsqFlatTreeSelectorFactory; pass selectorFactory to EsqMoveDialog
 */
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
@@ -14,7 +15,7 @@ import { EsqEntityCommandHandler, EsqEntityCommandContext, EsqNodeCommandContext
 import { EsqExplorerCallApi } from 'src/esquire.ui/api/EsqExplorerCallApi';
 import { EsqTreeNode } from 'src/esquire.ui/api/EsqTreeNode';
 import { EsqMoveDialog } from './EsqMoveDialog';
-import { EsqFlatTreeDatasource } from '../EsqFlatTreeDatasource';
+import { EsqFlatTreeSelectorFactory } from '../EsqFlatTreeSelector';
 import { EsqRestApi } from 'src/esquire.ui/api/EsqRestApi';
 
 /**
@@ -23,7 +24,7 @@ import { EsqRestApi } from 'src/esquire.ui/api/EsqRestApi';
  */
 export class EsqMoveCommandHandler implements EsqEntityCommandHandler {
     constructor(
-        private getDatasource: () => EsqFlatTreeDatasource | undefined
+        private getSelectorFactory: () => EsqFlatTreeSelectorFactory | undefined
     ) {}
 
 
@@ -82,7 +83,7 @@ export class EsqMoveCommandHandler implements EsqEntityCommandHandler {
       data: {
         node,
         nodeKind,
-        getFlatDs: () => this.getDatasource(),
+        selectorFactory: this.getSelectorFactory(),
         restApi,
         callApi,
         userId

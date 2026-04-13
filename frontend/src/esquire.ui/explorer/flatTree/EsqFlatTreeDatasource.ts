@@ -8,9 +8,12 @@
 * 03/20/2026 mir0n  gotoTreeNode(): navigate to tree node by id; expands ancestors
 * 03/31/2026 mir0n  getOrgNodes(): filter loaded nodes to org kind
 * 04/08/2026 mir0n  remove logDelay()
+* 04/12/2026 mir0n  implements EsqFlatTreeSelectorFactory; createFlatTreeSelector(kinds, isLeaf?); selectorsMap cache; reset clears selectors
 */
 import {EsqTreeViewDatasource} from './EsqTreeViewDatasource';
 import {EsqListViewDatasource} from './EsqListViewDatasource';
+import {EsqSelectEntityDatasource} from './EsqSelectEntityDatasource';
+import {EsqFlatTreeSelector, EsqFlatTreeSelectorFactory} from './EsqFlatTreeSelector';
 /*
 import {EsqRestApi, EsqTreeNode} from '@mir0n-pro/esquire.ui/api';
 import {EsqUtils} from '@mir0n-pro/esquire.ui/components';
@@ -20,12 +23,12 @@ import {EsqTreeNode} from 'src/esquire.ui/api/EsqTreeNode';
 import {EsqUtils} from 'src/esquire.ui/components/EsqUtils';
 
 import { Observable } from 'rxjs';
-export class EsqFlatTreeDatasource {
+export class EsqFlatTreeDatasource implements EsqFlatTreeSelectorFactory {
     public tree: EsqTreeViewDatasource;
     public list: EsqListViewDatasource;
+    private selectorsMap = new Map<string, EsqSelectEntityDatasource>();
 
-    public constructor(api:EsqRestApi) {
-        //this.api = api;
+    public constructor(private api: EsqRestApi) {
         this.tree = new EsqTreeViewDatasource(api);
         this.list = new EsqListViewDatasource(this.tree);
     }
@@ -63,6 +66,17 @@ export class EsqFlatTreeDatasource {
    public clear () {
         this.list.clear();
         this.tree.clear();
+        this.selectorsMap.forEach(s => s.reset());
+    }
+
+    public createFlatTreeSelector(kinds: Set<number>, isLeaf?: (node: EsqTreeNode) => boolean): EsqFlatTreeSelector {
+        var key = [...kinds].sort((a, b) => a - b).join(',');
+        var cached = this.selectorsMap.get(key);
+        if (cached) return cached;
+        var bigApi: EsqRestApi = { ...this.api, esquire: (id?, skip?, _take?, opts?) => this.api.esquire(id, skip, 200, opts) };
+        var selector = new EsqSelectEntityDatasource(this.tree, bigApi, kinds, isLeaf);
+        this.selectorsMap.set(key, selector);
+        return selector;
     }
 
     public getById (id: string) : EsqTreeNode|undefined{

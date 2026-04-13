@@ -2,6 +2,20 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+04/12/2026 mir0n  Account picker; EsqAcctDialog fixes; EsqSelectAcctDialog
++ added flatTree\acct\EsqAcctPicker.*
+flatTree\acct\EsqAcctDialog.ts
+  - extract account picker to EsqAcctPicker; idLabel from dict field 'id'
+  - validateFields() before submit; onEnterKey event: Event
+flatTree\acct\EsqAcctDialog.scss
+  - account header row grid styles
++ added flatTree\acct\EsqSelectAcctDialog.ts
+flatTree\acct\EsqAcctCommandHandler.ts
+  - selectorFactory param; pass to EsqAcctDialog; dialog size 480px
+flatTree\app-shell.ts
+  - EsqFlatTreeDatasource created in constructor; passed to EsqAcctCommandHandler
+
+
 04/10/2026 mir0n Rename app-explorer.component with app-shell
 
 04/10/2026 mir0n Externalize acct command as custom

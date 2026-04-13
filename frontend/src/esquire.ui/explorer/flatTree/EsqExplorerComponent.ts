@@ -24,6 +24,7 @@
 *                   api.call(): added subCmd, selectMode
 * 04/08/2026 mir0n  ExplorerHost registration redesigned : fanout host events to any number of registered hosts 
 *                   handle EsqExplorerHost.setLoading()
+* 04/12/2026 mir0n  esqDatasource @Input: accept external EsqFlatTreeDatasource; backward compatible
 */
 import {Component,
   ElementRef,
@@ -117,6 +118,7 @@ export class EsqExplorerComponent extends EsqExplorerHostDummy implements OnInit
   @Input() public esqExplorerCallApi: EsqExplorerCallApi | null = null;
   @Input() public esqCommandMenuItems:EsqCommandMenuItem[] = [];
   @Input() public esqAccessProfile:EsqAccessProfile | null = null;
+  @Input() public esqDatasource?: EsqFlatTreeDatasource;
 
   treeLevelAccessor = (dataNode: EsqTreeNode)  => dataNode.level;
   datasource!: EsqFlatTreeDatasource;
@@ -223,7 +225,7 @@ export class EsqExplorerComponent extends EsqExplorerHostDummy implements OnInit
     const moveHandler = new EsqMoveCommandHandler(() => this.getDatasource());
     this.esqExplorerCallApi?.registerHandler(moveHandler);
 
-    this.datasource = new EsqFlatTreeDatasource(this.esqRestApi as EsqRestApi);
+    this.datasource = this.esqDatasource ?? new EsqFlatTreeDatasource(this.esqRestApi as EsqRestApi);
     await this.datasource.loadInitialData();
     this.listNodeOwner = this.datasource.data4tree[0];
     if (this.listNodeOwner) {

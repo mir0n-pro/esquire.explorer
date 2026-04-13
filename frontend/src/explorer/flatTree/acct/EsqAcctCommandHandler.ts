@@ -6,8 +6,9 @@
 *
 * History :
 * 04/09/2026 mir0n  initial: acct deposit command handler
-* 04/10/2026 mir0n  use EsqShellConstants.CMD_ACCT 
+* 04/10/2026 mir0n  use EsqShellConstants.CMD_ACCT
 *                   accept external defined REST command submitter
+* 04/12/2026 mir0n  selectorFactory param; pass to EsqAcctDialog; dialog size 480px
 */
 import { MatDialog } from '@angular/material/dialog';
 import { EsqEntityCommandHandler, EsqEntityCommandContext, EsqNodeCommandContext, EsqCommandSubmitter, SelectMode } from 'src/esquire.ui/api/EsqEntityCommandHandler';
@@ -15,6 +16,7 @@ import { EsqExplorerCallApi } from 'src/esquire.ui/api/EsqExplorerCallApi';
 import { EsqRestApi } from 'src/esquire.ui/api/EsqRestApi';
 import { EsqDictionaryApi } from 'src/esquire.ui/api/EsqDictionaryApi';
 import { EsqAcctDialog } from './EsqAcctDialog';
+import { EsqFlatTreeSelectorFactory } from 'src/esquire.ui/explorer/flatTree/EsqFlatTreeSelector';
 import {EsqShellConstants} from "../app-shell.contants";
 
 /**
@@ -23,7 +25,10 @@ import {EsqShellConstants} from "../app-shell.contants";
  */
 export class EsqAcctCommandHandler implements EsqEntityCommandHandler {
 
-    constructor(private submitter?: EsqCommandSubmitter) {}
+    constructor(
+        private submitter?: EsqCommandSubmitter,
+        private selectorFactory?: EsqFlatTreeSelectorFactory
+    ) {}
 
     canHandle(cmd: string): boolean {
         return cmd === EsqShellConstants.CMD_ACCT;
@@ -73,9 +78,9 @@ export class EsqAcctCommandHandler implements EsqEntityCommandHandler {
         var dialogRef = dialog.open(EsqAcctDialog, {
             autoFocus: false,
             panelClass: 'esq-dialog',
-            data: { entityKind, entityId, entityName, restApi, dictionaryApi, callApi, userId, submitter: this.submitter }
+            data: { entityKind, entityId, entityName, restApi, dictionaryApi, callApi, userId, submitter: this.submitter, selectorFactory: this.selectorFactory }
         });
-        dialogRef.updateSize('360px', 'auto');
+        dialogRef.updateSize('480px', 'auto');
 
         await new Promise<void>(resolve =>
             dialogRef.afterClosed().subscribe(() => resolve())

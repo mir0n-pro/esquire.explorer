@@ -5,51 +5,53 @@
   mailto:mir0n.the.programmer@gmail.com
 
   History:
-  03/31/2026 mir0n  initial
 -->
 <mat-toolbar class="mat-elevation-z2 esq-dialog-toolbar"
     cdkDrag
     cdkDragRootElement=".cdk-overlay-pane"
     cdkDragHandle
     cdkDragBoundary=".cdk-overlay-container"
-    [esqDialogResize]="'move:' + userId"
+    [esqDialogResize]="resizeKey"
 >
   <div>
     @if (loading()) {
       <span class="esq-loading-div"></span>
+    } @else if (headerIcon) {
+      <img [src]="headerIcon" class="esq-base-icon"/>
     } @else {
-      <img [src]="movingNode.kind.icon" class="esq-base-icon"/>
+      <span style="width:24px;display:inline-block;"></span>
     }
   </div>
-  <div>Move: {{movingNode.name}}</div>
-  <button class="esq-move-close-btn" (click)="onCancel()">&#x2715;</button>
+  <div>{{dialogTitle}}</div>
+  <button class="esq-select-entity-close-btn" (click)="onCancel()">&#x2715;</button>
 </mat-toolbar>
 
-<div class="esq-move-tree-panel">
-  <mat-tree [dataSource]="moveDs" [levelAccessor]="levelAccessor">
+<div class="esq-select-entity-tree-panel">
+  <mat-tree [dataSource]="treeDs.selectDs" [levelAccessor]="treeDs.levelAccessor">
     <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding matTreeNodePaddingIndent="16"
-        id="move-node-{{node.id}}"
-        class="esq-move-tree-node"
+        id="select-entity-node-{{node.id}}"
+        class="esq-select-entity-tree-node"
         tabindex="0"
         [ngClass]="{
-            'esq-move-active-node': selectedDest === node,
-            'esq-move-mouse-node': hoveredNode === node && selectedDest !== node
+            'esq-select-entity-active-node': selectedNode === node,
+            'esq-select-entity-mouse-node': hoveredNode === node && selectedNode !== node
         }"
         (click)="onNodeClick(node)"
+        (dblclick)="onNodeDblClick(node)"
         (keydown)="onNodeKeydown($event, node)"
         (mouseenter)="hoveredNode = node"
         (mouseleave)="hoveredNode = null"
         (focus)="hoveredNode = node"
         (blur)="hoveredNode = null">
-      @if (node.expandable()) {
-        <mat-icon class="esq-move-toggle-icon"
+      @if (treeDs.isExpandable(node)) {
+        <mat-icon class="esq-select-entity-toggle-icon"
           (click)="onToggleClick(node, $event)"
           (dblclick)="onToggleDblClick(node, $event)">{{node.expanded() ? 'expand_more' : 'chevron_right'}}</mat-icon>
       } @else {
         <span style="width:24px;display:inline-block;flex-shrink:0;"></span>
       }
-      <img [src]="node.kind.icon" class="esq-base-icon" (dblclick)="onNodeDblClick(node)"/>
-      <span class="esq-move-overlay-text" (dblclick)="onNodeDblClick(node)">{{node.name}}</span>
+      <img [src]="node.kind.icon" class="esq-base-icon"/>
+      <span class="esq-select-entity-overlay-text">{{node.name}}</span>
     </mat-tree-node>
   </mat-tree>
 </div>

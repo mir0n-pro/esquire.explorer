@@ -28,7 +28,8 @@
 *                   added registerHandler()
 * 04/07/2026 mir0n  kind normalization centralized: doNodeCommand() → context.nodeKind,
 *                   doEntityCommand() → context.entityKind, doCreate(); use EsqObjectKindFactory.normalize()
-* 04/08/2026 mir0n  ExplorerHost registration redesigned : fanout host events to any number of registered hosts 
+* 04/08/2026 mir0n  ExplorerHost registration redesigned : fanout host events to any number of registered hosts
+* 04/12/2026 mir0n  String() normalization for entityId in calle() command context
 */
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { EsqCreateEntityDialog } from "./EsqCreateEntityDialog";
@@ -106,7 +107,7 @@ export class EsqExplorerCallApiMill {
       var context: EsqEntityCommandContext = {
           cmd: !cmd ? EsqExplorerCallApi.CMD_DEFAULT : cmd,
           subCmd,
-          entityId: entity_id,
+          entityId: String(entity_id),
           entityName: entity_name,
           entityKind,
           accessProfile,

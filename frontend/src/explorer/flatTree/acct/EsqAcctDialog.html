@@ -20,13 +20,27 @@
             <img [src]="headerIcon" class="esq-base-icon"/>
         }
     </div>
-    <div>{{entityName}}: Deposit</div>
+    <div>{{headerText}}</div>
     <button matIconButton (click)="onCancel()" class="esq-icon-button" matTooltip="Close">
         <mat-icon>close</mat-icon>
     </button>
 </mat-toolbar>
 
 <mat-dialog-content>
+    <div class="esq-acct-picker">
+        <b>{{idLabel}}:</b>
+        <esq-acct-picker
+            [entityId]="entityId"
+            [entityKind]="entityKind"
+            [entityName]="entityName"
+            [userId]="userId"
+            [restApi]="restApi"
+            [callApi]="callApi"
+            [selectorFactory]="selectorFactory"
+            [reloadTrigger]="reloadTrigger"
+            (entityChange)="onEntityChange($event)"
+        />
+    </div>
     @for (field of fields; track field.name) {
         <esq-tab-field
             [field]="field"
@@ -37,10 +51,11 @@
             [userId]="userId"
         />
     }
+
 </mat-dialog-content>
 
 <mat-dialog-actions align="center">
     <button mat-raised-button (click)="onCancel()">Close</button>
-    <button mat-raised-button [disabled]="!canSubmit()" (click)="onSubmit()">Submit</button>
+    <button mat-raised-button type="submit" [disabled]="!canSubmit()" (click)="onSubmit()" class="esq-acct-submit-btn">Submit</button>
     <button mat-raised-button (click)="loadEntity()">Refresh</button>
 </mat-dialog-actions>

@@ -1,0 +1,26 @@
+/*
+*  Esquire frameworks (tm)
+*  Esquire Explorer
+*  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
+*  mailto:mir0n.the.programmer@gmail.com
+*
+*  History:
+*/
+esq-acct-dialog {
+
+  /* Same grid as .esq-grid-input: 123px label | 1fr input */
+  .esq-acct-picker {
+    display: grid;
+    grid-template-columns: 123px auto;
+    align-items: center;
+    gap: 4px;
+    margin-top: 16px;
+    font-size: 10pt;
+    box-sizing: border-box;
+  }
+
+  .esq-acct-submit-btn {
+    border: 1px solid #888;
+  }
+
+}

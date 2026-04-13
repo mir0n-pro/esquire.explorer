@@ -1,0 +1,27 @@
+<!--
+  Esquire frameworks (tm)
+
+  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
+  mailto:mir0n.the.programmer@gmail.com
+
+  History:
+  04/12/2026 mir0n  initial
+-->
+<div class="esq-acct-picker-row">
+  <div class="esq-acct-picker-box">
+    @if (loading()) {
+      <span class="esq-loading-div" style="width:16px;height:16px;flex-shrink:0;"></span>
+    } @else {
+      <img [src]="entityIcon" class="esq-acct-icon"/>
+    }
+    <span class="esq-acct-picker-name" tabindex="0">{{entityName}}</span>
+    <button class="esq-acct-picker-btn" (click)="onSelectAccount()" matTooltip="Select account">
+      <mat-icon>keyboard_arrow_down</mat-icon>
+    </button>
+    <button class="esq-acct-picker-btn" (click)="onOpenDetails()" matTooltip="Details">
+      <mat-icon>wysiwyg</mat-icon>
+    </button>
+  </div>
+  <span class="esq-acct-ccy">{{entityData()?.ccy}}</span>
+  <span class="esq-acct-balance">{{entityData()?.balance | number:'1.2-2'}}</span>
+</div>

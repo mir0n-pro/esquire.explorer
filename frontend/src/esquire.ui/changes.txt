@@ -2,6 +2,22 @@ Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
 
+04/12/2026 mir0n  Account picker; generic entity select dialog; EsqMoveDialog refactor; String() id normalization
++ added explorer\flatTree\components\EsqSelectEntityDialog.*
+explorer\flatTree\components\EsqMoveDialog.ts
+  - refactored to extend EsqSelectEntityDialog; callApi inherited from base (removed duplicate field)
+  - MOVE_TREE_KINDS={0,20}; drop own tree/BehaviorSubject
++ added explorer\flatTree\EsqFlatTreeSelector.ts
++ added explorer\flatTree\EsqSelectEntityDatasource.ts
+explorer\flatTree\EsqFlatTreeDatasource.ts
+  - implements EsqFlatTreeSelectorFactory; createFlatTreeSelector(kinds, isLeaf?); selectorsMap cache; reset clears selectors
++ added explorer\flatTree\EsqExplorerComponent.ts
+components\EsqMoveCommandHandler.ts
+  - use EsqFlatTreeSelectorFactory; pass selectorFactory to EsqMoveDialog
+components\EsqExplorerCallApiMill.ts
+  - String() normalization for entityId in calle() command context
+
+
 04/09/2026 mir0n Externalize acct command as custom
 api\EsqAccessProfile.ts
   - static readonly FLAG_INDEX replaced with customizable flagIndexes

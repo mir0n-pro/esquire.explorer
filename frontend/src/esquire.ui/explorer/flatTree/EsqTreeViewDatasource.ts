@@ -23,6 +23,7 @@ export class EsqTreeViewDatasource implements DataSource<EsqTreeNode> {
   private dataShown = new BehaviorSubject<EsqTreeNode[]>([]);
   private dataInternal:EsqTreeNode[] = [];
   private dataTree:EsqTreeNode[] = [];
+
   private api: EsqRestApi;
 
   
