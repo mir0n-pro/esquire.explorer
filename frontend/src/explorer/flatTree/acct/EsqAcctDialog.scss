@@ -14,13 +14,16 @@ esq-acct-dialog {
     grid-template-columns: 123px auto;
     align-items: center;
     gap: 4px;
-    margin-top: 16px;
     font-size: 10pt;
     box-sizing: border-box;
   }
 
   .esq-acct-submit-btn {
     border: 1px solid #888;
+  }
+
+  .esq-amount-negative input {
+    color: red;
   }
 
 }

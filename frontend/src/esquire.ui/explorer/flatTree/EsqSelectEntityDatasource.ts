@@ -6,6 +6,7 @@
 *
 * History :
 * 04/12/2026 mir0n  initial: generic tree-selector datasource; wraps EsqTreeViewDatasource;
+* 04/14/2026 mir0n  findByNodeId / findByEntityId split; findByEntityId expression corrected
 */
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { EsqTreeNode } from 'src/esquire.ui/api/EsqTreeNode';
@@ -98,9 +99,20 @@ export class EsqSelectEntityDatasource implements EsqFlatTreeSelector {
         return !this.isLeaf(node);
     }
 
-    findById(id: string): EsqTreeNode | null {
-        return this.allNodes().find(n => n.entityId === id) ?? null;
+    findByNodeId(id: string): EsqTreeNode | null {
+        var ret: EsqTreeNode | null = this.allNodes().find(n => 
+            id === n.id
+        ) ?? null;
+        return ret;
     }
+
+    findByEntityId(id: string): EsqTreeNode | null {
+        var ret: EsqTreeNode | null = this.allNodes().find(n => 
+            id === n.entityId?n.entityId:''
+        ) ?? null;
+        return ret;
+    }
+
 
     async expandToNode(entityId: string): Promise<EsqTreeNode | null> {
         var path = await this.treeDs.getPath(entityId);
@@ -111,7 +123,7 @@ export class EsqSelectEntityDatasource implements EsqFlatTreeSelector {
                 await this.toggleNode(ancestor);
             }
         }
-        return this.findById(entityId);
+        return this.findByNodeId(entityId);
     }
 
     private allNodes(): EsqTreeNode[] {

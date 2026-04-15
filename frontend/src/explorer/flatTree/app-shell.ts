@@ -59,6 +59,7 @@
 * 04/12/2026 mir0n  EsqFlatTreeDatasource created in constructor; passed to EsqAcctCommandHandler
 * 04/13/2026 mir0n  kinds 1000/1002 (deposit/withdrawal) in EsquireObjectKinds with titles
 *                   acct subItems built in ngOnInit from dict kind icons
+* 04/14/2026 mir0n  subItemDisabled callback; Transfer submenu item; EsqObjectKind 1004 (transfer)
 */
 import {Component,
   OnDestroy,
@@ -109,6 +110,7 @@ import { EsqSingleEntryDialog } from 'src/esquire.ui/components/EsqSingleEntryDi
 import {EsqAcctCommandHandler} from 'src/explorer/flatTree/acct/EsqAcctCommandHandler';
 import {AcctOperation} from 'src/explorer/flatTree/acct/AcctOperation';
 import {EsqFlatTreeDatasource} from 'src/esquire.ui/explorer/flatTree/EsqFlatTreeDatasource';
+import {EsqTreeNode} from 'src/esquire.ui/api/EsqTreeNode';
 
 import {EsquireService} from '../../rest/api/esquire.service';
 import { KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
@@ -146,6 +148,14 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
   hideLoginHint = signal(false);
   dataService?: EsquireService;
   _dataService: EsquireService;
+
+  readonly subItemDisabled = (cmd: string, subCmd: string, node: EsqTreeNode | null): boolean => {
+      if (cmd === EsqShellConstants.CMD_ACCT && Number(subCmd) === AcctOperation.DICT_KIND_TRANSFER) {
+          var kind = node?.kind.id ?? 0;
+          return kind === EsqShellConstants.KIND_PACCOUNT || kind === EsqShellConstants.KIND_PACCOUNTLNK;
+      }
+      return false;
+  };
 
   readonly detailsDialog:MatDialog = inject(MatDialog);
   private callApi?:EsqExplorerCallApi;
@@ -381,6 +391,7 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
         acctItem.subItems = [
             { label: 'Deposit',    icon: EsqObjectKindFactory.instanceOf(AcctOperation.DICT_KIND_DEPOSIT).icon,    subCmd: String(AcctOperation.DICT_KIND_DEPOSIT)    },
             { label: 'Withdrawal', icon: EsqObjectKindFactory.instanceOf(AcctOperation.DICT_KIND_WITHDRAWAL).icon, subCmd: String(AcctOperation.DICT_KIND_WITHDRAWAL) },
+            { label: 'Transfer',   icon: EsqObjectKindFactory.instanceOf(AcctOperation.DICT_KIND_TRANSFER).icon,   subCmd: String(AcctOperation.DICT_KIND_TRANSFER)   },
         ];
     }
   }
@@ -500,6 +511,7 @@ export const EsquireObjectKinds = [
     new EsqObjectKind({id: 982,  name:"tools",      icon:"img/tools.ico"}),
     new EsqObjectKind({id: 1000, name:"deposit",    title:"Deposit",    icon:"img/$sign.ico"}),
     new EsqObjectKind({id: 1002, name:"withdrawal", title:"Withdrawal", icon:"img/$withdraw.ico"}),
+    new EsqObjectKind({id: 1004, name:"transfer",   title:"Transfer",   icon:"img/$transfer.ico"}),
 ] as const;
 
 export const EsquireStatuses = {

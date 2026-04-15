@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.2-2604.1420  Acct Transaction Phase IV: Transfer acct operation with dest picker and paper-account guard
+  :Feature:     EsqTransferDialog — second account picker; same-account validation
+  :Improvement: EsqAcctDialog protected hooks (onDictionaryLoaded, focusOnInit, validateExtra, extraConfirmLines)
+  :Fix:         findByEntityId expression; onSelect() kind normalization; Transfer DICT_KIND corrected
+
 v1.2.2-2604.1319 Acct operations expansion: Deposit/Withdrawal submenu; AmountEffect validation
 
 v1.2.2-2604.1219 Account picker; generic entity select dialog; EsqMoveDialog refactor

@@ -7,6 +7,7 @@
 * History :
 * 04/13/2026 mir0n  initial: AcctOperation namespace; AmountEffect enum; OperationCode interface;
 *                   DICT_KIND_DEPOSIT/WITHDRAWAL; valueOf()
+* 04/14/2026 mir0n  DICT_KIND_TRANSFER=1004; TRANSFER.dictKind corrected
 */
 
 /**
@@ -17,6 +18,7 @@ export namespace AcctOperation {
 
     export const DICT_KIND_DEPOSIT    = 1000;
     export const DICT_KIND_WITHDRAWAL = 1002;
+    export const DICT_KIND_TRANSFER   = 1004;
 
     export enum AmountEffect {
         NEGATIVE = -1,   // the amount must be < 0
@@ -36,7 +38,7 @@ export namespace AcctOperation {
     export const UNKNOWN:    OperationCode = { id: 0, name: 'UNKNOWN',    label: 'Unknown',    effect: AmountEffect.ANY,      dictKind: DICT_KIND_DEPOSIT,    icon: 'img/$sign.ico'     };
     export const DEPOSIT:    OperationCode = { id: 1, name: 'DEPOSIT',    label: 'Deposit',    effect: AmountEffect.POSITIVE, dictKind: DICT_KIND_DEPOSIT,    icon: 'img/$sign.ico'     };
     export const WITHDRAWAL: OperationCode = { id: 2, name: 'WITHDRAWAL', label: 'Withdrawal', effect: AmountEffect.NEGATIVE, dictKind: DICT_KIND_WITHDRAWAL, icon: 'img/$withdraw.ico' };
-    export const TRANSFER:   OperationCode = { id: 3, name: 'TRANSFER',   label: 'Transfer',   effect: AmountEffect.NEGATIVE, dictKind: DICT_KIND_WITHDRAWAL, icon: 'img/$transfer.ico' };
+    export const TRANSFER:   OperationCode = { id: 3, name: 'TRANSFER',   label: 'Transfer',   effect: AmountEffect.NEGATIVE, dictKind: DICT_KIND_TRANSFER,  icon: 'img/$transfer.ico' };
     export const ADJUSTMENT: OperationCode = { id: 4, name: 'ADJUSTMENT', label: 'Adjustment', effect: AmountEffect.ANY,      dictKind: DICT_KIND_DEPOSIT,    icon: 'img/$sign.ico'     };
     export const COMMISSION: OperationCode = { id: 5, name: 'COMMISSION', label: 'Commission', effect: AmountEffect.NEGATIVE, dictKind: DICT_KIND_WITHDRAWAL, icon: 'img/$withdraw.ico' };
 

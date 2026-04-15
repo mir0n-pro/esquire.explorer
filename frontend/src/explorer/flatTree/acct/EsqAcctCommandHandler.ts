@@ -10,6 +10,7 @@
 *                   accept external defined REST command submitter
 * 04/12/2026 mir0n  selectorFactory param; pass to EsqAcctDialog; dialog size 480px
 * 04/13/2026 mir0n  pass dictKind (parsed from subCmd) to EsqAcctDialog
+* 04/14/2026 mir0n  route DICT_KIND_TRANSFER to EsqTransferDialog
 */
 import { MatDialog } from '@angular/material/dialog';
 import { EsqEntityCommandHandler, EsqEntityCommandContext, EsqNodeCommandContext, EsqCommandSubmitter, SelectMode } from 'src/esquire.ui/api/EsqEntityCommandHandler';
@@ -17,8 +18,10 @@ import { EsqExplorerCallApi } from 'src/esquire.ui/api/EsqExplorerCallApi';
 import { EsqRestApi } from 'src/esquire.ui/api/EsqRestApi';
 import { EsqDictionaryApi } from 'src/esquire.ui/api/EsqDictionaryApi';
 import { EsqAcctDialog } from './EsqAcctDialog';
+import { EsqTransferDialog } from './EsqTransferDialog';
 import { EsqFlatTreeSelectorFactory } from 'src/esquire.ui/explorer/flatTree/EsqFlatTreeSelector';
 import {EsqShellConstants} from "../app-shell.contants";
+import { AcctOperation } from './AcctOperation';
 
 /**
  * Handler for CMD_ACCT command
@@ -79,7 +82,8 @@ export class EsqAcctCommandHandler implements EsqEntityCommandHandler {
         userId: string,
         onRefresh: (entityId: string) => void
     ): Promise<void> {
-        var dialogRef = dialog.open(EsqAcctDialog, {
+        var dialogClass = dictKind === AcctOperation.DICT_KIND_TRANSFER ? EsqTransferDialog : EsqAcctDialog;
+        var dialogRef = dialog.open(dialogClass, {
             autoFocus: false,
             panelClass: 'esq-dialog',
             data: { entityKind, entityId, entityName, dictKind, restApi, dictionaryApi, callApi, userId, submitter: this.submitter, selectorFactory: this.selectorFactory }

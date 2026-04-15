@@ -66,7 +66,7 @@
               matTooltip={{item.label}}
               [disabled]="!canSubCmdClick(item, false)"
               [matMenuTriggerFor]="toolbarSubMenu"
-              (click)="prepareSubmenu(item)">
+              (click)="prepareSubmenu(item, false)">
               <mat-icon>{{item.icon}}</mat-icon>
           </button>
       } @else if (item.cmd === 'new') {
@@ -193,7 +193,7 @@
                   class="esq-menu-item"
                   [disabled]="!canSubCmdClick(item, true)"
                   [matMenuTriggerFor]="contextSubMenu"
-                  (click)="prepareSubmenu(item)">
+                  (click)="prepareSubmenu(item, true)">
               <p class="esq-menu-grid">
                   <span class="esq-menu-label">{{item.label}}</span>
               </p>

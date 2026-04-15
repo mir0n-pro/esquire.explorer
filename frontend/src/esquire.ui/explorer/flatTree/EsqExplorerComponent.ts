@@ -26,6 +26,7 @@
 *                   handle EsqExplorerHost.setLoading()
 * 04/12/2026 mir0n  esqDatasource @Input: accept external EsqFlatTreeDatasource; backward compatible
 * 04/13/2026 mir0n  generic submenu: EsqSubMenuItem, activeSubItems, prepareSubmenu(), canSubCmdClick(), onSubCmdClick()
+* 04/14/2026 mir0n  esqSubItemDisabled @Input callback; isSubItemDisabled() hook; prepareSubmenu(menu) param
 */
 import {Component,
   ElementRef,
@@ -123,6 +124,7 @@ export class EsqExplorerComponent extends EsqExplorerHostDummy implements OnInit
   activeCmd: string = '';
   @Input() public esqAccessProfile:EsqAccessProfile | null = null;
   @Input() public esqDatasource?: EsqFlatTreeDatasource;
+  @Input() public esqSubItemDisabled?: (cmd: string, subCmd: string, node: EsqTreeNode | null) => boolean;
 
   treeLevelAccessor = (dataNode: EsqTreeNode)  => dataNode.level;
   datasource!: EsqFlatTreeDatasource;
@@ -450,9 +452,17 @@ export class EsqExplorerComponent extends EsqExplorerHostDummy implements OnInit
         return ret;
     }
 
-    prepareSubmenu(item: EsqCommandMenuItem): void {
+    prepareSubmenu(item: EsqCommandMenuItem, menu: boolean): void {
+        var node = this.getSelectedNode(menu);
         this.activeCmd      = item.cmd;
-        this.activeSubItems = item.subItems ?? [];
+        this.activeSubItems = (item.subItems ?? []).map(sub => ({
+            ...sub,
+            disabled: sub.disabled || this.isSubItemDisabled(item.cmd, sub.subCmd, node),
+        }));
+    }
+
+    protected isSubItemDisabled(cmd: string, subCmd: string, node: EsqTreeNode | null): boolean {
+        return this.esqSubItemDisabled?.(cmd, subCmd, node) ?? false;
     }
 
     async onSubCmdClick(subCmd: string, menu: boolean): Promise<void> {

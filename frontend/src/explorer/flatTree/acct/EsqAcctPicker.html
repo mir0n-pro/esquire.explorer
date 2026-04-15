@@ -11,8 +11,10 @@
   <div class="esq-acct-picker-box">
     @if (loading()) {
       <span class="esq-loading-div" style="width:16px;height:16px;flex-shrink:0;"></span>
-    } @else {
+    } @else if (entityId) {
       <img [src]="entityIcon" class="esq-acct-icon"/>
+    } @else {
+      <span style="width:16px;display:inline-block;"></span>
     }
     <span class="esq-acct-picker-name" tabindex="0">{{entityName}}</span>
     <button class="esq-acct-picker-btn" (click)="onSelectAccount()" matTooltip="Select account">

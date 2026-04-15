@@ -2,6 +2,16 @@ Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
 
+04/14/2026 mir0n  Transfer acct operation; picker entity kind normalization; submenu per-item disable
+explorer\flatTree\EsqExplorerComponent.ts
+  - esqSubItemDisabled @Input callback; isSubItemDisabled() hook; prepareSubmenu(menu) param
+explorer\flatTree\EsqFlatTreeSelector.ts
+  - findById split into findByNodeId / findByEntityId (interface)
+explorer\flatTree\EsqSelectEntityDatasource.ts
+  - findByNodeId / findByEntityId implementation; findByEntityId expression corrected
+explorer\flatTree\components\EsqSelectEntityDialog.ts
+  - onSelect() normalizes kind via EsqObjectKindFactory.normalize(); preSelectedId protected; canSelect() cleanup
+
 04/13/2026 mir0n  Acct command submenu; generic subItems submenu support; EsqObjectKindFactory local-kind fix
 api\EsqContextMenuBuilder.ts
   - EsqSubMenuItem interface; subItems?: EsqSubMenuItem[] on EsqCommandMenuItem

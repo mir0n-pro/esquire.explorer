@@ -2,6 +2,22 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+04/14/2026 mir0n  Transfer acct operation; protective hooks; paper-account submenu guard
+flatTree\acct\AcctOperation.ts
+  - DICT_KIND_TRANSFER=1004; TRANSFER.dictKind corrected
++ added flatTree\acct\EsqTransferDialog.*
+flatTree\acct\EsqAcctCommandHandler.ts
+  - route DICT_KIND_TRANSFER to EsqTransferDialog
+flatTree\acct\EsqAcctDialog.ts
+  - protected hooks for subclassing: onDictionaryLoaded, focusOnInit, extraConfirmLines, validateExtra async
+  - isNegativeOp getter; el.nativeElement querySelector; idLabel in confirm lines
+flatTree\acct\EsqSelectAcctDialog.ts
+  - isSelectable() blocks re-selection of pre-selected entity
+flatTree\app-shell.contants.ts
+  - KIND_PACCOUNT/KIND_PACCOUNTLNK constants
+flatTree\app-shell.ts
+  - subItemDisabled callback; Transfer submenu item; EsqObjectKind 1004 (transfer)
+
 04/13/2026 mir0n  Acct operations expansion: Deposit/Withdrawal submenu; AmountEffect validation
 + added flatTree\acct\AcctOperation.ts
 flatTree\acct\EsqAcctCommandHandler.ts

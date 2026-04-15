@@ -13,6 +13,8 @@
 * 04/13/2026 mir0n  dict-kind driven: header icon/title and dictionary from dictKind param
 *                   AmountEffect validation; NEGATIVE ops: user types positive, submit negated
 *                   opKind cached; entityId guard in canSubmit; confirmDlg passes opKind
+* 04/14/2026 mir0n  protected hooks for subclassing: onDictionaryLoaded, focusOnInit, extraConfirmLines, validateExtra async
+*                   isNegativeOp getter; el.nativeElement querySelector; idLabel in confirm lines
 */
 import {
     Component,
@@ -70,7 +72,7 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
 
     private dialogRef: MatDialogRef<EsqAcctDialog>;
     protected restApi: EsqRestApi;
-    private dictionaryApi: EsqDictionaryApi;
+    protected dictionaryApi: EsqDictionaryApi;
     private submitter?: EsqCommandSubmitter;
     protected callApi: EsqExplorerCallApi;
 
@@ -81,16 +83,16 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
     protected dictKind: number;
     protected selectorFactory?: EsqFlatTreeSelectorFactory;
 
-    private opKind = EsqObjectKindFactory.UNKNOWN;
+    protected opKind = EsqObjectKindFactory.UNKNOWN;
     protected headerIcon: string = 'img/$sign.ico';
     protected headerText: string = '';
     protected idLabel: string = '';
     protected reloadTrigger: number = 0;
     protected fields: any[] = [];
     protected details: any = {};
-    private dictLayers: any[] = [];
+    protected dictLayers: any[] = [];
 
-    private el = inject(ElementRef);
+    protected el = inject(ElementRef);
 
     public loading = signal(false);
     public saving = signal(false);
@@ -136,13 +138,9 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
                 }
             }
             this.fields = allFields;
+            this.onDictionaryLoaded();
             this.resetDetails();
-            setTimeout(() => {
-                var input = this.el.nativeElement.querySelector(
-                    'esq-tab-field input:not([readonly]):not([disabled]), esq-tab-field select:not([disabled])'
-                );
-                if (input) (input as HTMLElement).focus();
-            }, 0);
+            setTimeout(() => this.focusOnInit(), 0);
         });
     }
 
@@ -162,7 +160,7 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
         this.details.kind = this.entityKind;
     }
 
-    private resetDetails(): void {
+    protected resetDetails(): void {
         this.details = { id: this.entityId, kind: this.entityKind };
         for (var tab of this.dictLayers) {
             for (var field of tab.fields) {
@@ -175,7 +173,8 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
 
     @HostListener('keydown.enter', ['$event'])
     onEnterKey(event: Event): void {
-        if ((event.target as HTMLElement).tagName === 'TEXTAREA') return;
+        var tag = (event.target as HTMLElement).tagName;
+        if (tag === 'TEXTAREA' || tag === 'BUTTON') return;
         if (this.canSubmit()) {
             event.preventDefault();
             void this.onSubmit();
@@ -187,9 +186,30 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
         this.dialogRef.close(null);
     }
 
+    protected get isNegativeOp(): boolean {
+        return this.amountEffect === AcctOperation.AmountEffect.NEGATIVE;
+    }
+
     private get amountEffect(): AcctOperation.AmountEffect {
         return AcctOperation.valueOf(Number(this.details.typeId)).effect;
     }
+
+    protected focusOnInit(): void {
+        var input = this.el.nativeElement.querySelector(
+            'esq-tab-field input:not([readonly]):not([disabled]), esq-tab-field select:not([disabled])'
+        );
+        if (input) (input as HTMLElement).focus();
+    }
+
+    protected extraConfirmLines(): string[] {
+        return [];
+    }
+
+    protected async validateExtra(): Promise<string | null> {
+        return null;
+    }
+
+    protected onDictionaryLoaded(): void {}
 
     protected canSubmit(): boolean {
         var amount = Number(this.details.amount);
@@ -209,9 +229,13 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
             await this.callApi.confirmDlg(this.opKind, this.headerText + ' Validation Error',
                 error.message, EsqExplorerCallApi.ConfirmFlag.Ok);
             setTimeout(() => {
-                var el = document.querySelector('[data-field="' + error!.fieldName + '"]') as HTMLElement;
+                var el = this.el.nativeElement.querySelector('[data-field="' + error!.fieldName + '"]') as HTMLElement;
                 if (el) el.focus();
             }, 100);
+            return;
+        }
+        var extraError = await this.validateExtra();
+        if (extraError) {
             return;
         }
         var amount = Number(this.details.amount);
@@ -237,7 +261,8 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
         }
         var lines: string[] = [
             'You are about to submit ' + operationName,
-            'Account: ' + this.entityName,
+            this.idLabel + ': ' + this.entityName,
+            ...this.extraConfirmLines(),
             ...rows,
         ];
         lines.push('');
@@ -250,12 +275,7 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
             await firstValueFrom(this.submitter!.submit(this.entityKind, this.entityId, body));
             this.resetDetails();
             void this.loadEntity();
-            setTimeout(() => {
-                var input = this.el.nativeElement.querySelector(
-                    'esq-tab-field input:not([readonly]):not([disabled]), esq-tab-field select:not([disabled])'
-                );
-                if (input) (input as HTMLElement).focus();
-            }, 0);
+            setTimeout(() => this.focusOnInit(), 0);
         } catch (err: any) {
             if (err.errors && err.errors.length > 0) {
                 var apiErr = err.errors[0];
@@ -268,7 +288,7 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
                 await this.callApi.confirmDlg(this.opKind, operationName + ' Error',
                     operationName + ' failed: ' + (err.detail || valError.message), EsqExplorerCallApi.ConfirmFlag.Ok);
                 setTimeout(() => {
-                    var el = document.querySelector('[data-field="' + valError.fieldName + '"]') as HTMLElement;
+                    var el = this.el.nativeElement.querySelector('[data-field="' + valError.fieldName + '"]') as HTMLElement;
                     if (el) el.focus();
                 }, 100);
             } else {

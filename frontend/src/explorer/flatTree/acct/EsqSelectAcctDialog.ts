@@ -6,6 +6,7 @@
 *
 * History :
 * 04/11/2026 mir0n  initial: account picker dialog
+* 04/14/2026 mir0n  isSelectable() blocks re-selection of pre-selected entity
 */
 import {
     Component,
@@ -78,6 +79,10 @@ export class EsqSelectAcctDialog extends EsqSelectEntityDialog {
     }
 
     protected override isSelectable(node: EsqTreeNode): boolean {
-        return node.kind.acct;
+        var ret: boolean = node.kind.acct;
+        if (ret && this.preSelectedId  && node.entityId) {
+            ret = String(node.entityId) !== String(this.preSelectedId);
+        }  
+        return ret;
     }
 }

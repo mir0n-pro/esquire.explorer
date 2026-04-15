@@ -6,6 +6,7 @@
 *
 * History :
 * 04/12/2026 mir0n  initial: generic entity picker dialog;
+* 04/14/2026 mir0n  onSelect() normalizes kind via EsqObjectKindFactory.normalize(); preSelectedId protected; canSelect() cleanup
 */
 import {
     AfterViewInit,
@@ -14,8 +15,6 @@ import {
     Inject,
     OnDestroy,
     OnInit,
-    afterEveryRender,
-    inject,
     signal,
     ViewEncapsulation,
 } from '@angular/core';
@@ -30,6 +29,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { EsqTreeNode } from 'src/esquire.ui/api/EsqTreeNode';
 import { EsqDialogResizeDirective } from 'src/esquire.ui/components/EsqDialogResizeDirective';
 import { EsqFlatTreeSelector } from '../EsqFlatTreeSelector';
+import { EsqObjectKindFactory } from 'src/esquire.ui/api/EsqObjectKindFactory';
 
 export { EsqFlatTreeSelector } from '../EsqFlatTreeSelector';
 
@@ -63,8 +63,8 @@ export class EsqSelectEntityDialog extends EsqExplorerHostDummy implements After
     protected hoveredNode: EsqTreeNode | null = null;
     public loading = signal(false);
     protected treeDs!: EsqFlatTreeSelector;
-    private preSelectedId: string = '';
-    private postFocusNodeId: string | null = null;
+    protected preSelectedId: string = '';
+    //private postFocusNodeId: string | null = null;
     protected callApi?: EsqExplorerCallApi;
 
     constructor(
@@ -97,24 +97,24 @@ export class EsqSelectEntityDialog extends EsqExplorerHostDummy implements After
         this.loading.set(true);
         this.treeDs.ensureLoaded()
             .then(() => {
-                if (!this.preSelectedId) return Promise.resolve();
-                return this.treeDs.expandToNode(this.preSelectedId)
-                    .then(node => {
-                        if (node) {
-                            this.selectedNode = node;
-                            this.postFocusNodeId = node.id;
-                            // trick: give the DOM time to render the node: max 0.5sec
-                            for (var i = 0; i < 50; i++) {
-                                var el = document.getElementById('select-entity-node-' + node.id);
-                                if (el) {
-                                    setTimeout(() => {
-                                        (el as HTMLElement).focus()
-                                    }, 10);
-                                    break;
-                                }
+                if (!this.preSelectedId)  return Promise.resolve();
+            return this.treeDs.expandToNode(this.preSelectedId)
+                .then(node => {
+                    if (node) {
+                        this.selectedNode = node;
+                        // this.postFocusNodeId = node.id;
+                        // trick: give the DOM time to render the node: max 0.5sec
+                        //for (var i = 0; i < 50; i++) {
+                            var el = document.getElementById('select-entity-node-' + node.id);
+                            if (el) {
+                                setTimeout(() => {
+                                    (el as HTMLElement).focus()
+                                }, 10);
+                        //        break;
                             }
-                        }
-                    });
+                        //}
+                    }
+                });
             })
             .finally(() => this.loading.set(false));
     }
@@ -179,7 +179,7 @@ export class EsqSelectEntityDialog extends EsqExplorerHostDummy implements After
     protected canSelect(): boolean {
         var ret = false;
         if (this.selectedNode) {
-            ret = this.isSelectable(this.selectedNode) && String(this.selectedNode.entityId) !== this.preSelectedId;
+            ret = this.isSelectable(this.selectedNode);
         }
         return ret;
     }
@@ -188,7 +188,7 @@ export class EsqSelectEntityDialog extends EsqExplorerHostDummy implements After
         if (!this.canSelect() || !this.selectedNode) return;
         this.dialogRef.close({
             entityId:   String(this.selectedNode.entityId),
-            entityKind: this.selectedNode.kind.id,
+            entityKind: EsqObjectKindFactory.normalize(this.selectedNode.kind.id),
             entityName: this.selectedNode.name,
         });
     }

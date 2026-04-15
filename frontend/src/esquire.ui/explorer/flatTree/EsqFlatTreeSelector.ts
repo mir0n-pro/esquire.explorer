@@ -6,6 +6,7 @@
 *
 * History :
 * 04/12/2026 mir0n  initial: account-picker tree datasource interface
+* 04/14/2026 mir0n  findById split into findByNodeId / findByEntityId
 */
 import { Observable } from 'rxjs';
 import { EsqTreeNode } from 'src/esquire.ui/api/EsqTreeNode';
@@ -20,7 +21,8 @@ export interface EsqFlatTreeSelector {
     ensureLoaded(): Promise<void>;
     toggleNode(node: EsqTreeNode): Promise<void>;
     isExpandable(node: EsqTreeNode): boolean;
-    findById(id: string): EsqTreeNode | null;
+    findByNodeId(id: string): EsqTreeNode | null;
+    findByEntityId(id: string): EsqTreeNode | null;
     expandToNode(entityId: string): Promise<EsqTreeNode | null>;
     reset(): void;
 }
