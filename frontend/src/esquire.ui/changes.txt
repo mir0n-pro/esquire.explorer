@@ -2,6 +2,10 @@ Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
 
+04/15/2026 mir0n  pass kind title from server
+api\EsqObjectKindFactory.ts
+  - pass title from server kind response
+
 04/14/2026 mir0n  Transfer acct operation; picker entity kind normalization; submenu per-item disable
 explorer\flatTree\EsqExplorerComponent.ts
   - esqSubItemDisabled @Input callback; isSubItemDisabled() hook; prepareSubmenu(menu) param

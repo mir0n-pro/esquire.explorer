@@ -2,6 +2,10 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+04/15/2026 mir0n  add login-hint background
+flatTree\app-shell.scss
+  - ComponentModel.svg background added to login-hint-row
+
 04/14/2026 mir0n  Transfer acct operation; protective hooks; paper-account submenu guard
 flatTree\acct\AcctOperation.ts
   - DICT_KIND_TRANSFER=1004; TRANSFER.dictKind corrected

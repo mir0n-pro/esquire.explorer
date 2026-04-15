@@ -17,6 +17,7 @@
 * 04/07/2026 mir0n  added static normalize(kind): number
 * 04/08/2026 mir0n  init() corrected
 * 04/13/2026 mir0n  init() registers locally-defined kinds absent from server response
+* 04/15/2026 mir0n  pass kind title from server response
 */
 
 import {EsqTreeNode} from "./EsqTreeNode";
@@ -97,7 +98,7 @@ export class EsqObjectKindFactory {
               if (kinds) {
                   for (var k of kinds) {
                       if (!this.kinds.find(existing => existing.id === k.id)) {
-                          this.kinds.push(new EsqObjectKind({ id: k.id, name: k.name, icon: k.icon, listHeaders: k.listHeaders }));
+                          this.kinds.push(new EsqObjectKind({ id: k.id, name: k.name, title: k.title, icon: k.icon, listHeaders: k.listHeaders }));
                       }
                   }
               }

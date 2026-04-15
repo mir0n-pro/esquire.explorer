@@ -29,4 +29,15 @@ services:
 #      - ./public/assets/config.json.template:/public/assets/config.json.template:ro
 #secrets:
 #  npmrc:
-#    file: ./.npmrc_composer 
+#    file: ./.npmrc_composer
+
+#  frontend-test:
+#    build: .
+#    image: esquire.frontend
+#    command: >
+#      sh -c "apt-get update -qq && apt-get install -y chromium &&
+#             ng test --watch=false --browsers=ChromeHeadlessNoSandbox --no-progress"
+#    environment:
+#      CHROME_BIN: /usr/bin/chromium
+#    profiles:
+#      - test

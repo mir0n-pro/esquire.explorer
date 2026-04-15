@@ -1,7 +1,9 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
-v1.2.2-2604.1422  Unit tests were added 
+v1.2.2-2604.1515  EsqObjectKindFactory: pass kind title from server; add login-hint background
+
+v1.2.2-2604.1422  Unit tests were added
    separated for esquire.ui and app levels
 
 v1.2.2-2604.1420  Acct Transaction Phase IV: Transfer acct operation with dest picker and paper-account guard
