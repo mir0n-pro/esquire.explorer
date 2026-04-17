@@ -23,7 +23,7 @@
         />
     } @else if (field.type == 'image') {
         <div class="esq-tab-image-container">
-            <img class="esq-tab-image" src="{{details[field.name]}" alt="{{details[field.name]}}" />
+            <img class="esq-tab-image" [src]="details[field.name]" [alt]="details[field.name]" />
         </div>
         <mat-divider></mat-divider>
     } @else if (field.type == 'href') {

@@ -3,6 +3,7 @@ export * from './EsqExplorerCallApi';
 export * from './EsqRestApi';
 export * from './EsqEntityDictionary';
 export * from './EsqNodeStatusFactory';
+export * from './EsqObjectKind';
 export * from './EsqObjectKindFactory';
 export * from './EsqTreeNode';
 export * from './AsEsqTreeNodePipe';

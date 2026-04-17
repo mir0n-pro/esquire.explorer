@@ -1,6 +1,8 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.2-2604.1712 Tuning of field types: image, tablist
+
 v1.2.2-2604.1515  EsqObjectKindFactory: pass kind title from server; add login-hint background
 
 v1.2.2-2604.1422  Unit tests were added

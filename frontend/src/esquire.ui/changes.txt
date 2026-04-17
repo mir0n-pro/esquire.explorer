@@ -1,6 +1,9 @@
 Esquire Frameworks(tm) 2.0
 esquire.ui node.js library of components
 
+04/15/2026 mir0n Tuning of field types: image, tablist
+  EsqTabListComponent: added .esq-tab-list-elevation-z5 class
+  EsqTabFieldComponent: corrected img src/alt
 
 04/15/2026 mir0n  pass kind title from server
 api\EsqObjectKindFactory.ts

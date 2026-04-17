@@ -28,7 +28,17 @@
   font-size: 10pt; //9
   font-weight: normal;
   display:grid;
-  grid-template-columns: auto repeat(3, 22px); //was: 5 : 22px
+  grid-template-columns: auto repeat(3, 22px);
+  gap: 0px;
+  align-items: center;
+}
+
+.esq-tab-list-elevation-z5 {
+  user-select:none;
+  font-size: 10pt; //9
+  font-weight: normal;
+  display:grid;
+  grid-template-columns: auto repeat(5, 22px);
   gap: 0px;
   align-items: center;
 }

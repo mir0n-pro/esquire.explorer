@@ -12,7 +12,7 @@
     class="esq-tab-list"
   >
     <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef class="mat-elevation-z2  esq-tab-list-elevation-z2" >
+      <th mat-header-cell *matHeaderCellDef class="mat-elevation-z2  esq-tab-list-elevation-z5" >
           <div>{{esqListHeader}}</div>
           <button matIconButton class = "esq-icon-button" matTooltip = "Details" disabled="{{!canDetailsBtn()}}" (click)="doDetailsBtn()">
             <mat-icon  [ngClass]="{'esq-icon-green': canDetailsBtn() }">check_circle_outline</mat-icon>
