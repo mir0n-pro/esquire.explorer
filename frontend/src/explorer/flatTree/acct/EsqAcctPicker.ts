@@ -6,6 +6,7 @@
 *
 * History :
 * 04/12/2026 mir0n  initial: standalone account picker;
+* 04/19/2026 mir0n  import paths migrated to @mir0n-pro/esquire.ui library
 */
 import {
     Component,
@@ -24,11 +25,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { firstValueFrom } from 'rxjs';
-import { EsqRestApi } from 'src/esquire.ui/api/EsqRestApi';
-import { EsqExplorerCallApi } from 'src/esquire.ui/api/EsqExplorerCallApi';
-import { EsqObjectKindFactory } from 'src/esquire.ui/api/EsqObjectKindFactory';
-import { EsqUtils } from 'src/esquire.ui/components/EsqUtils';
-import { EsqFlatTreeSelectorFactory } from 'src/esquire.ui/explorer/flatTree/EsqFlatTreeSelector';
+import {
+    EsqRestApi,
+    EsqExplorerCallApi,
+    EsqObjectKindFactory,
+    EsqUtils,
+} from '@mir0n-pro/esquire.ui/api';
+import { EsqFlatTreeSelectorFactory } from '@mir0n-pro/esquire.ui/explorer/flatTree';
 import { EsqSelectAcctDialog } from './EsqSelectAcctDialog';
 
 @Component({

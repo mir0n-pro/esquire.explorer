@@ -11,15 +11,22 @@
 * 04/12/2026 mir0n  selectorFactory param; pass to EsqAcctDialog; dialog size 480px
 * 04/13/2026 mir0n  pass dictKind (parsed from subCmd) to EsqAcctDialog
 * 04/14/2026 mir0n  route DICT_KIND_TRANSFER to EsqTransferDialog
+* 04/19/2026 mir0n  import paths migrated to @mir0n-pro/esquire.ui library
 */
 import { MatDialog } from '@angular/material/dialog';
-import { EsqEntityCommandHandler, EsqEntityCommandContext, EsqNodeCommandContext, EsqCommandSubmitter, SelectMode } from 'src/esquire.ui/api/EsqEntityCommandHandler';
-import { EsqExplorerCallApi } from 'src/esquire.ui/api/EsqExplorerCallApi';
-import { EsqRestApi } from 'src/esquire.ui/api/EsqRestApi';
-import { EsqDictionaryApi } from 'src/esquire.ui/api/EsqDictionaryApi';
+import {
+    EsqEntityCommandHandler,
+    EsqEntityCommandContext,
+    EsqNodeCommandContext,
+    EsqCommandSubmitter,
+    SelectMode,
+    EsqExplorerCallApi,
+    EsqRestApi,
+    EsqDictionaryApi,
+} from '@mir0n-pro/esquire.ui/api';
 import { EsqAcctDialog } from './EsqAcctDialog';
 import { EsqTransferDialog } from './EsqTransferDialog';
-import { EsqFlatTreeSelectorFactory } from 'src/esquire.ui/explorer/flatTree/EsqFlatTreeSelector';
+import { EsqFlatTreeSelectorFactory } from '@mir0n-pro/esquire.ui/explorer/flatTree';
 import {EsqShellConstants} from "../app-shell.contants";
 import { AcctOperation } from './AcctOperation';
 

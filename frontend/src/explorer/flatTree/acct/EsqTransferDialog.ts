@@ -7,24 +7,28 @@
 * History :
 * 04/13/2026 mir0n  initial: transfer dialog extending EsqAcctDialog; second account picker (id2/kind2)
 * 04/14/2026 mir0n  onDictionaryLoaded hook; validateExtra self-contained async; same-account validation
+* 04/19/2026 mir0n  import paths migrated to @mir0n-pro/esquire.ui library
 */
 import {
     Component,
     Inject,
     ViewEncapsulation,
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+    MAT_DIALOG_DATA,
+    MatDialogModule,
+    MatDialogRef,
+} from '@angular/material/dialog';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { EsqDialogResizeDirective } from 'src/esquire.ui/components/EsqDialogResizeDirective';
-import { EsqTabFieldComponent } from 'src/esquire.ui/components/EsqTabFieldComponent';
+import { EsqExplorerCallApi } from '@mir0n-pro/esquire.ui/api';
+import { EsqDialogResizeDirective, EsqTabFieldComponent } from '@mir0n-pro/esquire.ui/components';
 import { EsqAcctPicker } from './EsqAcctPicker';
 import { EsqAcctDialog } from './EsqAcctDialog';
-import { EsqExplorerCallApi } from 'src/esquire.ui/api/EsqExplorerCallApi';
 
 @Component({
     selector: 'esq-acct-dialog',
@@ -42,7 +46,7 @@ import { EsqExplorerCallApi } from 'src/esquire.ui/api/EsqExplorerCallApi';
         EsqAcctPicker,
     ],
     templateUrl: './EsqTransferDialog.html',
-    styleUrls: ['../../../esquire.ui/components/EsqDetailsDialog.scss', './EsqAcctDialog.scss'],
+    styleUrls: ['./EsqAcctDialog.scss'],
     encapsulation: ViewEncapsulation.None,
 })
 export class EsqTransferDialog extends EsqAcctDialog {

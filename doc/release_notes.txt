@@ -1,6 +1,14 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.2-2604.1914  Local esquire.ui module replaced with library package; Playwright e2e suite
+   :Refactoring: src/esquire.ui/ removed (73 files); all import paths migrated to
+                 @mir0n-pro/esquire.ui
+   :Improvement: run-yalc.bat / run-git.bat; package.json lib dep set to ^1.2.2
+   :Feature:     27-test Playwright e2e suite
+   :doc:         added doc/e2e.todo.md
+                 lib docs moved to esquire.ui.lib project
+
 v1.2.2-2604.1712 Tuning of field types: image, tablist
 
 v1.2.2-2604.1515  EsqObjectKindFactory: pass kind title from server; add login-hint background

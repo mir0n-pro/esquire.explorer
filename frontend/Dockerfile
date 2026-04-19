@@ -11,8 +11,7 @@ COPY *.json ./
 COPY ./src/ ./src/
 COPY ./public/ ./public/
 
-#RUN --mount=type=secret,id=npmrc,target=/root/.npmrc \
-#    npm install
-RUN npm install
+RUN --mount=type=secret,id=npmrc,target=/root/.npmrc \
+    npm install
 
 # rest CMD is from compose.yaml

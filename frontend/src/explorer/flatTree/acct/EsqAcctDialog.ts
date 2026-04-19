@@ -15,6 +15,7 @@
 *                   opKind cached; entityId guard in canSubmit; confirmDlg passes opKind
 * 04/14/2026 mir0n  protected hooks for subclassing: onDictionaryLoaded, focusOnInit, extraConfirmLines, validateExtra async
 *                   isNegativeOp getter; el.nativeElement querySelector; idLabel in confirm lines
+* 04/19/2026 mir0n  import paths migrated to @mir0n-pro/esquire.ui library
 */
 import {
     Component,
@@ -27,26 +28,31 @@ import {
     signal,
     ViewEncapsulation,
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+    MAT_DIALOG_DATA,
+    MatDialogModule,
+    MatDialogRef,
+} from '@angular/material/dialog';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
-import { EsqRestApi } from 'src/esquire.ui/api/EsqRestApi';
-import { EsqDictionaryApi } from 'src/esquire.ui/api/EsqDictionaryApi';
-
-import { EsqCommandSubmitter } from 'src/esquire.ui/api/EsqEntityCommandHandler';
-import { EsqExplorerCallApi, EsqExplorerHostDummy } from 'src/esquire.ui/api/EsqExplorerCallApi';
-import { EsqDialogResizeDirective } from 'src/esquire.ui/components/EsqDialogResizeDirective';
-import { EsqTabFieldComponent } from 'src/esquire.ui/components/EsqTabFieldComponent';
-import { EsqUtils } from 'src/esquire.ui/components/EsqUtils';
-import { EsqValidationError } from 'src/esquire.ui/components/EsqValidationError';
+import {
+    EsqRestApi,
+    EsqDictionaryApi,
+    EsqCommandSubmitter,
+    EsqExplorerCallApi,
+    EsqExplorerHostDummy,
+    EsqUtils,
+    EsqValidationError,
+    EsqObjectKindFactory,
+} from '@mir0n-pro/esquire.ui/api';
+import { EsqDialogResizeDirective, EsqTabFieldComponent } from '@mir0n-pro/esquire.ui/components';
+import { EsqFlatTreeSelectorFactory } from '@mir0n-pro/esquire.ui/explorer/flatTree';
 import { MatIcon } from '@angular/material/icon';
-import { EsqFlatTreeSelectorFactory } from 'src/esquire.ui/explorer/flatTree/EsqFlatTreeSelector';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { EsqAcctPicker } from './EsqAcctPicker';
-import { EsqObjectKindFactory } from 'src/esquire.ui/api/EsqObjectKindFactory';
 import { AcctOperation } from './AcctOperation';
 
 @Component({
@@ -65,7 +71,7 @@ import { AcctOperation } from './AcctOperation';
         EsqAcctPicker,
     ],
     templateUrl: './EsqAcctDialog.html',
-    styleUrls: ['../../../esquire.ui/components/EsqDetailsDialog.scss', './EsqAcctDialog.scss'],
+    styleUrls: ['./EsqAcctDialog.scss'],
     encapsulation: ViewEncapsulation.None,
 })
 export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDestroy {
