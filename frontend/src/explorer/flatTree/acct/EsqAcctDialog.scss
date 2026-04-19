@@ -6,6 +6,8 @@
 *
 *  History:
 */
+@use '@mir0n-pro/esquire.ui/components/EsqDetailsDialog';
+
 esq-acct-dialog {
 
   /* Same grid as .esq-grid-input: 123px label | 1fr input */

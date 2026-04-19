@@ -60,8 +60,10 @@
 * 04/13/2026 mir0n  kinds 1000/1002 (deposit/withdrawal) in EsquireObjectKinds with titles
 *                   acct subItems built in ngOnInit from dict kind icons
 * 04/14/2026 mir0n  subItemDisabled callback; Transfer submenu item; EsqObjectKind 1004 (transfer)
+* 04/19/2026 mir0n  import paths migrated to @mir0n-pro/esquire.ui library
 */
-import {Component,
+import {
+  Component,
   OnDestroy,
   OnInit,
 //  ViewChild,
@@ -92,32 +94,45 @@ import { EsqExplorerCallApiMill, EsqDictionary } from '@mir0n-pro/esquire.ui/com
 import { EsqExplorerComponent} from '@mir0n-pro/esquire.ui/explorer/flatTree';
 */
 
-import {EsqObjectKind} from 'src/esquire.ui/api/EsqObjectKind';
-import {EsqObjectKindFactory} from 'src/esquire.ui/api/EsqObjectKindFactory';
-import {EsqNodeStatus,EsqNodeStatusFactory} from 'src/esquire.ui/api/EsqNodeStatusFactory';
-import {EsqRestApi} from 'src/esquire.ui/api/EsqRestApi';
-import {EsqDictionaryApi} from 'src/esquire.ui/api/EsqDictionaryApi';
-import {EsqExplorerCallApi, EsqExplorerHost} from 'src/esquire.ui/api/EsqExplorerCallApi';
-//import {EsqEntityLayer} from 'src/esquire.ui/api/EsqEntityDictionary';
-import {EsqExplorerCallApiMill} from 'src/esquire.ui/components/EsqExplorerCallApiMill';
-import {EsqExplorerHostDummy} from 'src/esquire.ui/api/EsqExplorerCallApi';
-import {EsqDictionary} from 'src/esquire.ui/components/EsqDictionary';
-import {EsqUtils} from 'src/esquire.ui/components/EsqUtils';
-import {EsqExplorerComponent} from 'src/esquire.ui/explorer/flatTree/EsqExplorerComponent';
-import { ProblemDetail, problemDetailDictionary } from 'src/esquire.ui/api/ProblemDetail';
-import { EsqSingleEntryDialog } from 'src/esquire.ui/components/EsqSingleEntryDialog';
-//import {EsqMoveCommandHandler} from 'src/esquire.ui/explorer/flatTree/components/EsqMoveCommandHandler';
+import {
+  EsqObjectKind,
+  EsqObjectKindFactory,
+  EsqNodeStatus,
+  EsqNodeStatusFactory,
+  EsqRestApi,
+  EsqDictionaryApi,
+  EsqExplorerCallApi,
+  EsqExplorerHost,
+  EsqExplorerHostDummy,
+  ProblemDetail,
+  problemDetailDictionary,
+  EsqTreeNode,
+  EsqCommandMenuItem,
+  EsqAccessProfile,
+  EsqUtils,
+} from '@mir0n-pro/esquire.ui/api';
+import {
+  EsqExplorerCallApiMill,
+  EsqDictionary,
+  EsqSingleEntryDialog,
+} from '@mir0n-pro/esquire.ui/components';
+import {EsqExplorerComponent, EsqFlatTreeDatasource} from '@mir0n-pro/esquire.ui/explorer/flatTree';
 import {EsqAcctCommandHandler} from 'src/explorer/flatTree/acct/EsqAcctCommandHandler';
 import {AcctOperation} from 'src/explorer/flatTree/acct/AcctOperation';
-import {EsqFlatTreeDatasource} from 'src/esquire.ui/explorer/flatTree/EsqFlatTreeDatasource';
-import {EsqTreeNode} from 'src/esquire.ui/api/EsqTreeNode';
 
 import {EsquireService} from '../../rest/api/esquire.service';
-import { KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
+import {
+  KEYCLOAK_EVENT_SIGNAL,
+  KeycloakEvent,
+  KeycloakEventType,
+} from 'keycloak-angular';
 import Keycloak from 'keycloak-js';
-import { Observable, catchError, throwError, finalize } from 'rxjs';
-import {EsqCommandMenuItem} from "../../esquire.ui/api/EsqContextMenuBuilder";
-import {EsqAccessProfile} from "../../esquire.ui/api/EsqAccessProfile";
+import {
+  Observable,
+  catchError,
+  throwError,
+  finalize,
+} from 'rxjs';
 import {EsqShellConstants} from "./app-shell.contants";
 
 const STATUS_CONNECTED = "Connected";

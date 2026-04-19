@@ -7,25 +7,34 @@
 * History :
 * 04/11/2026 mir0n  initial: account picker dialog
 * 04/14/2026 mir0n  isSelectable() blocks re-selection of pre-selected entity
+* 04/19/2026 mir0n  import paths migrated to @mir0n-pro/esquire.ui library
 */
 import {
     Component,
     Inject,
     ViewEncapsulation,
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+    MAT_DIALOG_DATA,
+    MatDialogModule,
+    MatDialogRef,
+} from '@angular/material/dialog';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { MatTree, MatTreeNode, MatTreeNodeDef, MatTreeNodePadding } from '@angular/material/tree';
+import {
+    MatTree,
+    MatTreeNode,
+    MatTreeNodeDef,
+    MatTreeNodePadding,
+} from '@angular/material/tree';
 import { MatIconModule } from '@angular/material/icon';
-import { EsqTreeNode } from 'src/esquire.ui/api/EsqTreeNode';
-import { EsqDialogResizeDirective } from 'src/esquire.ui/components/EsqDialogResizeDirective';
-import { EsqSelectEntityDialog } from 'src/esquire.ui/explorer/flatTree/components/EsqSelectEntityDialog';
-import { EsqFlatTreeSelectorFactory } from 'src/esquire.ui/explorer/flatTree/EsqFlatTreeSelector';
+import { EsqTreeNode } from '@mir0n-pro/esquire.ui/api';
+import { EsqDialogResizeDirective } from '@mir0n-pro/esquire.ui/components';
+import { EsqSelectEntityDialog, EsqFlatTreeSelectorFactory } from '@mir0n-pro/esquire.ui/explorer/flatTree';
 
-export { EsqFlatTreeSelector, EsqFlatTreeSelectorFactory } from 'src/esquire.ui/explorer/flatTree/EsqFlatTreeSelector';
+export { EsqFlatTreeSelector, EsqFlatTreeSelectorFactory } from '@mir0n-pro/esquire.ui/explorer/flatTree';
 
 @Component({
     selector: 'esq-select-acct-dialog',
@@ -43,11 +52,8 @@ export { EsqFlatTreeSelector, EsqFlatTreeSelectorFactory } from 'src/esquire.ui/
         MatIconModule,
         EsqDialogResizeDirective,
     ],
-    templateUrl: '../../../esquire.ui/explorer/flatTree/components/EsqSelectEntityDialog.html',
-    styleUrls: [
-        '../../../esquire.ui/components/EsqDetailsDialog.scss',
-        '../../../esquire.ui/explorer/flatTree/components/EsqSelectEntityDialog.scss',
-    ],
+    templateUrl: './EsqSelectEntityDialog.html',
+    styleUrls: ['./EsqSelectAcctDialog.scss'],
     encapsulation: ViewEncapsulation.None,
 })
 export class EsqSelectAcctDialog extends EsqSelectEntityDialog {

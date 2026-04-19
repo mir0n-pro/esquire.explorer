@@ -2,6 +2,35 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+04/19/2026 mir0n  import paths migrated to @mir0n-pro/esquire.ui library
+app\interceptor\rfc9457Interceptor.ts
+  - import paths migrated to @mir0n-pro/esquire.ui library
+  - multiline import blocks reformatted: 3+ items one-per-line
+explorer\flatTree\app-shell.ts
+  - import paths migrated to @mir0n-pro/esquire.ui library
+  - multiline import blocks reformatted: 3+ items one-per-line
+explorer\flatTree\acct\EsqAcctCommandHandler.ts
+  - import paths migrated to @mir0n-pro/esquire.ui library
+  - multiline import blocks reformatted: 3+ items one-per-line
+explorer\flatTree\acct\EsqAcctDialog.ts
+  - import paths migrated to @mir0n-pro/esquire.ui library
+  - multiline import blocks reformatted: 3+ items one-per-line
+explorer\flatTree\acct\EsqAcctDialog.scss
+  - @use '@mir0n-pro/esquire.ui/components/EsqDetailsDialog' (replaces local src reference)
+explorer\flatTree\acct\EsqAcctPicker.ts
+  - import paths migrated to @mir0n-pro/esquire.ui library
+  - multiline import blocks reformatted: 3+ items one-per-line
+explorer\flatTree\acct\EsqSelectAcctDialog.ts
+  - import paths migrated to @mir0n-pro/esquire.ui library
+  - multiline import blocks reformatted: 3+ items one-per-line
+explorer\flatTree\acct\EsqSelectAcctDialog.scss
+  - @use '@mir0n-pro/esquire.ui/components/EsqDetailsDialog' and /explorer/flatTree/components/EsqSelectEntityDialog
++ added explorer\flatTree\acct\EsqSelectEntityDialog.html
+  - template copied locally from library (Angular requires templateUrl to be a local file)
+explorer\flatTree\acct\EsqTransferDialog.ts
+  - import paths migrated to @mir0n-pro/esquire.ui library
+  - multiline import blocks reformatted: 3+ items one-per-line
+
 04/15/2026 mir0n  add login-hint background
 flatTree\app-shell.scss
   - ComponentModel.svg background added to login-hint-row
