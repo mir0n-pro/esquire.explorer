@@ -2,6 +2,14 @@ Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
 
+04/20/2026 mir0n  Transfer: dynamic rate label and readonly toggle
+explorer\flatTree\acct\EsqAcctPicker.ts
+  - ccyChange output: emits account currency after each account load
+  - destroyed guard added (OnDestroy)
+explorer\flatTree\acct\EsqTransferDialog.*
+  - dynamic rate label: shows "Rate SRC/DEST" from ccyChange events
+  - same-ccy: rate field readonly, reset to 1.00; cross-ccy: editable
+
 04/19/2026 mir0n  import paths migrated to @mir0n-pro/esquire.ui library
 app\interceptor\rfc9457Interceptor.ts
   - import paths migrated to @mir0n-pro/esquire.ui library

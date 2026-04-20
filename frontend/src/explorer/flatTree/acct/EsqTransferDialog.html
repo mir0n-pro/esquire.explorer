@@ -40,6 +40,7 @@
             [treeKinds]="treeKinds2"
             [reloadTrigger]="reloadTrigger"
             (entityChange)="onEntityChange($event)"
+            (ccyChange)="onSrcCcyChange($event)"
         />
     </div>
     <div class="esq-acct-picker">
@@ -55,6 +56,7 @@
             [treeKinds]="treeKinds2"
             [reloadTrigger]="reloadTrigger2"
             (entityChange)="onEntityChange2($event)"
+            (ccyChange)="onDestCcyChange($event)"
         />
     </div>
     @for (field of fields; track field.name) {

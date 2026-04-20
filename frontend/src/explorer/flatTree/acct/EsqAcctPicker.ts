@@ -7,12 +7,14 @@
 * History :
 * 04/12/2026 mir0n  initial: standalone account picker;
 * 04/19/2026 mir0n  import paths migrated to @mir0n-pro/esquire.ui library
+* 04/20/2026 mir0n  ccyChange output: emits account currency on load; destroyed guard
 */
 import {
     Component,
     EventEmitter,
     Input,
     OnChanges,
+    OnDestroy,
     OnInit,
     Output,
     SimpleChanges,
@@ -46,7 +48,7 @@ import { EsqSelectAcctDialog } from './EsqSelectAcctDialog';
     styleUrls: ['./EsqAcctPicker.scss'],
     encapsulation: ViewEncapsulation.None,
 })
-export class EsqAcctPicker implements OnInit, OnChanges {
+export class EsqAcctPicker implements OnInit, OnChanges, OnDestroy {
 
     @Input() entityId:         string = '';
     @Input() entityKind:       number = 0;
@@ -59,15 +61,21 @@ export class EsqAcctPicker implements OnInit, OnChanges {
     @Input() reloadTrigger:    number = 0;
 
     @Output() entityChange = new EventEmitter<{ entityId: string; entityKind: number; entityName: string }>();
+    @Output() ccyChange    = new EventEmitter<string>();
 
     protected entityIcon = 'img/$sign.ico';
     protected entityData = signal<any>(null);
     public    loading    = signal(false);
 
-    private dialog = inject(MatDialog);
+    private dialog    = inject(MatDialog);
+    private destroyed = false;
 
     ngOnInit(): void {
         void this.loadEntity();
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed = true;
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -81,17 +89,22 @@ export class EsqAcctPicker implements OnInit, OnChanges {
         if (!this.entityId) {
             this.entityIcon = 'img/$sign.ico';
             this.entityData.set(null);
+            this.ccyChange.emit('');
             return;
         }
         this.loading.set(true);
         try {
             this.entityIcon = EsqObjectKindFactory.instanceOf(this.entityKind).icon;
-            this.entityData.set(await firstValueFrom(this.restApi.esquireCmd(this.entityKind, this.entityId)));
+            var data = await firstValueFrom(this.restApi.esquireCmd(this.entityKind, this.entityId));
+            if (this.destroyed) return;
+            this.entityData.set(data);
+            this.ccyChange.emit(data?.ccy || '');
         } catch (err: any) {
+            if (this.destroyed) return;
             await this.callApi.confirmDlg(null, 'Load Error',
                 EsqUtils.errorMessage(err), EsqExplorerCallApi.ConfirmFlag.Ok);
         } finally {
-            this.loading.set(false);
+            if (!this.destroyed) this.loading.set(false);
         }
     }
 

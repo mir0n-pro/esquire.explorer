@@ -8,6 +8,7 @@
 * 04/13/2026 mir0n  initial: transfer dialog extending EsqAcctDialog; second account picker (id2/kind2)
 * 04/14/2026 mir0n  onDictionaryLoaded hook; validateExtra self-contained async; same-account validation
 * 04/19/2026 mir0n  import paths migrated to @mir0n-pro/esquire.ui library
+* 04/20/2026 mir0n  dynamic rate label: Rate SRC/DEST; same-ccy readonly+reset to 1.00
 */
 import {
     Component,
@@ -52,6 +53,8 @@ import { EsqAcctDialog } from './EsqAcctDialog';
 export class EsqTransferDialog extends EsqAcctDialog {
 
     protected id2Label:       string     = '';
+    private   srcCcy:         string     = '';
+    private   destCcy:        string     = '';
     protected entityId2:      string     = '';
     protected entityKind2:    number     = 0;
     protected entityName2:    string     = '';
@@ -88,6 +91,28 @@ export class EsqTransferDialog extends EsqAcctDialog {
                 }
             }
         }
+    }
+
+    private updateRateField(): void {
+        var idx = this.fields.findIndex((f: any) => f.name === 'rate');
+        if (idx < 0) return;
+        var sameCcy  = !!this.srcCcy && this.srcCcy === this.destCcy;
+        var label    = 'Rate ' + (this.srcCcy || '?') + '/' + (this.destCcy || '?');
+        var field    = this.fields[idx];
+        this.fields[idx] = { ...field, label, readwrite: sameCcy ? 1 : 3 };
+        if (sameCcy) {
+            this.details.rate = field.default || '1.00';
+        }
+    }
+
+    protected onSrcCcyChange(ccy: string): void {
+        this.srcCcy = ccy;
+        this.updateRateField();
+    }
+
+    protected onDestCcyChange(ccy: string): void {
+        this.destCcy = ccy;
+        this.updateRateField();
     }
 
     protected onEntityChange2(result: { entityId: string; entityKind: number; entityName: string }): void {

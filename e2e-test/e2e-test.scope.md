@@ -66,13 +66,16 @@ Single login shared across three sequential tests — no re-authentication betwe
   removed from tree.
 
 ### 11-deposit.spec.ts — accounting lifecycle (describe.serial, shared session)
-Single login, navigates to Mer Chant account once. Net effect on DB is zero (deposit then
-withdraw same amount).
-- **deposit dialog opens and submits**: Accounting → Deposit → amount 100, ref ABC-123 →
-  Submit → confirm Yes → close result dialog.
-- **withdrawal dialog shows negative amount and completes**: Accounting → Withdrawal →
-  amount 100, ref ABC-456 → Submit → confirm Yes (confirmation shows negative amount) →
-  close result dialog.
+Single login, navigates to Mer Chant account once. Net effect on DB is zero across all five tests.
+- **deposit dialog opens and submits**: Accounting → Deposit → amount 100, ref ABC-123 → Submit → confirm Yes → close.
+- **withdrawal dialog shows negative amount and completes**: Accounting → Withdrawal → amount 100, ref ABC-456 → Submit → confirm Yes → close. Restores balance to 0.
+- **deposits 100 EUR into 10011 for transfer**: Accounting → Deposit → amount 100, ref ABC-T01 → Submit → confirm Yes → close. Funds src account for transfer.
+- **transfers 100 EUR from 10011 to 10012 at rate 1.18**: Accounting → Transfer → verifies rate field is readonly with EUR/EUR label (same-ccy initial state) → changes dest picker to account 10012 (USD, under Company / Department / All clients / Cli Ent) → verifies rate label updates to "Rate EUR/USD" and field becomes editable → fills amount 100, rate 1.18 → Submit → confirm Yes → close.
+  Select dialog: Company pre-expanded (src account path); click + ArrowRight expands nodes (dblclick causes expand/collapse race on toggle icon); `[aria-level="4"]` targets "All clients" under Department (same name exists at Company level).
+- **withdraws 118 USD from 10012**: navigates to Cli Ent via toolbar Up (×2) then list row dblclicks (Department → All clients → Cli Ent); selects account 10012; Accounting → Withdrawal → amount 118, ref ABC-T02 → Submit → confirm Yes → close. Restores both accounts to 0.
+
+### 13-transfer.spec.ts
+Stub — see 11-deposit.spec.ts.
 
 ### 14-error-handling.spec.ts
 Provoke a backend error; bottom status bar shows error message; error report icon opens

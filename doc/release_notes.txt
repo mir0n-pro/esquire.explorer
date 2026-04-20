@@ -1,6 +1,8 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.2-2604.2018  Transfer: dynamic rate label (Rate SRC/DEST); same-ccy readonly+reset
+
 v1.2.2-2604.1914  Local esquire.ui module replaced with library package; Playwright e2e suite
    :Refactoring: src/esquire.ui/ removed (73 files); all import paths migrated to
                  @mir0n-pro/esquire.ui
