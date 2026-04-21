@@ -1,6 +1,9 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+
+v1.2.2-2604.2118 v1.2.2 Finalization. Advertisement context
+
 v1.2.2-2604.2018  Transfer: dynamic rate label (Rate SRC/DEST); same-ccy readonly+reset
 
 v1.2.2-2604.1914  Local esquire.ui module replaced with library package; Playwright e2e suite

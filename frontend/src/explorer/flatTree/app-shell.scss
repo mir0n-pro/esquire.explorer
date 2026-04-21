@@ -24,11 +24,15 @@
     vertical-align: middle;
     font-size: 9pt;
     text-align: left;
-    font-weight: normal;  
-    
+    font-weight: normal;
+
     display: grid;
-    grid-template-columns: fit-content(48px) auto fit-content(120px);
+    grid-template-columns: fit-content(48px) auto 1fr fit-content(120px);
     gap: 16px;
+
+    &:last-child {
+      grid-template-columns: auto 1fr;
+    }
   }
  
   .mat-toolbar h1 {
@@ -46,7 +50,29 @@
     padding: 3px 3px 3px 3px;
   }
 
+  .app-logo-static {
+    width: 48px;
+    height: 48px;
+  }
+
+  .app-logo {
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: opacity 0.15s ease, box-shadow 0.15s ease;
+    outline: none;
+    &:hover {
+      opacity: 0.8;
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+    }
+    &:focus-visible {
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+    }
+  }
+
   .name-bar {
+    grid-column: 4;
     border: 1px solid #ccc;
     border-radius: 8px;
     //left: 100px;
@@ -85,51 +111,133 @@
 
 
 
-  .login-hint-row {
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-start;
-    padding: 12px 16px 0 0;
-    background-image: url('/img/ComponentModel.svg');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
-  }
-
-  .login-form-wrapper {
+  .landing-panel {
     position: relative;
-    background: #fff;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 10px 16px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    font-size: 9pt;
-    color: rgba(0, 0, 0, 0.87);
-    max-width: 260px;
+    overflow: hidden;
+    height: 100%;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf0 50%, #f0f4f8 100%);
 
-    p { margin: 3px 0; }
+    mat-tab-group {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
 
-    // arrow pointing up toward the login icon (top-right)
-    &::before {
-      content: '';
-      position: absolute;
-      top: -10px;
-      right: 18px;
-      border: 9px solid transparent;
-      border-top: none;
-      border-bottom-color: #ccc;
-    }
-    &::after {
-      content: '';
-      position: absolute;
-      top: -8px;
-      right: 19px;
-      border: 8px solid transparent;
-      border-top: none;
-      border-bottom-color: #fff;
+      .mat-mdc-tab-body-wrapper {
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .mat-mdc-tab-body-content {
+        overflow-y: auto;
+        height: 100%;
+      }
     }
   }
 
+  .landing-tab-content {
+    padding: 24px 48px;
+    max-width: 860px;
+    margin: 0 auto;
+
+    h2 {
+      font-size: 13pt;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.87);
+      margin: 0 0 14px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      padding-bottom: 6px;
+    }
+
+    h3 {
+      font-size: 10.5pt;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.75);
+      margin: 18px 0 6px;
+    }
+
+    p {
+      font-size: 9.5pt;
+      line-height: 1.65;
+      color: rgba(0, 0, 0, 0.68);
+      margin: 0 0 10px;
+    }
+
+    blockquote {
+      border-left: 3px solid #90a4ae;
+      margin: 16px 0;
+      padding: 6px 16px;
+      font-style: italic;
+      color: rgba(0, 0, 0, 0.55);
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 0 4px 4px 0;
+    }
+  }
+
+  .feature-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin-top: 12px;
+
+    th {
+      background: rgba(0, 0, 0, 0.06);
+      padding: 6px 10px;
+      text-align: left;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.75);
+      border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    }
+
+    td {
+      padding: 5px 10px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+      color: rgba(0, 0, 0, 0.68);
+
+      &:first-child { font-weight: 400; color: rgba(0, 0, 0, 0.75); }
+      &:nth-child(2) { font-weight: 500; color: #2e7d32; }
+    }
+
+    tr:hover td { background: rgba(255, 255, 255, 0.6); }
+  }
+
+  .arch-diagram {
+    width: 100%;
+    max-width: 700px;
+    display: block;
+    margin: 0 auto 28px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+    background: #fff;
+  }
+
+  .toolbar-login-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 8.5pt;
+    color: rgba(0, 0, 0, 0.55);
+    white-space: nowrap;
+    width: fit-content;
+    justify-self: end;
+  }
+
+  .hint-arrow {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 9px solid rgba(0, 0, 0, 0.35);
+  }
 }
 
+.login-hint-tooltip .mdc-tooltip__surface {
+  white-space: pre-line !important;
+  max-width: unset !important;
+  width: max-content !important;
+  background-color: #fff !important;
+  color: rgba(0, 0, 0, 0.87) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+}
 

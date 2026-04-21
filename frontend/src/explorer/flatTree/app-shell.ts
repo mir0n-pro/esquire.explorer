@@ -61,6 +61,7 @@
 *                   acct subItems built in ngOnInit from dict kind icons
 * 04/14/2026 mir0n  subItemDisabled callback; Transfer submenu item; EsqObjectKind 1004 (transfer)
 * 04/19/2026 mir0n  import paths migrated to @mir0n-pro/esquire.ui library
+* 04/21/2026 mir0n  advertisement context added, nvagation to adv-explorer back-n-force
 */
 import {
   Component,
@@ -79,6 +80,8 @@ import { MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatIconButton} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 /*
 import {EsqNodeType
   , EsqNodeTypeFactory
@@ -147,6 +150,8 @@ const STATUS_READY = "Ready";
     MatIconButton,
     MatIconModule,
     MatMenuModule,
+    MatTabsModule,
+    MatTooltipModule,
     EsqExplorerComponent
   ],
   templateUrl: './app-shell.html',
@@ -160,9 +165,11 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
   keycloakSignal: Signal<KeycloakEvent> = inject(KEYCLOAK_EVENT_SIGNAL);
   authState = signal('Initial');
   errorMessage = signal('');
-  hideLoginHint = signal(false);
+  showLanding = signal(true);
   dataService?: EsquireService;
   _dataService: EsquireService;
+
+  readonly loginHint = 'Welcome to Esquire Application Frameworks 2.0\u2122!\nThis is a super-powered backoffice framework \u2014 log in to explore.\nSeed logon: mainadmin / q';
 
   readonly subItemDisabled = (cmd: string, subCmd: string, node: EsqTreeNode | null): boolean => {
       if (cmd === EsqShellConstants.CMD_ACCT && Number(subCmd) === AcctOperation.DICT_KIND_TRANSFER) {
@@ -264,6 +271,7 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
                   },
                   complete: () =>  {
                     this.authState.set(STATUS_CONNECTED);
+                    this.showLanding.set(false);
                   }
               }) ??
               throwError(() => new Error('Data Service is not initialized'));
@@ -395,10 +403,6 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
 
   async ngOnInit() {
     this.dataService = this._dataService;
-    if (new URLSearchParams(window.location.search).get('from') === 'auth') {
-      this.hideLoginHint.set(true);
-    }
-
     await EsqObjectKindFactory.init(this.esqRestApiWrapper(), EsquireObjectKinds);
     EsqNodeStatusFactory.init(Object.values(EsquireStatuses));
     var acctItem = EsqCommandMenuItems.find(i => i.cmd === EsqShellConstants.CMD_ACCT);
@@ -413,7 +417,7 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
 
 public async login(): Promise<void> {
   await this.keycloak.login({
-    redirectUri: window.location.origin + '/?from=auth'
+    redirectUri: window.location.origin
   });
 }
 
@@ -429,6 +433,12 @@ public async showAccessProfile() {
     if (this.isConnected() && p) {
         this.callApi?.calle(EsqExplorerCallApi.CMD_KEY, null, p.id as string, "", 0, p);
     }
+}
+
+public toggleLanding(): void {
+  if (this.isConnected() && this.profileLoaded()) {
+    this.showLanding.set(!this.showLanding());
+  }
 }
 
 public isConnected() : boolean {
@@ -460,7 +470,7 @@ public async logout(): Promise<void> {
   this.profileRequested = false;
   this.profile.set(null);
   await this.keycloak.logout({
-    redirectUri: window.location.origin + '/?from=auth',
+    redirectUri: window.location.origin,
   });
 }
 

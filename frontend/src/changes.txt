@@ -1,6 +1,9 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+04/20/2026 mir0n  Advertisement context
+flatTree\app-shell.*
+  - advertisement context added, nvagation to adv-explorer back-n-force
 
 04/20/2026 mir0n  Transfer: dynamic rate label and readonly toggle
 explorer\flatTree\acct\EsqAcctPicker.ts
