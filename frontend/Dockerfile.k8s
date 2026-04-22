@@ -1,11 +1,14 @@
-FROM node:24
+FROM node:24 AS build
 WORKDIR /app
-RUN apt-get update && apt-get install -y git gettext-base
+RUN apt-get update && apt-get install -y git
 COPY *.json ./
 COPY ./src/ ./src/
 COPY ./public/ ./public/
 RUN sed -i 's|file:../../esquire.ui.lib/pkg/mir0n-pro-esquire.ui-1.2.2.tgz|https://github.com/mir0n-pro/esquire.ui.lib/raw/refs/heads/release/v1.2.2/pkg/mir0n-pro-esquire.ui-1.2.2.tgz|g' package.json && \
     rm -f package-lock.json && \
-    npm install
+    npm install && npm run build
 
-# rest CMD is from compose.yaml
+FROM nginx:alpine
+COPY --from=build /app/dist/client/browser /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80

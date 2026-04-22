@@ -6,7 +6,7 @@ export default defineConfig({
   workers: 1,
   fullyParallel: false,
   use: {
-    baseURL: 'http://localhost:4200',
+    baseURL: process.env['BASE_URL'] ?? 'http://localhost:4200',
     headless: true,
   },
   reporter: [['list'], ['html', { open: 'never' }]],

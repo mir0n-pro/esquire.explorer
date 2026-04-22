@@ -3,7 +3,7 @@ import { keycloakLogin } from '../helpers/auth';
 
 test('Log in redirects to Keycloak', async ({ page }) => {
   await page.goto('/');
-  await page.waitForSelector('.login-hint-row', { timeout: 10000 });
+  await page.waitForSelector('.toolbar-login-hint', { timeout: 10000 });
   await page.locator('button[aria-label="Profile menu"]').click();
   await page.locator('button[mat-menu-item]:has-text("Log in")').click();
   await page.waitForURL(/realms\/esquire/, { timeout: 15000 });
@@ -13,7 +13,7 @@ test('Log in redirects to Keycloak', async ({ page }) => {
 test('login flow succeeds and shows explorer', async ({ page }) => {
   await keycloakLogin(page);
   await expect(page.locator('.name-bar')).toBeVisible();
-  await expect(page.locator('.login-hint-row')).not.toBeVisible();
+  await expect(page.locator('.toolbar-login-hint')).not.toBeVisible();
   await expect(page.locator('mat-tree-node').first()).toBeVisible({ timeout: 10000 });
 });
 
