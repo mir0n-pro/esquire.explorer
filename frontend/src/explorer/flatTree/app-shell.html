@@ -258,7 +258,7 @@
             <h2>Why it matters</h2>
             <h3>Every team builds the same five things</h3>
             <p>Before any product delivers value, an engineering team must build:</p>
-            <ol style="font-size:9.5pt; line-height:1.8; color:rgba(0,0,0,0.7); padding-left:20px;">
+            <ol style="font-size:12pt; line-height:1.6; color:rgba(0,0,0,0.75); padding-left:20px;">
               <li>A way to store and manage users and organizations</li>
               <li>A permission system (and then rework it two or three times)</li>
               <li>An audit log (typically after the first incident)</li>
@@ -299,12 +299,21 @@
               database state.
             </p>
 
-            <h3>4. Accounting operations built into the framework</h3>
+            <h3>4. Accounting as the demo business model</h3>
             <p>
-              Deposit, withdrawal, and cross-currency transfer are first-class operations in Esquire,
-              not integrations to external accounting systems. Each transfer is a two-leg transaction
-              linked by a shared key. Conversion rates are validated and persisted with each transfer record.
-              No general-purpose backoffice framework includes this.
+              Everyone knows what to expect from accounting — that is exactly why it is the demo.
+              The accounting domain — multi-currency deposit, withdrawal, and two-leg transfer with
+              conversion-rate validation, balance constraints, and status guards — is implemented
+              as the framework's demonstration, not as a framework feature. Pick a domain the reader
+              already understands, and the framework's behavior speaks for itself: tree-scoped reads,
+              positional permission resolution, server-driven UI rendering, audit, async entity
+              broadcast — all visible in a single click-through.
+            </p>
+            <p>
+              Most comparable tools demonstrate themselves with CRUD over toy data. No other entry
+              in the competitive landscape ships a framework demonstration this complete. The
+              accounting domain is the proof. Any other domain — KYC, case management, contracts,
+              portfolios — sits on the same backbone and inherits the same structural rules.
             </p>
 
             <h3>5. Asynchronous entity synchronization</h3>
@@ -354,21 +363,25 @@
             <p>
               Forest Admin, Retool, AdminJS, React Admin — these tools generate a working UI quickly.
               The tradeoff is that they are UI tools, not backoffice frameworks. They have no opinion
-              about your permission model beyond what the database schema implies. They have no audit trail.
-              They have no accounting layer. They work well for internal dashboards and data browsing.
-              They are not a foundation for a regulated backoffice system.
+              about your permission model beyond what the database schema implies. They have no audit
+              trail and no end-to-end domain demonstration. They work well for internal dashboards and
+              data browsing. They are not a foundation for a regulated backoffice system.
             </p>
             <p>Esquire is slower to get started with than Retool. It is incomparably more complete.</p>
 
             <h3>Identity and access management</h3>
             <p>
               Apache Syncope is the closest technical cousin — hierarchical entity model, Spring-based,
-              multi-database, audit-aware. But it is an identity management system. There are no accounts,
-              no transactions, no server-driven UI, no accounting operations.
+              multi-database, audit-aware. But it is an identity management system. Its hierarchy exists
+              to support provisioning and reconciliation of users and groups across external systems.
+              There is no server-driven UI, no domain-agnostic entity layer for arbitrary business
+              hierarchies, and no demonstration that runs a business domain end to end.
             </p>
             <p>
               Frontegg is purpose-built for B2B SaaS multi-tenancy. Its permission model is strong.
-              But it is a SaaS product with proprietary IAM, and it stops at the organization/user boundary.
+              But it is a SaaS product with proprietary IAM, and it stops at the organization/user
+              boundary — there is no entity layer below users, no server-driven UI, no async messaging
+              topology, no path to host it yourself.
             </p>
             <p>
               OpenFGA is a fine-grained authorization engine — it solves one part of the permission
@@ -379,16 +392,18 @@
             <h3>Microservice generators</h3>
             <p>
               JHipster generates a microservices scaffold. It does not give you a pre-built, working
-              backoffice — it gives you the starting point for building one. After generation, the entity
-              hierarchy, permission model, audit trail, accounting layer, and messaging topology are all
-              still on your backlog. Esquire starts where JHipster leaves off.
+              backoffice — it gives you the starting point for building one. After generation, the
+              hierarchical entity tree, the positional permission model, the server-driven UI, and
+              the async messaging topology are all still on your backlog. Esquire starts where
+              JHipster leaves off.
             </p>
 
             <h3>eCommerce and CMS platforms</h3>
             <p>
-              Broadleaf Commerce and Strapi have strong admin panels for their domain (products, content).
-              Outside that domain they do not apply. An organization/user/account hierarchy is not a
-              product catalog. A balance transfer is not a CMS workflow.
+              Broadleaf Commerce and Strapi ship strong admin panels for a fixed domain (products,
+              content). Their admin domain is closed — extending it means rebuilding what the platform
+              was built around. Esquire's admin domain is open: any hierarchy of any entities sits on
+              the framework's structural backbone with no domain-specific assumptions baked in.
             </p>
 
             <h3>Feature comparison</h3>
@@ -401,18 +416,18 @@
                 <th>Forest Admin</th>
                 <th>Frontegg</th>
               </tr>
-              <tr><td>Entity hierarchy (org/user/account)</td><td>Yes</td><td>Partial</td><td>No</td><td>No</td><td>Partial</td></tr>
-              <tr><td>Accounting operations</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+              <tr><td>Hierarchical entity tree (domain-agnostic)</td><td>Yes</td><td>Partial</td><td>No</td><td>No</td><td>Partial</td></tr>
               <tr><td>Server-driven UI</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
               <tr><td>Audit trail / BRIUD triggers</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td><td>No</td></tr>
               <tr><td>Distributed trace correlation</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
               <tr><td>Microservices + async messaging</td><td>Yes</td><td>Partial</td><td>Yes</td><td>No</td><td>No</td></tr>
               <tr><td>Field-level permission enforcement</td><td>Yes</td><td>Partial</td><td>No</td><td>No</td><td>No</td></tr>
-              <tr><td>Multi-currency transfer</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
-              <tr><td>Keycloak IAM</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+              <tr><td>Tree-shaped (positional) authorization</td><td>Yes</td><td>Partial</td><td>No</td><td>No</td><td>No</td></tr>
+              <tr><td>Pluggable IAM adapter (Keycloak today)</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
               <tr><td>Oracle + Postgres</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Partial</td><td>No</td></tr>
               <tr><td>No vendor lock-in</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td></tr>
               <tr><td>Open source / self-hosted</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td></tr>
+              <tr><td>End-to-end demonstration domain</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
             </table>
           </div>
         </mat-tab>

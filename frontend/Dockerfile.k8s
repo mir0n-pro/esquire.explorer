@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y git
 COPY *.json ./
 COPY ./src/ ./src/
 COPY ./public/ ./public/
-RUN sed -i 's|file:../../esquire.ui.lib/pkg/mir0n-pro-esquire.ui-1.2.2.tgz|https://github.com/mir0n-pro/esquire.ui.lib/raw/refs/heads/release/v1.2.2/pkg/mir0n-pro-esquire.ui-1.2.2.tgz|g' package.json && \
+RUN sed -i 's|file:../../esquire.ui.lib/pkg/mir0n-pro-esquire.ui-1.2.2.tgz|https://github.com/mir0n-pro/esquire.ui.lib/raw/refs/heads/pending-v1.2.3/pkg/mir0n-pro-esquire.ui-1.2.2.tgz|g' package.json && \
     rm -f package-lock.json && \
     npm install && npm run build
 

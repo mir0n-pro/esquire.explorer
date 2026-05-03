@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-test('app loads', async ({ page }) => {
+test('app loads', async ({ page }, testInfo) => {
   await page.goto('/');
   await page.waitForLoadState('domcontentloaded');
-  expect(page.url()).toContain('localhost');
+  const baseURL = testInfo.project.use.baseURL ?? 'http://localhost:4200';
+  expect(page.url()).toContain(new URL(baseURL).host);
 });
 
 test('login hint is visible before authentication', async ({ page }) => {

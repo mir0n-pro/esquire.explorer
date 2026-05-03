@@ -9,7 +9,7 @@
 .app-shell {
    display: grid;
    grid-template-rows: fit-content(64px) 1fr fit-content(64px);
-   height: 100%;
+   height: 100dvh;
    width: 99.5%;
    margin: 0;
    font-family: Roboto, sans-serif;
@@ -53,13 +53,14 @@
   .app-logo-static {
     width: 48px;
     height: 48px;
+    border-radius: 50%;
   }
 
   .app-logo {
     width: 48px;
     height: 48px;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 50%;
     transition: opacity 0.15s ease, box-shadow 0.15s ease;
     outline: none;
     &:hover {
@@ -115,16 +116,34 @@
     position: relative;
     overflow: hidden;
     height: 100%;
+    min-height: 0;
     background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf0 50%, #f0f4f8 100%);
 
     mat-tab-group {
       height: 100%;
+      min-height: 0;
       display: flex;
       flex-direction: column;
+
+      .mat-mdc-tab-header {
+        background: rgba(0, 0, 0, 0.08);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+
+        .mdc-tab__text-label {
+          font-size: 13pt;
+          font-weight: 500;
+          letter-spacing: 0.01em;
+        }
+
+        .mat-mdc-tab {
+          height: 52px;
+        }
+      }
 
       .mat-mdc-tab-body-wrapper {
         flex: 1;
         overflow: hidden;
+        min-height: 0;
       }
 
       .mat-mdc-tab-body-content {
@@ -140,7 +159,7 @@
     margin: 0 auto;
 
     h2 {
-      font-size: 13pt;
+      font-size: 17pt;
       font-weight: 500;
       color: rgba(0, 0, 0, 0.87);
       margin: 0 0 14px;
@@ -149,16 +168,16 @@
     }
 
     h3 {
-      font-size: 10.5pt;
+      font-size: 13pt;
       font-weight: 500;
-      color: rgba(0, 0, 0, 0.75);
+      color: rgba(0, 0, 0, 0.78);
       margin: 18px 0 6px;
     }
 
     p {
-      font-size: 9.5pt;
-      line-height: 1.65;
-      color: rgba(0, 0, 0, 0.68);
+      font-size: 12pt;
+      line-height: 1.6;
+      color: rgba(0, 0, 0, 0.75);
       margin: 0 0 10px;
     }
 

@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.2-2605.0318 v1.2.2 Finalization. Search resources and metadata
+  - e2e tests support any url
+  - search resources and metadata
+  - landing page: corrected context
+  - landing page: mobile pen/finger firendly
 
 v1.2.2-2604.2118 v1.2.2 Finalization. Advertisement context
 
