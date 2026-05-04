@@ -1,7 +1,7 @@
 # Release Report: v1.2.1 → v1.2.2
 
 **Repo:** `esquire.explorer/develop`  
-**Top commit:** `37f8c73`
+**Top commit:** `f885b20`
 
 ---
 
@@ -9,6 +9,12 @@
 
 ### doc/release_notes.txt
 
+
+**v1.2.2-2605.0318** v1.2.2 Finalization. Search resources and metadata  
+&nbsp;- e2e tests support any url  
+&nbsp;- search resources and metadata  
+&nbsp;- landing page: corrected context  
+&nbsp;- landing page: mobile pen/finger firendly  
 
 **v1.2.2-2604.2118** v1.2.2 Finalization. Advertisement context  
 
@@ -506,6 +512,35 @@
 ## Commits
 
 ```
+
+-- 2026-05-03 | commit: f885b20 | mir0n.the.programmer | v1.2.2-2605.0318 v1.2.2 Finalization. Search resources and metadata --
+M	doc/release_notes.txt
+M	e2e-test/tests/01-prelogin.spec.ts
+M	e2e-test/tests/07-details.spec.ts
+M	frontend/Dockerfile.k8s
+M	frontend/package.json
+A	frontend/public/googlecb109f50553030d1.html
+A	frontend/public/img/og-banner.png
+A	frontend/public/robots.txt
+A	frontend/public/sitemap.xml
+M	frontend/src/explorer/flatTree/app-shell.html
+M	frontend/src/explorer/flatTree/app-shell.scss
+M	frontend/src/index.html
+M	frontend/src/styles.scss
+ 13 files changed, 193 insertions(+), 37 deletions(-)
+
+-- 2026-04-22 | commit: c138563 | mir0n.the.programmer | support of local k8s deployment --
+A	doc/reports/report_v1.2.2.md
+M	e2e-test/e2e-test.bat
+M	e2e-test/helpers/auth.ts
+M	e2e-test/playwright.config.ts
+M	e2e-test/tests/01-prelogin.spec.ts
+M	e2e-test/tests/02-login.spec.ts
+M	frontend/Dockerfile
+A	frontend/Dockerfile.k8s
+A	frontend/nginx.conf
+M	frontend/src/explorer/flatTree/app-shell.html
+ 10 files changed, 1521 insertions(+), 24 deletions(-)
 
 -- 2026-04-21 | commit: 37f8c73 | mir0n.the.programmer | v1.2.2 Finalization --
 M	README.md
@@ -1327,6 +1362,7 @@ M	frontend/src/explorer/flatTree/app-explorer.component.ts
 M	README.md
 A	doc/e2e.todo.md
 M	doc/release_notes.txt
+A	doc/reports/report_v1.2.2.md
 A	e2e-test/.env
 A	e2e-test/.gitignore
 A	e2e-test/e2e-test.bat
@@ -1352,18 +1388,24 @@ A	e2e-test/tests/12-withdrawal.spec.ts
 A	e2e-test/tests/13-transfer.spec.ts
 A	e2e-test/tests/14-error-handling.spec.ts
 M	frontend/Dockerfile
+A	frontend/Dockerfile.k8s
 M	frontend/angular.json
 M	frontend/compose.yaml
+A	frontend/nginx.conf
 M	frontend/package.json
 M	frontend/public/assets/config.json
 M	frontend/public/assets/config.json.template
+A	frontend/public/googlecb109f50553030d1.html
 A	frontend/public/img/$sign.ico
 A	frontend/public/img/$transfer.ico
 A	frontend/public/img/$withdraw.ico
 A	frontend/public/img/ComponentModel.svg
+A	frontend/public/img/og-banner.png
 A	frontend/public/img/star.ico
 A	frontend/public/img/sysadmin.ico
 A	frontend/public/img/tools.ico
+A	frontend/public/robots.txt
+A	frontend/public/sitemap.xml
 D	frontend/src/app/app.component.spec.ts
 M	frontend/src/app/app.routes.ts
 M	frontend/src/app/interceptor/rfc9457Interceptor.ts
@@ -1438,6 +1480,7 @@ A	frontend/src/explorer/flatTree/app-shell.contants.ts
 A	frontend/src/explorer/flatTree/app-shell.html
 A	frontend/src/explorer/flatTree/app-shell.scss
 A	frontend/src/explorer/flatTree/app-shell.ts
+M	frontend/src/index.html
 M	frontend/src/main.ts
 M	frontend/src/rest/.openapi-generator/FILES
 M	frontend/src/rest/api/esquire.service.ts
@@ -1459,7 +1502,7 @@ A	frontend/src/test/group3/AppComponent.spec.ts
 A	frontend/src/test/group3/ExplorerComponent.spec.ts
 A	frontend/src/test/test.structure.md
 M	openapi-generate/esqEsquireApi.yaml
- 135 files changed, 19336 insertions(+), 5934 deletions(-)
+ 143 files changed, 21000 insertions(+), 5945 deletions(-)
 ```
 
 ---
