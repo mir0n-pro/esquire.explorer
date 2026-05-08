@@ -8,6 +8,8 @@ configuration.ts
 encoder.ts
 git_push.sh
 index.ts
+model/acctTransactionRequest.ts
+model/acctTransactionSimple.ts
 model/esqAccessProfile.ts
 model/esqAccessProfilePermissions.ts
 model/esqColumnHeaderDef.ts

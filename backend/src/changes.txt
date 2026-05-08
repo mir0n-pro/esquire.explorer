@@ -1,0 +1,34 @@
+Esquire Frameworks(tm) 2.0
+Esquire Explorer (backend / BFF tier)
+
+05/07/2026 mir0n  v1.2.3 created: Backend-for-Frontend tier
++ added src\index.ts
+  - BFF entrypoint; Express server; mounts /auth, /api proxy, baked SPA static, /readyz
++ added src\config.ts
+  - load BackendConfig from env vars: PUBLIC_BASE_URL, ALLOWED_ORIGINS,
+    KC_ISSUER/CLIENT_ID/CLIENT_SECRET, GATEWAY_URL, SESSION_SECRET, dict cache TTL
++ added src\auth\openidClient.ts
+  - openid-client v5 init via issuer discovery; cached singleton; getEndSessionUrl helper
++ added src\auth\routes.ts
+  - /auth/login, /callback, /logout, /me; OIDC code+PKCE flow
+  - per-request redirect_uri resolved from Origin/Referer against allowedOrigins
+    (lets login work from either host.docker.internal:* or localhost:* in local k8s)
++ added src\auth\sessionStore.ts
+  - express-session middleware; HttpOnly + SameSite=Lax cookie
+  - secure flag from nodeEnv; session shape: tokens, claims, pendingLogin
++ added src\auth\tokens.ts
+  - getValidAccessToken() with refresh-on-expiry via openid-client
+  - NoSessionError sentinel for missing-session signalling to handlers
++ added src\proxy\apiProxy.ts
+  - /api/* server-to-server proxy to gateway; injects Bearer from session
+  - cacheable GET path for /esq-kinds and /esq-dictionary; X-Request-ID propagation
++ added src\proxy\cache.ts
+  - in-memory dictionary cache; TTL + max-entries; key by path + sorted query
+  - per-process (no cross-pod sync; intended for low-cardinality dict data)
++ added src\static\spa.ts
+  - serves baked Angular SPA from /app/public; SPA fallback to index.html for client-side routes
++ added src\util\log.ts
+  - pino logger + httpLogger; production JSON, development pretty
++ added src\util\trace.ts
+  - traceMiddleware; X-Request-ID generated per request
+  - X-Correlation-ID propagated only when client sets it (gateway is canonical generator)

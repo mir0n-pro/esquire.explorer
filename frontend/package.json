@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -10,8 +10,8 @@
     "test": "ng test",
     "lib:yalc": "yalc add @mir0n-pro/esquire.ui",
     "lib:git": "yalc remove --all && npm install @mir0n-pro/esquire.ui",
-    "lib:local": "yalc remove --all && npm install ../../esquire.ui.lib/pkg/mir0n-pro-esquire.ui-1.2.2.tgz",
-    "lib:pkg": "yalc remove --all && npm install https://github.com/mir0n-pro/esquire.ui.lib/raw/refs/heads/pending-v1.2.3/pkg/mir0n-pro-esquire.ui-1.2.2.tgz"
+    "lib:local": "yalc remove --all && npm install ../../esquire.ui.lib/pkg/mir0n-pro-esquire.ui-1.2.3.tgz",
+    "lib:pkg": "yalc remove --all && npm install https://github.com/mir0n-pro/esquire.ui.lib/raw/refs/tags/v1.2.3/pkg/mir0n-pro-esquire.ui-1.2.3.tgz"
   },
   "private": true,
   "dependencies": {
@@ -24,10 +24,7 @@
     "@angular/platform-browser": "^20.3.15",
     "@angular/platform-browser-dynamic": "^20.3.15",
     "@angular/router": "^ 20.3.15",
-    "@mir0n-pro/esquire.ui": "file:../../esquire.ui.lib/pkg/mir0n-pro-esquire.ui-1.2.2.tgz",
-    "angular-auth-oidc-client": "^21.0.1",
-    "keycloak-angular": "^20.1.0",
-    "keycloak-js": "^26.2.2",
+    "@mir0n-pro/esquire.ui": "https://github.com/mir0n-pro/esquire.ui.lib/raw/refs/tags/v1.2.3/pkg/mir0n-pro-esquire.ui-1.2.3.tgz",
     "rxjs": "^6.5.3 || ^7.4.0",
     "tslib": "^2.3.0",
     "winston": "^3.19.0"

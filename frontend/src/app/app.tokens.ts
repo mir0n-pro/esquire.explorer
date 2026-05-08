@@ -6,6 +6,7 @@
 *
 *  History:
 * 01/08/2026 mir0n added keycloak params
+* 05/07/2026 mir0n  v1.2.3 BFF migration: removed keycloakUrl/keycloakRealm/keycloakClientId from RuntimeConfig (BFF owns OIDC config)
 */
 
 import { InjectionToken } from '@angular/core';
@@ -13,10 +14,5 @@ import { InjectionToken } from '@angular/core';
 // This is for the full object fetched from /assets/config.json
 export interface RuntimeConfig {
   apiBasePath: string;
-  keycloakUrl: string;
-  keycloakRealm: string;
-  keycloakClientId: string;
 }
 export const RUNTIME_CONFIG = new InjectionToken<RuntimeConfig>('runtime.config');
-
-

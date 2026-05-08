@@ -7,12 +7,9 @@
 * History :
 */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
-import { KEYCLOAK_EVENT_SIGNAL } from 'keycloak-angular';
-import Keycloak from 'keycloak-js';
 import { ExplorerComponent } from 'src/explorer/flatTree/app-shell';
 
 describe('ExplorerComponent', () => {
@@ -26,15 +23,13 @@ describe('ExplorerComponent', () => {
             imports: [ExplorerComponent, NoopAnimationsModule],
             providers: [
                 provideHttpClient(),
-                { provide: KEYCLOAK_EVENT_SIGNAL, useValue: signal(null) },
-                { provide: Keycloak, useValue: jasmine.createSpyObj<Keycloak>('Keycloak', ['login', 'logout', 'updateToken']) },
                 { provide: MatDialog, useValue: dialogSpy },
             ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(ExplorerComponent);
         component = fixture.componentInstance;
-        // Do not call detectChanges — ngOnInit requires live Keycloak/REST
+        // Do not call detectChanges — ngOnInit requires live REST + /auth/me
     });
 
     it('creates without error', () => {
