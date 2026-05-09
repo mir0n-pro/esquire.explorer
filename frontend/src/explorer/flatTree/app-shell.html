@@ -442,8 +442,8 @@
         <!-- Tab 6: Architecture -->
         <mat-tab label="Architecture">
           <div class="landing-tab-content">
-            <h2>Current Architecture (v1.2.2) </h2>
-            <img class="arch-diagram" src="/img/ComponentModel.svg" alt="Esquire Component Model"/>
+            <h2>Current Architecture (v1.2.3) </h2>
+            <img class="arch-diagram" src="/img/ComponentModel.png" alt="Esquire Component Model"/>
 
             <h3>Esq2025</h3>
             <p>The database (Oracle or Postgres); persistent store for all entity data, transactions,
@@ -479,18 +479,27 @@
                identity commands from the IAM bus and executes create / update / delete in the IAM.</p>
 
             <h3>gateway</h3>
-            <p>Spring Cloud Gateway; the single entry point for all frontend traffic; routes requests
-               to the appropriate backend service by path and entity kind; validates JWT tokens on
-               every request.</p>
+            <p>Spring Cloud Gateway; the in-cluster API router; routes requests to the appropriate
+               backend service by path and entity kind; validates JWT tokens on every request.
+               v1.2.3: ClusterIP-only &mdash; only the BFF reaches it; no longer publicly addressable.</p>
 
             <h3>Keycloak</h3>
             <p>External IAM; issues JWT access tokens; manages user identities, realm configuration,
                and authentication flows including TOTP; runs as a containerized service.</p>
 
-            <h3>Esquire Explorer</h3>
-            <p>The frontend application (Node.js / Angular); tree-based entity browser and operations UI;
-               consumes the @mir0n-pro/esquire.ui library; communicates exclusively through the gateway
-               REST API.</p>
+            <h3>Esquire Explorer Backend (BFF)</h3>
+            <p>Backend-for-Frontend (Node.js); the public entry point at esquire.mir0n.pro.
+               Owns the OIDC code+PKCE flow with Keycloak (/auth/login, /callback, /logout, /me);
+               proxies /api/* to the gateway with bearer injection; caches static entity dictionaries
+               per pod, shared across users; bakes the Angular SPA into its image at build time and
+               serves it on /. The browser never sees the access token &mdash; it holds an opaque
+               session cookie.</p>
+
+            <h3>Esquire Explorer Frontend (SPA)</h3>
+            <p>The user-facing application (Angular); tree-based entity browser and operations UI;
+               consumes the @mir0n-pro/esquire.ui library; communicates only with the BFF via
+               same-origin /auth/* and /api/*, never directly with the gateway or Keycloak.
+               Shipped baked into the BFF image; one deployable.</p>
 
             <p style="margin-top: 24px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 16px;">
               Source code and documentation:
