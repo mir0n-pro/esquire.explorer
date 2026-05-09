@@ -62,6 +62,9 @@
 * 04/14/2026 mir0n  subItemDisabled callback; Transfer submenu item; EsqObjectKind 1004 (transfer)
 * 04/19/2026 mir0n  import paths migrated to @mir0n-pro/esquire.ui library
 * 04/21/2026 mir0n  advertisement context added, nvagation to adv-explorer back-n-force
+* 05/07/2026 mir0n  v1.2.3 BFF migration: replaced keycloak-angular event signal with bootstrapAuth() hitting /auth/me;
+*                   lazy init -- EsqObjectKindFactory.init() and acctItem.subItems setup deferred to authenticated branch
+*                   (avoids cold-load 401 on /api/esq-kinds before login)
 */
 import {
   Component,
@@ -69,10 +72,7 @@ import {
   OnInit,
 //  ViewChild,
   inject,
-  Signal,
   signal,
-  effect,
-  computed,
   ViewEncapsulation,
 } from '@angular/core';
 import { MatToolbar } from '@angular/material/toolbar';
@@ -125,12 +125,6 @@ import {AcctOperation} from 'src/explorer/flatTree/acct/AcctOperation';
 
 import {EsquireService} from '../../rest/api/esquire.service';
 import {
-  KEYCLOAK_EVENT_SIGNAL,
-  KeycloakEvent,
-  KeycloakEventType,
-} from 'keycloak-angular';
-import Keycloak from 'keycloak-js';
-import {
   Observable,
   catchError,
   throwError,
@@ -160,9 +154,7 @@ const STATUS_READY = "Ready";
 })
 export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, OnDestroy {
 
-  private keycloak: Keycloak;
   protected flatDs!: EsqFlatTreeDatasource;
-  keycloakSignal: Signal<KeycloakEvent> = inject(KEYCLOAK_EVENT_SIGNAL);
   authState = signal('Initial');
   errorMessage = signal('');
   showLanding = signal(true);
@@ -203,7 +195,6 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
     //EsqUtils.DELAY = true;
     //EsqUtils.DEBUG = true;
     this._dataService = dataService;
-    this.keycloak = inject(Keycloak);
 
     EsqAccessProfile.addFlagIndex(EsqShellConstants.CMD_ACCT,4);
 
@@ -225,65 +216,58 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
         this.flatDs
     ));
 
-    effect(() => {
-      const event = this.keycloakSignal();
-      console.warn('Session status update: ' + event.type);
-      if (event.type === KeycloakEventType.TokenExpired) {
-        // Token expired - Keycloak will automatically attempt to refresh
-        EsqUtils.log('Token expired, attempting refresh...');
-      //} else if (event.type === KeycloakEventType.AuthSuccess) {
-      //  this.authState.set('Authenticated');
-      //  console.log('User successfully authenticated');
-      } else if (event.type === KeycloakEventType.AuthError) {
-        this.authState.set('Authentication error');
-        this.logout();
-      } else if (event.type === KeycloakEventType.AuthRefreshError) {
-      // Handle the case where the refresh token itself expired
-        this.logout();
-      } else if (event.type === KeycloakEventType.AuthRefreshSuccess) {
-        // Token refreshed successfully - maintain current state if already connected
-        if (this.authState() === STATUS_CONNECTED && this.profile()) {
-          EsqUtils.log('Token refreshed successfully');
+    this.bootstrapAuth(callApiMill);
+  }
+
+  private async bootstrapAuth(callApiMill: EsqExplorerCallApiMill): Promise<void> {
+    let authenticated = false;
+    try {
+      const res = await fetch('/auth/me', { credentials: 'include' });
+      const me = await res.json();
+      authenticated = me?.authenticated === true;
+    } catch (err) {
+      console.warn('auth/me failed: ', err);
+    }
+
+    if (!authenticated) {
+      this.authState.set(STATUS_READY);
+      return;
+    }
+    if (this.profileRequested) {
+      return;
+    }
+    this.profileRequested = true;
+    this.authState.set(STATUS_AUTHENTICATED);
+    // Lazy: only load kinds (and anything else needing a session) once we
+    // know we're authenticated -- avoids a guaranteed 401 on cold load.
+    await EsqObjectKindFactory.init(this.esqRestApiWrapper(), EsquireObjectKinds);
+    var acctItem = EsqCommandMenuItems.find(i => i.cmd === EsqShellConstants.CMD_ACCT);
+    if (acctItem) {
+        acctItem.subItems = [
+            { label: 'Deposit',    icon: EsqObjectKindFactory.instanceOf(AcctOperation.DICT_KIND_DEPOSIT).icon,    subCmd: String(AcctOperation.DICT_KIND_DEPOSIT)    },
+            { label: 'Withdrawal', icon: EsqObjectKindFactory.instanceOf(AcctOperation.DICT_KIND_WITHDRAWAL).icon, subCmd: String(AcctOperation.DICT_KIND_WITHDRAWAL) },
+            { label: 'Transfer',   icon: EsqObjectKindFactory.instanceOf(AcctOperation.DICT_KIND_TRANSFER).icon,   subCmd: String(AcctOperation.DICT_KIND_TRANSFER)   },
+        ];
+    }
+    this._dataService.esquireKey().subscribe({
+      next: (value) => {
+        var ap = new EsqAccessProfile(value);
+        this.profile.set(ap);
+        callApiMill.setUserId(ap.id);
+      },
+      error: (err) => {
+        this.errorReport = err;
+        console.error('Something went wrong: ' + err);
+        this.authState.set("Error in profile");
+        this.setErrorMessage('Something went wrong: ' + err.detail);
+        if (err.detail) {
+          alert('Something went wrong: ' + err.detail);
         }
-      } else if (event.type === KeycloakEventType.Ready) {
-        var good = computed(() => this.keycloak.authenticated ?? false);
-        if (good()) {
-          let was:string = this.authState();
-          if (!this.profileRequested) {
-            this.authState.set(STATUS_AUTHENTICATED);
-            if (was != STATUS_AUTHENTICATED) {
-              this.profileRequested = true;
-              this.dataService?.esquireKey().subscribe({
-                  next: (value) => {
-                    var ap = new EsqAccessProfile(value);
-                    this.profile.set(ap);
-                    callApiMill.setUserId(ap.id);
-                  },
-                  error: (err) => {
-                    this.errorReport = err;
-                    console.error('Something went wrong: ' + err);
-                    this.authState.set("Error in profile");
-                    this.setErrorMessage('Something went wrong: ' + err.detail);
-                    if (err.detail) {
-                      alert('Something went wrong: ' + err.detail);
-                    }
-                    this.logout();
-                  },
-                  complete: () =>  {
-                    this.authState.set(STATUS_CONNECTED);
-                    this.showLanding.set(false);
-                  }
-              }) ??
-              throwError(() => new Error('Data Service is not initialized'));
-            }
-          }
-        } else {
-          this.authState.set(STATUS_READY);
-        }
-      } else {
-        //xxx: this will disable access to explorer, keeping session open, simple "login" will bring all back
-        //     it could be more complex solution, but that is good-enough for now
-        this.authState.set('' + event.type);
+        this.logout();
+      },
+      complete: () => {
+        this.authState.set(STATUS_CONNECTED);
+        this.showLanding.set(false);
       }
     });
   }
@@ -403,22 +387,13 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
 
   async ngOnInit() {
     this.dataService = this._dataService;
-    await EsqObjectKindFactory.init(this.esqRestApiWrapper(), EsquireObjectKinds);
+    // Local-only init -- safe before auth. Anything that hits /api/* is
+    // deferred to bootstrapAuth's authenticated branch.
     EsqNodeStatusFactory.init(Object.values(EsquireStatuses));
-    var acctItem = EsqCommandMenuItems.find(i => i.cmd === EsqShellConstants.CMD_ACCT);
-    if (acctItem) {
-        acctItem.subItems = [
-            { label: 'Deposit',    icon: EsqObjectKindFactory.instanceOf(AcctOperation.DICT_KIND_DEPOSIT).icon,    subCmd: String(AcctOperation.DICT_KIND_DEPOSIT)    },
-            { label: 'Withdrawal', icon: EsqObjectKindFactory.instanceOf(AcctOperation.DICT_KIND_WITHDRAWAL).icon, subCmd: String(AcctOperation.DICT_KIND_WITHDRAWAL) },
-            { label: 'Transfer',   icon: EsqObjectKindFactory.instanceOf(AcctOperation.DICT_KIND_TRANSFER).icon,   subCmd: String(AcctOperation.DICT_KIND_TRANSFER)   },
-        ];
-    }
   }
 
 public async login(): Promise<void> {
-  await this.keycloak.login({
-    redirectUri: window.location.origin
-  });
+  window.location.href = '/auth/login';
 }
 
 public async showDetails() {
@@ -469,9 +444,12 @@ public faceNameClass() : string {
 public async logout(): Promise<void> {
   this.profileRequested = false;
   this.profile.set(null);
-  await this.keycloak.logout({
-    redirectUri: window.location.origin,
-  });
+  try {
+    await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+  } catch (err) {
+    console.warn('logout fetch failed: ', err);
+  }
+  window.location.href = '/';
 }
 
 private findIcon(kind:number) : string {

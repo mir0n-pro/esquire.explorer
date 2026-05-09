@@ -8,6 +8,7 @@
   History:
   01/19/2026 mir0n  Error Report added
   04/20/2026 mir0n  Landing page: tabbed marketing panel; logo toggle
+  05/07/2026 mir0n  v1.2.3 BFF: profile-menu trigger gated on isConnected(); standalone .profile-menu-button when unauthenticated
 
 -->
 
@@ -37,12 +38,18 @@
         <span class="hint-arrow"></span>
       </div>
     }
-    <div [class]="faceNameClass()">
-      <span>{{faceName()}}</span>
-      <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Profile menu">
+    @if (isConnected()) {
+      <div [class]="faceNameClass()">
+        <span>{{faceName()}}</span>
+        <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Profile menu">
+          <img style="width: 24px; height:24px;"  [src]="faceIcon()"/>
+        </button>
+      </div>
+    } @else {
+      <button class="profile-menu-button" mat-icon-button [matMenuTriggerFor]="menu" aria-label="Profile menu">
         <img style="width: 24px; height:24px;"  [src]="faceIcon()"/>
       </button>
-    </div>
+    }
     <mat-menu #menu="matMenu">
       @if (isConnected()) {
         <button mat-menu-item style="line-height: 1;min-height: 12px"

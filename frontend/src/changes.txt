@@ -1,6 +1,31 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+05/07/2026 mir0n  v1.2.3 BFF migration: SPA delegates auth to BFF tier; eager kinds load gated on auth
+app\app.component.ts
+  - keycloak-angular event handling removed (BFF tier owns auth)
+app\app.config.ts
+  - keycloak-angular providers + includeBearerTokenInterceptor removed
+  - auth handled by BFF cookie; only tracingInterceptor + rfc9457Interceptor remain
+app\app.tokens.ts
+  - RuntimeConfig: keycloakUrl/keycloakRealm/keycloakClientId removed (BFF owns OIDC config)
+app\interceptor\tracingInterceptor.ts
+  - newRequestId(): Math.random fallback when crypto.randomUUID is unavailable on
+    non-secure-context origins (e.g. host.docker.internal:4200 in local k8s)
+explorer\flatTree\app-shell.ts
+  - bootstrapAuth() replaces keycloak-angular event signal; hits /auth/me to determine session state
+  - lazy init: EsqObjectKindFactory.init() and acctItem.subItems setup deferred to authenticated branch
+    -- avoids guaranteed 401 on /api/esq-kinds before login
+explorer\flatTree\app-shell.html
+  - profile-menu trigger gated on isConnected(); standalone .profile-menu-button when unauthenticated
+explorer\flatTree\app-shell.scss
+  - .profile-menu-button styles for unauthenticated standalone profile-menu trigger
+main.ts
+  - keycloak-js init removed; bootstrapApplication directly (BFF tier owns auth)
+public\assets\config.json (and .template)
+  - apiBasePath = "/api" (BFF same-origin, no absolute URL)
+  - keycloakUrl/keycloakRealm/keycloakClientId removed (BFF owns OIDC config)
+
 04/20/2026 mir0n  Advertisement context
 flatTree\app-shell.*
   - advertisement context added, nvagation to adv-explorer back-n-force

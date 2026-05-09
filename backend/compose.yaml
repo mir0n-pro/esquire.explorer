@@ -1,0 +1,22 @@
+services:
+  backend:
+    container_name: esq-backend
+    build:
+      # Multi-stage Dockerfile reaches into ../frontend, so context is the
+      # parent explorer/ directory.
+      context: ..
+      dockerfile: backend/Dockerfile
+    image: esquire.backend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+      - KC_ISSUER=http://localhost:8080/kc-auth/realms/esquire
+      - KC_CLIENT_ID=esq-angular
+      - KC_CLIENT_SECRET=esq-angular-bff-dev-secret-rotate-in-prod
+      - GATEWAY_URL=http://gateway:7070
+      - PUBLIC_BASE_URL=http://localhost:3000
+      - SESSION_SECRET=esq-bff-dev-session-secret-rotate-in-prod
+    extra_hosts:
+      - "localhost:host-gateway"

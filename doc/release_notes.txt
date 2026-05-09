@@ -1,6 +1,23 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.3-2605.0722  v1.2.3 BFF tier; SPA auth migrated from in-browser keycloak-js to cookie-backed BFF
+   :Feature:     Backend-for-Frontend (BFF) tier under explorer/backend/
+                 Express + openid-client v5; cookie session; OIDC code+PKCE
+                 /auth/login, /callback, /logout, /me; /api/* proxy with bearer injection
+                 dictionary cache (esq-kinds, esq-dictionary) per-process
+                 baked SPA served from /app/public; per-request redirect_uri origin allowlist
+   :Refactoring: SPA: keycloak-angular and keycloak-js removed
+                 main.ts and app.config.ts no longer init Keycloak; auth state from /auth/me
+                 app.tokens.ts: keycloak* fields removed from RuntimeConfig
+                 app-shell.ts: bootstrapAuth() lazy-loads kinds/key only after authenticated
+   :Fix:         tracingInterceptor: Math.random fallback when crypto.randomUUID is undefined
+                 (non-secure-context origins like host.docker.internal:4200)
+                 SPA cold-load no longer fires /api/esq-kinds before /auth/me confirmation
+                 (eliminates 401 + PAGEERROR cascade on landing page)
+   :Improvement: icon set refreshed (admin, client, merchant, sysadmin, unknown, $transfer)
+   Components:   backend (new), frontend
+
 v1.2.2-2605.0318 v1.2.2 Finalization. Search resources and metadata
   - e2e tests support any url
   - search resources and metadata

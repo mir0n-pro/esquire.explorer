@@ -7,10 +7,10 @@
 *  History:
 * 01/98/2026 mir0n log keycloak initialization
 * 01/10/2026 mir0n remove keycloakSignal
+* 05/07/2026 mir0n  v1.2.3 BFF migration: remove keycloak-angular event handling (BFF tier owns auth)
 */
-import { Component, inject, OnInit, signal, Signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType  } from 'keycloak-angular';
 
 @Component({
   selector: 'app-root',

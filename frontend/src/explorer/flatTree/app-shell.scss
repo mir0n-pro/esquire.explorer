@@ -5,6 +5,7 @@
 *  mailto:mir0n.the.programmer@gmail.com
 *
 *  History:
+* 05/07/2026 mir0n  v1.2.3 BFF: .profile-menu-button styles for unauthenticated standalone profile-menu trigger
 */
 .app-shell {
    display: grid;
@@ -81,14 +82,21 @@
     //box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.5);
     //background-color: rgba(0, 0, 0, 0);
     display: flex;
-    align-items: center; 
-    vertical-align: middle;    
+    align-items: center;
+    vertical-align: middle;
 
     padding-left: 10px;
     padding-right: 10px;
     margin-left: 10px;
      display: grid;
     grid-template-columns: auto fit-content(24px);
+  }
+  .profile-menu-button {
+    // Standalone profile-menu trigger when no name-bar (i.e. unauthenticated).
+    // Lives in column 4 of the toolbar grid in place of the name-bar.
+    grid-column: 4;
+    justify-self: end;
+    margin-right: 10px;
   }
   .esq-icon-button {
     transform: scale(0.75) !important;

@@ -3,6 +3,5 @@ node_modules
 .angular
 .yalc
 .npmrc
-package-lock.json
 Dockerfile
 README.md

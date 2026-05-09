@@ -1,6 +1,3 @@
 {
-  "apiBasePath": "http://localhost:7070",
-  "keycloakUrl": "http://localhost:8080",
-  "keycloakRealm": "esquire",
-  "keycloakClientId": "esq-angular"
+  "apiBasePath": "/api"
 }

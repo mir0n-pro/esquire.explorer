@@ -9,19 +9,17 @@
 * 01/08/2026 mir0n includeBearerTokenInterceptor
 *                  attempt to init keycloack
 * 01/18/2026 mir0n added interceptors: tracingInterceptor, rfc9457Interceptor
+* 05/07/2026 mir0n  v1.2.3 BFF migration: removed keycloak-angular providers + includeBearerTokenInterceptor; auth handled by BFF cookie
 */
 
-import {ApplicationConfig, inject, provideAppInitializer, provideZonelessChangeDetection} from '@angular/core';
+import {ApplicationConfig, inject, provideZonelessChangeDetection} from '@angular/core';
 import {provideRouter} from '@angular/router';
-//import { authInterceptor, provideAuth } from 'angular-auth-oidc-client';
-//import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {provideHttpClient, withInterceptors} from '@angular/common/http';
 
 import {routes} from './app.routes';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {BASE_PATH} from "../rest";
 import { RUNTIME_CONFIG} from './app.tokens';
-import { INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, includeBearerTokenInterceptor, provideKeycloak, KeycloakService } from 'keycloak-angular';
 import { rfc9457Interceptor } from './interceptor/rfc9457Interceptor';
 import { tracingInterceptor } from './interceptor/tracingInterceptor';
 
@@ -30,76 +28,20 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([
         tracingInterceptor,
-        includeBearerTokenInterceptor,
         rfc9457Interceptor,
-      ]) 
+      ])
     ),
-    {
-      provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
-      useFactory: () => {
-        const config = inject(RUNTIME_CONFIG);
-        // Define which URLs get the token (e.g., your API base path)
-       var s = config.apiBasePath; // Extracts the string for OpenAPI services
-        if (!s || s.includes('${')) {
-            console.debug('path variables have not been replaced!!!: ',s);
-            s = "http://localhost:3000"; // Fallback if template placeholder not replaced
-        } 
-        s = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special regex characters       
-        return [
-          {
-            urlPattern: new RegExp(`^${s}/.*`, 'i'),
-            httpMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
-          }
-        ];
-      }
-    },
-
-    
-//xxx: unable to init keycloak dynamically, within appConfig providers, let have it in main.ts 
-//     until the issue is solved by angular/keycloak-angular team
-/*   
-// dummy config to allow initialization
-    provideKeycloak({
-      config: {
-        url: '', 
-        realm: '',
-        clientId: ''
-      }
-    }),
-    //real config initializer
-    provideAppInitializer(async () => {
-      const keycloakService = inject(KeycloakService); // Use the service here
-      const config = inject(RUNTIME_CONFIG);
-      await keycloakService.init({
-        config: {
-          url: config.keycloakUrl,
-          realm: config.keycloakRealm,
-          clientId: config.keycloakClientId,
-          grant_type:'password', 
-          scope: 'openid profile email'
-        },
-        initOptions: {
-          //onLoad: 'check-sso',
-          onLoad: 'login-required',
-          checkLoginIframe: false, 
-          pkceMethod: 'S256'        
-          //flow: 'standard',
-          //silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
-        }
-      });
-    }),
-  */  
-    provideRouter(routes), 
+    provideRouter(routes),
     provideAnimationsAsync(),
     provideZonelessChangeDetection(),
     {
       provide: BASE_PATH,
       useFactory: () => {
         const config = inject(RUNTIME_CONFIG);
-        var s = config.apiBasePath; // Extracts the string for OpenAPI services
+        var s = config.apiBasePath;
         if (!s || s.includes('${')) {
-            console.debug('path variables have not been replaced!!!: ',s);
-            s = "http://localhost:3000"; // Fallback if template placeholder not replaced
+            console.debug('path variables have not been replaced!!!: ', s);
+            s = "/api";
           }
         return s;
       }
