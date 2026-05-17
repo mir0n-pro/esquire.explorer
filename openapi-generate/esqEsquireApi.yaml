@@ -116,6 +116,38 @@ paths:
                 type: object
         '405':
           description: Invalid input
+  /esq-cmd-tree:
+    get:
+      tags:
+        - esquire
+      summary: Read the natural entity subtree under a seed entity
+      description: FK-based traversal of esq_org / esq_user / esq_account, independent from the biztree cache. Returns the seed entity and every descendant, leaves-first (level DESC) so callers can delete bottom-up without reordering. Same EsqTreeNode shape as /esq for response compatibility.
+      operationId: esquireCommandTree
+      parameters:
+        - name: kind
+          in: query
+          description: Seed entity kind code (ORG / USR / ACCT)
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: id
+          in: query
+          description: Seed entity id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EsqTreeNode'
+        '405':
+          description: Invalid input
   /esq-enode:
     get:
       tags:
@@ -150,6 +182,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EsqTreeNode'
+        '405':
+          description: Invalid input
+  /esq-tree:
+    get:
+      tags:
+        - esquire
+      summary: Recursive subtree from biztree H2 cache
+      description: Returns the seed node plus every descendant cached node (real entities, virtual folders, and account shortcuts) under one tree-path prefix. Counterpart to enyMan's /esq-cmd-tree (authoritative DB walk); used together by the hauberk CompareTrees diff scenario.
+      operationId: esquireSubtree
+      parameters:
+        - name: id
+          in: query
+          description: Seed tree-node id (subtree root)
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EsqTreeNode'
         '405':
           description: Invalid input
   /esq-dict:
@@ -521,6 +578,10 @@ components:
             type: string
           description: Node path on the tree
           example: [root,Pokemons]
+        entityPath:
+          type: string
+          description: Raw entity-path string (esq_entity_path.ep_path on the DB side; ESQ_TREE.tree_entity_path on the biztree side). Both should be identical when the cache is in sync. Distinct from path (which on biztree is the navigation tree path traversing folder nodes).
+          example: 1.5.12.
         desc:
           type: string
           description: Node description

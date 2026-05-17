@@ -1,21 +1,39 @@
 | ![Alt text](./favicon.ico) | Esquire Frameworks(tm) 2.0 |
 |----------------------------|-------------------------|
 
-Frameworks for organizing business entities in a tree, for any business or activity. The framework is targeting to cover traditional functionality for a Backoffice (sub)system: onboarding, user profile maintenance, permissions, authorization, and accounting.
+Frameworks for organizing business entities in a tree, for any business or activity. The framework is targeting to cover traditional 
+functionality for a Backoffice (sub)system: onboarding, user profile maintenance, permissions, authorization, and accounting.
 
-## 
+## esquire.explorer -- the front-yard of Esquire frameworks
 
-## esquire.explorer: Esquire Tree Explorer
+This repository is the **front-yard system equipment**: a collection of
+independent tools and applications that sit *outside* the Esquire server
+and connect to it as external callers -- each for one task or another.
 
-Part of Esquire frameworks. The frontend component, a user interface that allows users to navigate through the entity tree, manage the state of entities, modify relationships between entities, and perform administrative operations and procedures.
+Not a single product. Five subprojects sharing one home, one build chain,
+and the same generated REST clients pointing at `services/`:
 
-## Esquire Explorer Error Report
+| Subproject     | What it is                                                  | What it's for                                                                                                                  |
+|----------------|-------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| `frontend/`    | Angular SPA -- the **Esquire Tree Explorer** UI             | Navigating the entity tree, managing entity state, modifying relationships, running administrative operations and procedures. |
+| `backend/`     | Node.js BFF (OIDC session + token broker)                   | Shielding the SPA from access tokens, handling the OIDC handshake server-side, brokering Bearer to the gateway.               |
+| `openapi-generate/`| OpenAPI spec + generator templates                      | Producing the typed REST clients the other subprojects consume.                                                                |
+| `e2e-test/`    | Playwright end-to-end test suite                            | Exercising the full SPA + BFF + gateway path in a real browser.                                                                |
+| `hauberk/`     | Gatling-based stress / load / soak harness (**Haubergeon**) | Driving HTTP load against a running deployment from outside; per-request timing with multi-tier attribution.                  |
 
-![](doc/media/94045cb936d79e912287bd755dbb2972.jpeg)
+Each subproject is independently built, run, and deployed; they all talk to
+the same **Esquire server** (`services/`) as outside callers.
 
-## Access Profile
 
-## ![](media/83817d896833ef994ed6cdb2b8ddd63a.jpeg)
+## v1.2.4 — complete (05/17/2026)
+
+
+| | |
+|--------------------|-------------------------|
+| `backend/`| - added unit test;|
+| `frontend/`|- updated landing page: component model: two public entrypoints: esquire.mir0n.pro and api.esquire.mir0n.pro;|
+| `openapi-generate/`| - added 2 new commands|               |
+| `hauberk/`| **Haubergeon** - new subproject: chainmail armor based on Gatling 3.13: stress / load / smoke / race-repro<br>(26 reusable Chains; 17 Simulations; PerformanceMatrix CSV + per-URL summary)|
 
 ## v1.2.2 — complete (04/20/2026)
 

@@ -1,14 +1,16 @@
 @echo off
 cd /d "%~dp0"
 
-rem Usage: e2e-test.bat [PORT]
-rem   PORT 4200 (default) -- Docker setup
-rem   PORT 80             -- K8s setup
+rem Runs the Playwright e2e suite against the LOCAL k8s deployment
+rem (Docker Desktop + ingress-nginx + MetalLB), which mirrors OKE's shape:
+rem the SPA + BFF answer on http://esquire.localhost/ (port 80 via ingress).
+rem
+rem Prerequisite: hosts file maps esquire.localhost -> 127.0.0.1
+rem   (one line: 127.0.0.1   esquire.localhost   api.esquire.localhost)
+rem
+rem Mirrors e2e-oci.bat (which hits https://esquire.mir0n.pro).
 
-set PORT=%1
-if "%PORT%"=="" set PORT=4200
-
-set BASE_URL=http://host.docker.internal:%PORT%
+set BASE_URL=http://esquire.localhost
 
 if not exist node_modules (
     call npm install
