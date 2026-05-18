@@ -1,6 +1,16 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.4-2605.1616 Hauberk Gatling harness; tree-diff endpoints; landing page two-host architecture
+   :Feature:     explorer/hauberk: new subproject: chainmail armor based on Gatling 3.13: stress / load / smoke / race-repro
+                 (26 reusable Chains; 17 Simulations; PerformanceMatrix CSV + per-URL summary);
+   :Feature:     rest/ regenerated -- /esq-cmd-tree (enyMan FK walk) and /esq-tree (biztree H2 cache)
+                 endpoints; EsqTreeNode.entityPath field (diff axis for race-repro CompareTrees)
+   :Improvement: landing-page Architecture tab updated for v1.2.4 -- two public hosts called out:
+                 esquire.mir0n.pro (administrative GUI, BFF + SPA)
+                 api.esquire.mir0n.pro (public REST API, gateway direct, Bearer JWT per request)
+   Components:   hauberk (new), frontend, backend (unit test added)
+
 v1.2.3-2605.0722  v1.2.3 BFF tier; SPA auth migrated from in-browser keycloak-js to cookie-backed BFF
    :Feature:     Backend-for-Frontend (BFF) tier under explorer/backend/
                  Express + openid-client v5; cookie session; OIDC code+PKCE

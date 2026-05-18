@@ -55,6 +55,10 @@ export interface EsqTreeNode {
      */
     path?: Array<string>;
     /**
+     * Raw entity-path string (esq_entity_path.ep_path on the DB side; ESQ_TREE.tree_entity_path on the biztree side). Both should be identical when the cache is in sync. Distinct from path (which on biztree is the navigation tree path traversing folder nodes).
+     */
+    entityPath?: string;
+    /**
      * Node description
      */
     desc?: string;

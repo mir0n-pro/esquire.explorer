@@ -1,0 +1,78 @@
+hauberk changes
+
+05/17/2026 created: Gatling-based stress / load / smoke / race-repro harness
+auth.KcTokenClient 
+  - plain-Java client_credentials grant against KC /token
+auth.RefreshableToken
+  - thread-safe access-token holder; lazy first fetch; auto-refresh at TTL-30s
+config.HauberkConfig
+   - typed config (endpoints, KC client+secret, playground id, prepare/move/super knobs, metrics)
+     loaded from hauberk.properties + optional overlay via --config
+   - added tokenRelay.type (plain | vanilla | phantom) + isBasicAuth() + basicAuthHeader() 
+     so the harness can present HTTP Basic at the edge for Vanilla Token Relay runs; overlay javadoc decoupled from JWS+ naming
+config.EntityKinds
+    - kind-code constants (ORG=20, USR_CLIENT=34, ACCT_CLIENT=50, TX_DEPOSIT/WITHDRAW/TRANSFER, ...)
+health.HealthPreCheck
+   - KC well-known + gateway health probes run before sim start; aborts on failure
+   - auth-path probe branches on HauberkConfig.AUTH_MODE 
+     presents Basic for Vanilla Token Relay, Bearer otherwise; 
+perf.PerformanceMatrix
+   - per-response transformResponse hook capturing the four observability headers
+    (X-Response-Time / Esq-Gw-Inner-Time / Esq-Srv-Outer-Time / Esq-Srv-Inner-Time);
+cli.HauberkCli
+   - picocli @Command root entry point; dispatches to subcommands
+cli.RunCommand
+   - programmatic Gatling launch with --metrics, --output, --config, --times, shape knobs
+cli.ListCommand
+   - catalogue of discovered Simulations with @SimulationInfo descriptions
+cli.SummaryCommand
+   - per-URL percentile summary from a saved perf-matrix CSV
+cli.DiffCommand
+   - side-by-side per-URL diff of two perf-matrix CSV snapshots
+cli.CsvSnapshot
+   - in-memory snapshot of a perf-matrix CSV (YAML preamble + row arrays)
+cli.SimulationCatalog
+   - classpath scanner for concrete Simulation classes; resolves short / kebab / FQCN names
+chain.*
+  - 26 atomic ChainBuilder building blocks:
+simulations.SimulationInfo
+  - SimulationInfo: class-level annotation carrying the one-line catalog description (read reflectively by ListCommand)
+simulations.HauberkSimulation
+  - abstract base for every hauberk Simulation -- pulls up lazy RefreshableToken, 
+    instrumented httpProtocol with PerformanceMatrix, and after() perf-matrix flush
+  - Authorization header branches on HauberkConfig.AUTH_MODE -- 
+    Basic for Vanilla Token Relay, Bearer (KC JWT) otherwise
+simulations.LoadScenarios
+  - shared scenario library (READ/UPDATE/CREATE/MOVE/TX) used by SuperLoad and the five standalone *LoadSimulation variants
+simulations.SmokeSimulation
+  - single-VU wiring check (KC token + one GET /esq-kinds)
+simulations.EntitySmokeSimulation
+  - end-to-end entity walk -- every CRUD Chain exercised sequentially by a single VU
+simulations.CleanHouseSimulation
+  - stateless name-driven teardown -- find hauberk-office-smoke + delete its subtree
+simulations.CompareTreesSimulation
+  - standalone CompareTrees runner across the playground subtree
+simulations.PrepareForAnythingSimulation
+  - load-test playground builder (D nested offices x N users x M accounts)
+simulations.MoveSmokeSimulation
+  - /esq-move smoke for USR + ORG re-parenting on a D-deep chain
+simulations.KcIntegrationSmokeSimulation
+  - access-profile end-to-end via enyMan + keySmith + kcMaster + KC + BFF login
+simulations.CreateLoadSimulation
+  - standalone variants of the create load scenarios
+simulations.ReadLoadSimulation
+  - standalone variants of the read load scenarios
+simulations.UpdateLoadSimulation
+  - standalone variants of the update load scenarios
+simulations.MoveLoadSimulation
+  - standalone variants of the move load scenarios
+simulations.TxLoadSimulation
+  - standalone variants of the deposit-withdrawal load scenarios
+simulations.SuperLoadSimulation: 
+  - all 5 LoadScenarios in parallel for super.duration.seconds
+simulations.RaceCacheLoadSimulation
+  - Race repro (cache-load race); self-validating PASS/FAIL
+simulations.RaceMoveCreateSimulation
+  - Race repro (move + concurrent create path race); self-validating PASS/FAIL
+simulations.ResidueCleanupSimulation
+  - targeted residue purge for hauberk-office-smoke leftovers

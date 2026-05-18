@@ -1,6 +1,13 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+05/17/2026 mir0n  v1.2.4 landing-page Architecture tab updated for two-host model
+explorer\flatTree\app-shell.html
+  - Architecture heading bumped: v1.2.3 -> v1.2.4
+05/14/2026 mir0n  v1.2.4 rest/ regenerated for tree-diff endpoints
+rest\api\*.ts
+  - regenerated: new endpoints exposed
+
 05/07/2026 mir0n  v1.2.3 BFF migration: SPA delegates auth to BFF tier; eager kinds load gated on auth
 app\app.component.ts
   - keycloak-angular event handling removed (BFF tier owns auth)

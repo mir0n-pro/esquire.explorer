@@ -442,8 +442,16 @@
         <!-- Tab 6: Architecture -->
         <mat-tab label="Architecture">
           <div class="landing-tab-content">
-            <h2>Current Architecture (v1.2.3) </h2>
+            <h2>Current Architecture (v1.2.4) </h2>
             <img class="arch-diagram" src="/img/ComponentModel.png" alt="Esquire Component Model"/>
+
+            <p>
+              Two public hosts:
+              <strong>esquire.mir0n.pro</strong> &mdash; administrative GUI (BFF + SPA), opaque
+              session cookie after OIDC code+PKCE login.
+              <strong>api.esquire.mir0n.pro</strong> &mdash; public REST API (gateway direct),
+              Bearer JWT on every request, for service-to-service callers and integrations.
+            </p>
 
             <h3>Esq2025</h3>
             <p>The database (Oracle or Postgres); persistent store for all entity data, transactions,
@@ -479,27 +487,33 @@
                identity commands from the IAM bus and executes create / update / delete in the IAM.</p>
 
             <h3>gateway</h3>
-            <p>Spring Cloud Gateway; the in-cluster API router; routes requests to the appropriate
-               backend service by path and entity kind; validates JWT tokens on every request.
-               v1.2.3: ClusterIP-only &mdash; only the BFF reaches it; no longer publicly addressable.</p>
+            <p>Spring Cloud Gateway; the API router; routes requests to the appropriate backend
+               service by path and entity kind; validates JWT tokens on every request. Reachable
+               two ways: in-cluster from the BFF on /api/*, and externally at
+               <strong>api.esquire.mir0n.pro</strong> &mdash; the public REST API for non-browser
+               callers (service-to-service integrations, load / smoke harnesses, future mobile or
+               API consumers). External callers carry their own bearer token; no BFF in the loop.</p>
 
             <h3>Keycloak</h3>
             <p>External IAM; issues JWT access tokens; manages user identities, realm configuration,
                and authentication flows including TOTP; runs as a containerized service.</p>
 
             <h3>Esquire Explorer Backend (BFF)</h3>
-            <p>Backend-for-Frontend (Node.js); the public entry point at esquire.mir0n.pro.
-               Owns the OIDC code+PKCE flow with Keycloak (/auth/login, /callback, /logout, /me);
-               proxies /api/* to the gateway with bearer injection; caches static entity dictionaries
-               per pod, shared across users; bakes the Angular SPA into its image at build time and
-               serves it on /. The browser never sees the access token &mdash; it holds an opaque
-               session cookie.</p>
+            <p>Backend-for-Frontend (Node.js); the <strong>administrative GUI entry point</strong>
+               at esquire.mir0n.pro. Owns the OIDC code+PKCE flow with Keycloak (/auth/login,
+               /callback, /logout, /me); proxies /api/* to the gateway with bearer injection;
+               caches static entity dictionaries per pod, shared across users; bakes the Angular
+               SPA into its image at build time and serves it on /. The browser never sees the
+               access token &mdash; it holds an opaque session cookie.</p>
 
             <h3>Esquire Explorer Frontend (SPA)</h3>
             <p>The user-facing application (Angular); tree-based entity browser and operations UI;
                consumes the @mir0n-pro/esquire.ui library; communicates only with the BFF via
                same-origin /auth/* and /api/*, never directly with the gateway or Keycloak.
                Shipped baked into the BFF image; one deployable.</p>
+
+            <h3>REST API</h3>
+            <p>Public REST API exposed for gatling-based load / smoke harnesses and other integrations.</p>
 
             <p style="margin-top: 24px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 16px;">
               Source code and documentation:

@@ -15,11 +15,11 @@
  */
 export interface AcctTransactionSimple { 
     /**
-     * Transaction ID (ATR_PK)
+     * acct Id
      */
     id?: string;
     /**
-     * Transaction entity kind (980 = accttr)
+     * Account kind
      */
     kind?: number;
     /**
