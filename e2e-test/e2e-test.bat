@@ -15,4 +15,3 @@ if not exist node_modules (
     call npx playwright install chromium
 )
 call npm test
-pause

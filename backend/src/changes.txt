@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (backend / BFF tier)
 
+05/23/2026 mir0n  v1.2.5 version bump (night-watch sprint alignment)
+package.json
+  - version 1.2.4 -> 1.2.5 (no code change; aligns the BFF with the backend sprint)
+
 05/07/2026 mir0n  v1.2.3 created: Backend-for-Frontend tier
 + added src\index.ts
   - BFF entrypoint; Express server; mounts /auth, /api proxy, baked SPA static, /readyz

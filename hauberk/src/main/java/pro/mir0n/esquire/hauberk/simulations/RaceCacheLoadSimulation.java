@@ -3,9 +3,13 @@
  *  Esquire Haubergeon (Gatling stress/load harness)
  *
  *  Copyright(c) 2001, 2026 mir0n&co www.mir0n.pro
+ *  mailto:mir0n.the.programmer@gmail.com
  *
  *  History:
  * 05/14/2026 mir0n  created: Phase 8a race repro -- heavy create-load while operator restarts biztree mid-flight; self-validating diff DB vs cache, prints PASS/FAIL
+ * 05/23/2026 mir0n  automated the operator restart: a "race-restart" population fires
+ *                   Cmd.run("restart-biztree") ~15s into the load (was a manual banner); the verify
+ *                   population waits via WaitCacheReady before diffing; maxDuration margin raised for the boot.
  */
 package pro.mir0n.esquire.hauberk.simulations;
 
@@ -103,9 +107,15 @@ public class RaceCacheLoadSimulation extends HauberkSimulation {
             // No delete -- want survivors in DB for the diff.
             .forever().on(exec(CreateUser.chain));
 
+    // Restart trigger: fires the biztree restart mid-load (was the manual operator step).
+    ScenarioBuilder restartScn = scenario("race-restart")
+            .exec(Cmd.run("restart-biztree"));
+
     // Verification scenario: single VU, runs AFTER the load (separate
     // PopulationBuilder with nothingFor delay).
     ScenarioBuilder verifyScn = scenario("race-verify")
+            // biztree was restarted mid-load -- wait until it is serving again before reading.
+            .exec(WaitCacheReady.chain)
             .exec(session -> session.set("officeName", "hauberk-office-smoke"))
             .exec(LookupOfficeIdByName.chain)
             .exec(http("GET /esq-cmd-tree (natural, post-load)")
@@ -189,12 +199,11 @@ public class RaceCacheLoadSimulation extends HauberkSimulation {
                 "RaceCacheLoadSimulation: super.create.workers must be >= 1.");
         }
 
-        // Banner -- operator must restart biztree manually during the load.
+        // Fully automated: the race-restart population fires `cmd restart-biztree` mid-load
+        // (~15s in) -- no operator. The verify population waits for biztree to come back.
         System.err.println();
         System.err.println("================================================");
-        System.err.println(" RACE 8a -- CACHE-LOAD RACE REPRO");
-        System.err.println(" >>> NOW: docker compose restart biztree <<<");
-        System.err.println(" (in a separate terminal, while this load runs)");
+        System.err.println(" RACE 8a -- CACHE-LOAD RACE (automated restart)");
         System.err.println("================================================");
         System.err.println();
 
@@ -203,13 +212,17 @@ public class RaceCacheLoadSimulation extends HauberkSimulation {
         // and process any in-flight JMS messages).
         List<PopulationBuilder> pops = new ArrayList<>();
         pops.add(createOnlyScn.injectOpen(atOnceUsers(cW)));
+        // restart biztree mid-load (~15s in) -- the automated former-operator step.
+        pops.add(restartScn.injectOpen(
+                nothingFor(Duration.ofSeconds(15)),
+                atOnceUsers(1)));
         pops.add(verifyScn.injectOpen(
                 nothingFor(Duration.ofSeconds(dur + 5)),
                 atOnceUsers(1)));
 
         setUp(pops)
-            // maxDuration covers load + settle + verify with margin.
-            .maxDuration(Duration.ofSeconds(dur + 30))
+            // maxDuration covers load + restart + biztree boot + verify with margin.
+            .maxDuration(Duration.ofSeconds(dur + 90))
             .protocols(httpProtocol);
     }
 }

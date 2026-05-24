@@ -1,5 +1,36 @@
 hauberk changes
 
+05/23/2026 mir0n  v1.2.5 Taijitu night-watch -- message-loss sims + infra-command framework
+chain.Cmd  (new)
+  - sim step that runs a configured infra command (cmd.<key>) through the OS shell (cmd /c on
+    Windows, sh -c elsewhere); {KEY} placeholder substitution from a passed env map; blocks until exit
+chain.ForceSweep  (new)
+  - POST /esq-sweep through the gateway (authenticated) to force a night-watch sweep; checks 202
+chain.WaitCacheReady  (new)
+  - poll GET /esq-tree until bizTree answers 200 (cache loaded + serving), after a restart/recreate
+chain.WaitBizTreeDown  (new)
+  - poll GET /esq-tree until 5xx -- confirms OVER REST that the TERMINATE reaction took bizTree down
+simulations.MessageLossSimulation  (new)
+  - night-watch SWAP scenario: recreate biztree (SWAP), stop AMQ, create a user (CREATE broadcast
+    lost), prove it MISSING, wait one sweep, prove the SWAP promoted the fresh shadow (user present);
+    fully automatic via Cmd
+simulations.MessageLossTerminateSimulation  (new)
+  - night-watch TERMINATE scenario: recreate biztree (TERMINATE), stop AMQ, create a user, prove
+    drift, force a sweep -> mismatch System.exit, assert bizTree DOWN (WaitBizTreeDown); restores the stack
+config.HauberkConfig
+  - added the cmd.* infra-command map (COMMANDS) + static command(key) accessor (cmd.<key> property,
+    -Dcmd.<key> override)
+simulations.RaceCacheLoadSimulation
+  - automated the operator restart: a race-restart population fires Cmd.run("restart-biztree") ~15s in
+    (was a manual banner); verify population waits via WaitCacheReady; maxDuration margin raised
+hauberk.properties
+  - added cmd.* defaults (stop-amq / start-amq / restart-biztree / recreate-biztree -- docker)
+hauberk-k8s.properties
+  - cmd.* overrides for local k8s (kubectl scale/wait AMQ; kubectl set env + rollout restart biztree)
+hauberk-oke.properties
+  - cmd.* overrides for OKE prod (same kubectl steps, -n default); enables the message-loss sims
+    against the live cluster (run with the OKE kubectl context active)
+
 05/17/2026 created: Gatling-based stress / load / smoke / race-repro harness
 auth.KcTokenClient 
   - plain-Java client_credentials grant against KC /token

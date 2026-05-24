@@ -8,6 +8,9 @@
  *  History:
  * 05/14/2026 mir0n  created: typed config (endpoints, KC client+secret, playground id, prepare/move/super knobs, metrics) loaded from hauberk.properties + optional overlay
  * 05/17/2026 mir0n  added tokenRelay.type (plain | vanilla | phantom) + isBasicAuth() + basicAuthHeader() so the harness can present HTTP Basic at the edge for Vanilla Token Relay runs; overlay javadoc decoupled from JWS+ naming
+ * 05/23/2026 mir0n  added the cmd.* infra-command map (COMMANDS) + static command(key) accessor
+ *                   (cmd.<key> property, -Dcmd.<key> CLI override; throws if unset) so a Simulation can
+ *                   drive the stack via Cmd.run("key").
  */
 package pro.mir0n.esquire.hauberk.config;
 
@@ -100,6 +103,10 @@ public final class HauberkConfig {
     public static final int SUPER_MOVE_WORKERS;
     public static final int SUPER_TX_WORKERS;
 
+    /** Infra-orchestration shell commands (key -> command line), from the cmd.* properties.
+     *  Run as sim steps via Cmd.run("key"); -Dcmd.key=... overrides at the CLI. */
+    private static final java.util.Map<String, String> COMMANDS;
+
     /**
      * Performance-metrics matrix capture (X-Capture-Metrics trigger). Off by
      * default; flipped on via system property hauberk.metrics=true (hauberk.cmd
@@ -175,6 +182,28 @@ public final class HauberkConfig {
         SUPER_CREATE_WORKERS          = requireIntMin0(p,"super.create.workers");
         SUPER_MOVE_WORKERS            = requireIntMin0(p,"super.move.workers");
         SUPER_TX_WORKERS              = requireIntMin0(p,"super.tx.workers");
+
+        java.util.Map<String, String> cmds = new java.util.HashMap<>();
+        for (String name : p.stringPropertyNames()) {
+            if (name.startsWith("cmd.")) {
+                cmds.put(name.substring("cmd.".length()), p.getProperty(name).trim());
+            }
+        }
+        COMMANDS = java.util.Map.copyOf(cmds);
+    }
+
+    /** The configured infra command for {@code key} (cmd.&lt;key&gt; in the properties);
+     *  {@code -Dcmd.<key>=...} overrides. Throws if neither is set. */
+    public static String command(String key) {
+        String sys = System.getProperty("cmd." + key);
+        if (sys != null && !sys.isBlank()) {
+            return sys.trim();
+        }
+        String ret = COMMANDS.get(key);
+        if (ret == null || ret.isBlank()) {
+            throw new IllegalStateException("Missing command 'cmd." + key + "' in " + CONFIG_FILE);
+        }
+        return ret;
     }
 
     public static String tokenEndpoint() {
