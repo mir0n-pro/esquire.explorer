@@ -442,7 +442,7 @@
         <!-- Tab 6: Architecture -->
         <mat-tab label="Architecture">
           <div class="landing-tab-content">
-            <h2>Current Architecture (v1.2.4) </h2>
+            <h2>Current Architecture (v1.2.5) </h2>
             <img class="arch-diagram" src="/img/ComponentModel.png" alt="Esquire Component Model"/>
 
             <p>
@@ -471,7 +471,11 @@
 
             <h3>bizTree</h3>
             <p>The entity tree service; maintains an in-memory cache of the business entity tree;
-               serves tree navigation to the frontend; stays current by consuming the broadcast bus.</p>
+               serves tree navigation to the frontend; stays current by consuming the broadcast bus.
+               As of v1.2.5 it is a <strong>recoverable cache service</strong>: a two-buffer
+               anti-entropy design whose background &ldquo;night-watch&rdquo; periodically rebuilds a
+               shadow copy from the database, compares the two, and self-heals any drift &mdash; so an
+               event missed while the service was down is reconciled automatically, with no restart.</p>
 
             <h3>enyMan — Entity Manager</h3>
             <p>Manages organizations and users; handles create, update, delete, and move operations;

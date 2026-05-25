@@ -209,6 +209,16 @@ paths:
                   $ref: '#/components/schemas/EsqTreeNode'
         '405':
           description: Invalid input
+  /esq-sweep:
+    post:
+      tags:
+        - esquire
+      summary: Force a night-watch sweep (asynchronous)
+      description: Triggers the cache director's night-watch sweep on a background thread and returns immediately (202) -- the request is not held for the full sweep. The sweep also fires periodically via the director's scheduler.
+      operationId: esquireSweep
+      responses:
+        '202':
+          description: sweep accepted (runs asynchronously)
   /esq-dict:
     get:
       tags:

@@ -1,6 +1,12 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+05/23/2026 mir0n  v1.2.5 rest/ regenerated for the /esq-sweep endpoint; version 1.2.5
+rest\api\esquire.service.ts
+  - regenerated from esqEsquireApi.yaml (added /esq-sweep POST): new esquireSweep() (202)
+package.json
+  - version 1.2.4 -> 1.2.5 (align with the backend night-watch sprint)
+
 05/17/2026 mir0n  v1.2.4 landing-page Architecture tab updated for two-host model
 explorer\flatTree\app-shell.html
   - Architecture heading bumped: v1.2.3 -> v1.2.4

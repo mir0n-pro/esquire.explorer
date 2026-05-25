@@ -1,6 +1,18 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.5-2605.2323  v1.2.5 night-watch harness, open api spec update
+   :Feature:     hauberk: message-loss Simulations (SWAP + TERMINATE) prove the bizTree night-watch
+                 detects dropped JMS messages and reacts; fully automatic via a new infra-command (Cmd) framework
+   :Feature:     hauberk: configurable cmd.* shell steps (docker + local-k8s + OKE overlays) + ForceSweep /
+                 WaitCacheReady / WaitBizTreeDown chains; RaceCacheLoad restart automated (no operator)
+   :Feature:     OpenAPI spec (esqEsquireApi.yaml) updated with /esq-sweep (POST, operationId
+                 esquireSweep); frontend rest/ client regenerated -- new esquireSweep() force-sweep method
+   :Improvement: landing-page Architecture tab updated to v1.2.5 -- bizTree described as a recoverable
+                 cache service (anti-entropy night-watch that self-heals dropped events)
+   :Config:      frontend + backend bumped to 1.2.5 (align with the backend night-watch sprint)
+   Components:   hauberk, frontend, backend
+
 v1.2.4-2605.1616 Hauberk Gatling harness; tree-diff endpoints; landing page two-host architecture
    :Feature:     explorer/hauberk: new subproject: chainmail armor based on Gatling 3.13: stress / load / smoke / race-repro
                  (26 reusable Chains; 17 Simulations; PerformanceMatrix CSV + per-URL summary);
