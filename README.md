@@ -25,6 +25,19 @@ Each subproject is independently built, run, and deployed; they all talk to
 the same **Esquire server** (`services/`) as outside callers.
 
 
+## v1.2.5 — complete (05/24/2026)
+
+Tracks the backend **bizTree Taijitu night-watch** sprint: the new `/esq-sweep` force-sweep endpoint
+reaches the generated client, the harness gains message-loss simulations that prove the cache
+self-heals, and the landing page describes bizTree as a recoverable cache service.
+
+| | |
+|--------------------|-------------------------|
+| `openapi-generate/`| - `/esq-sweep` (POST, operationId `esquireSweep`) added to `esqEsquireApi.yaml` |
+| `frontend/`| - rest/ client regenerated -- new `esquireSweep()` force-sweep method;<br>- landing-page Architecture tab updated to v1.2.5 (bizTree described as a recoverable cache service);<br>- version 1.2.4 -> 1.2.5 |
+| `backend/`| - version 1.2.4 -> 1.2.5 (BFF + baked SPA redeployed with the new landing) |
+| `hauberk/`| - message-loss Simulations (SWAP + TERMINATE) proving the bizTree night-watch heals dropped events;<br>- new infra-command (`Cmd`) framework + `ForceSweep` / `WaitCacheReady` / `WaitBizTreeDown` chains;<br>- `RaceCacheLoad` restart automated (no operator); OKE `cmd.*` overlay<br>- now 21 Simulations / 30 reusable Chains |
+
 ## v1.2.4 — complete (05/17/2026)
 
 
