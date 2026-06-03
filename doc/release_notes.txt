@@ -1,6 +1,19 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.6-2606.0219  v1.2.6 race-8c verification harness + name-prefix residue cleanup
+   :Feature:     hauberk: race-8c verify Simulation (RaceMoveCreateKc) diffs DB ep_path against the KC user
+                 esq_rootpath via the master-realm admin REST API; poll-until-stable with per-tick admin-token refresh
+   :Feature:     hauberk: deterministic single-shot race-8c repro (RaceMoveCreateKcSingleShot) -- buffer OFF
+                 reproduces the stale path, buffer ON proves the kcMaster path-buffer fix
+   :Feature:     hauberk: KC orphan cleanup (KcCleanup Simulation + CleanupKcOrphans chain) removes hauberk-* KC users
+   :Feature:     hauberk: residue-cleanup is now name-prefix driven (-Dcleanup.prefix) and disconnects-then-deletes
+                 via the API -- purges msgloss / other-named Test House leftovers, including on prod
+   :Config:      hauberk: kc.admin.user / kc.admin.password (master-realm admin) added; MoveEntity accepts
+                 202 in addition to 200 (v1.2.6 Goal 3 made /esq-move async-ack)
+   :Config:      frontend + backend bumped to 1.2.6 (align with the services v1.2.6 sprint)
+   Components:   hauberk, frontend, backend
+
 v1.2.5-2605.2323  v1.2.5 night-watch harness, open api spec update
    :Feature:     hauberk: message-loss Simulations (SWAP + TERMINATE) prove the bizTree night-watch
                  detects dropped JMS messages and reacts; fully automatic via a new infra-command (Cmd) framework

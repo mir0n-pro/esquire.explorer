@@ -6,6 +6,8 @@
  *
  *  History:
  * 05/14/2026 mir0n  created: Chain POST /esq-move?kind=&id=&dist_id= for entity re-parenting (USR or ORG)
+ * 06/01/2026 mir0n  accept HTTP 202 in addition to 200 -- v1.2.6 Goal 3 makes /esq-move async-ack
+ *                   (submits to enyMan's move queue and returns 202 Accepted at submit time).
  */
 package pro.mir0n.esquire.hauberk.chain;
 
@@ -25,6 +27,10 @@ import static io.gatling.javaapi.http.HttpDsl.*;
  *   moveKind    -- entity kind (20 ORG, 34 USR_CLIENT, etc.).
  *   moveId      -- id of the entity being moved.
  *   moveDestId  -- id of the destination ORG (must be kind=20).
+ *
+ * Response: v1.2.5 returned 200 with an empty body. v1.2.6 Goal 3 made /esq-move async-ack:
+ *   it submits to enyMan's in-process move queue and returns 202 Accepted at submit time.
+ *   The body stays empty. We accept either to keep the chain compatible with both versions.
  */
 public final class MoveEntity {
 
@@ -36,5 +42,5 @@ public final class MoveEntity {
             .queryParam("kind",    "#{moveKind}")
             .queryParam("id",      "#{moveId}")
             .queryParam("dist_id", "#{moveDestId}")
-            .check(status().is(200)));
+            .check(status().in(200, 202)));
 }

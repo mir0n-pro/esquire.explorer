@@ -25,45 +25,39 @@ Each subproject is independently built, run, and deployed; they all talk to
 the same **Esquire server** (`services/`) as outside callers.
 
 
-## v1.2.5 — complete (05/24/2026)
+## v1.2.6 — complete (06/02/2026)
 
-Tracks the backend **bizTree Taijitu night-watch** sprint: the new `/esq-sweep` force-sweep endpoint
-reaches the generated client, the harness gains message-loss simulations that prove the cache
-self-heals, and the landing page describes bizTree as a recoverable cache service.
+Tracks the backend **enyMan-redundancy / race-8c** sprint (instance-aware entity-id minting, the
+async move queue, and the kcMaster path-buffer). The harness gains a KC-side verification and
+cleanup layer that proves the server-side fix and tidies up after it.
 
 | | |
 |--------------------|-------------------------|
-| `openapi-generate/`| - `/esq-sweep` (POST, operationId `esquireSweep`) added to `esqEsquireApi.yaml` |
-| `frontend/`| - rest/ client regenerated -- new `esquireSweep()` force-sweep method;<br>- landing-page Architecture tab updated to v1.2.5 (bizTree described as a recoverable cache service);<br>- version 1.2.4 -> 1.2.5 |
-| `backend/`| - version 1.2.4 -> 1.2.5 (BFF + baked SPA redeployed with the new landing) |
-| `hauberk/`| - message-loss Simulations (SWAP + TERMINATE) proving the bizTree night-watch heals dropped events;<br>- new infra-command (`Cmd`) framework + `ForceSweep` / `WaitCacheReady` / `WaitBizTreeDown` chains;<br>- `RaceCacheLoad` restart automated (no operator); OKE `cmd.*` overlay<br>- now 21 Simulations / 30 reusable Chains |
+| `hauberk/`| - **race-8c** verify Simulation (`RaceMoveCreateKc`): diffs DB `ep_path` against the KC user `esq_rootpath` via the master-realm admin REST API — poll-until-stable with per-tick admin-token refresh;<br>- deterministic **single-shot** repro (`RaceMoveCreateKcSingleShot`): buffer OFF reproduces the stale path, buffer ON proves the kcMaster path-buffer fix;<br>- KC orphan cleanup (`KcCleanup` Simulation + `KcAdminAuth` / `CleanupKcOrphans` chains);<br>- `residue-cleanup` is now name-prefix driven (`-Dcleanup.prefix`) and disconnects-then-deletes via the API — purges msgloss / other-named Test House leftovers, including on prod;<br>- `MoveEntity` accepts the `/esq-move` 202 async-ack; the move-create verifier is poll-until-quiescent;<br>- now 21 Simulations / 32 reusable Chains |
+| `frontend/`, `backend/`| - version 1.2.5 -> 1.2.6 |
+
+## v1.2.5 — complete (05/24/2026)
+
+bizTree **Taijitu night-watch** surface: the `/esq-sweep` force-sweep reaches the generated client,
+the harness gains message-loss simulations proving the cache self-heals, and the landing page
+reframes bizTree as a recoverable cache service.<br>
+[More Details: v1.2.5 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.5?tab=readme-ov-file)
 
 ## v1.2.4 — complete (05/17/2026)
 
+Introduces **Haubergeon** (`hauberk/`) — a pure-REST Gatling 3.13 stress / load / smoke / race-repro
+harness — and updates the landing page to the two-public-entrypoint component model.<br>
+[More Details: v1.2.4 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.4?tab=readme-ov-file)
 
-| | |
-|--------------------|-------------------------|
-| `backend/`| - added unit test;|
-| `frontend/`|- updated landing page: component model: two public entrypoints: esquire.mir0n.pro and api.esquire.mir0n.pro;|
-| `openapi-generate/`| - added 2 new commands|               |
-| `hauberk/`| **Haubergeon** - new subproject: chainmail armor based on Gatling 3.13: stress / load / smoke / race-repro<br>(26 reusable Chains; 17 Simulations; PerformanceMatrix CSV + per-URL summary)|
+## v1.2.3 — complete (05/08/2026)
+
+BFF sprint: the Node.js **`backend/`** tier (OIDC session + token broker) sits between the Angular
+SPA and the gateway, so the browser holds only an opaque session cookie.<br>
+[More Details: v1.2.3 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.3?tab=readme-ov-file)
 
 ## v1.2.2 — complete (04/20/2026)
 
-The core UI layer is delivered as a standalone library (`@mir0n-pro/esquire.ui`) that the explorer
-frontend consumes as a package dependency. The library provides the tree explorer component
-(`EsqExplorerComponent`), server-driven details dialogs (`EsqEntityDetailsDialog`,
-`EsqNodeDetailsDialog`), entity select/move/confirm dialogs, dictionary-driven field rendering
-(`EsqTabFieldComponent` covering all field types), permission model (`EsqAccessProfile`), kind
-registry (`EsqObjectKindFactory`), and pluggable command handler infrastructure
-(`EsqCommandHandlerRegistry`). Field layouts, control types, and validation rules are delivered at
-runtime from server configuration — no field definitions are hardcoded in the frontend.
-
-On top of the library, the explorer frontend delivers the full entity lifecycle (Create, Move, Delete
-with tree refresh and permission gating) and a complete accounting command set: Deposit, Withdrawal,
-and Transfer dialogs with dictionary-driven fields, AmountEffect validation, account picker
-(`EsqAcctPicker`), and dynamic cross-currency rate label. The REST API was generalized to
-kind-uniform endpoints, and the `esquire.ui` source tree was removed from the frontend and replaced
-by the published package. The release is covered by a 30-test Playwright e2e suite validating full
-entity and accounting lifecycles.
+First complete vertical slice: the `@mir0n-pro/esquire.ui` library plus the explorer frontend deliver
+the full entity lifecycle and accounting command set, validated by a 30-test Playwright e2e suite.<br>
+[More Details: v1.2.2 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.2?tab=readme-ov-file)
 
