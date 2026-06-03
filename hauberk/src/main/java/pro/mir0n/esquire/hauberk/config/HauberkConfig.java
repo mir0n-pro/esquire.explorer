@@ -11,6 +11,8 @@
  * 05/23/2026 mir0n  added the cmd.* infra-command map (COMMANDS) + static command(key) accessor
  *                   (cmd.<key> property, -Dcmd.<key> CLI override; throws if unset) so a Simulation can
  *                   drive the stack via Cmd.run("key").
+ * 06/02/2026 mir0n  added KC_ADMIN_USER / KC_ADMIN_PASSWORD (kc.admin.user / kc.admin.password, default
+ *                   admin/q) for the master-realm admin REST sims (race-8c verify, KC orphan cleanup)
  */
 package pro.mir0n.esquire.hauberk.config;
 
@@ -54,6 +56,12 @@ public final class HauberkConfig {
     public static final String KC_CLIENT_SECRET;
     public static final String GW_BASE;
     public static final String BFF_BASE;
+
+    /** Master-realm bootstrap admin credentials. Used by KC admin REST simulations
+     *  (race-8c verify, KC orphan cleanup) to issue token + manage users in the
+     *  esquire realm. Optional -- only required by sims that touch the admin API. */
+    public static final String KC_ADMIN_USER;
+    public static final String KC_ADMIN_PASSWORD;
 
     /**
      * Token Relay pattern this run targets at the gateway. Names the
@@ -145,6 +153,9 @@ public final class HauberkConfig {
         KC_CLIENT_SECRET = require(p, "kc.client.secret");
         GW_BASE          = require(p, "gw.base");
         BFF_BASE         = require(p, "bff.base");
+
+        KC_ADMIN_USER     = p.getProperty("kc.admin.user", "admin");
+        KC_ADMIN_PASSWORD = p.getProperty("kc.admin.password", "q");
 
         TOKEN_RELAY_TYPE = optionalLowercase(p, "tokenRelay.type", "plain");
         if (!"plain".equals(TOKEN_RELAY_TYPE)

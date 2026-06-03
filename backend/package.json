@@ -1,6 +1,6 @@
 {
   "name": "@mir0n-pro/esquire.backend",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Esquire Frameworks Backend-for-Frontend (BFF) tier. Sits between explorer/frontend and the Spring Cloud Gateway; holds OIDC tokens server-side, serves the Angular SPA in production, and caches static entity dictionaries.",
   "private": true,
   "type": "module",

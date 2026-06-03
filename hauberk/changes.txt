@@ -1,5 +1,37 @@
 hauberk changes
 
+06/02/2026 mir0n  v1.2.6 race-8c -- KC esq_rootpath verification + single-shot repro + KC orphan cleanup
+chain.KcAdminAuth  (new)
+  - POST master-realm token endpoint (admin-cli, grant_type=password, kc.admin.user / kc.admin.password);
+    saves access_token as session "kcAdminToken" for subsequent KC admin REST calls
+chain.CleanupKcOrphans  (new)
+  - GET esquire-realm users (search=hauberk-) then DELETE each via admin REST (accepts 200 / 204 / 404);
+    reports kcOrphansDeleted
+simulations.RaceMoveCreateKcSimulation  (new)
+  - race-8c verify: move-oscillate + connected USR creates; verifier diffs DB ep_path (/esq-cmd-tree) against
+    KC esq_rootpath (admin REST). Poll-until-stable with per-tick KcAdminAuth refresh (60s token) and a
+    KC-count stability gate (3 equal ticks) so a zero-mismatch reading is only taken once kcMaster has drained
+simulations.RaceMoveCreateKcSingleShotSimulation  (new)
+  - deterministic single-shot race-8c: one disabled user + exactly ONE move during the keySmith hold, nothing
+    heals it; buffer OFF (ttl=-1) -> FAIL (reproduce), buffer ON (10000) -> PASS (fix proven)
+simulations.KcCleanupSimulation  (new)
+  - standalone teardown: KcAdminAuth + CleanupKcOrphans -- DELETE hauberk-* KC users left behind after CleanHouse
+chain.MoveEntity
+  - accept HTTP 202 in addition to 200 (v1.2.6 Goal 3 made /esq-move async-ack, returns 202 at submit)
+config.HauberkConfig
+  - KC_ADMIN_USER / KC_ADMIN_PASSWORD added (kc.admin.user / kc.admin.password, default admin/q)
+simulations.RaceMoveCreateSimulation
+  - bounded load (during(dur) replaces forever()) + 200ms / 100ms pacing; poll-until-quiescent verifier
+    (5s tick, 5-min budget) replaces the single post-load snapshot; int counters + snapshot maps replace
+    the List<Long> collectors
+hauberk.properties
+  - kc.admin.user / kc.admin.password (default admin/q) for the KC admin REST sims
+simulations.ResidueCleanupSimulation
+  - name-prefix driven: lists offices directly under Test House and runs each whose name starts with
+    -Dcleanup.prefix (default "hauberk-office-smoke") through CleanupOfficeByName (disconnect connected
+    USRs, then delete the subtree bottom-up via the FK /esq-cmd-tree). Catches msgloss / other-named
+    leftovers the old exact-match missed; deletes via the API so it works on prod (direct DB deletes blocked)
+
 05/23/2026 mir0n  v1.2.5 Taijitu night-watch -- message-loss sims + infra-command framework
 chain.Cmd  (new)
   - sim step that runs a configured infra command (cmd.<key>) through the OS shell (cmd /c on

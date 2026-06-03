@@ -6,6 +6,9 @@
  *
  *  History:
  * 05/14/2026 mir0n  created: Phase 8b race repro -- move-oscillate + concurrent USR creates in moving subtree; self-validating diff DB ep_path vs biztree-derived path, prints PASS/FAIL
+ * 06/02/2026 mir0n  v1.2.6 Goal 3: bounded load -- during(dur) replaces forever() so it stops for the verifier;
+ *                   200ms/100ms pacing; poll-until-quiescent verifier (5s tick, 5-min budget) replaces the
+ *                   single post-load snapshot; int counters + snapshot maps replace the List<Long> collectors
  */
 package pro.mir0n.esquire.hauberk.simulations;
 
@@ -65,10 +68,39 @@ import static io.gatling.javaapi.http.HttpDsl.*;
 @SimulationInfo("Race 8b: move + concurrent create; DB ep_path vs biztree path divergence")
 public class RaceMoveCreateSimulation extends HauberkSimulation {
 
-    // Move scenario reused as-is from LoadScenarios.
-    private final ScenarioBuilder moveScn = LoadScenarios.MOVE;
+    // v1.2.6 Goal 3: bounded move scenario -- LoadScenarios.MOVE uses forever() which runs
+    // until maxDuration. For the race repro we need the load to STOP at `duration` so the
+    // verifier can read a quiet final state. Inline the move-oscillate body wrapped in
+    // during(dur) so the load actually terminates at `duration` seconds.
+    private final ScenarioBuilder moveScn = scenario("race-move-only")
+            .exec(session -> session.set("officeName", "hauberk-office-smoke"))
+            .exec(LookupOfficeIdByName.chain)
+            .exec(session -> session.set("moveTopId", session.getString("officeId")))
+            .exec(session -> session.set("officeName", "w1-l2"))
+            .exec(LookupOfficeIdByName.chain)
+            .exec(session -> session.set("moveOriginalParentId", session.getString("officeId")))
+            .exec(session -> session.set("officeName", "w1-l3"))
+            .exec(LookupOfficeIdByName.chain)
+            .exec(session -> session.set("moveTargetId", session.getString("officeId")))
+            // 200ms pace between oscillation cycles -> ~10 esq-move per sec per VU.
+            // Matches the single move-worker's sustainable rate (each move = JPA + N cascade
+            // broadcasts, ~100ms wall). Without this the unpaced loop fires moves orders of
+            // magnitude faster than the worker can drain, the move queue saturates, and the
+            // resulting drops + backlog dominate the test result instead of the race itself.
+            .during(Duration.ofSeconds(HauberkConfig.SUPER_DURATION_SECONDS)).on(
+                pace(Duration.ofMillis(200))
+                .exec(session -> session
+                        .set("moveKind",   EntityKinds.ORG)
+                        .set("moveId",     session.getString("moveTargetId"))
+                        .set("moveDestId", session.getString("moveTopId")))
+                .exec(MoveEntity.chain)
+                .exec(session -> session
+                        .set("moveDestId", session.getString("moveOriginalParentId")))
+                .exec(MoveEntity.chain)
+            );
 
     // Create-only (no delete) so survivors accumulate for path comparison.
+    // Bounded with during(dur) so the load truly stops before the verifier runs.
     ScenarioBuilder createOnlyScn = scenario("race-move-create-only")
             .exec(session -> session.set("officeName", "hauberk-office-smoke"))
             .exec(LookupOfficeIdByName.chain)
@@ -104,97 +136,145 @@ public class RaceMoveCreateSimulation extends HauberkSimulation {
                 }
                 return session.set("officeId", deepestId);
             })
-            .forever().on(exec(CreateUser.chain));
+            // 100ms pace between creates -> ~10 USRs/sec per VU. Plenty to fire the race
+            // (CREATE arriving inside a move's window) without overwhelming the worker.
+            .during(Duration.ofSeconds(HauberkConfig.SUPER_DURATION_SECONDS)).on(
+                pace(Duration.ofMillis(100))
+                .exec(CreateUser.chain)
+            );
 
-    // Verification scenario: compare entityPath per kind=34 USR.
+    // v1.2.6 Goal 3: poll-until-quiescent verification. After the load stops, bizTree's
+    // consumer keeps draining its queue. The verifier samples both trees on a 5s tick; once
+    // mismatches drop to zero (bizTree has fully caught up to DB) it declares PASS. If it
+    // doesn't converge in maxRetries ticks, it reports the residual count as FAIL.
+    private static final int MAX_VERIFY_RETRIES = 60;   // 60 * 5s = 5 minutes settling budget
+    private static final int VERIFY_SLEEP_SEC   = 5;
+
     ScenarioBuilder verifyScn = scenario("race-move-verify")
             .exec(session -> session.set("officeName", "hauberk-office-smoke"))
             .exec(LookupOfficeIdByName.chain)
-            .exec(http("GET /esq-cmd-tree (natural, post-load)")
-                .get("/esq-cmd-tree")
-                .queryParam("kind", EntityKinds.ORG)
-                .queryParam("id",   "#{officeId}")
-                .check(status().is(200))
-                .check(jsonPath("$").ofList().saveAs("naturalNodes")))
-            .exec(http("GET /esq-tree (biztree, post-load)")
-                .get("/esq-tree")
-                .queryParam("id", "#{officeId}")
-                .check(status().is(200))
-                .check(jsonPath("$").ofList().saveAs("biztreeNodes")))
+            .exec(session -> session
+                    .set("convergenceRetry", 0)
+                    .set("mismatchCount",    Integer.MAX_VALUE)
+                    .set("bizMissingCount",  0)
+                    .set("naturalUsrCount",  0)
+                    .set("biztreeUsrCount",  0))
+            .asLongAs(s -> s.getInt("mismatchCount") > 0 && s.getInt("convergenceRetry") < MAX_VERIFY_RETRIES)
+                .on(
+                    exec(http("GET /esq-cmd-tree (natural, post-load)")
+                        .get("/esq-cmd-tree")
+                        .queryParam("kind", EntityKinds.ORG)
+                        .queryParam("id",   "#{officeId}")
+                        .check(status().is(200))
+                        .check(jsonPath("$").ofList().saveAs("naturalNodes")))
+                    .exec(http("GET /esq-tree (biztree, post-load)")
+                        .get("/esq-tree")
+                        .queryParam("id", "#{officeId}")
+                        .check(status().is(200))
+                        .check(jsonPath("$").ofList().saveAs("biztreeNodes")))
+                    .exec(session -> {
+                        @SuppressWarnings("unchecked")
+                        List<Map<String, Object>> nat =
+                                (List<Map<String, Object>>) session.get("naturalNodes");
+                        @SuppressWarnings("unchecked")
+                        List<Map<String, Object>> biz =
+                                (List<Map<String, Object>>) session.get("biztreeNodes");
+
+                        Map<Long, String> natPath = new HashMap<>();
+                        for (Map<String, Object> n : nat) {
+                            Object k = n.get("kind");
+                            Object e = n.get("entityId");
+                            if (k instanceof Number
+                                    && ((Number) k).intValue() == EntityKinds.USR_CLIENT
+                                    && e instanceof Number) {
+                                natPath.put(((Number) e).longValue(),
+                                        String.valueOf(n.get("entityPath")));
+                            }
+                        }
+                        Map<Long, String> bizPath = new HashMap<>();
+                        for (Map<String, Object> n : biz) {
+                            Object k = n.get("kind");
+                            Object e = n.get("entityId");
+                            Object linkId = n.get("linkId");
+                            if (k instanceof Number
+                                    && ((Number) k).intValue() == EntityKinds.USR_CLIENT
+                                    && e instanceof Number
+                                    && linkId == null) {
+                                bizPath.put(((Number) e).longValue(),
+                                        String.valueOf(n.get("entityPath")));
+                            }
+                        }
+
+                        int mismatches = 0;
+                        int bizMissing = 0;
+                        for (Map.Entry<Long, String> entry : natPath.entrySet()) {
+                            String bizP = bizPath.get(entry.getKey());
+                            if (bizP == null) {
+                                bizMissing++;
+                            } else if (!entry.getValue().equals(bizP)) {
+                                mismatches++;
+                            }
+                        }
+                        int retry = session.getInt("convergenceRetry");
+                        System.err.println("[RaceMoveCreate] poll #" + retry
+                                + " natural=" + natPath.size()
+                                + " biztree=" + bizPath.size()
+                                + " path-mismatches=" + mismatches
+                                + " missing-in-biztree=" + bizMissing);
+                        return session
+                                .set("mismatchCount",   mismatches)
+                                .set("bizMissingCount", bizMissing)
+                                .set("naturalUsrCount", natPath.size())
+                                .set("biztreeUsrCount", bizPath.size())
+                                .set("naturalSnapshot", natPath)
+                                .set("biztreeSnapshot", bizPath);
+                    })
+                    .pause(Duration.ofSeconds(VERIFY_SLEEP_SEC))
+                    .exec(s -> s.set("convergenceRetry", s.getInt("convergenceRetry") + 1))
+                )
             .exec(session -> {
-                @SuppressWarnings("unchecked")
-                List<Map<String, Object>> nat =
-                        (List<Map<String, Object>>) session.get("naturalNodes");
-                @SuppressWarnings("unchecked")
-                List<Map<String, Object>> biz =
-                        (List<Map<String, Object>>) session.get("biztreeNodes");
-
-                // Build entityId -> entityPath maps for kind=34 only on each side.
-                // For biztree side: skip shortcut nodes (linkId != null).
-                Map<Long, String> natPath = new HashMap<>();
-                for (Map<String, Object> n : nat) {
-                    Object k = n.get("kind");
-                    Object e = n.get("entityId");
-                    if (k instanceof Number
-                            && ((Number) k).intValue() == EntityKinds.USR_CLIENT
-                            && e instanceof Number) {
-                        natPath.put(((Number) e).longValue(),
-                                String.valueOf(n.get("entityPath")));
-                    }
-                }
-                Map<Long, String> bizPath = new HashMap<>();
-                for (Map<String, Object> n : biz) {
-                    Object k = n.get("kind");
-                    Object e = n.get("entityId");
-                    Object linkId = n.get("linkId");
-                    if (k instanceof Number
-                            && ((Number) k).intValue() == EntityKinds.USR_CLIENT
-                            && e instanceof Number
-                            && linkId == null) {
-                        bizPath.put(((Number) e).longValue(),
-                                String.valueOf(n.get("entityPath")));
-                    }
-                }
-
-                List<Long> pathMismatches = new ArrayList<>();
-                List<Long> bizMissing = new ArrayList<>();
-                for (Map.Entry<Long, String> entry : natPath.entrySet()) {
-                    Long id = entry.getKey();
-                    String natP = entry.getValue();
-                    String bizP = bizPath.get(id);
-                    if (bizP == null) {
-                        bizMissing.add(id);
-                    } else if (!natP.equals(bizP)) {
-                        pathMismatches.add(id);
-                        // Print first few for diagnostic.
-                        if (pathMismatches.size() <= 5) {
-                            System.err.println("[RaceMoveCreate]  id=" + id
-                                    + " natural=" + natP
-                                    + " biztree=" + bizP);
+                int mismatches = session.getInt("mismatchCount");
+                int bizMissing = session.getInt("bizMissingCount");
+                int retry      = session.getInt("convergenceRetry");
+                System.err.println("[RaceMoveCreate] final after " + retry
+                        + " poll(s) (" + (retry * VERIFY_SLEEP_SEC) + "s settle): "
+                        + "natural=" + session.getInt("naturalUsrCount")
+                        + " biztree=" + session.getInt("biztreeUsrCount")
+                        + " path-mismatches=" + mismatches
+                        + " missing-in-biztree=" + bizMissing);
+                if (mismatches > 0) {
+                    // Dump first 5 diverging USR paths for diagnostic.
+                    @SuppressWarnings("unchecked")
+                    Map<Long, String> nat =
+                            (Map<Long, String>) session.get("naturalSnapshot");
+                    @SuppressWarnings("unchecked")
+                    Map<Long, String> biz =
+                            (Map<Long, String>) session.get("biztreeSnapshot");
+                    int printed = 0;
+                    if (nat != null && biz != null) {
+                        for (Map.Entry<Long, String> entry : nat.entrySet()) {
+                            String bizP = biz.get(entry.getKey());
+                            if (bizP != null && !entry.getValue().equals(bizP)) {
+                                System.err.println("[RaceMoveCreate]  id=" + entry.getKey()
+                                        + " natural=" + entry.getValue()
+                                        + " biztree=" + bizP);
+                                if (++printed >= 5) break;
+                            }
                         }
                     }
-                }
-
-                System.err.println("[RaceMoveCreate] kind=34 USRs: natural="
-                        + natPath.size() + " biztree=" + bizPath.size()
-                        + " path-mismatches=" + pathMismatches.size()
-                        + " missing-in-biztree=" + bizMissing.size());
-                if (!pathMismatches.isEmpty()) {
-                    System.err.println("[RaceMoveCreate] FAIL: RACE REPRODUCED -- "
-                            + pathMismatches.size()
-                            + " kind=34 USRs have entityPath divergence between "
-                            + "DB (esq_entity_path.ep_path) and biztree "
-                            + "(derived from tree_path).");
+                    System.err.println("[RaceMoveCreate] FAIL: did not converge within "
+                            + (MAX_VERIFY_RETRIES * VERIFY_SLEEP_SEC) + "s -- "
+                            + mismatches + " kind=34 USRs still diverge.");
                     return session.markAsFailed();
                 }
-                if (!bizMissing.isEmpty()) {
+                if (bizMissing > 0) {
                     System.err.println("[RaceMoveCreate] WARN: "
-                            + bizMissing.size() + " USRs missing in biztree "
-                            + "(unrelated cache-load race surface; see "
-                            + "RaceCacheLoadSimulation).");
+                            + bizMissing + " USRs missing in biztree "
+                            + "(unrelated cache-load race surface).");
                 }
                 System.err.println("[RaceMoveCreate] PASS: every kind=34 USR's "
-                        + "entityPath agrees between DB and biztree.");
+                        + "entityPath agrees between DB and biztree (converged in "
+                        + (retry * VERIFY_SLEEP_SEC) + "s after load).");
                 return session;
             });
 
@@ -218,12 +298,16 @@ public class RaceMoveCreateSimulation extends HauberkSimulation {
         List<PopulationBuilder> pops = new ArrayList<>();
         pops.add(moveScn        .injectOpen(atOnceUsers(mW)));
         pops.add(createOnlyScn  .injectOpen(atOnceUsers(cW)));
+        // v1.2.6 Goal 3: verifier injects right when the load ends and then poll-loops on its
+        // own until the bizTree side fully converges (or the 5-min budget is exhausted).
         pops.add(verifyScn      .injectOpen(
                 nothingFor(Duration.ofSeconds(dur + 5)),
                 atOnceUsers(1)));
 
+        // maxDuration must cover load (dur) + small grace (5s) + worst-case verifier poll
+        // budget (MAX_VERIFY_RETRIES * VERIFY_SLEEP_SEC = 300s) + slack.
         setUp(pops)
-            .maxDuration(Duration.ofSeconds(dur + 30))
+            .maxDuration(Duration.ofSeconds(dur + 5 + (MAX_VERIFY_RETRIES * VERIFY_SLEEP_SEC) + 30))
             .protocols(httpProtocol);
     }
 }

@@ -1,6 +1,15 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+06/02/2026 mir0n  v1.2.6 landing-page Architecture tab updated for the mcMaster refine
+explorer\flatTree\app-shell.html
+  - Architecture heading bumped v1.2.5 -> v1.2.6; 
+
+05/24/2026 mir0n  v1.2.5 landing-page Architecture tab updated for the bizTree redesign
+explorer\flatTree\app-shell.html
+  - Architecture heading bumped v1.2.4 -> v1.2.5; bizTree blurb reframed as a recoverable cache
+    service (two-buffer anti-entropy night-watch that self-heals dropped events)
+
 05/23/2026 mir0n  v1.2.5 rest/ regenerated for the /esq-sweep endpoint; version 1.2.5
 rest\api\esquire.service.ts
   - regenerated from esqEsquireApi.yaml (added /esq-sweep POST): new esquireSweep() (202)

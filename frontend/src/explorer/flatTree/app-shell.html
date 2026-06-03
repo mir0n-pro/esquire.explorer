@@ -442,7 +442,7 @@
         <!-- Tab 6: Architecture -->
         <mat-tab label="Architecture">
           <div class="landing-tab-content">
-            <h2>Current Architecture (v1.2.5) </h2>
+            <h2>Current Architecture (v1.2.6) </h2>
             <img class="arch-diagram" src="/img/ComponentModel.png" alt="Esquire Component Model"/>
 
             <p>
@@ -488,7 +488,8 @@
 
             <h3>kcMaster</h3>
             <p>Keycloak sync coordinator; the only service that writes to Keycloak IAT directly; consumes
-               identity commands from the IAM bus and executes create / update / delete in the IAM.</p>
+               identity commands from the IAM bus and executes create / update / delete in the IAM. Also
+               listens on the entity broadcast bus to keep a moved entity's Keycloak path in sync.</p>
 
             <h3>gateway</h3>
             <p>Spring Cloud Gateway; the API router; routes requests to the appropriate backend

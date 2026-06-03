@@ -508,8 +508,8 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          description: successful operation
+        '202':
+          description: accepted for async processing
         '403':
           description: Permission denied or descendant guard violation
         '404':
