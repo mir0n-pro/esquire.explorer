@@ -6,6 +6,8 @@
  *
  *  History:
  * 05/14/2026 mir0n  created: per-response transformResponse hook capturing the four observability headers; per-scenario CSV + percentile summary; moved into Gatling run dir post-run
+ * 06/03/2026 mir0n  printSummary() made synchronized (same monitor as add()) + column() snapshots
+ *                   rows.size() once -- fixes AIOOBE in the post-run summary at high sample counts
  */
 package pro.mir0n.esquire.hauberk.perf;
 
@@ -272,7 +274,9 @@ public final class PerformanceMatrix {
             }
         }
 
-        void printSummary() {
+        // synchronized on the same monitor as add(): a straggler response must not grow a
+        // request's row list mid-summary (was: AIOOBE in column() at high sample counts).
+        synchronized void printSummary() {
             System.err.println();
             System.err.println("[perf-matrix] scenario=" + scenarioName
                     + " (sim=" + simClassName + ", client=" + HauberkConfig.KC_CLIENT_ID + ")"
@@ -340,8 +344,9 @@ public final class PerformanceMatrix {
     }
 
     private static long[] column(List<long[]> rows, int idx) {
-        long[] ret = new long[rows.size()];
-        for (int i = 0; i < rows.size(); i++) {
+        int n = rows.size();                 // snapshot size once -- never let the loop
+        long[] ret = new long[n];            // bound exceed the allocated array length
+        for (int i = 0; i < n; i++) {
             ret[i] = rows.get(i)[idx];
         }
         return ret;

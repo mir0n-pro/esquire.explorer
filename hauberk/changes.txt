@@ -1,5 +1,11 @@
 hauberk changes
 
+06/03/2026 mir0n  v1.2.7 -- PerformanceMatrix AIOOBE fix in the post-run summary
+perf.PerformanceMatrix
+  - printSummary() made synchronized (same monitor as add()) so a straggler response cannot grow a
+    request's row list mid-summary; column() snapshots rows.size() once so the loop bound never exceeds
+    the allocated array (was AIOOBE at high sample counts, aborting the run summary / CSV / HTML report)
+
 06/02/2026 mir0n  v1.2.6 race-8c -- KC esq_rootpath verification + single-shot repro + KC orphan cleanup
 chain.KcAdminAuth  (new)
   - POST master-realm token endpoint (admin-cli, grant_type=password, kc.admin.user / kc.admin.password);
