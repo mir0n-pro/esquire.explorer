@@ -1,0 +1,50 @@
+# Esquire explorer -- CI (phase 1)
+# Runs on every push and PR (public repo -> free hosted minutes). Two independent jobs:
+# the Angular frontend and the Node/TS BFF backend. No secrets, no deploy.
+# Design: doc/Esquire.GitHubActions.md (services repo); logic lives in .github/scripts/.
+# e2e-test (Playwright) is NOT here -- it needs the running stack and is a separate workflow.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22 + npm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build + test the Angular frontend
+        run: bash .github/scripts/ci-frontend.sh
+
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22 + npm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Lint + build + test the BFF backend
+        run: bash .github/scripts/ci-backend.sh
