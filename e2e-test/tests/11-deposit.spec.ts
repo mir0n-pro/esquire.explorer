@@ -10,7 +10,10 @@ test.describe.serial('accounting lifecycle: deposit → withdrawal → transfer 
     page = await ctx.newPage();
     await keycloakLogin(page);
     await navigateTo(page, 'Company', 'All merchants', 'Mer Chant');
-    const accountRow = page.locator('tr[mat-row]').first();
+    // Select the account by ID, not .first(): account-row ordering is NOT deterministic across
+    // backends (on k8s the list returned a different order than Docker), so .first() picked the
+    // wrong account. 10011 is the account the chain deposits/withdraws/transfers from.
+    const accountRow = page.locator('tr[mat-row]:has-text("10011")').first();
     await accountRow.waitFor({ timeout: 5000 });
     await accountRow.click();
     await accountRow.focus();
@@ -151,7 +154,9 @@ test.describe.serial('accounting lifecycle: deposit → withdrawal → transfer 
     await page.locator('tr[mat-row]:has-text("All clients")').first().dblclick();     // → All clients
     await page.locator('tr[mat-row]:has-text("Cli Ent")').first().waitFor({ timeout: 5000 });
     await page.locator('tr[mat-row]:has-text("Cli Ent")').first().dblclick();         // → Cli Ent
-    const accountRow = page.locator('tr[mat-row]').first();
+    // 10012 by ID, not .first(): the Cli Ent list returned 10013 (0.00 balance) first on k8s, so
+    // .first() made the withdrawal fail with "Insufficient balance" and stack an error dialog.
+    const accountRow = page.locator('tr[mat-row]:has-text("10012")').first();
     await accountRow.waitFor({ timeout: 5000 });
     await accountRow.click();
 
