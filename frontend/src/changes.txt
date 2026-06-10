@@ -1,6 +1,15 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+06/10/2026 mir0n  v1.2.7 landing-page Architecture tab refreshed for the audit-logging sprint
+explorer\flatTree\app-shell.html
+  - Architecture heading bumped v1.2.6 -> v1.2.7; Esq2025 audit-log note scoped to "when triggers are
+    enabled" + new "Esq2025 audit" component; Messaging Bus now three channels (added the optional Audit
+    Broadcast Bus); new xx-rod and Redis DB components; the audit principle + feature-table row reframed
+    as an optional, pluggable concern (was BRIUD-trigger-only)
+public\img\ComponentModel.png
+  - component-model diagram refreshed with the optional audit components
+
 06/02/2026 mir0n  v1.2.6 landing-page Architecture tab updated for the mcMaster refine
 explorer\flatTree\app-shell.html
   - Architecture heading bumped v1.2.5 -> v1.2.6; 

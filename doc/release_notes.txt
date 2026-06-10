@@ -1,6 +1,17 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.7-2606.1000  v1.2.7 landing-page audit refresh + e2e account-pick fix
+    :Doc:         landing-page Architecture tab refreshed for the audit-logging sprint -- v1.2.7 heading, the
+    :Fix:         e2e: 11-deposit selects accounts by id (Mer Chant 10011 / Cli Ent 10012) instead of row
+                  position
+    Components:   frontend, e2e
+
+v1.2.7-2606.0615  v1.2.7 hauberk PerformanceMatrix summary fix
+    :Fix:         hauberk: post-run PerformanceMatrix summary no longer throws AIOOBE at high sample
+                  counts (synchronized summary + snapshotted row count); run summary / CSV / HTML report complete
+    Components:   hauberk
+
 v1.2.6-2606.0219  v1.2.6 race-8c verification harness + name-prefix residue cleanup
    :Feature:     hauberk: race-8c verify Simulation (RaceMoveCreateKc) diffs DB ep_path against the KC user
                  esq_rootpath via the master-realm admin REST API; poll-until-stable with per-tick admin-token refresh
