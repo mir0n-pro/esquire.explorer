@@ -25,6 +25,20 @@ Each subproject is independently built, run, and deployed; they all talk to
 the same **Esquire server** (`services/`) as outside callers.
 
 
+## v1.2.7 — complete (06/10/2026)
+
+Rides the backend **audit-logging** sprint and lands the explorer's share of the CI/CD establishment:
+the landing page reframes the audit story, the e2e suite is made deterministic, the harness gains a
+report-summary fix and a list-catalog contract, and delivery moves onto automatic build-and-test.
+
+| | |
+|--------------------|-------------------------|
+| `frontend/`| - landing-page Architecture tab refreshed for the audit sprint (v1.2.7 heading; new xx-rod + Redis components; optional Audit Broadcast Bus channel; the audit principle / feature-table reframed);<br>- ComponentModel diagram refreshed;<br>- version 1.2.6 -> 1.2.7 |
+| `e2e-test/`| - 11-deposit selects accounts by id (Mer Chant 10011 / Cli Ent 10012) instead of row position, removing a non-deterministic account-ordering failure — full suite **31 passed** on both Docker and local k8s |
+| `hauberk/`| - PerformanceMatrix post-run summary AIOOBE fix (synchronized `printSummary`, snapshotted row count);<br>- `@SimulationInfo` descriptions trimmed under the 90-char `hauberk list` cap (`SimulationCatalogContractTest`);<br>- version 1.2.4 -> 1.2.7 |
+| `backend/`| - version 1.2.6 -> 1.2.7 |
+| CI/CD| - GitHub Actions CI established: every push / PR builds and tests **frontend** (Angular build + headless unit tests) and **backend** (lint + build + tests) on Node 22;<br>- both `package-lock.json` committed so the automated install is reproducible |
+
 ## v1.2.6 — complete (06/02/2026)
 
 Tracks the backend **enyMan-redundancy / race-8c** sprint (instance-aware entity-id minting, the

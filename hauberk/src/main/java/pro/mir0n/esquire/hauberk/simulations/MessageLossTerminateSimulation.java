@@ -11,6 +11,7 @@
  *                   proves the cache drifted, forces a sweep -> the mismatch makes bizTree System.exit
  *                   -- and asserts the container is DOWN (k8s would relaunch it in prod). Restores the
  *                   stack at the end. Fully automatic via the Cmd infra steps.
+ * 06/10/2026 mir0n  @SimulationInfo description trimmed to fit the hauberk list table (<=90 chars)
  */
 package pro.mir0n.esquire.hauberk.simulations;
 
@@ -36,7 +37,7 @@ import static io.gatling.javaapi.core.CoreDsl.*;
  *   7. poll GET /esq-tree over REST until the gateway returns 5xx -> assert DOWN. The TERMINATE fired.
  *   8. restore: start ActiveMQ, recreate bizTree in SWAP mode, wait until serving again.
  */
-@SimulationInfo("Message-loss + night-watch TERMINATE: broker down -> user missed -> sweep mismatch -> biztree exits (asserts DOWN)")
+@SimulationInfo("Message-loss + night-watch TERMINATE: broker down, user missed, sweep mismatch, exits")
 public class MessageLossTerminateSimulation extends HauberkSimulation {
 
     ScenarioBuilder scn = scenario("message-loss-terminate")

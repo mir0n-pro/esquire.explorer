@@ -1,6 +1,15 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.7-2606.1016  v1.2.7 -- release finalized (versions aligned to 1.2.7)
+    :Config:      frontend + backend package.json bumped to 1.2.7; hauberk module bumped 1.2.4 -> 1.2.7
+                  (release finalization)
+    :Fix:         hauberk SimulationInfo descriptions trimmed to <=90 chars so 'hauberk list' fits the
+                  table (the SimulationCatalogContractTest contract)
+    Components:   frontend,
+                  backend,
+                  hauberk
+
 v1.2.7-2606.1000  v1.2.7 landing-page audit refresh + e2e account-pick fix
     :Doc:         landing-page Architecture tab refreshed for the audit-logging sprint -- v1.2.7 heading, the
     :Fix:         e2e: 11-deposit selects accounts by id (Mer Chant 10011 / Cli Ent 10012) instead of row

@@ -10,6 +10,7 @@
  * 06/02/2026 mir0n  name-prefix driven: finds ALL offices directly under Test House whose name starts with
  *                   -Dcleanup.prefix (default "hauberk-office-smoke") and runs each through CleanupOfficeByName
  *                   (disconnect-then-delete, /esq-cmd-tree FK walk). Catches msgloss / other-named leftovers too.
+ * 06/10/2026 mir0n  @SimulationInfo description trimmed to fit the hauberk list table (<=90 chars)
  */
 package pro.mir0n.esquire.hauberk.simulations;
 
@@ -43,7 +44,7 @@ import static io.gatling.javaapi.http.HttpDsl.*;
  * The seeded Test Driver users (uid 15/16/17) and Test House (pk 14) itself are
  * never matched (they are not offices named with the prefix), so they are safe.
  */
-@SimulationInfo("Targeted residue purge: offices under Test House matching -Dcleanup.prefix (default hauberk-office-smoke)")
+@SimulationInfo("Targeted residue purge: offices under Test House matching -Dcleanup.prefix")
 public class ResidueCleanupSimulation extends HauberkSimulation {
 
     private static final String PREFIX = System.getProperty("cleanup.prefix", "hauberk-office-smoke");

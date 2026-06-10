@@ -11,6 +11,7 @@
  *                   the user is MISSING from the cache, waits one night-watch sweep, and proves the
  *                   SWAP promoted the fresh shadow so the user is now present. Fully automatic via the
  *                   Cmd infra steps (stop/start broker, recreate biztree) -- no operator.
+ * 06/10/2026 mir0n  @SimulationInfo description trimmed to fit the hauberk list table (<=90 chars)
  */
 package pro.mir0n.esquire.hauberk.simulations;
 
@@ -38,7 +39,7 @@ import static io.gatling.javaapi.core.CoreDsl.*;
  *   7. CompareTrees -> the user is now PRESENT (cmpMissingInBiztree == 0). The sweep self-healed.
  *   8. start ActiveMQ, clean up.
  */
-@SimulationInfo("Message-loss + night-watch SWAP: broker down -> user missed in cache -> sweep promotes fresh shadow -> recovered")
+@SimulationInfo("Message-loss + night-watch SWAP: broker down, user missed, sweep promotes fresh shadow")
 public class MessageLossSimulation extends HauberkSimulation {
 
     ScenarioBuilder scn = scenario("message-loss-swap")

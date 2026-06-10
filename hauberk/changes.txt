@@ -1,5 +1,13 @@
 hauberk changes
 
+06/10/2026 mir0n  v1.2.7 -- SimulationInfo descriptions trimmed to the hauberk list 90-char cap
+simulations.MessageLossSimulation
+  - @SimulationInfo trimmed 112 -> 86 chars (SimulationCatalogContractTest.descriptionFitsTerminalWidth)
+simulations.MessageLossTerminateSimulation
+  - @SimulationInfo trimmed 114 -> 85 chars
+simulations.ResidueCleanupSimulation
+  - @SimulationInfo trimmed 105 -> 74 chars (dropped the -Dcleanup.prefix default-value note)
+
 06/03/2026 mir0n  v1.2.7 -- PerformanceMatrix AIOOBE fix in the post-run summary
 perf.PerformanceMatrix
   - printSummary() made synchronized (same monitor as add()) so a straggler response cannot grow a
