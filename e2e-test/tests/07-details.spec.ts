@@ -18,14 +18,17 @@ test('Details dialog closes with ESC', async ({ page }) => {
   await node.waitFor({ timeout: 10000 });
   await node.click();
   await page.locator('button[matTooltip="Details"]').click();
-  await page.locator('mat-dialog-container').waitFor();
-  // Wait for the tabbed form to render — signals dictionary loaded and details/originalDetails set,
-  // so hasChanges() returns false and ESC closes cleanly. Without this, against a remote backend
-  // (network latency > a few ms) ESC fires while data is still loading → hasChanges() throws on
-  // undefined dictionary or returns true → confirm dialog opens instead of close.
-  await page.locator('mat-dialog-container mat-tab-group').waitFor({ state: 'visible', timeout: 5000 });
+  const dialog = page.locator('mat-dialog-container');
+  await dialog.waitFor();
+  // The tab-group renders BEFORE the dictionary/details finish loading, so waiting for it is not
+  // enough: against a remote backend ESC can fire while details are still in flight → originalDetails
+  // is not yet synced → hasChanges() returns true → the unsaved-changes guard holds the dialog open
+  // instead of closing (passes locally where latency ≈ 0, fails against OKE). Wait until a field is
+  // actually POPULATED — proof the details loaded and originalDetails is set — before pressing ESC.
+  await dialog.locator('mat-tab-group').waitFor({ state: 'visible', timeout: 5000 });
+  await expect(dialog.locator('input').first()).not.toHaveValue('', { timeout: 8000 });
   await page.keyboard.press('Escape');
-  await expect(page.locator('mat-dialog-container')).not.toBeVisible({ timeout: 3000 });
+  await expect(dialog).not.toBeVisible({ timeout: 3000 });
 });
 
 test('Details dialog closes with Close button', async ({ page }) => {
