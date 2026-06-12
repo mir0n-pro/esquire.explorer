@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.8-2606.1216  v1.2.8 -- e2e coverage for the system entity flag (anti-deletion)
+    :Feature:     e2e 15-system-entity-protection asserts a delete of a system-flagged office/user is blocked (409)
+    Components:   e2e
+
 v1.2.7-2606.1021  v1.2.7 -- e2e: Details ESC-close test hardened for remote latency
     :Fix:         e2e 07-details "closes with ESC" now waits for a populated field
     Components:   e2e

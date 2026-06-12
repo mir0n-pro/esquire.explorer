@@ -80,3 +80,9 @@ Stub — see 11-deposit.spec.ts.
 ### 14-error-handling.spec.ts
 Provoke a backend error; bottom status bar shows error message; error report icon opens
 dialog with RFC 7807 Problem Detail fields (title, detail, status).
+
+### 15-system-entity-protection.spec.ts — system entity flag (anti-deletion)
+After login, calls the BFF `/api/esq-cmd-del` with the authenticated browser session (session →
+BFF injects bearer → gateway → enyMan → DB guard) and asserts a delete of each seed-flagged
+entity is rejected with **HTTP 409**: root Esquire office (org 1), Test House office (org 14),
+and Test Driver users (15, 16). Read-only — no entity is removed (the guard blocks before delete).
