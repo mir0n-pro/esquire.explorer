@@ -358,9 +358,10 @@
               does not touch application code.
             </p>
             <p>
-              <strong>Messaging broker.</strong> ActiveMQ today. A future milestone will introduce
-              a vendor-agnostic bus abstraction — the broadcast and request-response patterns remain
-              the contract; the underlying broker becomes a deployment choice.
+              <strong>Messaging Bus.</strong> Esquire ships a vendor-agnostic Messaging Bus —
+              the broadcast and request-response patterns are the contract; the transport is a
+              deployment choice behind a pluggable transport-provider interface. ActiveMQ is the first
+              transport provider implemented; Kafka and Redis providers use the same interface.
             </p>
             <p>
               <strong>Identity and access management.</strong> Keycloak today. The architecture
@@ -369,10 +370,9 @@
               is unchanged. A deployment decision, not an architectural one.
             </p>
             <p>
-              With v1.2.2, Esquire has reached the Establishment: a working, connected system from
-              database to browser. From here, many routes are open — new database targets, new
-              brokers, new IAM providers, new entity domains — without any dramatic change to the
-              core architecture.
+              Esquire is a working, connected system from database to browser. Many routes are open
+              from here — new database targets, new transports, new IAM providers, new entity domains —
+              without any dramatic change to the core architecture.
             </p>
           </div>
         </mat-tab>
@@ -458,7 +458,7 @@
         <!-- Tab 6: Architecture -->
         <mat-tab label="Architecture">
           <div class="landing-tab-content">
-            <h2>Current Architecture (v1.2.7) </h2>
+            <h2>Current Architecture</h2>
             <img class="arch-diagram" src="/img/ComponentModel.png" alt="Esquire Component Model"/>
 
             <p>
@@ -485,14 +485,14 @@
               <img src="/logo/activemq.png" alt="ActiveMQ" height="20" style="vertical-align:middle">
               <img src="/logo/redis.svg" alt="Redis" height="20" style="vertical-align:middle">&nbsp;
               <img src="/logo/kafka.svg" alt="Kafka" height="20" style="vertical-align:middle"></h3>
-            <p>ActiveMQ broker; three logical channels (the third added in v1.2.7, optional):
+            <p>Three logical channels:
                the IAM Request-Response Bus carries identity commands from keySmith to kcMaster and
-               acknowledgement replies back;
+               acknowledgement replies back; ActiveMQ transport provider;
                the Entity Broadcast Bus carries entity change events published by enyMan and pacMan
-               to bizTree and other interested consumers;
+               to bizTree and other interested consumers; ActiveMQ transport provider;
                the Audit Broadcast Bus (optional, off by default) carries each committed change event
                from the entity-updating services (enyMan, pacMan, keySmith) to the audit sink &mdash;
-               transport vendors: ActiveMQ, Kafka, or Redis.</p>
+               transport providers: ActiveMQ, Kafka, or Redis.</p>
 
             <h3>pacMan — Personal Account Manager
               <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
@@ -541,12 +541,12 @@
               <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
               <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">&nbsp;
               <img src="/logo/keep.svg" alt="x-rod" height="20" style="vertical-align:middle"></h3>
-            <p>Optional (v1.2.7); the audit consumer service that drains the Audit Broadcast Bus and writes
+            <p>Optional; the audit consumer service that drains the Audit Broadcast Bus and writes
                the <code>*_log</code> tables.</p>
 
             <h3>Redis DB
               <img src="/logo/redis.svg" alt="Redis" height="20" style="vertical-align:middle"></h3>
-            <p>Optional (v1.2.7); the alternative non-SQL (document-DB) audit sink &mdash; the Redis stream
+            <p>Optional; the alternative non-SQL (document-DB) audit sink &mdash; the Redis stream
                itself holds the audit trail (the stream is the log). Feeding it from the Kafka transport needs
                one extra component, a <b>Kafka Connect Redis Sink</b>.</p>
 
