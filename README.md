@@ -1,5 +1,4 @@
-| ![Alt text](./favicon.ico) | Esquire Frameworks(tm) 2.0 |
-|----------------------------|-------------------------|
+# <img src="./favicon.ico" alt="Esquire logo" valign="middle" width="64" height="64"> Esquire Application Frameworks(tm) 2.0
 
 Frameworks for organizing business entities in a tree, for any business or activity. The framework is targeting to cover traditional 
 functionality for a Backoffice (sub)system: onboarding, user profile maintenance, permissions, authorization, and accounting.
@@ -25,30 +24,27 @@ Each subproject is independently built, run, and deployed; they all talk to
 the same **Esquire server** (`services/`) as outside callers.
 
 
-## v1.2.7 — complete (06/10/2026)
+## v1.2.8 — complete (06/19/2026)
 
-Rides the backend **audit-logging** sprint and lands the explorer's share of the CI/CD establishment:
-the landing page reframes the audit story, the e2e suite is made deterministic, the harness gains a
-report-summary fix and a list-catalog contract, and delivery moves onto automatic build-and-test.
+The explorer's share of the **Messaging Bus** sprint: end-to-end coverage for the new system-entity
+anti-deletion flag, and a landing-page reframe that presents the messaging layer as the delivered,
+vendor-agnostic **Messaging Bus**.
 
 | | |
 |--------------------|-------------------------|
-| `frontend/`| - landing-page Architecture tab refreshed for the audit sprint (v1.2.7 heading; new xx-rod + Redis components; optional Audit Broadcast Bus channel; the audit principle / feature-table reframed);<br>- ComponentModel diagram refreshed;<br>- version 1.2.6 -> 1.2.7 |
-| `e2e-test/`| - 11-deposit selects accounts by id (Mer Chant 10011 / Cli Ent 10012) instead of row position, removing a non-deterministic account-ordering failure — full suite **31 passed** on both Docker and local k8s |
-| `hauberk/`| - PerformanceMatrix post-run summary AIOOBE fix (synchronized `printSummary`, snapshotted row count);<br>- `@SimulationInfo` descriptions trimmed under the 90-char `hauberk list` cap (`SimulationCatalogContractTest`);<br>- version 1.2.4 -> 1.2.7 |
-| `backend/`| - version 1.2.6 -> 1.2.7 |
-| CI/CD| - GitHub Actions CI established: every push / PR builds and tests **frontend** (Angular build + headless unit tests) and **backend** (lint + build + tests) on Node 22;<br>- both `package-lock.json` committed so the automated install is reproducible |
+| `e2e-test/`| - **15-system-entity-protection** asserts that deleting a system-flagged office or user is blocked (HTTP 409) — end-to-end coverage of the backend anti-deletion guard |
+| `frontend/`| - landing-page value-proposition + Architecture tab reframed: the messaging layer is presented as the implemented, vendor-agnostic **Messaging Bus** (ActiveMQ the first transport provider, Kafka / Redis on the same SPI);<br>- version 1.2.7 -> 1.2.8 |
+| `backend/`, `hauberk/`| - version 1.2.7 -> 1.2.8 |
+
+## v1.2.7 — complete (06/10/2026)
+
+The explorer's share of the backend **audit-logging** + CI/CD sprint: the landing page reframed the audit story, the e2e suite was made deterministic (full suite **31 passed** on Docker and local k8s), the hauberk harness gained a report-summary fix and a list-catalog contract, and GitHub Actions CI build-and-test was established for frontend and backend.<br>
+[More Details: v1.2.7 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.7?tab=readme-ov-file)
 
 ## v1.2.6 — complete (06/02/2026)
 
-Tracks the backend **enyMan-redundancy / race-8c** sprint (instance-aware entity-id minting, the
-async move queue, and the kcMaster path-buffer). The harness gains a KC-side verification and
-cleanup layer that proves the server-side fix and tidies up after it.
-
-| | |
-|--------------------|-------------------------|
-| `hauberk/`| - **race-8c** verify Simulation (`RaceMoveCreateKc`): diffs DB `ep_path` against the KC user `esq_rootpath` via the master-realm admin REST API — poll-until-stable with per-tick admin-token refresh;<br>- deterministic **single-shot** repro (`RaceMoveCreateKcSingleShot`): buffer OFF reproduces the stale path, buffer ON proves the kcMaster path-buffer fix;<br>- KC orphan cleanup (`KcCleanup` Simulation + `KcAdminAuth` / `CleanupKcOrphans` chains);<br>- `residue-cleanup` is now name-prefix driven (`-Dcleanup.prefix`) and disconnects-then-deletes via the API — purges msgloss / other-named Test House leftovers, including on prod;<br>- `MoveEntity` accepts the `/esq-move` 202 async-ack; the move-create verifier is poll-until-quiescent;<br>- now 21 Simulations / 32 reusable Chains |
-| `frontend/`, `backend/`| - version 1.2.5 -> 1.2.6 |
+The explorer's share of the **enyMan-redundancy / race-8c** sprint: the hauberk harness gained a KC-side verify-and-cleanup layer — the `RaceMoveCreateKc` / single-shot repros that prove the kcMaster path-buffer fix, KC orphan cleanup, and prefix-driven residue cleanup — reaching 21 Simulations / 32 reusable Chains.<br>
+[More Details: v1.2.6 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.6?tab=readme-ov-file)
 
 ## v1.2.5 — complete (05/24/2026)
 

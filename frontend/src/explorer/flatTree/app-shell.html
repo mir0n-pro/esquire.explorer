@@ -99,6 +99,11 @@
         <mat-tab label="The Vision">
           <div class="landing-tab-content">
             <h2>The Vision</h2>
+            <img src="helm.svg" alt="Esquire logo" align="left" width="256" height="256" style="margin: 0 10px 10px 0;">
+            <p>
+                <strong style="color: #4D6A8D;">Tree-shaped authorization. Write business logic only. The server defines the UI. </strong>
+                <br>
+            </p>
             <p>
               Every organized domain has a natural structure: a hierarchy. Organizations have divisions.
               Divisions have teams. Teams have members. Members have assets. Assets belong to portfolios.
@@ -110,6 +115,7 @@
               somewhere else, maintained separately, diverging over time. Esquire collapses those two things
               into one: the tree itself defines what you can see and what you are allowed to do.
             </p>
+
             <h3>Hierarchical Visibility</h3>
             <p>
               Your position in the tree determines your data scope. You see your branch.
@@ -123,6 +129,15 @@
               is designed to reflect that reality: authority is not a global property of your account,
               but a function of where you sit in the tree.
             </p>
+              <h3>You write only business logic</h3>
+              <p>
+                  A framework earns its name by doing one thing: letting the people who write business logic
+                  write <strong>only</strong> business logic. Networks, protocols, message brokers, persistence,
+                  identity, deployment — the plumbing every application drags along — is the framework's job,
+                  not the domain developer's. You place an entity on the tree and describe what it <em>means</em>;
+                  how it is stored, synchronized across services, secured, audited, and served to the browser is
+                  <strong>inherited, not coded</strong>.
+              </p>
             <h3>Entity Self-Description</h3>
             <p>
               Every business entity type carries its own definition — the fields it exposes,
@@ -343,9 +358,10 @@
               does not touch application code.
             </p>
             <p>
-              <strong>Messaging broker.</strong> ActiveMQ today. A future milestone will introduce
-              a vendor-agnostic bus abstraction — the broadcast and request-response patterns remain
-              the contract; the underlying broker becomes a deployment choice.
+              <strong>Messaging Bus.</strong> Esquire ships a vendor-agnostic Messaging Bus —
+              the broadcast and request-response patterns are the contract; the transport is a
+              deployment choice behind a pluggable transport-provider interface. ActiveMQ is the first
+              transport provider implemented; Kafka and Redis providers use the same interface.
             </p>
             <p>
               <strong>Identity and access management.</strong> Keycloak today. The architecture
@@ -354,10 +370,9 @@
               is unchanged. A deployment decision, not an architectural one.
             </p>
             <p>
-              With v1.2.2, Esquire has reached the Establishment: a working, connected system from
-              database to browser. From here, many routes are open — new database targets, new
-              brokers, new IAM providers, new entity domains — without any dramatic change to the
-              core architecture.
+              Esquire is a working, connected system from database to browser. Many routes are open
+              from here — new database targets, new transports, new IAM providers, new entity domains —
+              without any dramatic change to the core architecture.
             </p>
           </div>
         </mat-tab>
@@ -443,7 +458,7 @@
         <!-- Tab 6: Architecture -->
         <mat-tab label="Architecture">
           <div class="landing-tab-content">
-            <h2>Current Architecture (v1.2.7) </h2>
+            <h2>Current Architecture</h2>
             <img class="arch-diagram" src="/img/ComponentModel.png" alt="Esquire Component Model"/>
 
             <p>
@@ -454,30 +469,44 @@
               Bearer JWT on every request, for service-to-service callers and integrations.
             </p>
 
-            <h3>Esq2025</h3>
+            <h3>Esq2025
+              <img src="/logo/postgres.svg" alt="Postgres" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/oracle.svg" alt="Oracle" height="20" style="vertical-align:middle"></h3>
             <p>The database (Oracle or Postgres); persistent store for all entity data, transactions,
                permissions, configuration parameters, and the audit log (when triggers are enabled).</p>
 
-            <h3>Esq2025 audit</h3>
+            <h3>Esq2025 audit
+              <img src="/logo/postgres.svg" alt="Postgres" height="20" style="vertical-align:middle"> &nbsp;
+              <img src="/logo/oracle.svg" alt="Oracle" height="20" style="vertical-align:middle"></h3>
             <p>Optional; a separate database (Oracle or Postgres) holding the entity audit log
                (<code>*_log</code> tables), so audit writes never touch the operational Esq2025.</p>
 
-            <h3>Messaging Bus</h3>
-            <p>ActiveMQ broker; three logical channels (the third added in v1.2.7, optional):
+            <h3>Messaging Bus
+              <img src="/logo/activemq.png" alt="ActiveMQ" height="20" style="vertical-align:middle">
+              <img src="/logo/redis.svg" alt="Redis" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/kafka.svg" alt="Kafka" height="20" style="vertical-align:middle"></h3>
+            <p>Three logical channels:
                the IAM Request-Response Bus carries identity commands from keySmith to kcMaster and
-               acknowledgement replies back;
+               acknowledgement replies back; ActiveMQ transport provider;
                the Entity Broadcast Bus carries entity change events published by enyMan and pacMan
-               to bizTree and other interested consumers;
+               to bizTree and other interested consumers; ActiveMQ transport provider;
                the Audit Broadcast Bus (optional, off by default) carries each committed change event
                from the entity-updating services (enyMan, pacMan, keySmith) to the audit sink &mdash;
-               transport vendors: ActiveMQ, Kafka, or Redis.</p>
+               transport providers: ActiveMQ, Kafka, or Redis.</p>
 
-            <h3>pacMan — Personal Account Manager</h3>
+            <h3>pacMan — Personal Account Manager
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
+              <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">
+              <img src="/logo/pac-man.svg" alt="pacMan" height="22" style="vertical-align:middle"></h3>
             <p>The accounting service; manages account balance operations: deposit, withdrawal,
                cross-currency transfer; the place where business logic lives; all other services
                exist to support it.</p>
 
-            <h3>bizTree</h3>
+            <h3>bizTree
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
+              <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/h2.svg" alt="H2" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/bizTree.png" alt="bizTree" height="20" style="vertical-align:middle"></h3>
             <p>The entity tree service; maintains an in-memory cache of the business entity tree;
                serves tree navigation to the frontend; stays current by consuming the broadcast bus.
                It is a <strong>recoverable cache service</strong>: a two-buffer
@@ -485,30 +514,46 @@
                shadow copy from the database, compares the two, and self-heals any drift &mdash; so an
                event missed while the service was down is reconciled automatically, with no restart.</p>
 
-            <h3>enyMan — Entity Manager</h3>
+            <h3>enyMan — Entity Manager
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
+                <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">
+              <img src="/logo/enyMan.3.png" alt="Spring Boot" height="24" style="vertical-align:middle"></h3>
             <p>Manages organizations and users; handles create, update, delete, and move operations;
                publishes entity change events to the broadcast bus.</p>
 
-            <h3>keySmith</h3>
-            <p>Authentication and access profile service; manages IAT integration and JWT-based
+            <h3>keySmith
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
+              <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">
+              <img src="/logo/keySmith.3.png" alt="keySmith" height="36" style="vertical-align:middle"></h3>
+            <p>Authentication and access profile service; manages IAS integration and JWT-based
                authorization; serves access profiles to the frontend; publishes identity change requests
                to the IAM bus.</p>
 
-            <h3>kcMaster</h3>
-            <p>Keycloak sync coordinator; the only service that writes to Keycloak IAT directly; consumes
+            <h3>kcMaster
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
+              <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">
+              <img src="/logo/kcMaster.png" alt="kcMaster" height="20" style="vertical-align:middle"></h3>
+            <p>Keycloak sync coordinator; the only service that writes to Keycloak directly; consumes
                identity commands from the IAM bus and executes create / update / delete in the IAM. Also
                listens on the entity broadcast bus to keep a moved entity's Keycloak path in sync.</p>
 
-            <h3>xx-rod</h3>
-            <p>Optional (v1.2.7); the audit consumer service that drains the Audit Broadcast Bus and writes
+            <h3>auKeep
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
+              <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/keep.svg" alt="x-rod" height="20" style="vertical-align:middle"></h3>
+            <p>Optional; the audit consumer service that drains the Audit Broadcast Bus and writes
                the <code>*_log</code> tables.</p>
 
-            <h3>Redis DB</h3>
-            <p>Optional (v1.2.7); the alternative non-SQL (document-DB) audit sink &mdash; the Redis stream
+            <h3>Redis DB
+              <img src="/logo/redis.svg" alt="Redis" height="20" style="vertical-align:middle"></h3>
+            <p>Optional; the alternative non-SQL (document-DB) audit sink &mdash; the Redis stream
                itself holds the audit trail (the stream is the log). Feeding it from the Kafka transport needs
-               one extra component, a Kafka Connect Redis Sink.</p>
+               one extra component, a <b>Kafka Connect Redis Sink</b>.</p>
 
-            <h3>gateway</h3>
+            <h3>gateway
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
+              <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/gateway.svg" alt="Gateway" height="20" style="vertical-align:middle"></h3>
             <p>Spring Cloud Gateway; the API router; routes requests to the appropriate backend
                service by path and entity kind; validates JWT tokens on every request. Reachable
                two ways: in-cluster from the BFF on /api/*, and externally at
@@ -516,11 +561,13 @@
                callers (service-to-service integrations, load / smoke harnesses, future mobile or
                API consumers). External callers carry their own bearer token; no BFF in the loop.</p>
 
-            <h3>Keycloak</h3>
+            <h3>Keycloak
+              <img src="/logo/keycloak.png" alt="Keycloak" height="20" style="vertical-align:middle"></h3>
             <p>External IAM; issues JWT access tokens; manages user identities, realm configuration,
                and authentication flows including TOTP; runs as a containerized service.</p>
 
-            <h3>Esquire Explorer Backend (BFF)</h3>
+            <h3>Esquire Explorer Backend (BFF)
+              <img src="/logo/node.js.svg" alt="Node.js" height="20" style="vertical-align:middle"></h3>
             <p>Backend-for-Frontend (Node.js); the <strong>administrative GUI entry point</strong>
                at esquire.mir0n.pro. Owns the OIDC code+PKCE flow with Keycloak (/auth/login,
                /callback, /logout, /me); proxies /api/* to the gateway with bearer injection;
@@ -528,13 +575,18 @@
                SPA into its image at build time and serves it on /. The browser never sees the
                access token &mdash; it holds an opaque session cookie.</p>
 
-            <h3>Esquire Explorer Frontend (SPA)</h3>
+            <h3>Esquire Explorer Frontend (SPA)
+              <img src="/logo/node.js.svg" alt="Node.js" height="20" style="vertical-align:middle">
+              <img src="/logo/angular.svg" alt="Angular" height="20" style="vertical-align:middle">
+              <img src="/logo/esquire.png" alt="Esquire" height="20" style="vertical-align:middle"></h3>
             <p>The user-facing application (Angular); tree-based entity browser and operations UI;
                consumes the @mir0n-pro/esquire.ui library; communicates only with the BFF via
                same-origin /auth/* and /api/*, never directly with the gateway or Keycloak.
                Shipped baked into the BFF image; one deployable.</p>
 
-            <h3>REST API</h3>
+            <h3>REST API
+              <img src="/logo/hauberk.svg" alt="Hauberk" height="20" style="vertical-align:middle">
+              <img src="/logo/gatling.svg" alt="Gatling" height="18" style="vertical-align:middle"></h3>
             <p>Public REST API exposed for gatling-based load / smoke harnesses and other integrations.</p>
 
             <p style="margin-top: 24px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 16px;">
