@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.9-2606.2112  v1.2.9 -- landing page tabs split into their own files
+    :Refactoring: the About/landing page's six tabs, previously one large block of markup inside the app
+                  shell, are now separate static files the app loads at runtime
+    Components:   explorer
+
 v1.2.8-2606.1216  v1.2.8 -- e2e coverage for the system entity flag (anti-deletion)
     :Feature:     e2e 15-system-entity-protection asserts a delete of a system-flagged office/user is blocked (409)
     Components:   e2e

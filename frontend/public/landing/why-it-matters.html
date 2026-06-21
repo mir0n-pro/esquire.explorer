@@ -1,0 +1,97 @@
+            <h2>Why it matters</h2>
+            <h3>Every team builds the same five things</h3>
+            <p>Before any product delivers value, an engineering team must build:</p>
+            <ol style="font-size:12pt; line-height:1.6; color:rgba(0,0,0,0.75); padding-left:20px;">
+              <li>A way to store and manage users and organizations</li>
+              <li>A permission system (and then rework it two or three times)</li>
+              <li>An audit log (typically after the first incident)</li>
+              <li>Some kind of account or balance concept</li>
+              <li>An admin UI that someone promises to clean up later</li>
+            </ol>
+            <p>
+              These are not competitive differentiators. They are infrastructure. Building them from
+              scratch on every project is expensive, slow, and consistently underestimated. Buying a
+              monolithic ERP means inheriting ten years of someone else's assumptions. Low-code admin
+              tools give you a panel quickly but leave the hard problems — permissions, audit, accounting
+              logic — entirely to you.
+            </p>
+            <p>Esquire is the middle path: a framework that solves the structural problems correctly once.</p>
+
+            <h3>1. The server defines the UI</h3>
+            <p>
+              Field layouts, control types, validation rules, and available commands are delivered at
+              runtime from a server configuration. Add a new entity type, change a field label, adjust a
+              validation rule — the Angular frontend adapts without a redeployment.
+              Every comparable tool uses a static component library where a schema change is a deployment.
+            </p>
+
+            <h3>2. A permission model that enforces itself at both layers</h3>
+            <p>
+              Every command and every editable field is gated by the logged-in user's access profile,
+              resolved server-side, and reflected in the frontend without duplication. There is no way to
+              call an endpoint the user is not permitted to call, and no way to render a field the user
+              is not permitted to edit.
+            </p>
+
+            <h3>3. Audit trail as a first-class, pluggable concern</h3>
+            <p>
+              Every write to every entity carries a correlation ID, request ID, and the acting user ID, so
+              audit entries tie back to distributed-tracing correlation IDs &mdash; making it possible to
+              reconstruct exactly what sequence of operations produced any given database state. Audit logging
+              itself is <strong>optional and pluggable</strong>: a deployment picks from a wide set of models
+              &mdash; from in-database triggers to a fully decoupled, message-driven pipeline &mdash; or turns
+              it off entirely, with no application-code change.
+            </p>
+
+            <h3>4. Accounting as the demo business model</h3>
+            <p>
+              Everyone knows what to expect from accounting — that is exactly why it is the demo.
+              The accounting domain — multi-currency deposit, withdrawal, and two-leg transfer with
+              conversion-rate validation, balance constraints, and status guards — is implemented
+              as the framework's demonstration, not as a framework feature. Pick a domain the reader
+              already understands, and the framework's behavior speaks for itself: tree-scoped reads,
+              positional permission resolution, server-driven UI rendering, audit, async entity
+              broadcast — all visible in a single click-through.
+            </p>
+            <p>
+              Most comparable tools demonstrate themselves with CRUD over toy data. No other entry
+              in the competitive landscape ships a framework demonstration this complete. The
+              accounting domain is the proof. Any other domain — KYC, case management, contracts,
+              portfolios — sits on the same backbone and inherits the same structural rules.
+            </p>
+
+            <h3>5. Asynchronous entity synchronization</h3>
+            <p>
+              Entity changes propagate across services via an ActiveMQ broadcast bus. The in-memory entity
+              tree stays current without polling. Keycloak identity operations are decoupled from the entity
+              write path. The entity mutation and the downstream synchronization never block each other.
+            </p>
+
+            <h3>6. No vendor lock-in at any layer</h3>
+            <p>
+              Spring Boot and Spring Cloud, Angular, every component is a well-known open-source
+              technology. Vendor independence is an architectural principle, not a feature.
+              It operates at three layers:
+            </p>
+            <p>
+              <strong>Database.</strong> Oracle and Postgres today; MySQL and other RDBMS targets
+              on the roadmap. Vendor-specific SQL is isolated in named query XML files — switching
+              does not touch application code.
+            </p>
+            <p>
+              <strong>Messaging Bus.</strong> Esquire ships a vendor-agnostic Messaging Bus —
+              the broadcast and request-response patterns are the contract; the transport is a
+              deployment choice behind a pluggable transport-provider interface. ActiveMQ is the first
+              transport provider implemented; Kafka and Redis providers use the same interface.
+            </p>
+            <p>
+              <strong>Identity and access management.</strong> Keycloak today. The architecture
+              ensures no core service ever touches Keycloak directly. Replacing it means replacing
+              kcMaster with an xyzMaster that speaks to a different IAM — the rest of the system
+              is unchanged. A deployment decision, not an architectural one.
+            </p>
+            <p>
+              Esquire is a working, connected system from database to browser. Many routes are open
+              from here — new database targets, new transports, new IAM providers, new entity domains —
+              without any dramatic change to the core architecture.
+            </p>

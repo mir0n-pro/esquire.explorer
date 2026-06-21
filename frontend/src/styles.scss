@@ -7,3 +7,124 @@ html, body {
 }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 app-root, app-explorer { display: block; height: 100%; }
+
+/* Landing-page marketing panel.
+   The tab content is fetched and injected via [innerHTML], which escapes
+   Angular view encapsulation -- so these rules must be GLOBAL. Every
+   top-level selector carries a landing- prefix to stay namespace-specific. */
+.landing-panel {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  min-height: 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf0 50%, #f0f4f8 100%);
+
+  mat-tab-group {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+
+    .mat-mdc-tab-header {
+      background: rgba(0, 0, 0, 0.08);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+
+      .mdc-tab__text-label {
+        font-size: 13pt;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+      }
+
+      .mat-mdc-tab {
+        height: 52px;
+      }
+    }
+
+    .mat-mdc-tab-body-wrapper {
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .mat-mdc-tab-body-content {
+      overflow-y: auto;
+      height: 100%;
+    }
+  }
+}
+
+.landing-tab-content {
+  padding: 24px 48px;
+  max-width: 860px;
+  margin: 0 auto;
+
+  h2 {
+    font-size: 17pt;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.87);
+    margin: 0 0 14px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: 6px;
+  }
+
+  h3 {
+    font-size: 13pt;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.78);
+    margin: 18px 0 6px;
+  }
+
+  p {
+    font-size: 12pt;
+    line-height: 1.6;
+    color: rgba(0, 0, 0, 0.75);
+    margin: 0 0 10px;
+  }
+
+  blockquote {
+    border-left: 3px solid #90a4ae;
+    margin: 16px 0;
+    padding: 6px 16px;
+    font-style: italic;
+    color: rgba(0, 0, 0, 0.55);
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 0 4px 4px 0;
+  }
+}
+
+.landing-feature-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8.5pt;
+  margin-top: 12px;
+
+  th {
+    background: rgba(0, 0, 0, 0.06);
+    padding: 6px 10px;
+    text-align: left;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.75);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  }
+
+  td {
+    padding: 5px 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+    color: rgba(0, 0, 0, 0.68);
+
+    &:first-child { font-weight: 400; color: rgba(0, 0, 0, 0.75); }
+    &:nth-child(2) { font-weight: 500; color: #2e7d32; }
+  }
+
+  tr:hover td { background: rgba(255, 255, 255, 0.6); }
+}
+
+.landing-arch-diagram {
+  width: 100%;
+  max-width: 860px;
+  display: block;
+  margin: 0 auto 28px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  background: #fff;
+}

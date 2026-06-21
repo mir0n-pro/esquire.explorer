@@ -1,6 +1,21 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+06/21/2026 mir0n  v1.2.9 landing-page tabs moved out of app-shell into public static assets
+explorer\flatTree\app-shell.ts
+  - injects HttpClient + DomSanitizer; ngOnInit fetches the 6 landing tab files (responseType text) and
+    bypassSecurityTrustHtml; landing = signal of the 6 SafeHtml values (LandingTabs)
+explorer\flatTree\app-shell.html
+  - each landing <mat-tab> body replaced with <div class="landing-tab-content" [innerHTML]="landing().<key>">;
+    inline tab markup removed (628 -> 152 lines)
+explorer\flatTree\app-shell.scss
+  - .landing-panel / .landing-tab-content (+ descendants) / .feature-table / .arch-diagram removed (moved global)
+styles.scss
+  - .landing-panel / .landing-tab-content (+ descendants) added GLOBAL so [innerHTML] content is styled;
+    .feature-table -> .landing-feature-table, .arch-diagram -> .landing-arch-diagram (kept landing- prefixed)
+public\landing\{vision,what-is-it,who-needs-it,why-it-matters,vs-competition,architecture}.html  (new)
+  - the 6 landing tab bodies as static HTML assets, served from the app root
+
 06/10/2026 mir0n  v1.2.7 landing-page Architecture tab refreshed for the audit-logging sprint
 explorer\flatTree\app-shell.html
   - Architecture heading bumped v1.2.6 -> v1.2.7; Esq2025 audit-log note scoped to "when triggers are
