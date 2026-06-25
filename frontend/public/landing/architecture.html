@@ -1,0 +1,140 @@
+            <h2>Current Architecture</h2>
+            <img class="landing-arch-diagram" src="/img/ComponentModel.png" alt="Esquire Component Model"/>
+
+            <p>
+              Two public hosts:
+              <strong>esquire.mir0n.pro</strong> &mdash; administrative GUI (BFF + SPA), opaque
+              session cookie after OIDC code+PKCE login.
+              <strong>api.esquire.mir0n.pro</strong> &mdash; public REST API (gateway direct),
+              Bearer JWT on every request, for service-to-service callers and integrations.
+            </p>
+
+            <h3>Esq2025
+              <img src="/logo/postgres.svg" alt="Postgres" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/oracle.svg" alt="Oracle" height="20" style="vertical-align:middle"></h3>
+            <p>The database (Oracle or Postgres); persistent store for all entity data, transactions,
+               permissions, configuration parameters, and the audit log (when triggers are enabled).</p>
+
+            <h3>Esq2025 audit
+              <img src="/logo/postgres.svg" alt="Postgres" height="20" style="vertical-align:middle"> &nbsp;
+              <img src="/logo/oracle.svg" alt="Oracle" height="20" style="vertical-align:middle"></h3>
+            <p>Optional; a separate database (Oracle or Postgres) holding the entity audit log
+               (<code>*_log</code> tables), so audit writes never touch the operational Esq2025.</p>
+
+            <h3>Messaging Bus
+              <img src="/logo/activemq.png" alt="ActiveMQ" height="20" style="vertical-align:middle">
+              <img src="/logo/redis.svg" alt="Redis" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/kafka.svg" alt="Kafka" height="20" style="vertical-align:middle"></h3>
+            <p>Three logical channels:
+               the IAM Request-Response Bus carries identity commands from keySmith to kcMaster and
+               acknowledgement replies back; ActiveMQ transport provider;
+               the Entity Broadcast Bus carries entity change events published by enyMan and pacMan
+               to bizTree and other interested consumers; ActiveMQ transport provider;
+               the Audit Broadcast Bus (optional, off by default) carries each committed change event
+               from the entity-updating services (enyMan, pacMan, keySmith) to the audit sink &mdash;
+               transport providers: ActiveMQ, Kafka, or Redis.</p>
+
+            <h3>pacMan — Personal Account Manager
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
+              <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">
+              <img src="/logo/pac-man.svg" alt="pacMan" height="22" style="vertical-align:middle"></h3>
+            <p>The accounting service; manages account balance operations: deposit, withdrawal,
+               cross-currency transfer; the place where business logic lives; all other services
+               exist to support it.</p>
+
+            <h3>bizTree
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
+              <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/h2.svg" alt="H2" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/bizTree.png" alt="bizTree" height="20" style="vertical-align:middle"></h3>
+            <p>The entity tree service; maintains an in-memory cache of the business entity tree;
+               serves tree navigation to the frontend; stays current by consuming the broadcast bus.
+               It is a <strong>recoverable cache service</strong>: a two-buffer
+               anti-entropy design whose background &ldquo;night-watch&rdquo; periodically rebuilds a
+               shadow copy from the database, compares the two, and self-heals any drift &mdash; so an
+               event missed while the service was down is reconciled automatically, with no restart.</p>
+
+            <h3>enyMan — Entity Manager
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
+                <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">
+              <img src="/logo/enyMan.3.png" alt="Spring Boot" height="24" style="vertical-align:middle"></h3>
+            <p>Manages organizations and users; handles create, update, delete, and move operations;
+               publishes entity change events to the broadcast bus.</p>
+
+            <h3>keySmith
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
+              <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">
+              <img src="/logo/keySmith.3.png" alt="keySmith" height="36" style="vertical-align:middle"></h3>
+            <p>Authentication and access profile service; manages IAS integration and JWT-based
+               authorization; serves access profiles to the frontend; publishes identity change requests
+               to the IAM bus.</p>
+
+            <h3>kcMaster
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
+              <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">
+              <img src="/logo/kcMaster.png" alt="kcMaster" height="20" style="vertical-align:middle"></h3>
+            <p>Keycloak sync coordinator; the only service that writes to Keycloak directly; consumes
+               identity commands from the IAM bus and executes create / update / delete in the IAM. Also
+               listens on the entity broadcast bus to keep a moved entity's Keycloak path in sync.</p>
+
+            <h3>auKeep
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
+              <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/keep.svg" alt="x-rod" height="20" style="vertical-align:middle"></h3>
+            <p>Optional; the audit consumer service that drains the Audit Broadcast Bus and writes
+               the <code>*_log</code> tables.</p>
+
+            <h3>Redis DB
+              <img src="/logo/redis.svg" alt="Redis" height="20" style="vertical-align:middle"></h3>
+            <p>Optional; the alternative non-SQL (document-DB) audit sink &mdash; the Redis stream
+               itself holds the audit trail (the stream is the log). Feeding it from the Kafka transport needs
+               one extra component, a <b>Kafka Connect Redis Sink</b>.</p>
+
+            <h3>gateway
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
+              <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/gateway.svg" alt="Gateway" height="20" style="vertical-align:middle"></h3>
+            <p>Spring Cloud Gateway; the API router; routes requests to the appropriate backend
+               service by path and entity kind; validates JWT tokens on every request. Reachable
+               two ways: in-cluster from the BFF on /api/*, and externally at
+               <strong>api.esquire.mir0n.pro</strong> &mdash; the public REST API for non-browser
+               callers (service-to-service integrations, load / smoke harnesses, future mobile or
+               API consumers). External callers carry their own bearer token; no BFF in the loop.</p>
+
+            <h3>Keycloak
+              <img src="/logo/keycloak.png" alt="Keycloak" height="20" style="vertical-align:middle"></h3>
+            <p>External IAM; issues JWT access tokens; manages user identities, realm configuration,
+               and authentication flows including TOTP; runs as a containerized service.</p>
+
+            <h3>Esquire Explorer Backend (BFF)
+              <img src="/logo/node.js.svg" alt="Node.js" height="20" style="vertical-align:middle"></h3>
+            <p>Backend-for-Frontend (Node.js); the <strong>administrative GUI entry point</strong>
+               at esquire.mir0n.pro. Owns the OIDC code+PKCE flow with Keycloak (/auth/login,
+               /callback, /logout, /me); proxies /api/* to the gateway with bearer injection;
+               caches static entity dictionaries per pod, shared across users; bakes the Angular
+               SPA into its image at build time and serves it on /. The browser never sees the
+               access token &mdash; it holds an opaque session cookie.</p>
+
+            <h3>Esquire Explorer Frontend (SPA)
+              <img src="/logo/node.js.svg" alt="Node.js" height="20" style="vertical-align:middle">
+              <img src="/logo/angular.svg" alt="Angular" height="20" style="vertical-align:middle">
+              <img src="/logo/esquire.png" alt="Esquire" height="20" style="vertical-align:middle"></h3>
+            <p>The user-facing application (Angular); tree-based entity browser and operations UI;
+               consumes the @mir0n-pro/esquire.ui library; communicates only with the BFF via
+               same-origin /auth/* and /api/*, never directly with the gateway or Keycloak.
+               Shipped baked into the BFF image; one deployable.</p>
+
+            <h3>REST API
+              <img src="/logo/hauberk.svg" alt="Hauberk" height="20" style="vertical-align:middle">
+              <img src="/logo/gatling.svg" alt="Gatling" height="18" style="vertical-align:middle"></h3>
+            <p>Public REST API exposed for gatling-based load / smoke harnesses and other integrations.</p>
+
+            <p style="margin-top: 24px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 16px;">
+              Source code and documentation:
+              <a href="https://github.com/mir0n-pro/esquire.services#readme"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 style="color: #1565c0;">
+                github.com/mir0n-pro/esquire.services
+              </a>
+            </p>

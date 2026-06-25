@@ -1,0 +1,72 @@
+            <h2>vs Competition</h2>
+
+            <h3>Low-code admin panel tools</h3>
+            <p>
+              Forest Admin, Retool, AdminJS, React Admin — these tools generate a working UI quickly.
+              The tradeoff is that they are UI tools, not backoffice frameworks. They have no opinion
+              about your permission model beyond what the database schema implies. They have no audit
+              trail and no end-to-end domain demonstration. They work well for internal dashboards and
+              data browsing. They are not a foundation for a regulated backoffice system.
+            </p>
+            <p>Esquire is slower to get started with than Retool. It is incomparably more complete.</p>
+
+            <h3>Identity and access management</h3>
+            <p>
+              Apache Syncope is the closest technical cousin — hierarchical entity model, Spring-based,
+              multi-database, audit-aware. But it is an identity management system. Its hierarchy exists
+              to support provisioning and reconciliation of users and groups across external systems.
+              There is no server-driven UI, no domain-agnostic entity layer for arbitrary business
+              hierarchies, and no demonstration that runs a business domain end to end.
+            </p>
+            <p>
+              Frontegg is purpose-built for B2B SaaS multi-tenancy. Its permission model is strong.
+              But it is a SaaS product with proprietary IAM, and it stops at the organization/user
+              boundary — there is no entity layer below users, no server-driven UI, no async messaging
+              topology, no path to host it yourself.
+            </p>
+            <p>
+              OpenFGA is a fine-grained authorization engine — it solves one part of the permission
+              problem with great depth. Esquire's permission model is less academically rigorous than ReBAC,
+              but it is fully integrated with the entity model and the UI, and ships as part of the framework.
+            </p>
+
+            <h3>Microservice generators</h3>
+            <p>
+              JHipster generates a microservices scaffold. It does not give you a pre-built, working
+              backoffice — it gives you the starting point for building one. After generation, the
+              hierarchical entity tree, the positional permission model, the server-driven UI, and
+              the async messaging topology are all still on your backlog. Esquire starts where
+              JHipster leaves off.
+            </p>
+
+            <h3>eCommerce and CMS platforms</h3>
+            <p>
+              Broadleaf Commerce and Strapi ship strong admin panels for a fixed domain (products,
+              content). Their admin domain is closed — extending it means rebuilding what the platform
+              was built around. Esquire's admin domain is open: any hierarchy of any entities sits on
+              the framework's structural backbone with no domain-specific assumptions baked in.
+            </p>
+
+            <h3>Feature comparison</h3>
+            <table class="landing-feature-table">
+              <tr>
+                <th>Feature</th>
+                <th>Esquire</th>
+                <th>Apache Syncope</th>
+                <th>JHipster</th>
+                <th>Forest Admin</th>
+                <th>Frontegg</th>
+              </tr>
+              <tr><td>Hierarchical entity tree (domain-agnostic)</td><td>Yes</td><td>Partial</td><td>No</td><td>No</td><td>Partial</td></tr>
+              <tr><td>Server-driven UI</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+              <tr><td>Audit trail (pluggable, optional)</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td><td>No</td></tr>
+              <tr><td>Distributed trace correlation</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+              <tr><td>Microservices + async messaging</td><td>Yes</td><td>Partial</td><td>Yes</td><td>No</td><td>No</td></tr>
+              <tr><td>Field-level permission enforcement</td><td>Yes</td><td>Partial</td><td>No</td><td>No</td><td>No</td></tr>
+              <tr><td>Tree-shaped (positional) authorization</td><td>Yes</td><td>Partial</td><td>No</td><td>No</td><td>No</td></tr>
+              <tr><td>Pluggable IAM adapter (Keycloak today)</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+              <tr><td>Oracle + Postgres</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Partial</td><td>No</td></tr>
+              <tr><td>No vendor lock-in</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td></tr>
+              <tr><td>Open source / self-hosted</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td></tr>
+              <tr><td>End-to-end demonstration domain</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+            </table>

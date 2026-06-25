@@ -1,7 +1,7 @@
 /*
 *  Esquire frameworks (tm)
 *  Esquire Explorer
-*  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
+*  Copyright(c) 2001, 2026 mir0n&co www.mir0n.pro
 *  mailto:mir0n.the.programmer@gmail.com
 *
 *  History:
@@ -65,6 +65,9 @@
 * 05/07/2026 mir0n  v1.2.3 BFF migration: replaced keycloak-angular event signal with bootstrapAuth() hitting /auth/me;
 *                   lazy init -- EsqObjectKindFactory.init() and acctItem.subItems setup deferred to authenticated branch
 *                   (avoids cold-load 401 on /api/esq-kinds before login)
+* 06/21/2026 mir0n  v1.2.9 landing-page tab content extracted from app-shell.html to public/landing/*.html static
+*                   assets; ngOnInit fetches each (HttpClient, responseType text) and binds via [innerHTML] after
+*                   DomSanitizer.bypassSecurityTrustHtml; landing = signal of the 6 SafeHtml values
 */
 import {
   Component,
@@ -75,6 +78,8 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatIconButton} from '@angular/material/button';
@@ -129,8 +134,18 @@ import {
   catchError,
   throwError,
   finalize,
+  firstValueFrom,
 } from 'rxjs';
 import {EsqShellConstants} from "./app-shell.contants";
+
+interface LandingTabs {
+  vision: SafeHtml;
+  whatIsIt: SafeHtml;
+  whoNeedsIt: SafeHtml;
+  whyItMatters: SafeHtml;
+  vsCompetition: SafeHtml;
+  architecture: SafeHtml;
+}
 
 const STATUS_CONNECTED = "Connected";
 const STATUS_AUTHENTICATED = "Authenticated";
@@ -172,6 +187,9 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
   };
 
   readonly detailsDialog:MatDialog = inject(MatDialog);
+  private readonly http: HttpClient = inject(HttpClient);
+  private readonly sanitizer: DomSanitizer = inject(DomSanitizer);
+  landing = signal<Partial<LandingTabs>>({});
   private callApi?:EsqExplorerCallApi;
   private callHost?:EsqExplorerHost;
   private dictionary?:EsqDictionaryApi;
@@ -390,6 +408,20 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
     // Local-only init -- safe before auth. Anything that hits /api/* is
     // deferred to bootstrapAuth's authenticated branch.
     EsqNodeStatusFactory.init(Object.values(EsquireStatuses));
+
+    // Landing-page marketing tabs: pure static HTML served from public/landing/.
+    // Fetched eagerly as text and trusted (first-party content with inline
+    // styles -- must not be sanitizer-stripped), then bound via [innerHTML].
+    const files: Record<string,string> = {
+      vision: 'landing/vision.html', whatIsIt: 'landing/what-is-it.html',
+      whoNeedsIt: 'landing/who-needs-it.html', whyItMatters: 'landing/why-it-matters.html',
+      vsCompetition: 'landing/vs-competition.html', architecture: 'landing/architecture.html',
+    };
+    const entries = await Promise.all(Object.entries(files).map(async ([k, url]) => {
+      const html = await firstValueFrom(this.http.get(url, { responseType: 'text' }));
+      return [k, this.sanitizer.bypassSecurityTrustHtml(html)] as const;
+    }));
+    this.landing.set(Object.fromEntries(entries) as Partial<LandingTabs>);
   }
 
 public async login(): Promise<void> {

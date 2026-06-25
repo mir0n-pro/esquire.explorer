@@ -1,0 +1,68 @@
+            <h2>The Vision</h2>
+            <img src="helm.svg" alt="Esquire logo" align="left" width="256" height="256" style="margin: 0 10px 10px 0;">
+            <p>
+                <strong style="color: #4D6A8D;">Tree-shaped authorization. Write business logic only. The server defines the UI. </strong>
+                <br>
+            </p>
+            <p>
+              Every organized domain has a natural structure: a hierarchy. Organizations have divisions.
+              Divisions have teams. Teams have members. Members have assets. Assets belong to portfolios.
+              Cases belong to clients. Projects belong to programs.
+            </p>
+            <p>
+              The insight behind Esquire is that <strong>this hierarchy is not just data — it is the authorization
+              model.</strong> In most systems, the org chart lives in one table and the access control rules live
+              somewhere else, maintained separately, diverging over time. Esquire collapses those two things
+              into one: the tree itself defines what you can see and what you are allowed to do.
+            </p>
+
+            <h3>Hierarchical Visibility</h3>
+            <p>
+              Your position in the tree determines your data scope. You see your branch.
+              Nothing above you, nothing beside you. No explicit filter written per query —
+              visibility is structural, resolved from where you sit.
+            </p>
+            <h3>Hierarchical Roles</h3>
+            <p>
+              In most business domains, authority is positional — the same person carries different
+              responsibilities at different nodes across different organizational structures. Esquire
+              is designed to reflect that reality: authority is not a global property of your account,
+              but a function of where you sit in the tree.
+            </p>
+              <h3>You write only business logic</h3>
+              <p>
+                  A framework earns its name by doing one thing: letting the people who write business logic
+                  write <strong>only</strong> business logic. Networks, protocols, message brokers, persistence,
+                  identity, deployment — the plumbing every application drags along — is the framework's job,
+                  not the domain developer's. You place an entity on the tree and describe what it <em>means</em>;
+                  how it is stored, synchronized across services, secured, audited, and served to the browser is
+                  <strong>inherited, not coded</strong>.
+              </p>
+            <h3>Entity Self-Description</h3>
+            <p>
+              Every business entity type carries its own definition — the fields it exposes,
+              the validation rules it enforces, the commands it permits, the way it is rendered.
+              This definition lives at the business layer, expressed once in server configuration.
+              The UI receives it at runtime and adapts. There is no field layout written in frontend
+              code, no validation rule duplicated between layers, no business logic interpreted on
+              the client side. The entity defines itself; every tool that touches it reads that
+              definition from the same authoritative source.
+            </p>
+            <p>
+              Together, these three concepts form the Esquire backbone. Any structured domain placed
+              on a tree inherits visibility scoping, positional authority, and entity-driven behavior
+              without any additional rules being written. The framework resolves them from the structure.
+            </p>
+            <blockquote>
+              A tree is the most natural model for any organized domain.
+              Once your data is on a tree, visibility, authority, and operations
+              are all resolved by position — not by rules written separately for every feature.
+              Every entity knows what it is, what it permits, and how it behaves.
+              Define it once at the business layer. Everything else follows.
+            </blockquote>
+            <p>
+              The point is the pattern: any hierarchy of any entities — organizations, assets, cases,
+              portfolios, projects, contracts — can be placed on an Esquire tree. Tools built on top
+              inherit governance for free. There is no limit to the number or type of trees a deployment
+              can maintain, and no limit to the tools that can be built on each one.
+            </p>
