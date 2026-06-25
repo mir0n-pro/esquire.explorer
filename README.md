@@ -24,17 +24,24 @@ Each subproject is independently built, run, and deployed; they all talk to
 the same **Esquire server** (`services/`) as outside callers.
 
 
-## v1.2.8 — complete (06/19/2026)
+## v1.2.9 — complete (06/24/2026)
 
-The explorer's share of the **Messaging Bus** sprint: end-to-end coverage for the new system-entity
-anti-deletion flag, and a landing-page reframe that presents the messaging layer as the delivered,
-vendor-agnostic **Messaging Bus**.
+The explorer's share of the **hardening** sprint is a landing-page restructure: the About page's six
+tabs, previously one large block of markup inside the Angular app shell, are now separate static files
+the app loads at runtime — and the messaging copy now names all three delivered transport providers.
 
 | | |
 |--------------------|-------------------------|
-| `e2e-test/`| - **15-system-entity-protection** asserts that deleting a system-flagged office or user is blocked (HTTP 409) — end-to-end coverage of the backend anti-deletion guard |
-| `frontend/`| - landing-page value-proposition + Architecture tab reframed: the messaging layer is presented as the implemented, vendor-agnostic **Messaging Bus** (ActiveMQ the first transport provider, Kafka / Redis on the same SPI);<br>- version 1.2.7 -> 1.2.8 |
-| `backend/`, `hauberk/`| - version 1.2.7 -> 1.2.8 |
+| `frontend/`| - the six landing tabs (Vision, What / Who / Why it matters, vs-competition, Architecture) lifted out of the app shell into standalone static HTML files served from the app root, loaded at runtime (app-shell markup 628 -> 152 lines);<br>- landing messaging copy reframed: the vendor-agnostic **Esquire Messaging Bus** runs today with ActiveMQ, Kafka and Redis as its first transport providers;<br>- version 1.2.8 -> 1.2.9 |
+| `backend/`, `e2e-test/`, `hauberk/`| - version 1.2.8 -> 1.2.9 |
+
+## v1.2.8 — complete (06/19/2026)
+
+The explorer's share of the **Messaging Bus** sprint: end-to-end coverage for the system-entity
+anti-deletion flag (`15-system-entity-protection` asserts a delete of a system-flagged office or user
+is blocked with HTTP 409), and a landing-page reframe presenting the messaging layer as the delivered,
+vendor-agnostic **Messaging Bus**.<br>
+[More Details: v1.2.8 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.8?tab=readme-ov-file)
 
 ## v1.2.7 — complete (06/10/2026)
 
