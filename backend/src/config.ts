@@ -2,11 +2,12 @@
  *  Esquire frameworks (tm)
  *  Esquire Backend (BFF tier)
  *
- *  Copyright(c) 2001, 2026 mir0n&co www.mir0n.me
+ *  Copyright(c) 2001, 2026 mir0n&co www.mir0n.pro
  *  mailto:mir0n.the.programmer@gmail.com
  *
  *  History:
  * 05/07/2026 mir0n  created: load BackendConfig from env (publicBaseUrl, allowedOrigins, KC issuer/client, gateway URL, session secret, dict cache)
+ * 06/27/2026 mir0n  added session.redisUrl from REDIS_URL env (default empty) -- shared session store endpoint
  */
 
 export interface BackendConfig {
@@ -31,6 +32,12 @@ export interface BackendConfig {
     secret: string;
     cookieName: string;
     maxAgeMs: number;
+    // Shared session store endpoint. When set, sessions live in Redis so every
+    // BFF replica reads the same session (required to run more than one replica).
+    // When empty, express-session falls back to its in-memory MemoryStore --
+    // correct only at a single replica. Set REDIS_URL on local k8s (where the
+    // infra redis runs); leave it unset on OKE, which keeps the BFF at one replica.
+    redisUrl: string;
   };
   cache: {
     ttlMs: number;
@@ -68,6 +75,7 @@ export function loadConfig(): BackendConfig {
       secret: required('SESSION_SECRET', 'dev-session-secret-replace-me'),
       cookieName: 'esq.sid',
       maxAgeMs: Number(process.env.SESSION_MAX_AGE_MS ?? 12 * 60 * 60 * 1000),
+      redisUrl: process.env.REDIS_URL ?? '',
     },
     cache: {
       ttlMs: Number(process.env.ESQ_DICT_CACHE_TTL_MS ?? 60 * 60 * 1000),

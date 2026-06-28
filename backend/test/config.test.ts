@@ -31,6 +31,7 @@ describe('loadConfig', () => {
     delete process.env.GATEWAY_URL;
     delete process.env.SESSION_SECRET;
     delete process.env.SESSION_MAX_AGE_MS;
+    delete process.env.REDIS_URL;
     delete process.env.ESQ_DICT_CACHE_TTL_MS;
     delete process.env.ESQ_DICT_CACHE_MAX;
 
@@ -45,6 +46,7 @@ describe('loadConfig', () => {
     expect(cfg.gateway.url).toBe('http://localhost:7070');
     expect(cfg.session.cookieName).toBe('esq.sid');
     expect(cfg.session.maxAgeMs).toBe(12 * 60 * 60 * 1000);
+    expect(cfg.session.redisUrl).toBe('');
     expect(cfg.cache.ttlMs).toBe(60 * 60 * 1000);
     expect(cfg.cache.maxEntries).toBe(64);
   });
@@ -90,5 +92,13 @@ describe('loadConfig', () => {
     process.env.NODE_ENV = 'production';
     const cfg = loadConfig();
     expect(cfg.nodeEnv).toBe('production');
+  });
+
+  it('reads REDIS_URL into session.redisUrl (shared store) and defaults to empty', () => {
+    delete process.env.REDIS_URL;
+    expect(loadConfig().session.redisUrl).toBe('');
+
+    process.env.REDIS_URL = 'redis://esquire-infra-redis:6379';
+    expect(loadConfig().session.redisUrl).toBe('redis://esquire-infra-redis:6379');
   });
 });

@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.10-2606.2722  v1.2.10 -- BFF shared login sessions (run more than one backend copy)
+    :Feature:     the backend keeps each login session in a shared store (Redis) when configured;
+                  left unset it keeps sessions in memory and runs as a single copy
+    Components:   backend
+
 v1.2.9-2606.2112  v1.2.9 -- landing page tabs split into their own files
     :Refactoring: the About/landing page's six tabs, previously one large block of markup inside the app
                   shell, are now separate static files the app loads at runtime

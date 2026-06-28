@@ -1,6 +1,15 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (backend / BFF tier)
 
+06/27/2026 mir0n  v1.2.10 BFF shared session store (connect-redis) for multi-replica
+src\config.ts
+  - added session.redisUrl from REDIS_URL env (default empty) -- shared session store endpoint
+src\auth\sessionStore.ts
+  - session store selectable -- buildSessionStore() returns connect-redis RedisStore (prefix esq.sess:)
+    when session.redisUrl set, else express-session MemoryStore
+package.json
+  - added dependencies connect-redis ^9.0.0 and redis ^6.0.1
+
 05/23/2026 mir0n  v1.2.5 version bump (night-watch sprint alignment)
 package.json
   - version 1.2.4 -> 1.2.5 (no code change; aligns the BFF with the backend sprint)
