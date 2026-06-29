@@ -13,6 +13,7 @@
  *                   drive the stack via Cmd.run("key").
  * 06/02/2026 mir0n  added KC_ADMIN_USER / KC_ADMIN_PASSWORD (kc.admin.user / kc.admin.password, default
  *                   admin/q) for the master-realm admin REST sims (race-8c verify, KC orphan cleanup)
+ * 06/29/2026 mir0n  added ENYMAN_BASE (enyman.base, required) -- enyMan reached directly for the R6 timeout smoke
  */
 package pro.mir0n.esquire.hauberk.config;
 
@@ -56,6 +57,8 @@ public final class HauberkConfig {
     public static final String KC_CLIENT_SECRET;
     public static final String GW_BASE;
     public static final String BFF_BASE;
+    /** enyMan reached DIRECTLY (not via the gateway) -- the R6 HA timeout smoke hits the flag-gated /test hook. */
+    public static final String ENYMAN_BASE;
 
     /** Master-realm bootstrap admin credentials. Used by KC admin REST simulations
      *  (race-8c verify, KC orphan cleanup) to issue token + manage users in the
@@ -153,6 +156,7 @@ public final class HauberkConfig {
         KC_CLIENT_SECRET = require(p, "kc.client.secret");
         GW_BASE          = require(p, "gw.base");
         BFF_BASE         = require(p, "bff.base");
+        ENYMAN_BASE      = require(p, "enyman.base");
 
         KC_ADMIN_USER     = p.getProperty("kc.admin.user", "admin");
         KC_ADMIN_PASSWORD = p.getProperty("kc.admin.password", "q");

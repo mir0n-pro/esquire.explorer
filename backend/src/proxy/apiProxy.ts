@@ -2,11 +2,12 @@
  *  Esquire frameworks (tm)
  *  Esquire Backend (BFF tier)
  *
- *  Copyright(c) 2001, 2026 mir0n&co www.mir0n.me
+ *  Copyright(c) 2001, 2026 mir0n&co www.mir0n.pro
  *  mailto:mir0n.the.programmer@gmail.com
  *
  *  History:
  * 05/07/2026 mir0n  created: /api/* server-to-server proxy to gateway; injects Bearer; cacheable GET path for esq-kinds/dictionary; X-Request-ID propagation
+ * 06/29/2026 mir0n  set proxyTimeout from config.proxy.timeoutMs when > 0 (R1; 0 omits it)
  */
 
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
@@ -130,6 +131,8 @@ function buildProxyMiddleware(config: BackendConfig): RequestHandler {
     changeOrigin: true,
     pathRewrite: { '^/api': '' },
     xfwd: true,
+    // R1: bound the BFF->gateway hop so a stuck upstream frees the socket. 0 (pre-HA default) omits it.
+    ...(config.proxy.timeoutMs > 0 ? { proxyTimeout: config.proxy.timeoutMs } : {}),
     on: {
       proxyReq: (proxyReq: ClientRequest, req: IncomingMessage) => {
         const ext = req as IncomingMessage & { _esqAccessToken?: string; esqRequestId?: string; esqCorrelationId?: string };

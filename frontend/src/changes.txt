@@ -1,6 +1,19 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+06/29/2026 mir0n  v1.2.10 R1 client-side request timeout
+interceptor\timeoutInterceptor.ts  (new)
+  - reads httpTimeoutMs from RUNTIME_CONFIG (assets/config.json); 0 / absent = pass through (pre-HA
+    default), a positive value bounds a hung request in the browser
+app.config.ts
+  - registered timeoutInterceptor in the HTTP interceptor chain
+app.tokens.ts
+  - added optional httpTimeoutMs to RuntimeConfig (R1 client-side request timeout)
+public\assets\config.json
+  - added "httpTimeoutMs": 0 (pre-HA default; baked into the image)
+public\assets\config.json.template
+  - added "httpTimeoutMs": 0
+
 06/21/2026 mir0n  v1.2.9 landing-page tabs moved out of app-shell into public static assets
 explorer\flatTree\app-shell.ts
   - injects HttpClient + DomSanitizer; ngOnInit fetches the 6 landing tab files (responseType text) and

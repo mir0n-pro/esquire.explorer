@@ -1,5 +1,15 @@
 hauberk changes
 
+06/29/2026 mir0n  v1.2.10 -- R6 query-timeout HA smoke
+simulations.HaTimeoutSmokeSimulation  (new)
+  - hits enyMan's flag-gated /test slow-query hook directly (not via the gateway): a capped slow query
+    (/test/slow-query) is cancelled at the cap (timedOut=true); an opt-out slow query
+    (/test/slow-query-optout, the move / cache-load mechanism) completes (timedOut=false)
+config.HauberkConfig
+  - added ENYMAN_BASE (enyman.base, required) -- enyMan reached directly for the R6 timeout smoke
+hauberk.properties
+  - added enyman.base=http://localhost:3003 (enyMan's own port; compose exposes 3003, local k8s port-forward)
+
 06/10/2026 mir0n  v1.2.7 -- SimulationInfo descriptions trimmed to the hauberk list 90-char cap
 simulations.MessageLossSimulation
   - @SimulationInfo trimmed 112 -> 86 chars (SimulationCatalogContractTest.descriptionFitsTerminalWidth)

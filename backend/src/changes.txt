@@ -1,6 +1,18 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (backend / BFF tier)
 
+06/29/2026 mir0n  v1.2.10 BFF R1 request-path timeouts + internal KC discovery URL
+src\config.ts
+  - added kc.issuerInternal (KC_ISSUER_INTERNAL env, defaults to issuer); added server.requestTimeoutMs
+    (BFF_REQUEST_TIMEOUT_MS) + proxy.timeoutMs (BFF_PROXY_TIMEOUT_MS), both default 0
+src\auth\openidClient.ts
+  - discover through config.kc.issuerInternal (server-to-server reachable) instead of the public issuer;
+    log discovered issuer + authorization/token endpoints
+src\index.ts
+  - set server.requestTimeout from config.server.requestTimeoutMs when > 0 (R1; 0 leaves Node's default)
+src\proxy\apiProxy.ts
+  - set proxyTimeout from config.proxy.timeoutMs when > 0 (R1; 0 omits it)
+
 06/27/2026 mir0n  v1.2.10 BFF shared session store (connect-redis) for multi-replica
 src\config.ts
   - added session.redisUrl from REDIS_URL env (default empty) -- shared session store endpoint

@@ -1,7 +1,7 @@
 /*
 *  Esquire frameworks (tm)
 *  Esquire Explorer
-*  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
+*  Copyright(c) 2001, 2026 mir0n&co www.mir0n.pro
 *  mailto:mir0n.the.programmer@gmail.com
 *
 *  History:
@@ -10,6 +10,7 @@
 *                  attempt to init keycloack
 * 01/18/2026 mir0n added interceptors: tracingInterceptor, rfc9457Interceptor
 * 05/07/2026 mir0n  v1.2.3 BFF migration: removed keycloak-angular providers + includeBearerTokenInterceptor; auth handled by BFF cookie
+* 06/29/2026 mir0n  registered timeoutInterceptor in the HTTP interceptor chain
 */
 
 import {ApplicationConfig, inject, provideZonelessChangeDetection} from '@angular/core';
@@ -22,6 +23,7 @@ import {BASE_PATH} from "../rest";
 import { RUNTIME_CONFIG} from './app.tokens';
 import { rfc9457Interceptor } from './interceptor/rfc9457Interceptor';
 import { tracingInterceptor } from './interceptor/tracingInterceptor';
+import { timeoutInterceptor } from './interceptor/timeoutInterceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -29,6 +31,7 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([
         tracingInterceptor,
         rfc9457Interceptor,
+        timeoutInterceptor,
       ])
     ),
     provideRouter(routes),

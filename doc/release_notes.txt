@@ -1,6 +1,18 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.10-2606.2910  v1.2.10 -- request timeouts across the explorer + a load-test for the query cap
+    :Feature:     the backend can bound how long it waits on a slow incoming request and on a stuck call
+                  to the gateway; both off by default, set on local k8s
+    :Feature:     the web app can bound how long the browser waits on a slow request; off by default
+    :Config:      the backend now finds Keycloak through a separate internal address when one is set, so it
+                  reaches it inside the cluster while the browser keeps using the public address
+    :Feature:     hauberk: a smoke run that checks the database query-time cap -- a capped slow query is
+                  cancelled at the cap while an opt-out slow query (a move / cache load) still completes
+    Components:   backend,
+                  frontend,
+                  hauberk
+
 v1.2.10-2606.2722  v1.2.10 -- BFF shared login sessions (run more than one backend copy)
     :Feature:     the backend keeps each login session in a shared store (Redis) when configured;
                   left unset it keeps sessions in memory and runs as a single copy
