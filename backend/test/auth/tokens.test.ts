@@ -20,7 +20,7 @@ vi.mock('../../src/auth/openidClient.js', () => ({
 }));
 
 // Import under test must come AFTER vi.mock so the stub is in effect.
-const { getValidAccessToken, NoSessionError, RefreshFailedError } = await import('../../src/auth/tokens.js');
+const { getValidAccessToken, NoSessionError, RefreshFailedError, refreshExpiresAt } = await import('../../src/auth/tokens.js');
 
 function fakeConfig(): BackendConfig {
   return {
@@ -148,5 +148,29 @@ describe('getValidAccessToken', () => {
     });
     await getValidAccessToken(req, fakeConfig());
     expect(req.session.tokens?.refresh_token).toBe('RT-KEEP');
+  });
+});
+
+describe('refreshExpiresAt', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW * 1000);
+  });
+
+  it('returns now + refresh_expires_in (seconds) when present', () => {
+    expect(refreshExpiresAt({ refresh_expires_in: 1800 })).toBe(NOW + 1800);
+  });
+
+  it('returns undefined when refresh_expires_in is absent', () => {
+    expect(refreshExpiresAt({ access_token: 'x' })).toBeUndefined();
+  });
+
+  it('returns undefined when refresh_expires_in is not a number', () => {
+    expect(refreshExpiresAt({ refresh_expires_in: 'soon' })).toBeUndefined();
+  });
+
+  it('returns undefined for null / undefined input', () => {
+    expect(refreshExpiresAt(null)).toBeUndefined();
+    expect(refreshExpiresAt(undefined)).toBeUndefined();
   });
 });

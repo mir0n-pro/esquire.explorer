@@ -6,6 +6,7 @@
  *
  *  History:
  * 05/14/2026 mir0n  created: picocli @Command root entry point; dispatches to run / list / summary / diff / help subcommands
+ * 07/02/2026 mir0n  registered the kc-reconcile subcommand (KcReconcileCommand)
  */
 package pro.mir0n.esquire.hauberk.cli;
 
@@ -34,6 +35,7 @@ import picocli.CommandLine.Command;
                 ListCommand.class,
                 SummaryCommand.class,
                 DiffCommand.class,
+                KcReconcileCommand.class,
                 CommandLine.HelpCommand.class
         })
 public final class HauberkCli implements Runnable {

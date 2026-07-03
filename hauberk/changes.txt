@@ -1,5 +1,23 @@
 hauberk changes
 
+07/03/2026 mir0n  v1.2.10 -- KC<->Esquire reconcile utility; write-time X-Request-ID companion
+cli.KcReconcileCommand  (new)
+  - picocli "kc-reconcile" subcommand -- detect (and optionally --repair) drift between esq2025 and KeyCloak, PG(JDBC) + KC(REST) directly, out of the Esquire services
+reconcile.KcRecover  (new)
+  - KC<->Esquire data-recover core: reads connected-user state from esq2025 over PG/JDBC + KeyCloak over REST admin; diffs and (repair mode) fixes a stale KC esq_rootpath in place
+cli.HauberkCli
+  - registered the kc-reconcile subcommand
+config.HauberkConfig
+  - added PG_URL / PG_USER / PG_PASSWORD (pg.url / pg.user / pg.password) for the kc-reconcile utility's direct JDBC read of esq2025
+simulations.HauberkSimulation
+  - every outbound request carries a fresh X-Request-ID (UUID) so hauberk writes satisfy the services' write-time X-Request-ID guard
+pom.xml
+  - added org.postgresql:postgresql (JDBC driver for kc-reconcile)
+hauberk.properties
+  - pg.url / pg.user / pg.password (kc-reconcile, docker: localhost:5432/esq2025)
+hauberk-k8s.properties
+  - pg.url (kc-reconcile, local k8s: port-forward localhost:25432)
+
 06/29/2026 mir0n  v1.2.10 -- R6 query-timeout HA smoke
 simulations.HaTimeoutSmokeSimulation  (new)
   - hits enyMan's flag-gated /test slow-query hook directly (not via the gateway): a capped slow query

@@ -14,6 +14,17 @@ export async function navigateTo(page: Page, ...path: string[]): Promise<void> {
   await target.click();
 }
 
+// Descend through the list pane by double-clicking a child row per name. The list shows
+// only the active node's direct children, so this avoids the tree's cross-level text
+// ambiguity (virtual folders like "All merchants" repeat at several depths).
+export async function listInto(page: Page, ...names: string[]): Promise<void> {
+  for (const name of names) {
+    const row = page.locator(`tr[mat-row]:has-text("${name}")`).first();
+    await row.waitFor({ timeout: 10000 });
+    await row.dblclick();
+  }
+}
+
 export async function expandPath(page: Page, ...path: string[]): Promise<void> {
   const root = page.locator('mat-tree-node').first();
   await root.waitFor({ timeout: 10000 });

@@ -1,6 +1,14 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (backend / BFF tier)
 
+07/03/2026 mir0n  v1.2.10 -- session-expiry redirect + pre-empt
+src\auth\routes.ts
+  - session-expiry: callback stores session_expires_at; /auth/me returns sessionExpiresAt and reports authenticated:false once the refresh-token window has passed
+src\auth\sessionStore.ts
+  - OidcTokens gains session_expires_at (epoch ms of the refresh-token window) for the session-expiry pre-empt
+src\auth\tokens.ts
+  - refreshExpiresAt(tokenSet) = now + refresh_expires_in; a refresh carries session_expires_at forward
+
 06/29/2026 mir0n  v1.2.10 BFF R1 request-path timeouts + internal KC discovery URL
 src\config.ts
   - added kc.issuerInternal (KC_ISSUER_INTERNAL env, defaults to issuer); added server.requestTimeoutMs

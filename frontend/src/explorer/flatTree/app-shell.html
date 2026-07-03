@@ -29,6 +29,9 @@
     <h1>{{showLanding() ? 'Esquire Application Frameworks 2.0\u2122' : 'Esquire Tree Explorer'}}</h1>
 
     @if (!isConnected()) {
+      @if (sessionExpired()) {
+        <div class="session-expired-notice">Your session expired &mdash; please log in again</div>
+      }
       <div class="toolbar-login-hint"
            [matTooltip]="loginHint"
            matTooltipPosition="below"

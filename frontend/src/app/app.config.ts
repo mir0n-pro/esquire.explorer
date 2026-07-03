@@ -11,6 +11,7 @@
 * 01/18/2026 mir0n added interceptors: tracingInterceptor, rfc9457Interceptor
 * 05/07/2026 mir0n  v1.2.3 BFF migration: removed keycloak-angular providers + includeBearerTokenInterceptor; auth handled by BFF cookie
 * 06/29/2026 mir0n  registered timeoutInterceptor in the HTTP interceptor chain
+* 07/02/2026 mir0n  BASE_PATH fallback logs via EsqUtils.log (was console.debug)
 */
 
 import {ApplicationConfig, inject, provideZonelessChangeDetection} from '@angular/core';
@@ -24,6 +25,7 @@ import { RUNTIME_CONFIG} from './app.tokens';
 import { rfc9457Interceptor } from './interceptor/rfc9457Interceptor';
 import { tracingInterceptor } from './interceptor/tracingInterceptor';
 import { timeoutInterceptor } from './interceptor/timeoutInterceptor';
+import { EsqUtils } from '@mir0n-pro/esquire.ui/api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -43,7 +45,7 @@ export const appConfig: ApplicationConfig = {
         const config = inject(RUNTIME_CONFIG);
         var s = config.apiBasePath;
         if (!s || s.includes('${')) {
-            console.debug('path variables have not been replaced!!!: ', s);
+            EsqUtils.log('path variables have not been replaced!!!: ', s);
             s = "/api";
           }
         return s;

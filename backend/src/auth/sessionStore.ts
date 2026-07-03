@@ -8,6 +8,7 @@
  *  History:
  * 05/07/2026 mir0n  created: express-session middleware; HttpOnly+SameSite=Lax cookie; secure flag from nodeEnv; session shape (tokens, claims, pendingLogin)
  * 06/27/2026 mir0n  session store selectable -- buildSessionStore() returns connect-redis RedisStore (prefix esq.sess:) when session.redisUrl set, else MemoryStore
+ * 07/02/2026 mir0n  OidcTokens gains session_expires_at (epoch ms of the refresh-token window) for the session-expiry pre-empt
  */
 
 import session, { type Store } from 'express-session';
@@ -21,7 +22,8 @@ export interface OidcTokens {
   access_token: string;   // JWE blob; never decrypted in the BFF
   refresh_token?: string;
   id_token?: string;
-  expires_at: number;     // epoch seconds
+  expires_at: number;         // access-token expiry, epoch seconds (auto-refreshed)
+  session_expires_at?: number; // refresh-token / session expiry, epoch seconds (session dies here)
   token_type?: string;
 }
 

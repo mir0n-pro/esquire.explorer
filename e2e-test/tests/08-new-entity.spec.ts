@@ -1,28 +1,39 @@
 import { test, expect, type Page } from '@playwright/test';
 import { keycloakLogin } from '../helpers/auth';
 import { navigateTo } from '../helpers/tree';
+import { createOffice, teardownHouse, TEST_HOUSE_NAME } from '../helpers/testHouse';
 
-test.describe.serial('entity lifecycle: create → move → delete', () => {
+// Entity lifecycle (create -> move -> delete), self-contained under the Test House.
+// The spec builds its OWN two offices under Test House (org 14) via the /api proxy in
+// beforeAll and removes them in afterAll, so it never touches the shared seed tree
+// (Company / Department). The lifecycle entity is created in the source office, moved
+// to the destination office, and deleted.
+test.describe.serial('entity lifecycle: create -> move -> delete', () => {
   let page: Page;
+  let srcOffice: { id: string; name: string };
+  let dstOffice: { id: string; name: string };
 
   test.beforeAll(async ({ browser }) => {
     const ctx = await browser.newContext();
     page = await ctx.newPage();
     await keycloakLogin(page);
+
+    const tag = String(Date.now());
+    srcOffice = await createOffice(page, `e2e-lifecycle-src-${tag}`);
+    dstOffice = await createOffice(page, `e2e-lifecycle-dst-${tag}`);
   });
 
   test.afterAll(async () => {
+    if (srcOffice) await teardownHouse(page, srcOffice.id);
+    if (dstOffice) await teardownHouse(page, dstOffice.id);
     await page.context().close();
   });
 
-  test('creates entity under Department', async () => {
-    await navigateTo(page, 'Company', 'Department');
+  test('creates entity under the source office', async () => {
+    await navigateTo(page, TEST_HOUSE_NAME, srcOffice.name);
 
     const newBtn = page.locator('button:has-text("add")').first();
-    if (!await newBtn.isEnabled({ timeout: 3000 }).catch(() => false)) {
-      test.skip(true, 'New... not enabled for Department node');
-      return;
-    }
+    await expect(newBtn).toBeEnabled({ timeout: 5000 });
     await newBtn.click();
 
     const newOrgItem = page.locator('[mat-menu-item]:has-text("org")').first();
@@ -48,7 +59,7 @@ test.describe.serial('entity lifecycle: create → move → delete', () => {
     await expect(page.locator('mat-tree-node:has-text("e2e-test-entity")').first()).toBeVisible({ timeout: 5000 });
   });
 
-  test('moves entity to Company', async () => {
+  test('moves entity to the destination office', async () => {
     const movableNode = page.locator('mat-tree-node:has-text("e2e-test-entity")').last();
     await expect(movableNode).toBeVisible({ timeout: 5000 });
 
@@ -58,10 +69,17 @@ test.describe.serial('entity lifecycle: create → move → delete', () => {
     const dialog = page.locator('mat-dialog-container');
     await dialog.waitFor({ timeout: 5000 });
 
+    // Destination office lives under Test House -> expand Test House, then pick it.
+    const houseNode = dialog.locator(`[id^="select-entity-node-"]:has-text("${TEST_HOUSE_NAME}")`).first();
+    await houseNode.waitFor({ timeout: 5000 });
+    await houseNode.click();
+    await page.keyboard.press('ArrowRight');
+
+    const dstNode = dialog.locator(`[id^="select-entity-node-"]:has-text("${dstOffice.name}")`).first();
+    await dstNode.waitFor({ timeout: 5000 });
+    await dstNode.click();
+
     const selectBtn = dialog.locator('button:has-text("Select")');
-    const companyNode = page.locator('[id^="select-entity-node-"]:has-text("Company")').first();
-    await companyNode.waitFor({ timeout: 5000 });
-    await companyNode.click();
     await expect(selectBtn).toBeEnabled({ timeout: 3000 });
     await selectBtn.click();
 
