@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.10-2607.0416  v1.2.10 -- e2e: tree navigation hardened for two-copy / remote runs
+    :Fix:         e2e tree navigation now waits for the path bar to show the just-selected node
+    Components:   e2e
+
 v1.2.10-2607.0300  v1.2.10 -- collected-backlog fixes
     - session-expiry redirect + pre-empt
     - frontend debug logging routed through EsqUtils.log
