@@ -68,6 +68,8 @@
 * 06/21/2026 mir0n  v1.2.9 landing-page tab content extracted from app-shell.html to public/landing/*.html static
 *                   assets; ngOnInit fetches each (HttpClient, responseType text) and binds via [innerHTML] after
 *                   DomSanitizer.bypassSecurityTrustHtml; landing = signal of the 6 SafeHtml values
+* 07/02/2026 mir0n  session-expiry: sessionExpired signal + '?auth=expired' marker (shown then stripped in ngOnInit);
+*                   scheduleSessionPreempt / onSessionPreempt re-check /auth/me and redirect on real expiry; ngOnDestroy clears the timer
 */
 import {
   Component,
@@ -150,6 +152,9 @@ interface LandingTabs {
 const STATUS_CONNECTED = "Connected";
 const STATUS_AUTHENTICATED = "Authenticated";
 const STATUS_READY = "Ready";
+// Fire the session pre-empt check just after the session's death time, so a re-read
+// of /auth/me reports it expired (authenticated:false) rather than racing the boundary.
+const SESSION_PREEMPT_BUFFER_MS = 1000;
 
 @Component({
   selector: 'app-shell',
@@ -173,6 +178,7 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
   authState = signal('Initial');
   errorMessage = signal('');
   showLanding = signal(true);
+  sessionExpired = signal(false);
   dataService?: EsquireService;
   _dataService: EsquireService;
 
@@ -195,6 +201,7 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
   private dictionary?:EsqDictionaryApi;
   private profile = signal<EsqAccessProfile|null>(null);
   private profileRequested = false;
+  private sessionPreemptTimer: ReturnType<typeof setTimeout> | undefined;
   private errorReport: ProblemDetail |undefined = undefined;
 
   private pipeWithErrorAndDelay(obsrvbl:Observable<any>): Observable<any> {
@@ -239,9 +246,10 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
 
   private async bootstrapAuth(callApiMill: EsqExplorerCallApiMill): Promise<void> {
     let authenticated = false;
+    let me: any = null;
     try {
       const res = await fetch('/auth/me', { credentials: 'include' });
-      const me = await res.json();
+      me = await res.json();
       authenticated = me?.authenticated === true;
     } catch (err) {
       console.warn('auth/me failed: ', err);
@@ -251,6 +259,10 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
       this.authState.set(STATUS_READY);
       return;
     }
+    // Proactively catch session expiry even while the user is idle -- an idle user makes
+    // no /api/* call, so nothing would otherwise 401. Schedule against the session
+    // (refresh-token) expiry reported by /auth/me.
+    this.scheduleSessionPreempt(me?.sessionExpiresAt);
     if (this.profileRequested) {
       return;
     }
@@ -288,6 +300,39 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
         this.showLanding.set(false);
       }
     });
+  }
+
+  // The session dies when its refresh token expires (session_expires_at, surfaced as
+  // sessionExpiresAt by /auth/me). Schedule a one-shot check just after that moment.
+  private scheduleSessionPreempt(sessionExpiresAtSeconds?: number): void {
+    if (this.sessionPreemptTimer !== undefined) {
+      clearTimeout(this.sessionPreemptTimer);
+      this.sessionPreemptTimer = undefined;
+    }
+    if (typeof sessionExpiresAtSeconds !== 'number') {
+      return; // BFF exposed no session expiry -> rely on the 401 -> landing redirect
+    }
+    const delayMs = sessionExpiresAtSeconds * 1000 + SESSION_PREEMPT_BUFFER_MS - Date.now();
+    this.sessionPreemptTimer = setTimeout(() => this.onSessionPreempt(), Math.max(delayMs, 0));
+  }
+
+  private async onSessionPreempt(): Promise<void> {
+    // Re-check the freshest state before acting: an active user's /api/* traffic makes the
+    // BFF rotate the refresh token and slide the session forward, so re-read /auth/me and
+    // reschedule if it moved. Only bounce to the landing when the session is truly gone.
+    let me: any = null;
+    try {
+      const res = await fetch('/auth/me', { credentials: 'include' });
+      me = await res.json();
+    } catch (err) {
+      console.warn('auth/me (preempt) failed: ', err);
+    }
+    if (me?.authenticated === true && typeof me.sessionExpiresAt === 'number'
+        && me.sessionExpiresAt * 1000 > Date.now()) {
+      this.scheduleSessionPreempt(me.sessionExpiresAt); // slid forward -> reschedule
+    } else {
+      window.location.href = '/?auth=expired';
+    }
   }
 
   public profileLoaded(): boolean {
@@ -401,10 +446,23 @@ export class ExplorerComponent extends EsqExplorerHostDummy implements OnInit, O
   ngOnDestroy(): void {
     //not really required
     this.callApi?.unregisterHost(this);
+    if (this.sessionPreemptTimer !== undefined) {
+      clearTimeout(this.sessionPreemptTimer);
+    }
   }
 
   async ngOnInit() {
     this.dataService = this._dataService;
+    // Session-expiry landing marker: the 401 interceptor and the pre-empt redirect
+    // here with ?auth=expired. Surface the notice, then strip the marker so a manual
+    // reload does not keep showing it.
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('auth') === 'expired') {
+      this.sessionExpired.set(true);
+      params.delete('auth');
+      const qs = params.toString();
+      window.history.replaceState({}, '', window.location.pathname + (qs ? '?' + qs : ''));
+    }
     // Local-only init -- safe before auth. Anything that hits /api/* is
     // deferred to bootstrapAuth's authenticated branch.
     EsqNodeStatusFactory.init(Object.values(EsquireStatuses));

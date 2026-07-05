@@ -2,11 +2,13 @@
  *  Esquire frameworks (tm)
  *  Esquire Backend (BFF tier)
  *
- *  Copyright(c) 2001, 2026 mir0n&co www.mir0n.me
+ *  Copyright(c) 2001, 2026 mir0n&co www.mir0n.pro
  *  mailto:mir0n.the.programmer@gmail.com
  *
  *  History:
  * 05/07/2026 mir0n  created: load BackendConfig from env (publicBaseUrl, allowedOrigins, KC issuer/client, gateway URL, session secret, dict cache)
+ * 06/27/2026 mir0n  added session.redisUrl from REDIS_URL env (default empty) -- shared session store endpoint
+ * 06/29/2026 mir0n  added kc.issuerInternal (KC_ISSUER_INTERNAL env, defaults to issuer); added server.requestTimeoutMs (BFF_REQUEST_TIMEOUT_MS) + proxy.timeoutMs (BFF_PROXY_TIMEOUT_MS), both default 0
  */
 
 export interface BackendConfig {
@@ -20,17 +22,40 @@ export interface BackendConfig {
   // publicBaseUrl. Set ALLOWED_ORIGINS to a comma-separated list to extend.
   allowedOrigins: string[];
   kc: {
+    // Public, browser-facing realm issuer -- the token issuer and the base for
+    // authorize / end_session redirects.
     issuer: string;
+    // URL the BFF discovers KC through server-to-server. Defaults to issuer.
+    // On local k8s the public host is loopback inside a pod, so this points at
+    // the in-cluster KC service; KC's backchannel-dynamic config keeps the
+    // discovered issuer + browser endpoints public while the token/jwks
+    // endpoints resolve to the reachable internal URL.
+    issuerInternal: string;
     clientId: string;
     clientSecret: string;
   };
   gateway: {
     url: string;
   };
+  // Request-path timeouts (R1). Both default 0 = pre-HA (Node's own request-timeout default; no proxy
+  // timeout). HA sets them via env (local-k8s chart): requestTimeoutMs bounds a slow inbound request,
+  // proxyTimeoutMs bounds the BFF->gateway hop so a stuck upstream frees the socket.
+  server: {
+    requestTimeoutMs: number;
+  };
+  proxy: {
+    timeoutMs: number;
+  };
   session: {
     secret: string;
     cookieName: string;
     maxAgeMs: number;
+    // Shared session store endpoint. When set, sessions live in Redis so every
+    // BFF replica reads the same session (required to run more than one replica).
+    // When empty, express-session falls back to its in-memory MemoryStore --
+    // correct only at a single replica. Set REDIS_URL on local k8s (where the
+    // infra redis runs); leave it unset on OKE, which keeps the BFF at one replica.
+    redisUrl: string;
   };
   cache: {
     ttlMs: number;
@@ -51,23 +76,32 @@ export function loadConfig(): BackendConfig {
   const publicBaseUrl = required('PUBLIC_BASE_URL', 'http://localhost:3000');
   const allowedFromEnv = (process.env.ALLOWED_ORIGINS ?? '').split(',').map(s => s.trim()).filter(s => s.length > 0);
   const allowedOrigins = Array.from(new Set([publicBaseUrl, ...allowedFromEnv]));
+  const kcIssuer = required('KC_ISSUER', 'http://localhost:8080/kc-auth/realms/esquire');
   const ret: BackendConfig = {
     port: Number(process.env.PORT ?? 3000),
     nodeEnv,
     publicBaseUrl,
     allowedOrigins,
     kc: {
-      issuer: required('KC_ISSUER', 'http://localhost:8080/kc-auth/realms/esquire'),
+      issuer: kcIssuer,
+      issuerInternal: process.env.KC_ISSUER_INTERNAL ?? kcIssuer,
       clientId: required('KC_CLIENT_ID', 'esq-angular'),
       clientSecret: required('KC_CLIENT_SECRET', 'esq-angular-bff-dev-secret-rotate-in-prod'),
     },
     gateway: {
       url: required('GATEWAY_URL', 'http://localhost:7070'),
     },
+    server: {
+      requestTimeoutMs: Number(process.env.BFF_REQUEST_TIMEOUT_MS ?? 0),
+    },
+    proxy: {
+      timeoutMs: Number(process.env.BFF_PROXY_TIMEOUT_MS ?? 0),
+    },
     session: {
       secret: required('SESSION_SECRET', 'dev-session-secret-replace-me'),
       cookieName: 'esq.sid',
       maxAgeMs: Number(process.env.SESSION_MAX_AGE_MS ?? 12 * 60 * 60 * 1000),
+      redisUrl: process.env.REDIS_URL ?? '',
     },
     cache: {
       ttlMs: Number(process.env.ESQ_DICT_CACHE_TTL_MS ?? 60 * 60 * 1000),

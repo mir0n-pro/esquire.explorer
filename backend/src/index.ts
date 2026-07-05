@@ -2,11 +2,12 @@
  *  Esquire frameworks (tm)
  *  Esquire Backend (BFF tier)
  *
- *  Copyright(c) 2001, 2026 mir0n&co www.mir0n.me
+ *  Copyright(c) 2001, 2026 mir0n&co www.mir0n.pro
  *  mailto:mir0n.the.programmer@gmail.com
  *
  *  History:
  * 05/07/2026 mir0n  created: BFF entrypoint; Express server; mounts /auth, /api proxy, baked SPA static, /readyz
+ * 06/29/2026 mir0n  set server.requestTimeout from config.server.requestTimeoutMs when > 0 (R1; 0 leaves Node's default)
  */
 
 import express from 'express';
@@ -50,6 +51,12 @@ getOidcClient(config).catch((err) => {
   log.error({ err }, 'OIDC issuer discovery failed at startup -- /auth/* will retry on demand');
 });
 
-app.listen(config.port, () => {
+const server = app.listen(config.port, () => {
   log.info({ port: config.port, nodeEnv: config.nodeEnv }, 'esquire backend listening');
 });
+
+// R1 request-path bound: when set (>0), cap a slow inbound request so it cannot hold a socket
+// indefinitely. 0 (the pre-HA default) leaves Node's own requestTimeout default in place.
+if (config.server.requestTimeoutMs > 0) {
+  server.requestTimeout = config.server.requestTimeoutMs;
+}

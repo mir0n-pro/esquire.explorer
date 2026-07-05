@@ -62,7 +62,7 @@
 
             <h3>5. Asynchronous entity synchronization</h3>
             <p>
-              Entity changes propagate across services via an ActiveMQ broadcast bus. The in-memory entity
+              Entity changes propagate across services via the entity broadcast bus. The in-memory entity
               tree stays current without polling. Keycloak identity operations are decoupled from the entity
               write path. The entity mutation and the downstream synchronization never block each other.
             </p>

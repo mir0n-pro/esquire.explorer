@@ -1,25 +1,38 @@
 import { test, expect, type Page } from '@playwright/test';
 import { keycloakLogin } from '../helpers/auth';
-import { navigateTo } from '../helpers/tree';
+import { navigateTo, listInto } from '../helpers/tree';
+import { setupHouse, teardownHouse, House, TEST_HOUSE_NAME } from '../helpers/testHouse';
 
-test.describe.serial('accounting lifecycle: deposit → withdrawal → transfer → withdrawal', () => {
+// Accounting lifecycle (deposit -> withdrawal -> transfer -> withdrawal), self-contained
+// under the Test House. beforeAll builds its own office with a merchant user + EUR account
+// (the source) and a client user + USD account (the destination) via the /api proxy, and
+// afterAll tears the whole subtree down (accounts under Test House purge their history on
+// delete). Net effect on balances is zero across all five tests; net effect on the tree is
+// nothing (fixture created then removed). No dependence on seed accounts 10011/10012.
+test.describe.serial('accounting lifecycle: deposit -> withdrawal -> transfer -> withdrawal', () => {
   let page: Page;
+  let house: House;
 
   test.beforeAll(async ({ browser }) => {
     const ctx = await browser.newContext();
     page = await ctx.newPage();
     await keycloakLogin(page);
-    await navigateTo(page, 'Company', 'All merchants', 'Mer Chant');
-    // Select the account by ID, not .first(): account-row ordering is NOT deterministic across
-    // backends (on k8s the list returned a different order than Docker), so .first() picked the
-    // wrong account. 10011 is the account the chain deposits/withdraws/transfers from.
-    const accountRow = page.locator('tr[mat-row]:has-text("10011")').first();
+
+    house = await setupHouse(page, String(Date.now()));
+
+    // Navigate to the office in the tree (Test House + office names are unique -> no
+    // ambiguity), then descend through the list pane for the repeated virtual-folder
+    // level (All merchants) down to the merchant user, whose accounts fill the list.
+    await navigateTo(page, TEST_HOUSE_NAME, house.officeName);
+    await listInto(page, 'All merchants', house.merchantName);
+    const accountRow = page.locator(`tr[mat-row]:has-text("${house.eurAcctNo}")`).first();
     await accountRow.waitFor({ timeout: 5000 });
     await accountRow.click();
     await accountRow.focus();
   });
 
   test.afterAll(async () => {
+    if (house) await teardownHouse(page, house.officeId);
     await page.context().close();
   });
 
@@ -54,6 +67,9 @@ test.describe.serial('accounting lifecycle: deposit → withdrawal → transfer 
     await expect(dialog).toBeVisible({ timeout: 5000 });
     await expect(dialog.locator('mat-toolbar')).toContainText('Withdrawal');
 
+    // Wait for the amount input to render (the acct-picker loads the selected account first);
+    // otherwise a slow account-detail load races the fill.
+    await expect(dialog.locator('input.esq-number-input').first()).toBeVisible({ timeout: 15000 });
     await dialog.locator('input.esq-number-input').first().fill('100');
     await dialog.locator('input.esq-number-input').first().press('Tab');
     await dialog.locator('input[type="text"]:not(.esq-number-input)').first().fill('ABC-456');
@@ -66,7 +82,7 @@ test.describe.serial('accounting lifecycle: deposit → withdrawal → transfer 
     await expect(page.locator('mat-dialog-container')).toHaveCount(0, { timeout: 5000 });
   });
 
-  test('deposits 100 EUR into 10011 for transfer', async () => {
+  test('deposits 100 EUR into the EUR account for transfer', async () => {
     await page.locator('button:has-text("monetization_on")').click();
     await page.locator('[mat-menu-item]:has-text("Deposit")').click();
 
@@ -87,7 +103,7 @@ test.describe.serial('accounting lifecycle: deposit → withdrawal → transfer 
     await expect(page.locator('mat-dialog-container')).toHaveCount(0, { timeout: 5000 });
   });
 
-  test('transfers 100 EUR from 10011 to 10012 at rate 1.18', async () => {
+  test('transfers 100 EUR to the USD account at rate 1.18', async () => {
     await page.locator('button:has-text("monetization_on")').click();
     await page.locator('[mat-menu-item]:has-text("Transfer")').click();
 
@@ -102,24 +118,19 @@ test.describe.serial('accounting lifecycle: deposit → withdrawal → transfer 
     await expect(rateInput).toHaveAttribute('readonly', '');
     await expect(dialog.locator('b:has-text("Rate EUR")')).toBeVisible();
 
-    // change dest account to 10012 (USD)
+    // change dest account to the USD client account under Test House / office / All clients / client
     await dialog.locator('esq-acct-picker').nth(1).locator('button[matTooltip="Select account"]').click();
 
     const selectDlg = page.locator('mat-dialog-container').last();
-    // Company is already expanded (pre-expand to src account 10011); Department is already visible.
-    // "All clients" exists at level 3 (Company direct child) AND level 4 (Department child) —
-    // use aria-level to target the correct one.
-    await selectDlg.locator('[id^="select-entity-node-"]:has-text("Department")').first().waitFor({ timeout: 10000 });
-    await selectDlg.locator('[id^="select-entity-node-"]:has-text("Department")').first().click();
-    await page.keyboard.press('ArrowRight');
-    await selectDlg.locator('[id^="select-entity-node-"][aria-level="4"]:has-text("All clients")').first().waitFor({ timeout: 10000 });
-    await selectDlg.locator('[id^="select-entity-node-"][aria-level="4"]:has-text("All clients")').first().click();
-    await page.keyboard.press('ArrowRight');
-    await selectDlg.locator('[id^="select-entity-node-"]:has-text("Cli Ent")').first().waitFor({ timeout: 10000 });
-    await selectDlg.locator('[id^="select-entity-node-"]:has-text("Cli Ent")').first().click();
-    await page.keyboard.press('ArrowRight');
-    await selectDlg.locator('[id^="select-entity-node-"]:has-text("10012")').first().waitFor({ timeout: 10000 });
-    await selectDlg.locator('[id^="select-entity-node-"]:has-text("10012")').first().click();
+    // The dialog tree repeats virtual-folder names across depths, so descend by explicit
+    // aria-level (Esquire=1, Test House=2, office=3, All clients=4, client=5, account=6).
+    await expandDialogNode(selectDlg, page, 2, TEST_HOUSE_NAME);
+    await expandDialogNode(selectDlg, page, 3, house.officeName);
+    await expandDialogNode(selectDlg, page, 4, 'All clients');
+    await expandDialogNode(selectDlg, page, 5, house.clientName);
+    const usdNode = selectDlg.locator(`[id^="select-entity-node-"][aria-level="6"]:has-text("${house.usdAcctNo}")`).first();
+    await usdNode.waitFor({ timeout: 10000 });
+    await usdNode.click();
     await expect(selectDlg.locator('button:has-text("Select")')).toBeEnabled({ timeout: 3000 });
     await selectDlg.locator('button:has-text("Select")').click();
 
@@ -140,23 +151,15 @@ test.describe.serial('accounting lifecycle: deposit → withdrawal → transfer 
     await expect(page.locator('mat-dialog-container')).toHaveCount(0, { timeout: 5000 });
   });
 
-  test('withdraws 118 USD from 10012', async () => {
-    // Navigate to Cli Ent via toolbar Up + list row dblclicks.
-    // Tree dblclick is unreliable here (stale node ref after async navigation);
-    // list row navigation (onListDoubleClick → doActivateListNode) is the stable path.
-    const upBtn = page.locator('button:has-text("arrow_upward")');
-    await upBtn.click();                                                               // Mer Chant → All merchants
-    await page.locator('tr[mat-row]:has-text("Mer Chant")').first().waitFor({ timeout: 5000 });
-    await upBtn.click();                                                               // All merchants → Company
-    await page.locator('tr[mat-row]:has-text("Department")').first().waitFor({ timeout: 5000 });
-    await page.locator('tr[mat-row]:has-text("Department")').first().dblclick();      // → Department
-    await page.locator('tr[mat-row]:has-text("All clients")').first().waitFor({ timeout: 5000 });
-    await page.locator('tr[mat-row]:has-text("All clients")').first().dblclick();     // → All clients
-    await page.locator('tr[mat-row]:has-text("Cli Ent")').first().waitFor({ timeout: 5000 });
-    await page.locator('tr[mat-row]:has-text("Cli Ent")').first().dblclick();         // → Cli Ent
-    // 10012 by ID, not .first(): the Cli Ent list returned 10013 (0.00 balance) first on k8s, so
-    // .first() made the withdrawal fail with "Insufficient balance" and stack an error dialog.
-    const accountRow = page.locator('tr[mat-row]:has-text("10012")').first();
+  test('withdraws 118 USD from the USD account', async () => {
+    // Reset to the office by selecting its (unique) tree node -- already expanded from
+    // beforeAll, so a single click activates it without a root-toggle -- then descend
+    // the list pane to the client's USD account.
+    const officeNode = page.locator(`mat-tree-node:has-text("${house.officeName}")`).first();
+    await officeNode.waitFor({ timeout: 5000 });
+    await officeNode.click();
+    await listInto(page, 'All clients', house.clientName);
+    const accountRow = page.locator(`tr[mat-row]:has-text("${house.usdAcctNo}")`).first();
     await accountRow.waitFor({ timeout: 5000 });
     await accountRow.click();
 
@@ -181,3 +184,14 @@ test.describe.serial('accounting lifecycle: deposit → withdrawal → transfer 
     await expect(page.locator('mat-dialog-container')).toHaveCount(0, { timeout: 5000 });
   });
 });
+
+// Select a node at a specific aria-level in the account-select dialog tree and ensure it
+// is expanded (ArrowRight expands without the toggle-icon dblclick race). Targeting by
+// aria-level disambiguates the virtual folders that repeat across depths.
+async function expandDialogNode(dlg: ReturnType<Page['locator']>, page: Page,
+                                level: number, text: string): Promise<void> {
+  const node = dlg.locator(`[id^="select-entity-node-"][aria-level="${level}"]:has-text("${text}")`).first();
+  await node.waitFor({ timeout: 10000 });
+  await node.click();
+  await page.keyboard.press('ArrowRight');
+}

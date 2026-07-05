@@ -6,7 +6,7 @@
 
     <groupId>pro.mir0n.esquire</groupId>
     <artifactId>hauberk</artifactId>
-    <version>1.2.9</version>
+    <version>1.2.10</version>
     <packaging>jar</packaging>
 
     <name>Esquire Haubergeon</name>
@@ -55,6 +55,13 @@
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
             <version>${picocli.version}</version>
+        </dependency>
+        <!-- PostgreSQL JDBC driver: the kc-reconcile utility reads esq2025 DIRECTLY over SQL
+             (out-of-band recovery, not through the Esquire services). -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.4</version>
         </dependency>
         <!--
           JUnit 5 + AssertJ for the SimulationCatalog contract test

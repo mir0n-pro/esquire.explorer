@@ -7,6 +7,7 @@
  *
  *  History:
  * 05/07/2026 mir0n  created: getValidAccessToken with refresh-on-expiry via openid-client; NoSessionError sentinel for missing-session signalling
+ * 07/02/2026 mir0n  refreshExpiresAt(tokenSet) = now + refresh_expires_in; a refresh carries session_expires_at forward
  */
 
 import type { Request } from 'express';
@@ -33,6 +34,17 @@ export class RefreshFailedError extends Error {
 function nowSeconds(): number {
   const ret = Math.floor(Date.now() / 1000);
   return ret;
+}
+
+/**
+ * The session's death time -- when the refresh token expires and the session can
+ * no longer be renewed. Derived from KeyCloak's `refresh_expires_in` (seconds from
+ * now) on the token response. Undefined if the provider did not return it (the
+ * frontend then skips the proactive pre-empt and relies on the 401->login redirect).
+ */
+export function refreshExpiresAt(tokenSet: unknown): number | undefined {
+  const raw = (tokenSet as Record<string, unknown> | null)?.['refresh_expires_in'];
+  return typeof raw === 'number' ? nowSeconds() + raw : undefined;
 }
 
 export async function getValidAccessToken(req: Request, config: BackendConfig): Promise<string> {
@@ -69,6 +81,10 @@ async function refresh(req: Request, config: BackendConfig): Promise<string> {
       refresh_token: tokenSet.refresh_token ?? tokens.refresh_token,
       id_token: tokenSet.id_token ?? tokens.id_token,
       expires_at: tokenSet.expires_at,
+      // KC rotates the refresh token on each refresh with a fresh lifetime (capped by
+      // the SSO session max), so an active session slides forward; keep the prior value
+      // if the provider omitted it.
+      session_expires_at: refreshExpiresAt(tokenSet) ?? tokens.session_expires_at,
       token_type: tokenSet.token_type ?? tokens.token_type,
     };
     req.session.tokens = updated;

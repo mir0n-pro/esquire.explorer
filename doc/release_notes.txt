@@ -1,6 +1,38 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.10-2607.0416  v1.2.10 -- e2e: tree navigation hardened for two-copy / remote runs
+    :Fix:         e2e tree navigation now waits for the path bar to show the just-selected node
+    Components:   e2e
+
+v1.2.10-2607.0300  v1.2.10 -- collected-backlog fixes
+    - session-expiry redirect + pre-empt
+    - frontend debug logging routed through EsqUtils.log
+    - KC<->Esquire reconcile utility (hauberk kc-reconcile)
+    - hauberk write-time X-Request-ID companion
+    - e2e: self-contained Test House fixtures; session-expiry + login-cancel specs; cold-start retry/timeout hardening
+    Components:   backend,
+                  frontend,
+                  hauberk,
+                  e2e
+
+v1.2.10-2606.2910  v1.2.10 -- request timeouts across the explorer + a load-test for the query cap
+    :Feature:     the backend can bound how long it waits on a slow incoming request and on a stuck call
+                  to the gateway; both off by default, set on local k8s
+    :Feature:     the web app can bound how long the browser waits on a slow request; off by default
+    :Config:      the backend now finds Keycloak through a separate internal address when one is set, so it
+                  reaches it inside the cluster while the browser keeps using the public address
+    :Feature:     hauberk: a smoke run that checks the database query-time cap -- a capped slow query is
+                  cancelled at the cap while an opt-out slow query (a move / cache load) still completes
+    Components:   backend,
+                  frontend,
+                  hauberk
+
+v1.2.10-2606.2722  v1.2.10 -- BFF shared login sessions (run more than one backend copy)
+    :Feature:     the backend keeps each login session in a shared store (Redis) when configured;
+                  left unset it keeps sessions in memory and runs as a single copy
+    Components:   backend
+
 v1.2.9-2606.2112  v1.2.9 -- landing page tabs split into their own files
     :Refactoring: the About/landing page's six tabs, previously one large block of markup inside the app
                   shell, are now separate static files the app loads at runtime

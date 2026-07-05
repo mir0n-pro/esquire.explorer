@@ -131,6 +131,15 @@
     justify-self: end;
   }
 
+  .session-expired-notice {
+    font-size: 8.5pt;
+    color: #b26a00;
+    white-space: nowrap;
+    width: fit-content;
+    justify-self: end;
+    margin-right: 6px;
+  }
+
   .hint-arrow {
     display: inline-block;
     width: 0;

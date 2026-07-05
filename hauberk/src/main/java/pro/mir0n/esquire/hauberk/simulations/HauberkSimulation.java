@@ -7,6 +7,7 @@
  *  History:
  * 05/14/2026 mir0n  created: abstract base for every hauberk Simulation -- pulls up lazy RefreshableToken, instrumented httpProtocol with PerformanceMatrix, and after() perf-matrix flush
  * 05/17/2026 mir0n  Authorization header branches on HauberkConfig.AUTH_MODE -- Basic for Vanilla Token Relay, Bearer (KC JWT) otherwise
+ * 07/02/2026 mir0n  every outbound request carries a fresh X-Request-ID (UUID) so hauberk writes satisfy the services' write-time X-Request-ID guard
  */
 package pro.mir0n.esquire.hauberk.simulations;
 
@@ -63,7 +64,11 @@ public abstract class HauberkSimulation extends Simulation {
                 .header("Authorization", (Session __sess) ->
                     HauberkConfig.isBasicAuth()
                         ? HauberkConfig.basicAuthHeader()
-                        : "Bearer " + TOKEN.value()));
+                        : "Bearer " + TOKEN.value())
+                // Esquire tracing convention: one client-generated X-Request-ID per outbound
+                // request. Required on writes (services reject a write without it); harmless on
+                // reads. Re-evaluated per request so every call carries a distinct id.
+                .header("X-Request-ID", (Session __sess) -> java.util.UUID.randomUUID().toString()));
 
     @Override
     public void after() {

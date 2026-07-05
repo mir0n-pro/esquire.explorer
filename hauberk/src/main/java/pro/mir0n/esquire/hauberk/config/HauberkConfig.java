@@ -13,6 +13,9 @@
  *                   drive the stack via Cmd.run("key").
  * 06/02/2026 mir0n  added KC_ADMIN_USER / KC_ADMIN_PASSWORD (kc.admin.user / kc.admin.password, default
  *                   admin/q) for the master-realm admin REST sims (race-8c verify, KC orphan cleanup)
+ * 06/29/2026 mir0n  added ENYMAN_BASE (enyman.base, required) -- enyMan reached directly for the R6 timeout smoke
+ * 07/02/2026 mir0n  added PG_URL / PG_USER / PG_PASSWORD (pg.url / pg.user / pg.password) for the kc-reconcile
+ *                   utility's direct JDBC read of esq2025
  */
 package pro.mir0n.esquire.hauberk.config;
 
@@ -56,12 +59,20 @@ public final class HauberkConfig {
     public static final String KC_CLIENT_SECRET;
     public static final String GW_BASE;
     public static final String BFF_BASE;
+    /** enyMan reached DIRECTLY (not via the gateway) -- the R6 HA timeout smoke hits the flag-gated /test hook. */
+    public static final String ENYMAN_BASE;
 
     /** Master-realm bootstrap admin credentials. Used by KC admin REST simulations
      *  (race-8c verify, KC orphan cleanup) to issue token + manage users in the
      *  esquire realm. Optional -- only required by sims that touch the admin API. */
     public static final String KC_ADMIN_USER;
     public static final String KC_ADMIN_PASSWORD;
+
+    /** Direct esq2025 connection for the OUT-OF-BAND kc-reconcile utility (PG/JDBC). Optional -- only the
+     *  kc-reconcile command touches them, so they are NOT {@code require}d (sims never open a DB). */
+    public static final String PG_URL;
+    public static final String PG_USER;
+    public static final String PG_PASSWORD;
 
     /**
      * Token Relay pattern this run targets at the gateway. Names the
@@ -153,9 +164,14 @@ public final class HauberkConfig {
         KC_CLIENT_SECRET = require(p, "kc.client.secret");
         GW_BASE          = require(p, "gw.base");
         BFF_BASE         = require(p, "bff.base");
+        ENYMAN_BASE      = require(p, "enyman.base");
 
         KC_ADMIN_USER     = p.getProperty("kc.admin.user", "admin");
         KC_ADMIN_PASSWORD = p.getProperty("kc.admin.password", "q");
+
+        PG_URL      = p.getProperty("pg.url", "");
+        PG_USER     = p.getProperty("pg.user", "esq2025");
+        PG_PASSWORD = p.getProperty("pg.password", "");
 
         TOKEN_RELAY_TYPE = optionalLowercase(p, "tokenRelay.type", "plain");
         if (!"plain".equals(TOKEN_RELAY_TYPE)

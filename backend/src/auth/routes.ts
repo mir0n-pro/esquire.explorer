@@ -7,11 +7,13 @@
  *
  *  History:
  * 05/07/2026 mir0n  created: /auth/login, /callback, /logout, /me; OIDC code+PKCE flow; per-request redirect_uri resolved from Origin/Referer against allowedOrigins
+ * 07/02/2026 mir0n  session-expiry: callback stores session_expires_at; /auth/me returns sessionExpiresAt and reports authenticated:false once the refresh-token window has passed
  */
 
 import { Router, type Request, type Response } from 'express';
 import { generators } from 'openid-client';
 import { getOidcClient, getEndSessionUrl } from './openidClient.js';
+import { refreshExpiresAt } from './tokens.js';
 import type { BackendConfig } from '../config.js';
 import type { OidcTokens, SessionClaims } from './sessionStore.js';
 import { log } from '../util/log.js';
@@ -131,6 +133,7 @@ function callbackHandler(config: BackendConfig) {
         refresh_token: tokenSet.refresh_token,
         id_token: tokenSet.id_token,
         expires_at: tokenSet.expires_at,
+        session_expires_at: refreshExpiresAt(tokenSet),
         token_type: tokenSet.token_type,
       };
       // Land back on the browser-visible origin we came from. Same-origin
@@ -179,7 +182,13 @@ function logoutHandler(config: BackendConfig) {
 async function meHandler(req: Request, res: Response): Promise<void> {
   const tokens = req.session.tokens;
   const claims = req.session.claims;
-  if (tokens === undefined || claims === undefined) {
+  // Report authoritative auth state: once the refresh token has expired the session
+  // can no longer be renewed, so it is not authenticated even though the session
+  // object still holds stale tokens. Reporting false here keeps the SPA on the
+  // landing (lazy-auth) instead of firing a cold /api/* call that would 401-loop.
+  const expired = tokens?.session_expires_at !== undefined
+    && tokens.session_expires_at * 1000 <= Date.now();
+  if (tokens === undefined || claims === undefined || expired) {
     res.json({ authenticated: false });
     return;
   }
@@ -188,6 +197,7 @@ async function meHandler(req: Request, res: Response): Promise<void> {
     username: claims.preferred_username ?? claims.sub,
     roles: claims.roles,
     expiresAt: tokens.expires_at,
+    sessionExpiresAt: tokens.session_expires_at,
   });
 }
 

@@ -9,6 +9,16 @@
               Bearer JWT on every request, for service-to-service callers and integrations.
             </p>
 
+            <p>
+              The <strong>gateway</strong>, the six backend <strong>services</strong> (bizTree, enyMan,
+              pacMan, keySmith, kcMaster, auKeep), and the <strong>BFF</strong> each run
+              <strong>redundant, with optional autoscale</strong>, for high availability &mdash; spread
+              across separate nodes so losing one keeps the site up. The databases, Keycloak, the message
+              broker, and the Session Store run as a single instance here; each is a third-party platform
+              that brings its <strong>own</strong> high-availability (clustering / replication), set up by
+              the operator when wanted &mdash; outside Esquire's concern.
+            </p>
+
             <h3>Esq2025
               <img src="/logo/postgres.svg" alt="Postgres" height="20" style="vertical-align:middle">&nbsp;
               <img src="/logo/oracle.svg" alt="Oracle" height="20" style="vertical-align:middle"></h3>
@@ -59,7 +69,9 @@
                 <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">
               <img src="/logo/enyMan.3.png" alt="Spring Boot" height="24" style="vertical-align:middle"></h3>
             <p>Manages organizations and users; handles create, update, delete, and move operations;
-               publishes entity change events to the broadcast bus.</p>
+               publishes entity change events to the entity broadcast bus and also receives from it
+               &mdash; a two-way link, so the redundant copies stay coordinated, each aware of the
+               entity changes the other makes.</p>
 
             <h3>keySmith
               <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
@@ -113,7 +125,14 @@
                /callback, /logout, /me); proxies /api/* to the gateway with bearer injection;
                caches static entity dictionaries per pod, shared across users; bakes the Angular
                SPA into its image at build time and serves it on /. The browser never sees the
-               access token &mdash; it holds an opaque session cookie.</p>
+               access token &mdash; it holds an opaque session cookie. When run redundant, login
+               sessions are kept in the <strong>Session Store</strong> so any copy can serve any request.</p>
+
+            <h3>Session Store
+              <img src="/logo/redis.svg" alt="Redis" height="20" style="vertical-align:middle"></h3>
+            <p>Optional; a Redis instance holding the BFF's login sessions, so the redundant BFF copies
+               share them &mdash; any copy can serve any request. Only needed when the BFF runs as more
+               than one copy; distinct from the audit-sink Redis.</p>
 
             <h3>Esquire Explorer Frontend (SPA)
               <img src="/logo/node.js.svg" alt="Node.js" height="20" style="vertical-align:middle">

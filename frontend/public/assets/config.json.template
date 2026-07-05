@@ -1,3 +1,4 @@
 {
-  "apiBasePath": "/api"
+  "apiBasePath": "/api",
+  "httpTimeoutMs": 0
 }
