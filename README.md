@@ -24,16 +24,21 @@ Each subproject is independently built, run, and deployed; they all talk to
 the same **Esquire server** (`services/`) as outside callers.
 
 
-## v1.2.9 — complete (06/24/2026)
+## v1.2.10 — complete (07/04/2026)
 
-The explorer's share of the **hardening** sprint is a landing-page restructure: the About page's six
-tabs, previously one large block of markup inside the Angular app shell, are now separate static files
-the app loads at runtime — and the messaging copy now names all three delivered transport providers.
+The explorer's share of the **Resilience / Durability** sprint: the SPA and BFF can bound how long they wait on a slow request or a stuck upstream, the BFF can run as more than one copy behind a shared login-session store, and the test harnesses gain recovery tooling and steadier end-to-end runs.
 
 | | |
 |--------------------|-------------------------|
-| `frontend/`| - the six landing tabs (Vision, What / Who / Why it matters, vs-competition, Architecture) lifted out of the app shell into standalone static HTML files served from the app root, loaded at runtime (app-shell markup 628 -> 152 lines);<br>- landing messaging copy reframed: the vendor-agnostic **Esquire Messaging Bus** runs today with ActiveMQ, Kafka and Redis as its first transport providers;<br>- version 1.2.8 -> 1.2.9 |
-| `backend/`, `e2e-test/`, `hauberk/`| - version 1.2.8 -> 1.2.9 |
+| `frontend/`| - the browser can bound how long it waits on a slow request (off by default);<br>- an expired session now returns the user to sign-in cleanly (redirect + pre-empt);<br>- debug logging routed through a single helper |
+| `backend/`| - login sessions can move to a shared store (Redis) so the BFF runs as more than one copy; left unset it keeps sessions in memory as a single copy;<br>- the BFF can bound how long it waits on a slow incoming request and on a stuck gateway call (off by default) |
+| `e2e-test/`| - self-contained Test House fixtures;<br>- new session-expiry and login-cancel scenarios;<br>- steadier runs under remote / two-copy timing (cold-start retry and tree-navigation waits) |
+| `hauberk/`| - a load run that checks the database query-time cap;<br>- a Keycloak <-> Esquire reconcile tool;<br>- a request-id stamped on write calls |
+
+## v1.2.9 — complete (06/24/2026)
+
+The explorer's share of the **hardening** sprint: the About page's six tabs lifted out of the Angular app shell into standalone static files loaded at runtime, and the landing copy reframed to name the vendor-agnostic Esquire Messaging Bus and its first three transport providers (ActiveMQ, Kafka, Redis).<br>
+[More Details: v1.2.9 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.9?tab=readme-ov-file)
 
 ## v1.2.8 — complete (06/19/2026)
 
