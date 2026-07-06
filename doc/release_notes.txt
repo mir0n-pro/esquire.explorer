@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.11-2607.0600  v1.2.11 -- e2e: Details dialog Esc-close coverage
+    e2e 18-details-esc-focus asserts the Details dialog on a seeded admin (Test House / Test Driver) closes on a single Esc, with focus landing inside the dialog on open
+    Components:   e2e
+
 v1.2.10-2607.0416  v1.2.10 -- e2e: tree navigation hardened for two-copy / remote runs
     :Fix:         e2e tree navigation now waits for the path bar to show the just-selected node
     Components:   e2e

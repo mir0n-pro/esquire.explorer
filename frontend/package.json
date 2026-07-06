@@ -10,7 +10,7 @@
     "test": "ng test",
     "lib:yalc": "yalc add @mir0n-pro/esquire.ui",
     "lib:git": "yalc remove --all && npm install @mir0n-pro/esquire.ui",
-    "lib:local": "yalc remove --all && npm install ../../esquire.ui.lib/pkg/mir0n-pro-esquire.ui-latest.tgz",
+    "lib:local": "yalc remove --all && npm install ../../esquire.ui.lib/pkg/mir0n-pro-esquire.ui-latest.tgz --no-save --no-package-lock",
     "lib:pkg": "yalc remove --all && npm install https://github.com/mir0n-pro/esquire.ui.lib/raw/refs/heads/develop/pkg/mir0n-pro-esquire.ui-latest.tgz"
   },
   "private": true,

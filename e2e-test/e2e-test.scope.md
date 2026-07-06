@@ -124,3 +124,10 @@ and Test Driver users (15, 16). Read-only — no entity is removed (the guard bl
 - **Cancel link persists across a failed-login re-render**: wrong credentials re-render the KC
   login page (the URL drops redirect_uri); the Cancel target survives via sessionStorage and still
   returns to the app.
+
+### 18-details-esc-focus.spec.ts — Details dialog Esc/focus
+- **a single Esc closes the Details dialog on an editable entity**: navigate Test House → All
+  admin-s → select the seeded admin **Test Driver** → open Details; focus lands inside the dialog
+  on open (on its Close button) and a single Esc closes it. Guards the fix for the editable-dialog
+  focus bug where Esc was ignored (focus stayed on the launching toolbar button) until a Tab moved
+  focus into the dialog.
