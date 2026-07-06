@@ -1,6 +1,13 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.11-2607.0615  v1.2.11 -- session-expired notice keeps the login button visible and scrolls for attention
+    :Fix:         on the session-expired landing the notice no longer pushes the Log-in button off the toolbar -- both stay visible
+    :Feature:     the session-expired notice now scrolls across to draw attention (held still for reduced-motion)
+    e2e 16-session-expiry asserts the login button stays in the toolbar when the notice shows
+    Components:   frontend,
+                  e2e
+
 v1.2.11-2607.0600  v1.2.11 -- e2e: Details dialog Esc-close coverage
     e2e 18-details-esc-focus asserts the Details dialog on a seeded admin (Test House / Test Driver) closes on a single Esc, with focus landing inside the dialog on open
     Components:   e2e

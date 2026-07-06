@@ -113,6 +113,9 @@ and Test Driver users (15, 16). Read-only — no entity is removed (the guard bl
   `/?auth=expired` shows the "Your session expired — please log in again" landing notice, and
   ngOnInit strips the marker so a reload does not keep showing it.
 - **a plain landing shows no session-expired notice**: a normal `/` load shows no notice.
+- **the session-expired notice does not push the login button out of the toolbar**: with the notice
+  shown (`/?auth=expired`), the standalone login button stays within the toolbar's single-row band
+  (bounding-box check, since `toBeVisible` alone does not catch an element clipped into a 2nd grid row).
 - **a dead session on an API action bounces to the landing notice**: after login, `/api/*` is
   forced to 401 {no session} and `/auth/me` to unauthenticated; a tree Refresh fires an `/api/*`
   call → the rfc9457Interceptor redirects to `/?auth=expired` → the landing notice appears.

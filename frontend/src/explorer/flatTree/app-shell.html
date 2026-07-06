@@ -2,13 +2,14 @@
   Esquire frameworks (tm)
   Esquire Explorer
 
-  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
+  Copyright(c) 2001, 2026 mir0n&co www.mir0n.pro
   mailto:mir0n.the.programmer@gmail.com
 
   History:
   01/19/2026 mir0n  Error Report added
   04/20/2026 mir0n  Landing page: tabbed marketing panel; logo toggle
   05/07/2026 mir0n  v1.2.3 BFF: profile-menu trigger gated on isConnected(); standalone .profile-menu-button when unauthenticated
+  07/06/2026 mir0n  session-expired notice + login hint grouped in .toolbar-login-area (grid col-3) so the notice no longer displaces the login button; notice text wrapped in a .notice-roll marquee span
 
 -->
 
@@ -29,16 +30,18 @@
     <h1>{{showLanding() ? 'Esquire Application Frameworks 2.0\u2122' : 'Esquire Tree Explorer'}}</h1>
 
     @if (!isConnected()) {
-      @if (sessionExpired()) {
-        <div class="session-expired-notice">Your session expired &mdash; please log in again</div>
-      }
-      <div class="toolbar-login-hint"
-           [matTooltip]="loginHint"
-           matTooltipPosition="below"
-           matTooltipClass="login-hint-tooltip"
-           matTooltipShowDelay="300">
-        <span>Log in here</span>
-        <span class="hint-arrow"></span>
+      <div class="toolbar-login-area">
+        @if (sessionExpired()) {
+          <div class="session-expired-notice"><span class="notice-roll">Your session expired &mdash; please log in again</span></div>
+        }
+        <div class="toolbar-login-hint"
+             [matTooltip]="loginHint"
+             matTooltipPosition="below"
+             matTooltipClass="login-hint-tooltip"
+             matTooltipShowDelay="300">
+          <span>Log in here</span>
+          <span class="hint-arrow"></span>
+        </div>
       </div>
     }
     @if (isConnected()) {
