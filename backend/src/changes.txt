@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (backend / BFF tier)
 
+07/07/2026 mir0n  v1.2.11 -- BFF stamps requestId / correlationId on each log line
+src\util\log.ts
+  - httpLogger customProps: stamp each request line with requestId (esqRequestId) and correlationId
+    (esqCorrelationId when present), matching the ECS field names
+
 07/03/2026 mir0n  v1.2.10 -- session-expiry redirect + pre-empt
 src\auth\routes.ts
   - session-expiry: callback stores session_expires_at; /auth/me returns sessionExpiresAt and reports authenticated:false once the refresh-token window has passed

@@ -1,6 +1,14 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.11-2607.0701  v1.2.11 -- the login backend tags its logs with the request id
+    :Feature:     the login backend (BFF) now stamps each log line with the request id (and the correlation
+                  id when the client set one), so its logs line up with the other services' logs for the same
+                  request in the shared log viewer
+    :Fix:         the login backend's container image builds reliably again -- leftover files from the host
+                  no longer leak into the image (added a build-ignore file at the image build root)
+    Components:   backend
+
 v1.2.11-2607.0615  v1.2.11 -- session-expired notice keeps the login button visible and scrolls for attention
     :Fix:         on the session-expired landing the notice no longer pushes the Log-in button off the toolbar -- both stay visible
     :Feature:     the session-expired notice now scrolls across to draw attention (held still for reduced-motion)
