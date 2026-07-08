@@ -1,6 +1,35 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (backend / BFF tier)
 
+07/08/2026 mir0n  v1.2.11 -- distributed tracing (O2): the BFF is the first hop of the trace
+src\util\trace.ts
+  - the whole BFF tracing surface lives in this one module: the OpenTelemetry engine, the W3C helpers and
+    traceMiddleware
+  - OpenTelemetry Node SDK: initTracing / shutdownTracing build the OTLP exporter + sampler; a custom
+    IdGenerator seeds the root traceId from the settled CORRELATION id (never the per-request id), keeping
+    traceId == correlationId. Off by default (esquire.tracing.enabled)
+  - the BFF settles the canonical correlation id itself (kept when W3C-shaped, converted otherwise, else
+    generated; the request id is never a seed) and always exposes it on req.esqCorrelationId + the response
+  - added the W3C helpers toW3cTraceId / isW3cTraceId / generateW3cId / settleCorrelationId /
+    buildTraceparent, kept in step with the Java common.EsqUtils
+  - traceMiddleware opens the BFF root server span via beginTrace() and finishes it on response, exposing
+    req.esqTraceparent for the upstream call -- so the BFF is the first hop of the distributed trace
+    (BFF -> gateway -> service)
+  - the span is opened only on a traced path -- isTracedPath() + TRACED_PREFIXES (/api, /auth); off them
+    (SPA shell, static assets, health probes) no span is created and req.esqTraceparent is a plain
+    traceparent carrying the correlation id. The ids are settled on EVERY request
+src\proxy\apiProxy.ts
+  - upstream calls carry Esq-Correlation-ID (the settled id, replacing the forward-only X-Correlation-ID) plus
+    the traceparent built from that same id, on both the cacheable GET path and the proxied path
+src\config.ts
+  - added tracing { enabled, otlpEndpoint, samplingRatio } from ESQ_TRACING_ENABLED / ESQ_OTLP_ENDPOINT /
+    ESQ_TRACING_SAMPLING_RATIO (off by default)
+src\index.ts
+  - initTracing(config) before any request is handled; SIGTERM flushes in-flight spans via shutdownTracing()
+    before the server closes (both from util\trace.ts alongside traceMiddleware)
+package.json
+  - @opentelemetry/api, /core, /resources, /sdk-trace-base, /sdk-trace-node, /exporter-trace-otlp-http added
+
 07/07/2026 mir0n  v1.2.11 -- BFF stamps requestId / correlationId on each log line
 src\util\log.ts
   - httpLogger customProps: stamp each request line with requestId (esqRequestId) and correlationId

@@ -9,6 +9,7 @@
  * 05/07/2026 mir0n  created: load BackendConfig from env (publicBaseUrl, allowedOrigins, KC issuer/client, gateway URL, session secret, dict cache)
  * 06/27/2026 mir0n  added session.redisUrl from REDIS_URL env (default empty) -- shared session store endpoint
  * 06/29/2026 mir0n  added kc.issuerInternal (KC_ISSUER_INTERNAL env, defaults to issuer); added server.requestTimeoutMs (BFF_REQUEST_TIMEOUT_MS) + proxy.timeoutMs (BFF_PROXY_TIMEOUT_MS), both default 0
+ * 07/08/2026 mir0n  v1.2.11 -- added tracing { enabled, otlpEndpoint, samplingRatio } from ESQ_TRACING_ENABLED / ESQ_OTLP_ENDPOINT / ESQ_TRACING_SAMPLING_RATIO (off by default)
  */
 
 export interface BackendConfig {
@@ -61,6 +62,14 @@ export interface BackendConfig {
     ttlMs: number;
     maxEntries: number;
   };
+  // Distributed tracing (v1.2.11 O2). When enabled, the BFF emits a root OTel span per request
+  // (traceId == the settled correlation id) and exports it over OTLP to the collector. Off by
+  // default (same posture as the Java services); the o11y stack + env turn it on.
+  tracing: {
+    enabled: boolean;
+    otlpEndpoint: string;
+    samplingRatio: number;
+  };
 }
 
 function required(name: string, fallback?: string): string {
@@ -106,6 +115,11 @@ export function loadConfig(): BackendConfig {
     cache: {
       ttlMs: Number(process.env.ESQ_DICT_CACHE_TTL_MS ?? 60 * 60 * 1000),
       maxEntries: Number(process.env.ESQ_DICT_CACHE_MAX ?? 64),
+    },
+    tracing: {
+      enabled: process.env.ESQ_TRACING_ENABLED === 'true',
+      otlpEndpoint: process.env.ESQ_OTLP_ENDPOINT ?? 'http://localhost:4318/v1/traces',
+      samplingRatio: Number(process.env.ESQ_TRACING_SAMPLING_RATIO ?? 1.0),
     },
   };
   return ret;

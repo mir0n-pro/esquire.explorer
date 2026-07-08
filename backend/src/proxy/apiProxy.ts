@@ -8,6 +8,9 @@
  *  History:
  * 05/07/2026 mir0n  created: /api/* server-to-server proxy to gateway; injects Bearer; cacheable GET path for esq-kinds/dictionary; X-Request-ID propagation
  * 06/29/2026 mir0n  set proxyTimeout from config.proxy.timeoutMs when > 0 (R1; 0 omits it)
+ * 07/08/2026 mir0n  v1.2.11 -- upstream calls carry Esq-Correlation-ID (the settled id, replacing the
+ *                   forward-only X-Correlation-ID) plus the traceparent built from that same id, on both the
+ *                   cacheable GET path and the proxied path
  */
 
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
@@ -76,10 +79,11 @@ async function handleCacheable(
     Authorization: `Bearer ${token}`,
     Accept: req.headers.accept ?? 'application/json',
     'X-Request-ID': req.esqRequestId,
+    // The BFF posts the canonical correlation id (the gateway settles from it) + the traceparent
+    // carrying the same id, so the gateway's OTel span traceId == the correlation id (T2.3).
+    'Esq-Correlation-ID': req.esqCorrelationId,
+    traceparent: req.esqTraceparent,
   };
-  if (req.esqCorrelationId !== undefined) {
-    upstreamHeaders['X-Correlation-ID'] = req.esqCorrelationId;
-  }
   try {
     const upstream = await fetch(upstreamUrl, {
       method: 'GET',
@@ -135,17 +139,20 @@ function buildProxyMiddleware(config: BackendConfig): RequestHandler {
     ...(config.proxy.timeoutMs > 0 ? { proxyTimeout: config.proxy.timeoutMs } : {}),
     on: {
       proxyReq: (proxyReq: ClientRequest, req: IncomingMessage) => {
-        const ext = req as IncomingMessage & { _esqAccessToken?: string; esqRequestId?: string; esqCorrelationId?: string };
+        const ext = req as IncomingMessage & { _esqAccessToken?: string; esqRequestId?: string; esqCorrelationId?: string; esqTraceparent?: string };
         if (ext._esqAccessToken !== undefined) {
           proxyReq.setHeader(HEADER_AUTH, `Bearer ${ext._esqAccessToken}`);
         }
         if (ext.esqRequestId !== undefined) {
           proxyReq.setHeader('X-Request-ID', ext.esqRequestId);
         }
-        // Don't forward an absent correlation id -- gateway will generate one.
-        // Only forward if the client set it explicitly (ad-hoc debug case).
+        // The BFF posts the canonical correlation id (the gateway settles from it); the traceparent
+        // carries the same id so the gateway's OTel span traceId == the correlation id (T2.3).
         if (ext.esqCorrelationId !== undefined) {
-          proxyReq.setHeader('X-Correlation-ID', ext.esqCorrelationId);
+          proxyReq.setHeader('Esq-Correlation-ID', ext.esqCorrelationId);
+        }
+        if (ext.esqTraceparent !== undefined) {
+          proxyReq.setHeader('traceparent', ext.esqTraceparent);
         }
       },
       error: (err) => {

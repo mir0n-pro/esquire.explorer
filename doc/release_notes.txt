@@ -1,6 +1,16 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.11-2607.0813  v1.2.11 -- observability: request tracing in the login backend
+    :Feature:     the login backend (BFF) joins the request timeline -- it opens the timeline for a data or
+                  sign-in request and passes it on, so the request can be followed from the browser through
+                  the gateway and on to the services
+    :Feature:     the login backend settles one id per request and sends it upstream, so its own log lines,
+                  the other services' log lines, and the request's timeline all carry the same id
+    :Feature:     only data and sign-in requests are timed; page files and health checks are left out
+    :Config:      tracing added to the login backend, off by default
+    Components:   backend
+
 v1.2.11-2607.0701  v1.2.11 -- the login backend tags its logs with the request id
     :Feature:     the login backend (BFF) now stamps each log line with the request id (and the correlation
                   id when the client set one), so its logs line up with the other services' logs for the same
