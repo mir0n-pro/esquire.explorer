@@ -19,9 +19,15 @@
  *                   (SPA shell, static assets, health probes) no span is created and req.esqTraceparent is a
  *                   plain traceparent carrying the correlation id. The ids are settled on EVERY request.
  *                   Off by default (esquire.tracing.enabled).
+ * 07/09/2026 mir0n  v1.2.11 -- the tracer resource now carries service.instance.id, the INSTANCE_ID constant
+ *                   in the Java <app>.<instanceNo> shape ('esq-backend.' + the host name's trailing ordinal
+ *                   after the last dash when that tail is all digits, else 0 -- the EsqUtils.instanceNo()
+ *                   rule). The collector rewrites service.name to it on the traces pipeline, so every BFF
+ *                   span is badged with the replica that served the request.
  */
 
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { hostname } from 'node:os';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import type { RequestHandler } from 'express';
 import { SpanKind, type Tracer } from '@opentelemetry/api';
@@ -122,6 +128,14 @@ let enabled = false;
 let tracer: Tracer | undefined;
 let provider: NodeTracerProvider | undefined;
 
+// This instance's id in the Java <app>.<instanceNo> shape, computed ONCE (cached). Mirrors the Java
+// EsqUtils.instanceNo() rule EXACTLY: the ordinal is the host name's tail AFTER THE LAST DASH, and only when
+// that tail is all digits (esquire-backend-backend-1 -> 1); anything else -- including a docker container id
+// that merely ends in digits (dd3376b3e076) -- has no ordinal and is instance 0. Emitted as the resource's
+// service.instance.id, in step with the Java services: the collector rewrites service.name to it on the traces
+// pipeline, so every BFF span is badged with the replica that served the request.
+const INSTANCE_ID: string = 'esq-backend.' + (/-(\d+)$/.exec(hostname())?.[1] ?? '0');
+
 // Wire the OTel SDK once at startup. No-op (zero cost) when tracing is disabled.
 export function initTracing(config: BackendConfig): void {
   if (!config.tracing.enabled) {
@@ -129,7 +143,7 @@ export function initTracing(config: BackendConfig): void {
   }
   const exporter = new OTLPTraceExporter({ url: config.tracing.otlpEndpoint });
   provider = new NodeTracerProvider({
-    resource: new Resource({ 'service.name': 'esq-backend' }),
+    resource: new Resource({ 'service.name': 'esq-backend', 'service.instance.id': INSTANCE_ID }),
     idGenerator: new EsqIdGenerator(),
     sampler: new ParentBasedSampler({ root: new TraceIdRatioBasedSampler(config.tracing.samplingRatio) }),
     spanProcessors: [new BatchSpanProcessor(exporter)],
@@ -160,6 +174,9 @@ interface RequestTrace {
 function beginTrace(traceId: string, fallbackTraceparent: string, method: string, path: string): RequestTrace {
   let ret: RequestTrace;
   if (enabled && tracer !== undefined) {
+    // The span name carries no instance id: which BFF replica handled the request shows in the span's service
+    // badge -- the collector rewrites service.name to service.instance.id on the traces pipeline -- so repeating
+    // it in the name would only duplicate the badge (the Java spans drop it for the same reason).
     const span = traceIdSeed.run(traceId, () => tracer!.startSpan(`BFF ${method} ${path}`, { kind: SpanKind.SERVER }));
     span.setAttribute('http.request.method', method);
     span.setAttribute('http.url', path);

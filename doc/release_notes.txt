@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.11-2607.0920  v1.2.11 -- observability: traces name the login backend copy that served the request
+    :Feature:     the login backend (BFF) reports which copy of itself handled a request, so every traced
+                  step is labelled with the copy that ran it
+    Components:   backend
+
 v1.2.11-2607.0813  v1.2.11 -- observability: request tracing in the login backend
     :Feature:     the login backend (BFF) joins the request timeline -- it opens the timeline for a data or
                   sign-in request and passes it on, so the request can be followed from the browser through
