@@ -134,3 +134,15 @@ and Test Driver users (15, 16). Read-only — no entity is removed (the guard bl
   on open (on its Close button) and a single Esc closes it. Guards the fix for the editable-dialog
   focus bug where Esc was ignored (focus stayed on the launching toolbar button) until a Tab moved
   focus into the dialog.
+
+### cycle/cycle.spec.ts — full-lifecycle soak / activity generator (not a coverage assertion)
+An activity generator, NOT an assertion spec: repeats a full GUI lifecycle N times (`CYCLES` env,
+default 2) under the Test House to exercise every service and light up the metrics dashboard + Tempo
+traces. Reuses the proven building blocks (`setupHouse` / `teardownHouse`, `navigateTo` / `listInto`,
+the deposit/withdrawal dialog flow from spec 11). Each lap runs on a FRESH page in the logged-in
+context: build a working subtree (office + merchant user + EUR account) → navigate to it (enyMan /
+bizTree reads) → Connect the user (keySmith → kcMaster → Keycloak) → deposit → withdraw → Disconnect →
+tear the subtree down; each GUI op is followed by a render pause (`RENDER_MS`). Gentle stop between
+laps via the `cycle/.stop` marker (`cycle-stop.bat`) or Ctrl-C — the in-flight lap finishes its
+teardown and no new lap begins. Per-environment launchers: `cycle-test.bat` (docker), `cycle-k8s.bat`,
+`cycle-oci.bat`.

@@ -1,6 +1,16 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.11-2607.1019  v1.2.11 -- observability: the login backend publishes its own live measurements
+    :Feature:     the login backend (BFF) now publishes its own live measurements -- request rates and response
+                  times, memory and event-loop health -- to the same metrics dashboard as the services
+    :Config:      off by default; turns on with the same observability switch as request tracing
+    :Feature:     a full-lifecycle activity job runs the create-user / connect / deposit / withdraw / remove cycle
+                  through the browser under the Test House, N times, to exercise every service and light up the
+                  dashboard and traces end to end
+    Components:   backend, 
+                  e2e
+
 v1.2.11-2607.0920  v1.2.11 -- observability: traces name the login backend copy that served the request
     :Feature:     the login backend (BFF) reports which copy of itself handled a request, so every traced
                   step is labelled with the copy that ran it
