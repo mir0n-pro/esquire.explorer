@@ -135,14 +135,34 @@ and Test Driver users (15, 16). Read-only — no entity is removed (the guard bl
   focus bug where Esc was ignored (focus stayed on the launching toolbar button) until a Tab moved
   focus into the dialog.
 
+### 19-access-profile-sync.spec.ts -- access-profile save -> Keycloak identity sync
+- **connect -> update role -> disconnect round-trips the identity through Keycloak**: builds its own
+  subtree under Test House, then on the merchant user: saves the access profile with connect=Y (Keycloak
+  CREATES the identity), grants a role it does not already hold (Keycloak re-assigns its roles), and saves
+  connect=N (Keycloak REMOVES the identity). Tears the subtree down.
+- THE GAP THIS FILLS: spec 03 only OPENS and CLOSES the Access Profile dialog -- it never saves. So the main
+  suite never once drove the identity path, and NOTHING anywhere drove a ROLE change. A role Esquire revoked
+  but Keycloak kept is an AUTHORIZATION drift -- the user keeps a permission the system believes it took away
+  -- and every test we had would still have been green.
+- THE ORDER IS THE CONTRACT, not cosmetics. keySmith derives the Keycloak operation from the connect flag:
+  N->Y is a CREATE, Y->Y an UPDATE, Y->N a DELETE. So the role change must sit BETWEEN connect and
+  disconnect: it is the only thing that drives kcMaster's UPDATE branch, and kcMaster looks the user up in
+  Keycloak by username and throws if the identity is not there yet. Before this spec existed the update path
+  was driven by NOTHING (esq.biz.kc.sync.total only ever showed CREATE and DELETE).
+- Exercises the full chain for real: browser session -> BFF /api proxy (injects the bearer) -> gateway ->
+  keySmith (saves the profile, publishes a URQ on the kc R&R bus) -> kcMaster (calls the Keycloak admin API).
+
 ### cycle/cycle.spec.ts — full-lifecycle soak / activity generator (not a coverage assertion)
 An activity generator, NOT an assertion spec: repeats a full GUI lifecycle N times (`CYCLES` env,
 default 2) under the Test House to exercise every service and light up the metrics dashboard + Tempo
 traces. Reuses the proven building blocks (`setupHouse` / `teardownHouse`, `navigateTo` / `listInto`,
 the deposit/withdrawal dialog flow from spec 11). Each lap runs on a FRESH page in the logged-in
-context: build a working subtree (office + merchant user + EUR account) → navigate to it (enyMan /
-bizTree reads) → Connect the user (keySmith → kcMaster → Keycloak) → deposit → withdraw → Disconnect →
-tear the subtree down; each GUI op is followed by a render pause (`RENDER_MS`). Gentle stop between
+context: build a working subtree (office + merchant user + EUR account) -> navigate to it (enyMan /
+bizTree reads) -> Connect the user (keySmith -> kcMaster -> Keycloak CREATE) -> grant the user a role while
+connected (the same chain, Keycloak UPDATE) -> deposit -> withdraw -> Disconnect (Keycloak DELETE) -> tear
+the subtree down; each GUI op is followed by a render pause (`RENDER_MS`). The role step is the ONE step
+driven by API rather than GUI -- the roles control is a dynamic multi-select, and this suite generates
+ACTIVITY rather than asserting; spec 19 is where the role contract is asserted. Gentle stop between
 laps via the `cycle/.stop` marker (`cycle-stop.bat`) or Ctrl-C — the in-flight lap finishes its
 teardown and no new lap begins. Per-environment launchers: `cycle-test.bat` (docker), `cycle-k8s.bat`,
 `cycle-oci.bat`.

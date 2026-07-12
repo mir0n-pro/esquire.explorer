@@ -1,6 +1,18 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.11-2607.1120  v1.2.11 -- e2e: the login-identity path is finally covered, roles included
+    :Feature:     a new end-to-end test switches a user's login access on, changes what they are allowed to do,
+                  and switches it off again -- driving the whole identity chain through to the login server for
+                  real, in the order the system actually requires
+    :Feature:     the repeating activity run does the same on every lap, so the identity path is exercised under
+                  sustained use, not only once
+    :Fix:         none of that was covered before: the existing access-profile test only opened and closed the
+                  dialog without ever saving, and NOTHING anywhere changed a user's permissions -- so a
+                  permission the system had revoked could have quietly remained in force at the login server
+                  and every test would still have passed
+    Components:   e2e
+
 v1.2.11-2607.1019  v1.2.11 -- observability: the login backend publishes its own live measurements
     :Feature:     the login backend (BFF) now publishes its own live measurements -- request rates and response
                   times, memory and event-loop health -- to the same metrics dashboard as the services

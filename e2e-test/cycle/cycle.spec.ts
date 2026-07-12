@@ -72,6 +72,32 @@ async function guiConnect(page: Page, connect: boolean) {
   await settle(page);
 }
 
+// Grant the user one role it does not already hold, through the access profile.
+//
+// API, not GUI -- deliberately, and this is the ONE step in the lap that is. The roles control is a dynamic
+// multi-select rendered by the ui.lib, and driving it by hand would be brittle for no gain: this suite is an
+// ACTIVITY GENERATOR, and its job here is to exercise the BACKEND chain, not the widget. The contract itself is
+// asserted by tests/19-access-profile-sync.spec.ts.
+//
+// WHY IT MATTERS. keySmith decides the KC operation from the connect flag: N->Y is a CREATE, Y->Y an UPDATE,
+// Y->N a DELETE. So a role change while CONNECTED is the only thing that drives kcMaster's UPDATE branch -- the
+// one that pushes the role set into Keycloak. Before this step existed, esq.biz.kc.sync.total only ever showed
+// CREATE and DELETE: the whole update path, and the authorization drift it guards against (a role Esquire
+// revoked but Keycloak kept), was exercised by NOTHING. It has to sit BETWEEN connect and disconnect: kcMaster
+// looks the user up in Keycloak by username and throws if the identity is not there yet.
+async function guiRole(page: Page, userId: string) {
+  const read = await page.request.get(`/api/esq-key?id=${userId}`);
+  if (read.status() !== 200) return;                       // soak run: never fail the lap on a read
+  const profile = await read.json();
+  const held = new Set((profile.roles ?? []).map((r: any) => r.name));
+  const toAdd = (profile.rolesAll ?? []).find((r: any) => !held.has(r.name));
+  if (!toAdd) return;
+  await page.request.post(`/api/esq-key-save?id=${userId}`, {
+    data: { ...profile, roles: [...(profile.roles ?? []), toAdd] },
+  });
+  await settle(page, 1500);                                // let the keySmith -> kcMaster -> Keycloak sync land
+}
+
 test.describe.serial(`GUI lifecycle cycle x${CYCLES} under ${TEST_HOUSE_NAME}`, () => {
   let ctx: import('@playwright/test').BrowserContext;
 
@@ -89,7 +115,7 @@ test.describe.serial(`GUI lifecycle cycle x${CYCLES} under ${TEST_HOUSE_NAME}`, 
   });
 
   for (let lap = 1; lap <= CYCLES; lap++) {
-    test(`lap ${lap}/${CYCLES}: build -> navigate -> connect -> deposit -> withdraw -> disconnect -> teardown`, async () => {
+    test(`lap ${lap}/${CYCLES}: build -> navigate -> connect -> role -> deposit -> withdraw -> disconnect -> teardown`, async () => {
       test.skip(stopIsRequested(), 'stop requested -- finishing gracefully between laps');
       const page = await ctx.newPage();                    // FRESH tab -> clean tree; proven navigation works
       await page.goto('/');
@@ -115,6 +141,9 @@ test.describe.serial(`GUI lifecycle cycle x${CYCLES} under ${TEST_HOUSE_NAME}`, 
         await settle(page, 700);
         await guiConnect(page, true);
 
+        // Grant a role while CONNECTED -- the only thing that drives kcMaster's UPDATE branch (see guiRole).
+        await guiRole(page, house.merchantId);
+
         // Deposit + Withdrawal on the EUR account (select its row first)
         await urow.dblclick();                             // into the user -> its accounts
         await settle(page);
@@ -132,7 +161,7 @@ test.describe.serial(`GUI lifecycle cycle x${CYCLES} under ${TEST_HOUSE_NAME}`, 
         await settle(page, 700);
         await guiConnect(page, false);
 
-        console.log(`  [GUI lap ${lap}/${CYCLES}] build -> connect -> deposit -> withdraw -> disconnect  OK  (acct ${house.eurAcctNo})`);
+        console.log(`  [GUI lap ${lap}/${CYCLES}] build -> connect -> role -> deposit -> withdraw -> disconnect  OK  (acct ${house.eurAcctNo})`);
       } finally {
         if (house) await teardownHouse(page, house.officeId);   // reuse the helper (self-purges under Test House)
         await page.close();
