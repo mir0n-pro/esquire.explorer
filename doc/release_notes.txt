@@ -1,6 +1,20 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.11-2607.1413  v1.2.11 -- hauberk: a performance matrix that measures the load-test results across every environment
+    :Feature:     a performance matrix -- one command measures every environment (docker, one copy of each service,
+                  two copies, each with and without observability) on the same machine, rebuilding everything from
+                  scratch each time so no run inherits the last one's data, and prints what each choice costs
+    :Fix:         a simulated user whose setup step failed used to carry on into its loop with nothing to work
+                  with, so it sent no requests at all and spun at full speed doing nothing -- 3.5 million such
+                  errors in one 60-second run, quietly holding down every throughput figure we measured
+    :Fix:         the read and update scenarios were drawing users from the same office the create-and-delete
+                  scenario churns, so they kept asking for people who had just been deleted and counted the answer
+                  as a failure of the system
+    :Fix:         the load runs reached the cluster through a port-forward -- a single-threaded relay that was
+                  capping every figure we took from it; they now go through the ingress, as the rest of the tests do
+    Components:   hauberk
+
 v1.2.11-2607.1120  v1.2.11 -- e2e: the login-identity path is finally covered, roles included
     :Feature:     a new end-to-end test switches a user's login access on, changes what they are allowed to do,
                   and switches it off again -- driving the whole identity chain through to the login server for
