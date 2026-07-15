@@ -152,6 +152,20 @@ and Test Driver users (15, 16). Read-only — no entity is removed (the guard bl
 - Exercises the full chain for real: browser session -> BFF /api proxy (injects the bearer) -> gateway ->
   keySmith (saves the profile, publishes a URQ on the kc R&R bus) -> kcMaster (calls the Keycloak admin API).
 
+### 20-token-relay.spec.ts -- gateway Token Relay (vanilla + phantom)
+- **Vanilla Token Relay: HTTP Basic at the edge reaches a protected route**: presents HTTP Basic
+  (client_id:client_secret) for the allowlisted esq-hauberk-S client straight to the gateway; the gateway runs
+  client_credentials on its behalf and forwards a full JWT downstream. A 200 from a protected read proves it.
+- **Phantom Token Relay: exchanged Bearer reaches a protected route**: gets a Bearer for the allowlisted
+  esq-hauberk-M client from Keycloak, presents it to the gateway; the gateway runs an RFC 8693 token-exchange
+  (as esq-gw-exchange) and forwards the exchanged JWT downstream. A 200 proves it.
+- THE GAP THIS FILLS: the relay was ENABLED on both targets and exercised by NOTHING -- three
+  esq.biz.gw.tokenrelay.* meters sat at zero series through every prior e2e run, smoke and the T10 matrix. These
+  calls hit the gateway DIRECTLY (not the BFF /api proxy, which injects the session bearer and never exercises
+  the relay).
+- Targets: default to the docker gateway (localhost:7070); e2e-k8s.bat points GATEWAY_URL / KC_URL at the k8s
+  ingress (api.esquire.localhost). The dev client secrets come from the committed realm import.
+
 ### cycle/cycle.spec.ts — full-lifecycle soak / activity generator (not a coverage assertion)
 An activity generator, NOT an assertion spec: repeats a full GUI lifecycle N times (`CYCLES` env,
 default 2) under the Test House to exercise every service and light up the metrics dashboard + Tempo

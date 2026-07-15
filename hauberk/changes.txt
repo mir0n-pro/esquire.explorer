@@ -1,5 +1,13 @@
 hauberk changes
 
+07/15/2026 mir0n  v1.2.11 -- T11 cleanup: fix/resolve issues noted during development
+hauberk-S.properties  (new)
+  - the VANILLA token-relay overlay: tokenRelay.type=vanilla + the esq-hauberk-S client (HTTP Basic at the edge,
+    the gateway runs client_credentials on its behalf) (I8)
+hauberk-M.properties  (new)
+  - the PHANTOM token-relay overlay: tokenRelay.type=phantom + the esq-hauberk-M client (a Bearer the gateway
+    exchanges via RFC 8693) (I8)
+
 07/14/2026 mir0n  v1.2.11 -- the performance matrix; a VU whose setup failed no longer spins; the user pool excludes the create loop's office
 perf-matrix.bat  (new)
   - entry point for the performance matrix: 6 configurations (docker / k8s x1 / k8s x2, each o11y OFF and ON) x 2

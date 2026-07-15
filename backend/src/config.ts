@@ -10,6 +10,9 @@
  * 06/27/2026 mir0n  added session.redisUrl from REDIS_URL env (default empty) -- shared session store endpoint
  * 06/29/2026 mir0n  added kc.issuerInternal (KC_ISSUER_INTERNAL env, defaults to issuer); added server.requestTimeoutMs (BFF_REQUEST_TIMEOUT_MS) + proxy.timeoutMs (BFF_PROXY_TIMEOUT_MS), both default 0
  * 07/08/2026 mir0n  v1.2.11 -- added tracing { enabled, otlpEndpoint, samplingRatio } from ESQ_TRACING_ENABLED / ESQ_OTLP_ENDPOINT / ESQ_TRACING_SAMPLING_RATIO (off by default)
+ * 07/15/2026 mir0n  v1.2.11 T11 -- tracing.enabled now reads ESQ_OBSERVABILITY_ENABLED (was ESQ_TRACING_ENABLED),
+ *                   the same umbrella switch the Java services use; it gates the BFF tracing AND the BFF metrics
+ *                   surface (I13)
  */
 
 export interface BackendConfig {
@@ -117,7 +120,7 @@ export function loadConfig(): BackendConfig {
       maxEntries: Number(process.env.ESQ_DICT_CACHE_MAX ?? 64),
     },
     tracing: {
-      enabled: process.env.ESQ_TRACING_ENABLED === 'true',
+      enabled: process.env.ESQ_OBSERVABILITY_ENABLED === 'true',
       otlpEndpoint: process.env.ESQ_OTLP_ENDPOINT ?? 'http://localhost:4318/v1/traces',
       samplingRatio: Number(process.env.ESQ_TRACING_SAMPLING_RATIO ?? 1.0),
     },

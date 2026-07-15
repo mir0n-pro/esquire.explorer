@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (backend / BFF tier)
 
+07/15/2026 mir0n  v1.2.11 -- T11 cleanup: fix/resolve issues noted during development
+src\config.ts
+  - tracing.enabled now reads ESQ_OBSERVABILITY_ENABLED (was ESQ_TRACING_ENABLED), the same umbrella switch the
+    Java services use; it gates the BFF tracing AND the BFF metrics surface (I13)
+
 07/10/2026 mir0n  v1.2.11 -- metrics foundation (O1): the BFF publishes its own metrics
 src\util\metrics.ts  (new)
   - the BFF Prometheus /metrics surface (prom-client): initMetrics() registers the Node runtime defaults

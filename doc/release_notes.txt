@@ -1,6 +1,13 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.11-2607.1513  v1.2.11 -- T11 cleanup: fix/resolve issues noted during development
+    - the browser tier read the wrong observability switch and stayed dark on the cluster
+    - the gateway's token relay was enabled but exercised by no test
+    Components:   backend,
+                  e2e,
+                  hauberk
+
 v1.2.11-2607.1413  v1.2.11 -- hauberk: a performance matrix that measures the load-test results across every environment
     :Feature:     a performance matrix -- one command measures every environment (docker, one copy of each service,
                   two copies, each with and without observability) on the same machine, rebuilding everything from

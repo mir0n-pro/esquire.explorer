@@ -11,6 +11,9 @@ rem
 rem Mirrors e2e-oci.bat (which hits https://esquire.mir0n.pro).
 
 set BASE_URL=http://esquire.localhost
+rem Token Relay spec (20) calls the gateway + KC DIRECTLY (not the BFF proxy); point it at the k8s ingress.
+set GATEWAY_URL=http://api.esquire.localhost
+set KC_URL=http://esquire.localhost/kc-auth
 
 if not exist node_modules (
     call npm install
