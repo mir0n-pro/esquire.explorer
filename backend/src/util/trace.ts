@@ -24,13 +24,15 @@
  *                   after the last dash when that tail is all digits, else 0 -- the EsqUtils.instanceNo()
  *                   rule). The collector rewrites service.name to it on the traces pipeline, so every BFF
  *                   span is badged with the replica that served the request.
+ * 07/17/2026 mir0n  traceKcCall(name, fn) opens a CLIENT span around a KeyCloak round-trip; toW3cTraceId /
+ *                   isW3cTraceId are exported for the cross-language W3C conformance test.
  */
 
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { hostname } from 'node:os';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import type { RequestHandler } from 'express';
-import { SpanKind, type Tracer } from '@opentelemetry/api';
+import { SpanKind, SpanStatusCode, context, trace, type Span, type Tracer } from '@opentelemetry/api';
 import { W3CTraceContextPropagator } from '@opentelemetry/core';
 import { Resource } from '@opentelemetry/resources';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
@@ -65,15 +67,17 @@ declare global {
 }
 
 // --- W3C trace-id settlement, kept byte-identical to the Java common.EsqUtils so the trace id the
-//     BFF seeds equals the correlation id the gateway settles from the same request/correlation id. ---
+//     BFF seeds equals the correlation id the gateway settles from the same request/correlation id.
+//     EXPORTED for the cross-language conformance test (test/util/w3c-id.conformance.test.ts, I35): the same
+//     input->id vectors run here AND against Java EsqUtils, so a drift between the two fails a build. ---
 
 // SHA-256 of the value, first 16 bytes -> 32 lowercase hex (matches EsqUtils.toW3cTraceId).
-function toW3cTraceId(value: string): string {
+export function toW3cTraceId(value: string): string {
   return createHash('sha256').update(value, 'utf8').digest().subarray(0, 16).toString('hex');
 }
 
 // 32 lowercase hex, not all zero (matches EsqUtils.isW3cTraceId).
-function isW3cTraceId(value: string | undefined): boolean {
+export function isW3cTraceId(value: string | undefined): boolean {
   return typeof value === 'string' && /^[0-9a-f]{32}$/.test(value) && !/^0{32}$/.test(value);
 }
 
@@ -89,7 +93,7 @@ function generateW3cId(): string {
 // Settle the correlation id: an incoming one wins (kept if W3C-shaped, else converted); otherwise a
 // FRESH id is generated. The per-request id is NEVER a seed here -- the correlation id is its own
 // identity (it, in turn, seeds the trace id). Mirrors EsqUtils.settleCorrelationId.
-function settleCorrelationId(correlationId: string | undefined): string {
+export function settleCorrelationId(correlationId: string | undefined): string {
   let ret: string;
   if (correlationId !== undefined && correlationId.trim().length > 0) {
     ret = isW3cTraceId(correlationId) ? correlationId : toW3cTraceId(correlationId);
@@ -166,6 +170,9 @@ interface RequestTrace {
   traceparent: string;
   // End the BFF span (records the response status). No-op when tracing is off.
   finish: (statusCode: number) => void;
+  // The BFF request span (absent when tracing is off), so traceMiddleware can make it the ACTIVE context for
+  // the request -- which is what lets a KC round-trip (traceKcCall) nest UNDER it in the waterfall.
+  span?: Span;
 }
 
 // Open the BFF's root span for a request. traceId is the settled correlation id; fallbackTraceparent
@@ -187,11 +194,33 @@ function beginTrace(traceId: string, fallbackTraceparent: string, method: string
         span.setAttribute('http.response.status_code', statusCode);
         span.end();
       },
+      span,
     };
   } else {
     ret = { traceparent: fallbackTraceparent, finish: () => { /* no span when tracing is off */ } };
   }
   return ret;
+}
+
+// Wrap an outbound KeyCloak round-trip -- issuer discovery, the login token exchange, a token refresh -- in a
+// CLIENT span, so the KC time shows as an explicit step in the /auth waterfall instead of INVISIBLE TIME inside
+// the request span (I27, exactly where a login stalls). It parents to whatever span is active, which is the BFF
+// request span traceMiddleware made active, so a login's KC call reads as a child of that login. No-op -- runs
+// fn directly, no span, no cost -- when tracing is off. A thrown error is recorded on the span before it ends.
+export async function traceKcCall<T>(name: string, fn: () => Promise<T>): Promise<T> {
+  if (!enabled || tracer === undefined) {
+    return fn();
+  }
+  const span = tracer.startSpan(name, { kind: SpanKind.CLIENT });
+  try {
+    return await context.with(trace.setSpan(context.active(), span), fn);
+  } catch (err) {
+    span.recordException(err as Error);
+    span.setStatus({ code: SpanStatusCode.ERROR });
+    throw err;
+  } finally {
+    span.end();
+  }
 }
 
 // --- Trace scope --------------------------------------------------------------------------------
@@ -244,10 +273,12 @@ export const traceMiddleware: RequestHandler = (req, res, next) => {
   // the downstream traceparent. Off the traced paths -- and whenever tracing is disabled -- a plain
   // traceparent carrying the correlation id is used and no span is created.
   const fallbackTraceparent = buildTraceparent(correlationId);
+  let requestSpan: Span | undefined;
   if (isTracedPath(req.path)) {
-    const trace = beginTrace(correlationId, fallbackTraceparent, req.method, req.path);
-    req.esqTraceparent = trace.traceparent;
-    res.on('finish', () => { trace.finish(res.statusCode); });
+    const reqTrace = beginTrace(correlationId, fallbackTraceparent, req.method, req.path);
+    req.esqTraceparent = reqTrace.traceparent;
+    requestSpan = reqTrace.span;
+    res.on('finish', () => { reqTrace.finish(res.statusCode); });
   } else {
     req.esqTraceparent = fallbackTraceparent;
   }
@@ -255,7 +286,14 @@ export const traceMiddleware: RequestHandler = (req, res, next) => {
   res.setHeader('X-Request-ID', req.esqRequestId);
   res.setHeader('X-Correlation-ID', correlationId);
 
-  next();
+  // Make the BFF span the ACTIVE context for the rest of the request, so an outbound KC round-trip (traceKcCall)
+  // nests UNDER it in the waterfall instead of vanishing into the request span. Off the traced paths / tracing
+  // off there is no span, and this is a plain next().
+  if (requestSpan !== undefined) {
+    context.with(trace.setSpan(context.active(), requestSpan), next);
+  } else {
+    next();
+  }
 };
 
 function headerValue(raw: string | string[] | undefined): string | undefined {

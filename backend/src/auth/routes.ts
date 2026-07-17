@@ -8,6 +8,7 @@
  *  History:
  * 05/07/2026 mir0n  created: /auth/login, /callback, /logout, /me; OIDC code+PKCE flow; per-request redirect_uri resolved from Origin/Referer against allowedOrigins
  * 07/02/2026 mir0n  session-expiry: callback stores session_expires_at; /auth/me returns sessionExpiresAt and reports authenticated:false once the refresh-token window has passed
+ * 07/17/2026 mir0n  the KeyCloak token exchange (callback) is wrapped in traceKcCall (CLIENT span).
  */
 
 import { Router, type Request, type Response } from 'express';
@@ -17,6 +18,7 @@ import { refreshExpiresAt } from './tokens.js';
 import type { BackendConfig } from '../config.js';
 import type { OidcTokens, SessionClaims } from './sessionStore.js';
 import { log } from '../util/log.js';
+import { traceKcCall } from '../util/trace.js';
 
 export function buildAuthRouter(config: BackendConfig): Router {
   const ret = Router();
@@ -116,11 +118,11 @@ function callbackHandler(config: BackendConfig) {
       }
       const client = await getOidcClient(config);
       const params = client.callbackParams(req);
-      const tokenSet = await client.callback(
+      const tokenSet = await traceKcCall('KC token exchange', () => client.callback(
         pending.redirectUri,
         params,
         { state: pending.state, nonce: pending.nonce, code_verifier: pending.codeVerifier },
-      );
+      ));
       if (tokenSet.access_token === undefined || tokenSet.expires_at === undefined) {
         res.status(500).json({ error: 'token response missing access_token or expires_at' });
         return;

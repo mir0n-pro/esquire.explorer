@@ -1,6 +1,15 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.11-2607.1714  v1.2.11 -- T11 cleanup: fix/resolve issues noted during development
+    - the browser tier's own metric names did not match the naming used everywhere else
+    - the hop from the browser tier out to the gateway had no timing of its own
+    - the browser tier's calls to the login server did not show up in the trace
+    - the browser tier could not turn tracing and metrics on independently
+    - the performance matrix measured the monitoring cost as one lump and could not separate out logging
+    Components:   backend,
+                  hauberk
+
 v1.2.11-2607.1513  v1.2.11 -- T11 cleanup: fix/resolve issues noted during development
     - the browser tier read the wrong observability switch and stayed dark on the cluster
     - the gateway's token relay was enabled but exercised by no test

@@ -3,11 +3,13 @@
 #
 #  Drives super-load across every deployment shape and writes one CSV you can compare.
 #
-#      docker  x1  o11y OFF / ON
-#      k8s     x1  o11y OFF / ON
-#      k8s     x2  o11y OFF / ON
+#      k8s     x1  o11y OFF / LOG / FULL
+#      k8s     x2  o11y OFF / LOG / FULL
+#      docker      OFF / LOG / ON        (SMOKE TEST ONLY -- uncapped, its sag biases an o11y delta; see $CONFIGS)
 #
-#  Each CONFIG is run TWICE, each run FROM SCRATCH, each run driving several back-to-back loads.
+#  o11y has THREE modes (I49): OFF (all logging off, no stack) / LOG (app logging only) / FULL (logging +
+#  tracing + metrics). Only pro.mir0n moves between them, so the modes ADD UP. -Runs sets runs per config,
+#  -Scale scales the VU count, -Only runs a subset. Each run is FROM SCRATCH, driving several back-to-back loads.
 #
 #  Entry point: perf-matrix.bat   (launches this detached so a long matrix survives the console)
 #
@@ -56,8 +58,12 @@ param(
     [int]    $MaxLoads   = 6,
     [double] $ClimbPct   = 3.0,      # extend while the last load is >this% above the previous
     [int]    $Runs       = 2,        # runs per config (2 = the noise floor)
-    [switch] $Fresh                  # start a new CSV instead of resuming the existing one
+    [switch] $Fresh,                 # start a new CSV instead of resuming the existing one
+    [string[]] $Only     = @(),      # run ONLY these config names (empty = all of $CONFIGS)
+    [double] $Scale      = 1.0       # scale every scenario's VU count (1.0 = the standard 200-VU super-load)
 )
+# NOTE $Only, never $Configs: PowerShell variable names are CASE-INSENSITIVE, so a param named $Configs
+# IS $CONFIGS -- it would silently overwrite the matrix definition with a list of strings and select nothing.
 
 $ErrorActionPreference = "Continue"
 $SVCS    = "C:\MyProjects\esquire\services"
@@ -65,17 +71,101 @@ $HAUBERK = $PSScriptRoot
 $APPS    = @("gateway","biztree","enyman","pacman","keysmith","kcmaster","aukeep","backend")
 
 # The super-puper load: 200 virtual users across the five scenarios.
-$LOAD = @("--duration","$Duration","--read","64","--update","32","--create","32","--move","8","--tx","64")
+# The standard super-load: 200 VUs as read 64 / update 32 / create 32 / move 8 / tx 64.
+# -Scale shrinks every scenario in proportion, for finding a load the HOST can actually hold flat.
+# WHY IT EXISTS: k8s plateaus dead flat at 200 VUs (573,1045,1034,1046) because every pod is capped at 1 CPU.
+# docker is UNCAPPED -- it grabs all 24 cores, saturates the box, and Windows throttles, so it SAGS. Worse,
+# the sag scales WITH throughput: the faster arm saturates harder and sags harder, so the decline eats part of
+# the very delta being measured. That is a BIAS, not noise, and no amount of averaging removes it.
+$vus = @{ read = 64; update = 32; create = 32; move = 8; tx = 64 }
+$scaled = @{}
+foreach ($k in @($vus.Keys)) { $scaled[$k] = [Math]::Max(1, [int][Math]::Round($vus[$k] * $Scale)) }
+$LOAD = @("--duration","$Duration",
+          "--read","$($scaled.read)","--update","$($scaled.update)","--create","$($scaled.create)",
+          "--move","$($scaled.move)","--tx","$($scaled.tx)")
+if ($Scale -ne 1.0) {
+    Log ("### LOAD SCALED x{0} -> read {1} / update {2} / create {3} / move {4} / tx {5} = {6} VUs" -f `
+         $Scale, $scaled.read, $scaled.update, $scaled.create, $scaled.move, $scaled.tx,
+         ($scaled.Values | Measure-Object -Sum).Sum)
+}
 
 # The matrix. Order groups k8s first so docker only needs the cluster torn down once.
+# THREE ARMS since I49 (mir0n):
+#
+#   OFF  app logger OFF (levelMir0n=OFF), no viewing stack, no tracing/metrics   <- the baseline
+#   LOG  app logger INFO + loki/alloy/grafana ONLY, tracing/metrics off          <- the log pillar alone
+#   ON   everything (tracing + metrics + shipping)
+#
+# THE KNOB IS levelMir0n, NEVER levelRoot (mir0n). `pro.mir0n` carries its own level in logback-spring.xml and
+# no appender of its own, so its events reach the root's ECS CONSOLE appender by ADDITIVITY -- an ancestor's
+# LEVEL is never re-checked on the way. levelRoot therefore gates only third-party libraries and CANNOT silence
+# the application. THE 07-16 RUN TURNED ROOT AND IS VOID: the app logged identically in both arms, cancelled out
+# of the delta, and the resulting "-4.7%" was the price of third-party libs plus loki/alloy/grafana -- not of
+# logging. Those load runs must be REDONE with this knob.
+#
+# T10 (doc/review/Esquire.PerfMatrix-07-14.md) is SOUND and is NOT superseded: the app logged at DEBUG in both
+# its arms, and its ON arm really did ship those lines to Loki while its OFF arm uninstalled Alloy/Loki. So its
+# -11.5% / -24% IS the full o11y cost, all three pillars. What T10 lacks is only the per-pillar SPLIT -- which
+# is the whole of I49's job.
+# devLog/msgLog (DEBUG/INFO, to FILES) are IDENTICAL in every arm and cancel out by design -- the only thing that
+# moves between OFF and LOG is the logging o11y stack.
+# DOCKER IS NOT AN INSTRUMENT FOR o11y COST -- it is a smoke test (mir0n, 2026-07-17). Do not re-add it to an
+# o11y measurement, and do not "fix" it with a lower load. See doc/review/Esquire.PerfMatrix-07-14.md Part III.
+#   k8s plateaus DEAD FLAT (573,1045,1034,1046 = 0.0% drift) because every pod is capped at 1 CPU: it draws
+#   ~1045 rps and leaves the box headroom. docker is UNCAPPED -- it takes all 24 cores, saturates the host
+#   (services + infra + o11y stack + Gatling in one 16 GB WSL2 VM) and Windows throttles, so it SAGS.
+#   THE SAG SCALES WITH THROUGHPUT: the all-logs-off arm was the fastest ever measured here (2243 rps) and
+#   sagged the HARDEST (-44%); slower arms sag ~11%. Throughput IS what an o11y comparison measures, so the
+#   decline eats the delta, always in the same direction. That is a BIAS. Two runs do not cancel it; averaging
+#   does not cancel it.
+#   AND the 200-VU super-load runs docker PAST ITS KNEE: 100 VUs gives the SAME 2225 rps at HALF the p99
+#   (235 vs 533 ms). The extra users buy queueing, not work. Nothing measured past the knee is a measurement.
+#   OKE caps app services at ~750m on ~1-OCPU nodes = the same effective 1 CPU local k8s reproduces. docker,
+#   the only place a JVM sees 24 cores, resembles nothing we deploy. k8s "slower" than docker is that budget.
+# THE THREE MODES (mir0n, 2026-07-17) = OFF / LOG / FULL. They ADD UP because only ONE thing ever moves --
+# pro.mir0n -- while develop/msg/amq/jms are OFF and root sits at its ERROR default in EVERY arm:
+#   OFF -> LOG   the log pillar alone        LOG -> FULL  tracing + metrics alone
+#   OFF -> FULL  the whole observability bill
+# "ON" is a FOURTH, different thing: the stack AS SHIPPED, pro.mir0n at its DEBUG chart default. It is what
+# T10 measured (12%/24%, sound). Keep it to reproduce T10 -- never mix it into the three-mode arithmetic.
 $CONFIGS = @(
-    @{ name = "k8s-x1-OFF";  target = "k8s";    reps = 1; o11y = "OFF" },
-    @{ name = "k8s-x1-ON";   target = "k8s";    reps = 1; o11y = "ON"  },
-    @{ name = "k8s-x2-OFF";  target = "k8s";    reps = 2; o11y = "OFF" },
-    @{ name = "k8s-x2-ON";   target = "k8s";    reps = 2; o11y = "ON"  },
+    @{ name = "k8s-x1-OFF";  target = "k8s";    reps = 1; o11y = "OFF"  },
+    @{ name = "k8s-x1-LOG";  target = "k8s";    reps = 1; o11y = "LOG"  },
+    @{ name = "k8s-x1-FULL"; target = "k8s";    reps = 1; o11y = "FULL" },
+    @{ name = "k8s-x1-ON";   target = "k8s";    reps = 1; o11y = "ON"   },
+    @{ name = "k8s-x2-OFF";  target = "k8s";    reps = 2; o11y = "OFF"  },
+    @{ name = "k8s-x2-LOG";  target = "k8s";    reps = 2; o11y = "LOG"  },
+    @{ name = "k8s-x2-FULL"; target = "k8s";    reps = 2; o11y = "FULL" },
+    @{ name = "k8s-x2-ON";   target = "k8s";    reps = 2; o11y = "ON"   },
+    # docker: smoke test only -- NEVER part of an o11y measurement (see the note above).
     @{ name = "docker-OFF";  target = "docker"; reps = 1; o11y = "OFF" },
+    @{ name = "docker-LOG";  target = "docker"; reps = 1; o11y = "LOG" },
     @{ name = "docker-ON";   target = "docker"; reps = 1; o11y = "ON"  }
 )
+
+# The full matrix order, captured BEFORE any -Configs filter: run numbers are assigned from a config's slot
+# here, so a subset keeps the same numbers it would have had in a full matrix.
+$ALL_CONFIG_NAMES = [System.Collections.ArrayList]@($CONFIGS | ForEach-Object { $_.name })
+
+# -Only runs a SUBSET by name (the k8s arms were stopped part-way on 07-16 and only the docker arms were
+# wanted; without this the resume would have re-run them). An unknown name is a typo, not a request to run
+# nothing -- fail loudly rather than silently skip the whole matrix.
+if ($Only.Count -gt 0) {
+    $known = $ALL_CONFIG_NAMES
+    $typo  = $Only | Where-Object { $known -notcontains $_ }
+    if ($typo) { throw "unknown config name(s): $($typo -join ', ') -- known: $($known -join ', ')" }
+    # @() is REQUIRED: a Where-Object that matches ONE config returns the hashtable itself, not an array,
+    # and $CONFIGS.Count then reports the hashtable's KEY count (4) instead of 1. The loop still runs
+    # correctly -- only the log lies -- which is exactly the kind of false alarm that gets a good run killed.
+    $CONFIGS = @($CONFIGS | Where-Object { $Only -contains $_.name })
+}
+
+# $OutDir MUST be absolute. The script Set-Locations into services\k8s and services\compose as it works, so a
+# RELATIVE -OutDir resolves against whatever the CWD happens to be at that moment: Add-Content then targets a
+# directory that does not exist, the write FAILS, and the log line is LOST WITHOUT A TRACE. That is how the
+# 07-17 run lost every RUN header, every build step and the infra-removal line while its CSV stayed perfect --
+# a log that lies by omission is worse than no log, because a missing step reads exactly like a step not taken.
+if (-not [System.IO.Path]::IsPathRooted($OutDir)) { $OutDir = Join-Path $PSScriptRoot $OutDir }
 
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 $CSV = "$OutDir\matrix.csv"
@@ -154,11 +244,48 @@ function Build-K8s($cfg) {
 
     Log "  bringing k8s up (fresh PG seed + KC realm import)"
     & ".\k8s-up.bat" *> $null
+
+    # REQUIRED INFRA ONLY (mir0n, 2026-07-17). k8s-up.bat installs the full dev cluster; a measurement wants
+    # nothing on the box that the measurement does not use -- idle components still hold RAM and take CPU on a
+    # host where EVERYTHING (services + infra + o11y + Gatling) shares one 16 GB WSL2 VM.
+    #   kafka -- ALWAYS out. Nothing references it: the audit sink is audit-c (AMQ -> auKeep); audit-ck/dk
+    #            are not in play.
+    #   redis -- out at x1 ONLY (mir0n). It is the BFF's SHARED SESSION STORE across replicas, so at x2 it is
+    #            REQUIRED -- two BFF pods must see each other's logins, and removing it would measure a broken
+    #            deployment. At x1 there is nothing to share: the chart omits REDIS_URL and the BFF falls back
+    #            to express-session's in-memory MemoryStore (config.ts) -- a SUPPORTED state, and exactly the
+    #            OKE 1-replica shape. (hauberk drives the GATEWAY directly either way.)
+    & helm uninstall esquire-infra-kafka *> $null
+    if ($cfg.reps -eq 1) {
+        Log "  required infra only -- removing kafka + redis (x1: BFF uses an in-memory session store)"
+        & helm upgrade esquire-backend charts\esquire-backend --reset-then-reuse-values --set redis.url="" *> $null
+        & kubectl rollout restart statefulset esquire-backend-backend *> $null
+        & helm uninstall esquire-infra-redis *> $null
+    } else {
+        Log "  required infra only -- removing kafka; redis KEPT (x2: the BFF replicas need a shared session store)"
+    }
+
     Wait-K8sPods
 
-    # k8s-up installs the viewing stack, so OFF must explicitly uninstall it.
-    if ($cfg.o11y -eq "ON") { Log "  o11y ON  (viewing stack + app instrumentation)"; & ".\o11y-on.bat"  *> $null }
-    else                    { Log "  o11y OFF (uninstalling viewing stack + app instrumentation)"; & ".\o11y-off.bat" *> $null }
+    # k8s-up installs the viewing stack, so every arm must explicitly put it into the state it wants.
+    # THREE arms (I49) -- and NO fall-through else: an unknown value must FAIL, never quietly run OFF and file
+    # the result under another name (that would report the cost of logging as zero, convincingly and wrongly).
+    if ($cfg.o11y -eq "FULL") {
+        Log "  o11y FULL (IN-FULL: pro.mir0n INFO + tracing + metrics + full viewing stack)"
+        & ".\o11y-full-on.bat" *> $null
+    } elseif ($cfg.o11y -eq "ON") {
+        Log "  o11y ON  (the stack AS SHIPPED: pro.mir0n at its DEBUG default + tracing + metrics)"
+        & ".\o11y-on.bat" *> $null
+    } elseif ($cfg.o11y -eq "LOG") {
+        Log "  o11y LOG (ONLY-LOGGING: pro.mir0n INFO + loki/alloy/grafana; tracing/metrics off)"
+        & ".\o11y-log-on.bat" *> $null
+    } elseif ($cfg.o11y -eq "OFF") {
+        Log "  o11y OFF (no viewing stack; tracing/metrics off; EVERY logger off)"
+        & ".\o11y-log-off.bat" *> $null
+    } else {
+        Log "  !! unknown o11y arm '$($cfg.o11y)' -- refusing to guess"
+        return $false
+    }
     Wait-K8sPods
 
     if ($cfg.reps -eq 1) {
@@ -183,11 +310,33 @@ function Build-Docker($cfg) {
     if (Test-Path "$SVCS\compose\data\keycloak") {
         Remove-Item "$SVCS\compose\data\keycloak" -Recurse -Force -ErrorAction SilentlyContinue
     }
-    if ($cfg.o11y -eq "ON") { $env:ESQ_OBSERVABILITY_ENABLED="true";  $env:ESQ_METRICS_HISTOGRAMS="true" }
-    else                    { $env:ESQ_OBSERVABILITY_ENABLED="false"; $env:ESQ_METRICS_HISTOGRAMS="false" }
+    # o11y has THREE values now (I49): OFF | ON | LOG.
+    #   OFF -- nothing: no tracing, no metrics, no viewing stack, APP LOGGER OFF (levelMir0n=OFF).
+    #   ON  -- everything (the T10 lump: tracing + metrics + shipping).
+    #   LOG -- the LOG PILLAR ALONE: tracing/metrics OFF, levelMir0n=INFO, loki+alloy+grafana, nothing else.
+    # LOG vs OFF is the isolated cost of logging -- the per-pillar SPLIT that T10 never reported (T10 itself
+    # is sound; it priced all three pillars as one lump). The knob is levelMir0n, never levelRoot.
+    # devLog/msgLog are IDENTICAL in every arm (DEBUG/INFO, to files) -- they cancel out of the delta by
+    # design (mir0n): the only thing that moves is the logging o11y stack.
+    # LOG_LEVEL_ROOT is NOT a knob here and never was -- root cannot silence the application (pro.mir0n has its
+    # own level and reaches the ECS console by additivity). pro.mir0n is THE knob; every other logger is OFF in
+    # every arm, so the only thing that moves is the pillar under test. Root stays at its ERROR default (mir0n).
+    $env:LOG_LEVEL_DEVELOP="OFF"; $env:LOG_LEVEL_MSG="OFF"; $env:LOG_LEVEL_AMQ="OFF"; $env:LOG_LEVEL_JMS="OFF"
+    if ($cfg.o11y -eq "FULL") {
+        $env:ESQ_OBSERVABILITY_ENABLED="true";  $env:ESQ_METRICS_HISTOGRAMS="true";  $env:LOG_LEVEL_MIR0N="INFO"
+    } elseif ($cfg.o11y -eq "ON") {
+        $env:ESQ_OBSERVABILITY_ENABLED="true";  $env:ESQ_METRICS_HISTOGRAMS="true";  $env:LOG_LEVEL_MIR0N=$null
+    } elseif ($cfg.o11y -eq "LOG") {
+        $env:ESQ_OBSERVABILITY_ENABLED="false"; $env:ESQ_METRICS_HISTOGRAMS="false"; $env:LOG_LEVEL_MIR0N="INFO"
+    } else {
+        $env:ESQ_OBSERVABILITY_ENABLED="false"; $env:ESQ_METRICS_HISTOGRAMS="false"; $env:LOG_LEVEL_MIR0N="OFF"
+    }
     Log "  bringing docker up (fresh PG seed + KC realm import), o11y=$($cfg.o11y)"
     docker compose up -d *> $null
-    if ($cfg.o11y -eq "ON") { & ".\o11y-on.bat" *> $null }
+    if ($cfg.o11y -eq "FULL") { & ".\o11y-full-on.bat" *> $null }
+    if ($cfg.o11y -eq "ON")   { & ".\o11y-on.bat"  *> $null }
+    if ($cfg.o11y -eq "LOG")  { & ".\o11y-log-on.bat" *> $null }
+    if ($cfg.o11y -eq "OFF")  { & ".\o11y-log-off.bat" *> $null }
 
     # The gateway's health is NOT a readiness gate for the STACK. It comes up in ~10s without
     # touching Postgres, so a database that failed to seed leaves the gateway happily reporting UP
@@ -291,7 +440,11 @@ foreach ($cfg in $CONFIGS) {
         $script:k8sDrained = $true
         Log "### k8s drained -- 0 pods, 0 helm releases; docker has the machine"
     }
-    for ($r = 1; $r -le $Runs; $r++) { $run++; Invoke-Run $run $cfg }
+    # The run NUMBER is derived from the config's slot in the FULL matrix, never from a running counter:
+    # with -Configs the counter would restart at 1 and collide with runs already in the CSV, which the
+    # resume check would then read as "already complete" and skip the whole subset.
+    $slot = $ALL_CONFIG_NAMES.IndexOf($cfg.name)
+    for ($r = 1; $r -le $Runs; $r++) { Invoke-Run (($slot * $Runs) + $r) $cfg }
 }
 Log "############ MATRIX COMPLETE -> $CSV ############"
 Log "Analyse with:  python perf-matrix-report.py `"$CSV`""

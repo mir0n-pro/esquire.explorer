@@ -1,5 +1,13 @@
 hauberk changes
 
+07/17/2026 mir0n  v1.2.11 -- T11 cleanup: fix/resolve issues noted during development
+perf-matrix.ps1
+  - the o11y arms go from OFF/ON to three modes OFF / LOG / FULL so logging is isolated from tracing+metrics;
+    the knob is levelMir0n (not levelRoot, which cannot silence the app -- pro.mir0n reaches the console by
+    additivity); -Scale scales the VU count, -Only runs a subset; docker is dropped from the o11y measurement
+    (uncapped -> its sag biases the delta) and kept only as a smoke test; required-infra-only removes kafka and
+    (at x1) redis where nothing under test uses them (I49)
+
 07/15/2026 mir0n  v1.2.11 -- T11 cleanup: fix/resolve issues noted during development
 hauberk-S.properties  (new)
   - the VANILLA token-relay overlay: tokenRelay.type=vanilla + the esq-hauberk-S client (HTTP Basic at the edge,

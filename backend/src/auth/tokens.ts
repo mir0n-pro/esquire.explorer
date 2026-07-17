@@ -8,6 +8,8 @@
  *  History:
  * 05/07/2026 mir0n  created: getValidAccessToken with refresh-on-expiry via openid-client; NoSessionError sentinel for missing-session signalling
  * 07/02/2026 mir0n  refreshExpiresAt(tokenSet) = now + refresh_expires_in; a refresh carries session_expires_at forward
+ * 07/17/2026 mir0n  the KeyCloak token refresh is wrapped in traceKcCall (CLIENT span); the refresh token is
+ *                   narrowed to a local so it stays narrowed inside the closure.
  */
 
 import type { Request } from 'express';
@@ -15,6 +17,7 @@ import { getOidcClient } from './openidClient.js';
 import type { BackendConfig } from '../config.js';
 import type { OidcTokens } from './sessionStore.js';
 import { log } from '../util/log.js';
+import { traceKcCall } from '../util/trace.js';
 
 const REFRESH_LEEWAY_SECONDS = 30;
 
@@ -72,7 +75,8 @@ async function refresh(req: Request, config: BackendConfig): Promise<string> {
   }
   try {
     const client = await getOidcClient(config);
-    const tokenSet = await client.refresh(tokens.refresh_token);
+    const refreshToken = tokens.refresh_token;   // narrowed to string by the guard above; a local keeps it narrowed inside the closure
+    const tokenSet = await traceKcCall('KC token refresh', () => client.refresh(refreshToken));
     if (tokenSet.access_token === undefined || tokenSet.expires_at === undefined) {
       throw new RefreshFailedError('refresh response missing access_token or expires_at');
     }

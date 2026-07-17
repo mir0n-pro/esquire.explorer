@@ -13,6 +13,8 @@
  * 07/15/2026 mir0n  v1.2.11 T11 -- tracing.enabled now reads ESQ_OBSERVABILITY_ENABLED (was ESQ_TRACING_ENABLED),
  *                   the same umbrella switch the Java services use; it gates the BFF tracing AND the BFF metrics
  *                   surface (I13)
+ * 07/17/2026 mir0n  per-pillar sub-switches: a separate metrics.enabled, and tracing.enabled via pillarOn under
+ *                   the ESQ_OBSERVABILITY_ENABLED umbrella (I41).
  */
 
 export interface BackendConfig {
@@ -67,11 +69,18 @@ export interface BackendConfig {
   };
   // Distributed tracing (v1.2.11 O2). When enabled, the BFF emits a root OTel span per request
   // (traceId == the settled correlation id) and exports it over OTLP to the collector. Off by
-  // default (same posture as the Java services); the o11y stack + env turn it on.
+  // default (same posture as the Java services); the o11y stack + env turn it on. `enabled` is the
+  // per-pillar EFFECTIVE value: master AND the tracing sub-switch (I41) -- see loadConfig.
   tracing: {
     enabled: boolean;
     otlpEndpoint: string;
     samplingRatio: number;
+  };
+  // Metrics pillar (O1/T5c): the Prometheus /metrics surface. `enabled` is the per-pillar EFFECTIVE
+  // value: master AND the metrics sub-switch (I41). Peer of tracing under the one observability master,
+  // so the BFF matches the Java services -- either pillar can run without the other (mesh coexistence).
+  metrics: {
+    enabled: boolean;
   };
 }
 
@@ -120,10 +129,24 @@ export function loadConfig(): BackendConfig {
       maxEntries: Number(process.env.ESQ_DICT_CACHE_MAX ?? 64),
     },
     tracing: {
-      enabled: process.env.ESQ_OBSERVABILITY_ENABLED === 'true',
+      enabled: pillarOn(process.env.ESQ_TRACING_ENABLED),
       otlpEndpoint: process.env.ESQ_OTLP_ENDPOINT ?? 'http://localhost:4318/v1/traces',
       samplingRatio: Number(process.env.ESQ_TRACING_SAMPLING_RATIO ?? 1.0),
     },
+    metrics: {
+      enabled: pillarOn(process.env.ESQ_METRICS_ENABLED),
+    },
   };
   return ret;
+}
+
+// Per-pillar enable (I41), mirroring the Java services: the observability MASTER
+// (ESQ_OBSERVABILITY_ENABLED) gates everything; each pillar then has a sub-switch that DEFAULTS to on,
+// so a bare master keeps both pillars up (unchanged). Effective = master AND sub. An unset or empty
+// sub follows the master; an explicit "false" turns just that pillar off -- e.g. ESQ_TRACING_ENABLED=false
+// runs the BFF metrics-only, the service-mesh coexistence case (a mesh already traces the wire).
+function pillarOn(sub: string | undefined): boolean {
+  const master = process.env.ESQ_OBSERVABILITY_ENABLED === 'true';
+  const subOn = sub === undefined || sub === '' ? true : sub === 'true';
+  return master && subOn;
 }
