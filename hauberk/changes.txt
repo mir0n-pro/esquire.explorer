@@ -1,5 +1,18 @@
 hauberk changes
 
+07/19/2026 mir0n  v1.2.11 -- T12: the OKE performance matrix
+oke-perf-matrix.ps1  (new)
+  - the OKE twin of perf-matrix.ps1: drives the 200-VU super-load across x1/x2 x OFF/LOG/FULL on the LIVE OKE
+    cluster, same CSV schema (perf-matrix-report.py reads it). TOGGLE IN PLACE, not from scratch -- OKE is live
+    and ALTER-migrated, no PVC wipe: each cell scales the replicas + calls oke-o11y-on <arm>, with clean-house
+    between cells. The broker is NEVER rolled (SKIP_INFRA_ROLL -- a broker bounce drops the app's messagingBus,
+    which does not self-heal); Wait-OkePods kicks any straggler. ONE run per config (no from-scratch, so a second
+    run is not an independent replicate -- it only deepens the run-order drift), MaxLoads 12 (OKE warms far
+    slower over the ~55ms RTT). Starts and ends at the OKE default (ERROR logging, no stack, x2)
+oke-perf-matrix.bat  (new)
+  - entry point for the OKE matrix: launches oke-perf-matrix.ps1 detached so a multi-hour run survives the
+    console (resumable); --fresh starts a new CSV, --fg runs in the current console; refuses docker-desktop
+
 07/17/2026 mir0n  v1.2.11 -- T11 cleanup: fix/resolve issues noted during development
 perf-matrix.ps1
   - the o11y arms go from OFF/ON to three modes OFF / LOG / FULL so logging is isolated from tracing+metrics;

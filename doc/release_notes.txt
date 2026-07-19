@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.11-2607.1910  v1.2.11 -- T12: the OKE performance matrix
+    - the performance matrix can now run on the live cloud cluster, switching monitoring on and off in place
+      instead of tearing the whole environment down and rebuilding it each time
+    Components:   hauberk
+
 v1.2.11-2607.1714  v1.2.11 -- T11 cleanup: fix/resolve issues noted during development
     - the browser tier's own metric names did not match the naming used everywhere else
     - the hop from the browser tier out to the gateway had no timing of its own
