@@ -1,6 +1,12 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (backend / BFF tier)
 
+07/23/2026 mir0n  v1.2.11 -- homework: fix/resolve issues noted during the audit
+src\config.ts
+  - KC_CLIENT_SECRET and SESSION_SECRET fail CLOSED: required() with no dev fallback (missing secret crashes boot)
+src\auth\routes.ts
+  - safeReturnTo(): post-login returnTo constrained to the callback origin (open-redirect / CWE-601 guard)
+
 07/17/2026 mir0n  v1.2.11 -- T11 cleanup: fix/resolve issues noted during development
 src\util\metrics.ts
   - esq_bff_inbound_duration_seconds (renamed from bff_http_request_duration_seconds, I48) plus

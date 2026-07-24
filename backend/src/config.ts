@@ -15,6 +15,8 @@
  *                   surface (I13)
  * 07/17/2026 mir0n  per-pillar sub-switches: a separate metrics.enabled, and tracing.enabled via pillarOn under
  *                   the ESQ_OBSERVABILITY_ENABLED umbrella (I41).
+ * 07/23/2026 mir0n  v1.2.11 -- KC_CLIENT_SECRET and SESSION_SECRET now fail CLOSED: required() with NO dev fallback
+ *                   (a missing secret crashes the boot instead of defaulting to a committed value)
  */
 
 export interface BackendConfig {
@@ -107,7 +109,10 @@ export function loadConfig(): BackendConfig {
       issuer: kcIssuer,
       issuerInternal: process.env.KC_ISSUER_INTERNAL ?? kcIssuer,
       clientId: required('KC_CLIENT_ID', 'esq-angular'),
-      clientSecret: required('KC_CLIENT_SECRET', 'esq-angular-bff-dev-secret-rotate-in-prod'),
+      // Security secret: NO fallback -- fail CLOSED. Supplied by config in every runtime (compose sets a dev
+      // value; the chart helm-requires it via --set at install). A missing secret must crash the boot, never
+      // default to a committed value -- dev included. Do not add a fallback here.
+      clientSecret: required('KC_CLIENT_SECRET'),
     },
     gateway: {
       url: required('GATEWAY_URL', 'http://localhost:7070'),
@@ -119,7 +124,8 @@ export function loadConfig(): BackendConfig {
       timeoutMs: Number(process.env.BFF_PROXY_TIMEOUT_MS ?? 0),
     },
     session: {
-      secret: required('SESSION_SECRET', 'dev-session-secret-replace-me'),
+      // Security secret: NO fallback -- fail CLOSED (see kc.clientSecret). Signs the esq.sid session cookie.
+      secret: required('SESSION_SECRET'),
       cookieName: 'esq.sid',
       maxAgeMs: Number(process.env.SESSION_MAX_AGE_MS ?? 12 * 60 * 60 * 1000),
       redisUrl: process.env.REDIS_URL ?? '',

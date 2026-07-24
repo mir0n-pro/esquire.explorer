@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.11-2607.2318  v1.2.11 -- homework: fixes noted during the audit
+    - the browser-tier login secrets now fail closed instead of falling back to a built-in dev value
+    - a post-login redirect is confined to the app's own address, so a crafted link cannot bounce a signed-in user elsewhere
+    Components:   backend
+
 v1.2.11-2607.1910  v1.2.11 -- T12: the OKE performance matrix
     - the performance matrix can now run on the live cloud cluster, switching monitoring on and off in place
       instead of tearing the whole environment down and rebuilding it each time

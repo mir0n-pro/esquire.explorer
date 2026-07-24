@@ -37,9 +37,9 @@ curl http://localhost:3000/healthz
 | `PUBLIC_BASE_URL` | `http://localhost:3000` | Used in OIDC redirect URIs |
 | `KC_ISSUER` | `http://localhost:8080/kc-auth/realms/esquire` | Keycloak realm issuer |
 | `KC_CLIENT_ID` | `esq-backend` | Confidential KC client |
-| `KC_CLIENT_SECRET` | (required in prod) | KC client secret |
+| `KC_CLIENT_SECRET` | **required (no default)** | KC client secret -- boot fails closed if unset (compose sets a dev value; the chart --sets it) |
 | `GATEWAY_URL` | `http://localhost:7070` | Spring Cloud Gateway |
-| `SESSION_SECRET` | (required in prod) | express-session signing secret |
+| `SESSION_SECRET` | **required (no default)** | express-session signing secret -- boot fails closed if unset (compose sets a dev value; the chart --sets it) |
 | `SESSION_MAX_AGE_MS` | `43200000` (12h) | Cookie maxAge |
 | `ESQ_DICT_CACHE_TTL_MS` | `3600000` (1h) | Dictionary cache TTL |
 | `ESQ_DICT_CACHE_MAX` | `64` | LRU cache max entries |
