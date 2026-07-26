@@ -1,42 +1,51 @@
             <h2>What is it?</h2>
             <p>
               Esquire is a <strong>business entity framework</strong> — the structural backbone for any system
-              that needs to organize people, organizations, and resources in a tree, enforce who can see
-              and do what within that tree, and run business operations against it.
+              that needs to organize people, organizations, and resources in a tree, enforce who can see and do
+              what within that tree, and run business operations against it.
+            </p>
+            <p>
+              Its authorization backbone is two dimensions at once: <strong>role-based rules</strong> for what a
+              user may do, and <strong>tree-based scope</strong> for what a user may see — a user's position in
+              the tree resolves both, with no per-query filter written by hand. Any business domain can sit on
+              top of it.
             </p>
             <p>
               The backoffice scenario — onboarding, profile maintenance, permissions, accounting — is the
               demonstration domain. Accounting in particular is the "everybody's know-how" example: a
-              universally understood domain that exercises the full framework stack end to end. It is not
-              the destination. It is the proof of concept for the real idea.
-            </p>
-            <p>
-              The real idea is this: <strong>authorization shaped by the business tree itself.</strong>
-            </p>
-            <p>
-              Traditional role-based access control answers the question "what operations is this user
-              allowed to perform?" Esquire extends that with a second, orthogonal dimension: hierarchical
-              visibility — "what data is this user allowed to see at all?"
-            </p>
-            <p>
-              In Esquire, every entity lives at a position in the tree. Every authenticated user carries
-              a root path — the branch of the tree they belong to. Read operations are automatically
-              scoped to that branch: a user sees their own subtree and nothing outside it. A regional
-              manager sees their region. A system administrator at the root sees everything. No explicit
-              filter needs to be written into each query; the scope is structural, derived from where the
-              user sits in the tree.
-            </p>
-            <p>
-              The combination — role-based rules for operations, tree-based rules for visibility — is
-              what Esquire calls the authorization backbone. Any domain can be placed on top of it.
+              universally understood domain that exercises the full framework stack end to end. It is the proof
+              of the idea, not the destination.
             </p>
             <p>
               Esquire is not a product you subscribe to. It is a framework you own, deploy, and extend.
               No SaaS lock-in, no monthly seat fees, no vendor standing between you and your data.
             </p>
+
+            <h3 style="color: #4D6A8D;">A mature framework — everything the stack makes possible</h3>
             <p>
-              And it is <strong>mature, not a prototype</strong>: a complete, working system from database to
-              browser — high availability, full observability, a hybrid REST and event-driven engine, and open
-              vendor slots at every layer — answering all <strong>fifteen factors</strong> of a modern
-              cloud-native application, and running live in production today.
+              Esquire is not a prototype or a half-built foundation. It takes the ordinary, widely used
+              technology stack — a relational database, Spring Boot, Node.js with Angular, the
+              Grafana/Prometheus tooling — and delivers <strong>everything that stack makes possible</strong>,
+              as one working system from database to browser. That is the whole cloud-native picture, not a
+              slice of it: Esquire answers all <strong>fifteen factors</strong> of a modern cloud-native
+              application — from API-first design through configuration, backing services, and disposability,
+              to telemetry, authentication, and authorization. It already carries what most teams reach only
+              years in:
+            </p>
+            <ul style="font-size:12pt; line-height:1.6; color:rgba(0,0,0,0.75); padding-left:20px;">
+              <li><strong>High availability</strong> — every service runs redundantly, spread across nodes, so
+                  a lost pod or a lost node does not take the system down.</li>
+              <li><strong>Full observability</strong> — metrics, logs, and distributed traces on one screen,
+                  joined by a single correlation id, so any request's whole story is one search away.</li>
+              <li><strong>A hybrid REST + event-driven engine</strong> — synchronous APIs and an asynchronous
+                  messaging bus, both live, both vendor-neutral underneath.</li>
+              <li><strong>Open at every layer</strong> — database, messaging transport, and identity are each a
+                  deployment choice behind a stable interface; no single vendor is baked in.</li>
+              <li><strong>Running for real</strong> — the complete stack is deployed live in the cloud, not only
+                  on a developer's laptop.</li>
+            </ul>
+            <p>
+              The three backbone ideas — tree-shaped visibility, positional authority, entity self-description —
+              sit on a finished, production-grade cloud-native foundation. The floor is not just laid; it is
+              complete.
             </p>

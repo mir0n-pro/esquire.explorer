@@ -1,6 +1,20 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.11-2607.2714  v1.2.11 -- Finalization
+    - the cloud end-to-end launchers now point the token-relay checks at the cloud gateway (where the
+      relay is intentionally off, so the checks skip) instead of silently testing a local gateway
+    - the dead-session recovery check now waits for the tree to finish loading before it simulates the
+      dead session, so the expiry is triggered reliably instead of racing the tree's own first load
+    Components:   e2e
+
+v1.2.11-2607.2616  v1.2.11 -- T13: landing pages + README refreshed
+    :Doc:         the About/landing Architecture tab gains the Observability Stack (its components, as on the
+                  services README); the other tabs gain a mature-framework message -- the goal met, the fifteen
+                  factors, high availability and full observability
+    :Doc:         the README carries the v1.2.11 observability announcement, with the prior version rolled down
+    Components:   frontend
+
 v1.2.11-2607.2318  v1.2.11 -- homework: fixes noted during the audit
     - the browser-tier login secrets now fail closed instead of falling back to a built-in dev value
     - a post-login redirect is confined to the app's own address, so a crafted link cannot bounce a signed-in user elsewhere

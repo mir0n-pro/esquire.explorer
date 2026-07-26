@@ -40,14 +40,20 @@ test('a plain landing shows no session-expired notice', async ({ page }) => {
 test('a dead session on an API action bounces to the landing notice', async ({ page }) => {
   await keycloakLogin(page);
   await expect(page.locator('.name-bar')).toBeVisible();
-  // Simulate a dead BFF session deterministically: every /api/* call returns
-  // 401 {no session}, and /auth/me reports unauthenticated (so the post-redirect
-  // bootstrap lands on the notice instead of re-bootstrapping into a loop).
+  // Arm the dead-session mock only AFTER the tree has finished loading. If armed while the tree's own
+  // background /api call is still in flight, THAT call hits the 401 first and fires the redirect before
+  // we click Refresh -- removing the button mid-test (a race that failed under latency). Waiting for the
+  // Refresh button + network idle means our click is the FIRST /api call after the mock: deterministic.
+  const refresh = page.locator('button[matTooltip="Refresh"]');
+  await expect(refresh).toBeVisible();
+  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => { /* no idle window; proceed */ });
+  // Simulate a dead BFF session deterministically: every /api/* call returns 401 {no session}, and
+  // /auth/me reports unauthenticated (so the post-redirect bootstrap lands on the notice, not a loop).
   await page.route('**/api/**', route =>
     route.fulfill({ status: 401, contentType: 'application/json', body: '{"error":"no session"}' }));
   await page.route('**/auth/me', route =>
     route.fulfill({ status: 200, contentType: 'application/json', body: '{"authenticated":false}' }));
-  // A tree refresh fires an /api/* call -> 401 -> rfc9457Interceptor redirects to /?auth=expired
-  await page.locator('button[matTooltip="Refresh"]').click();
+  // The Refresh click fires an /api/* call -> 401 -> rfc9457Interceptor redirects to /?auth=expired
+  await refresh.click();
   await expect(page.locator('.session-expired-notice')).toBeVisible({ timeout: 15000 });
 });

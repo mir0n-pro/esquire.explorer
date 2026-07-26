@@ -9,6 +9,10 @@
               <li>An admin UI that someone promises to clean up later</li>
             </ol>
             <p>
+              And once it is live, two more that most teams add only when they are already in production:
+              keeping it up (high availability) and seeing what it is doing (observability).
+            </p>
+            <p>
               These are not competitive differentiators. They are infrastructure. Building them from
               scratch on every project is expensive, slow, and consistently underestimated. Buying a
               monolithic ERP means inheriting ten years of someone else's assumptions. Low-code admin
@@ -90,34 +94,23 @@
               kcMaster with an xyzMaster that speaks to a different IAM — the rest of the system
               is unchanged. A deployment decision, not an architectural one.
             </p>
+
+            <h3>7. Observability built in, not left to you</h3>
             <p>
+              Metrics, logs, and traces come from every service in the same shape, ready from the start and
+              the same in every environment. Most comparable tools ship none of this and leave it to your team
+              to add later, one gap at a time — here it is part of the framework.
+            </p>
+
+            <h3>8. High availability from the first deploy, not a later project</h3>
+            <p>
+              Every tier already runs as more than one copy, spread across machines, so losing one keeps the
+              site up. This is how Esquire is deployed from the start — not a hardening step added after the
+              first outage.
+            </p>
+
+            <p style="margin-top: 20px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 16px;">
               Esquire is a working, connected system from database to browser. Many routes are open
               from here — new database targets, new transports, new IAM providers, new entity domains —
               without any dramatic change to the core architecture.
-            </p>
-
-            <h3>7. Observable the same way everywhere</h3>
-            <p>
-              Metrics, logs, and distributed traces come from every service in one common shape, joined by a
-              single correlation id. A log line, its trace, and its numbers are one click apart on one screen —
-              a request's whole story, from the browser through the service calls and across the message hops,
-              is one search away. The whole stack switches on in any environment, at any moment; whether it is
-              left running is a resource decision, not a capability one. Most comparable tools leave telemetry
-              to the application team; here it is built in and uniform.
-            </p>
-
-            <h3>8. Highly available by construction</h3>
-            <p>
-              The gateway, every backend service, and the browser front-door each run redundantly, spread
-              across nodes, so losing one keeps the site up. High availability is not a later hardening
-              project bolted on — it is how the system is deployed from the start.
-            </p>
-
-            <h3>A finished, production-grade foundation</h3>
-            <p>
-              Each of these is a hard problem most teams solve late, under pressure, one incident at a time.
-              Esquire solves all of them once, correctly, and ships them together as one mature framework —
-              answering the full set of <strong>fifteen cloud-native factors</strong>, from API-first design
-              to telemetry and authorization. The floor is not just laid; it is complete, and running live
-              in production.
             </p>

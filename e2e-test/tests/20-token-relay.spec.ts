@@ -29,7 +29,13 @@ const PROTECTED = '/esq-dict?kind=1000';
 
 const TOKEN_ENDPOINT = `${KC}/realms/${REALM}/protocol/openid-connect/token`;
 
-test('Vanilla Token Relay: HTTP Basic at the edge reaches a protected route', async () => {
+// Token Relay is a LAB feature. On the internet-facing OKE gateway it is DISABLED by design -- empty
+// allowlists, so the gateway never brokers/exchanges and a relay call is correctly 403'd (services
+// k8s-oci/values/gateway.yaml, mir0n 2026-07-20). The OKE e2e run sets RELAY_DISABLED=true so these two
+// specs SKIP there; docker / local k8s leave the relay live and keep running them.
+const relayTest = process.env['RELAY_DISABLED'] === 'true' ? test.skip : test;
+
+relayTest('Vanilla Token Relay: HTTP Basic at the edge reaches a protected route', async () => {
   const ctx = await pwRequest.newContext();
   const basic = Buffer.from(`${VANILLA_ID}:${VANILLA_SECRET}`).toString('base64');
   const res = await ctx.get(`${GATEWAY}${PROTECTED}`, { headers: { Authorization: `Basic ${basic}` } });
@@ -37,7 +43,7 @@ test('Vanilla Token Relay: HTTP Basic at the edge reaches a protected route', as
   await ctx.dispose();
 });
 
-test('Phantom Token Relay: exchanged Bearer reaches a protected route', async () => {
+relayTest('Phantom Token Relay: exchanged Bearer reaches a protected route', async () => {
   const ctx = await pwRequest.newContext();
 
   const tokenRes = await ctx.post(TOKEN_ENDPOINT, {

@@ -1,6 +1,22 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+07/26/2026 mir0n  v1.2.11 -- landing pages: observability + the mature-framework message
+public\landing\architecture.html
+  - Observability Stack section added (o11yStack.png + the seven o11y components: Postgres Exporter,
+    Prometheus, OpenTelemetry Collector, Grafana Tempo, Alloy, Loki, Grafana), mirroring the services README
+public\landing\vision.html
+  - "A mature framework -- everything the stack makes possible" section (the fifteen factors + high
+    availability, full observability, hybrid engine, open at every layer, running for real)
+public\landing\why-it-matters.html
+  - two value points added -- observability and high availability -- plus a finished-foundation closer
+public\landing\what-is-it.html
+  - mature / complete-framework closing paragraph
+public\landing\who-needs-it.html
+  - mature / complete-framework closing paragraph
+public\landing\vs-competition.html
+  - mature-framework intro reframing the comparison
+
 07/06/2026 mir0n  session-expired notice grouped with the login hint (button no longer displaced) + marquee scroll
 explorer\flatTree\app-shell.html
   - session-expired notice + login hint grouped in .toolbar-login-area (grid col-3) so the notice no longer displaces the login button; notice text wrapped in a .notice-roll marquee span
