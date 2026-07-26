@@ -148,6 +148,49 @@
               <img src="/logo/gatling.svg" alt="Gatling" height="18" style="vertical-align:middle"></h3>
             <p>Public REST API exposed for gatling-based load / smoke harnesses and other integrations.</p>
 
+            <h2 style="margin-top: 32px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 20px;">Observability Stack</h2>
+            <img class="landing-arch-diagram" src="/img/o11yStack.png" alt="Esquire Observability Stack"/>
+
+            <p>
+              The framework is <strong>observable the same way everywhere</strong>: metrics, logs, and distributed
+              traces, joined by a single correlation id, so any request's whole story &mdash; from the browser, through
+              the service calls, across the message hops &mdash; is one search away on one screen. The whole stack can
+              be switched on in <strong>any environment, at any moment</strong>; whether it is left running is a
+              resource decision, not a capability one. Every piece below is open-source, and any of it can be swapped
+              out &mdash; no lock-in, the same rule as the rest of the platform.
+            </p>
+
+            <h3>Postgres Exporter
+              <img src="/logo/postgres.svg" alt="Postgres" height="20" style="vertical-align:middle"></h3>
+            <p>Turns the database's own statistics into numbers the metrics store can read.</p>
+
+            <h3>Prometheus
+              <img src="/logo/prometheus_logo.svg" alt="Prometheus" height="22" style="vertical-align:middle"></h3>
+            <p>The metrics store &mdash; collects the numbers (rates, timings, counts) from every service and keeps
+               their history.</p>
+
+            <h3>OpenTelemetry Collector
+              <img src="/logo/OTelCollector.png" alt="OpenTelemetry Collector" height="22" style="vertical-align:middle"></h3>
+            <p>The traces hub &mdash; a separate service that gathers each request's trace from every service, passes
+               it to the trace store, and builds the live map of which service calls which.</p>
+
+            <h3>Grafana Tempo
+              <img src="/logo/tempo_logo.svg" alt="Tempo" height="22" style="vertical-align:middle"></h3>
+            <p>The trace store &mdash; keeps each request's end-to-end trace, found by the same id as its logs.</p>
+
+            <h3>Grafana Alloy
+              <img src="/logo/alloy_icon.png" alt="Alloy" height="22" style="vertical-align:middle"></h3>
+            <p>The log collector &mdash; gathers the log lines from every service and passes them to the log store.</p>
+
+            <h3>Grafana Loki
+              <img src="/logo/loki_icon.svg" alt="Loki" height="22" style="vertical-align:middle"></h3>
+            <p>The log store &mdash; keeps all the logs, searchable, and serves them to the dashboard.</p>
+
+            <h3>Grafana
+              <img src="/logo/grafana_icon.svg" alt="Grafana" height="22" style="vertical-align:middle"></h3>
+            <p>The one screen &mdash; dashboards for logs, traces, and numbers together; because everything shares one
+               id, a log line, its trace, and its numbers are one click apart.</p>
+
             <p style="margin-top: 24px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 16px;">
               Source code and documentation:
               <a href="https://github.com/mir0n-pro/esquire.services#readme"

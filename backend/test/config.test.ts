@@ -14,22 +14,24 @@ describe('loadConfig', () => {
 
   beforeEach(() => {
     process.env = { ...originalEnv };
+    // Security secrets are REQUIRED (no code fallback) -- set them so loadConfig() succeeds. The fail-closed
+    // behaviour when they are ABSENT gets its own test below.
+    process.env.KC_CLIENT_SECRET = 'test-kc-client-secret';
+    process.env.SESSION_SECRET = 'test-session-secret';
   });
 
   afterEach(() => {
     process.env = originalEnv;
   });
 
-  it('falls back to documented defaults when no env vars are set', () => {
+  it('falls back to documented defaults for the OPTIONAL vars (secrets are required separately)', () => {
     delete process.env.PORT;
     delete process.env.NODE_ENV;
     delete process.env.PUBLIC_BASE_URL;
     delete process.env.ALLOWED_ORIGINS;
     delete process.env.KC_ISSUER;
     delete process.env.KC_CLIENT_ID;
-    delete process.env.KC_CLIENT_SECRET;
     delete process.env.GATEWAY_URL;
-    delete process.env.SESSION_SECRET;
     delete process.env.SESSION_MAX_AGE_MS;
     delete process.env.REDIS_URL;
     delete process.env.ESQ_DICT_CACHE_TTL_MS;
@@ -100,5 +102,15 @@ describe('loadConfig', () => {
 
     process.env.REDIS_URL = 'redis://esquire-infra-redis:6379';
     expect(loadConfig().session.redisUrl).toBe('redis://esquire-infra-redis:6379');
+  });
+
+  it('fails CLOSED: throws when KC_CLIENT_SECRET is missing (no committed fallback)', () => {
+    delete process.env.KC_CLIENT_SECRET;
+    expect(() => loadConfig()).toThrow(/KC_CLIENT_SECRET/);
+  });
+
+  it('fails CLOSED: throws when SESSION_SECRET is missing (no committed fallback)', () => {
+    delete process.env.SESSION_SECRET;
+    expect(() => loadConfig()).toThrow(/SESSION_SECRET/);
   });
 });

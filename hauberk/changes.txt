@@ -1,5 +1,66 @@
 hauberk changes
 
+07/19/2026 mir0n  v1.2.11 -- T12: the OKE performance matrix
+oke-perf-matrix.ps1  (new)
+  - the OKE twin of perf-matrix.ps1: drives the 200-VU super-load across x1/x2 x OFF/LOG/FULL on the LIVE OKE
+    cluster, same CSV schema (perf-matrix-report.py reads it). TOGGLE IN PLACE, not from scratch -- OKE is live
+    and ALTER-migrated, no PVC wipe: each cell scales the replicas + calls oke-o11y-on <arm>, with clean-house
+    between cells. The broker is NEVER rolled (SKIP_INFRA_ROLL -- a broker bounce drops the app's messagingBus,
+    which does not self-heal); Wait-OkePods kicks any straggler. ONE run per config (no from-scratch, so a second
+    run is not an independent replicate -- it only deepens the run-order drift), MaxLoads 12 (OKE warms far
+    slower over the ~55ms RTT). Starts and ends at the OKE default (ERROR logging, no stack, x2)
+oke-perf-matrix.bat  (new)
+  - entry point for the OKE matrix: launches oke-perf-matrix.ps1 detached so a multi-hour run survives the
+    console (resumable); --fresh starts a new CSV, --fg runs in the current console; refuses docker-desktop
+
+07/17/2026 mir0n  v1.2.11 -- T11 cleanup: fix/resolve issues noted during development
+perf-matrix.ps1
+  - the o11y arms go from OFF/ON to three modes OFF / LOG / FULL so logging is isolated from tracing+metrics;
+    the knob is levelMir0n (not levelRoot, which cannot silence the app -- pro.mir0n reaches the console by
+    additivity); -Scale scales the VU count, -Only runs a subset; docker is dropped from the o11y measurement
+    (uncapped -> its sag biases the delta) and kept only as a smoke test; required-infra-only removes kafka and
+    (at x1) redis where nothing under test uses them (I49)
+
+07/15/2026 mir0n  v1.2.11 -- T11 cleanup: fix/resolve issues noted during development
+hauberk-S.properties  (new)
+  - the VANILLA token-relay overlay: tokenRelay.type=vanilla + the esq-hauberk-S client (HTTP Basic at the edge,
+    the gateway runs client_credentials on its behalf) (I8)
+hauberk-M.properties  (new)
+  - the PHANTOM token-relay overlay: tokenRelay.type=phantom + the esq-hauberk-M client (a Bearer the gateway
+    exchanges via RFC 8693) (I8)
+
+07/14/2026 mir0n  v1.2.11 -- the performance matrix; a VU whose setup failed no longer spins; the user pool excludes the create loop's office
+perf-matrix.bat  (new)
+  - entry point for the performance matrix: 6 configurations (docker / k8s x1 / k8s x2, each o11y OFF and ON) x 2
+    runs x 4+ loads. Launches perf-matrix.ps1 detached so a multi-hour matrix survives the console; --fresh starts
+    a new CSV, --fg runs in the current console
+perf-matrix.ps1  (new)
+  - the matrix engine. Every run is built FROM SCRATCH -- the stack is torn down and rebuilt and the Postgres,
+    KeyCloak and broker data dropped (k8s-down.bat leaves the PVCs and `docker compose down` keeps the volume, so
+    both are deleted explicitly). Loads run until the throughput STOPS MOVING (4 minimum, extended while the last
+    load is still climbing >3%, capped at 6). o11y OFF also UNINSTALLS the viewing stack. Only one stack is ever
+    up: before the docker half it uninstalls every esquire helm release and ABORTS if any pod survives. Readiness
+    is gated on the DB being seeded + the realm imported + the gateway UP, and a failed playground prepare aborts
+    the run. Results are appended to matrix.csv after every load and a completed run is skipped on rerun
+perf-matrix-report.py  (new)
+  - reads matrix.csv and prints the three answers: does super-load pass (KO rate per config), what is the noise
+    floor (the gap between a config's own two from-scratch runs), and what each comparison costs. Steady state is
+    the PLATEAU -- the trailing loads within 3% of each other; load 1 (warm-up) and any load still climbing or
+    sagging are excluded. Every comparison is printed next to the noise it must beat, plus a separation check
+simulations.LoadScenarios
+  - exitHereIfFailed() between the setup and the .forever() loop in all five scenarios -- a VU whose setup failed
+    used to walk into the loop with no session attributes, so its requests were never SENT and the loop spun at
+    full CPU issuing nothing
+chain.PoolFetchUsers
+  - userPool EXCLUDES users parented by the deepest office -- the CREATE scenario's churn ground. It fetches the
+    subtree, finds the deepest ORG by the same rule LoadScenarios.CREATE uses, and drops the users whose parentId
+    is that office; an empty pool marks the VU failed
+hauberk-k8s.properties
+  - kc.base and gw.base both moved onto the ingress (esquire.localhost / api.esquire.localhost); no port-forward.
+    gw.base was localhost:8808, a single-threaded userspace proxy that capped every k8s load run; kc.base was
+    localhost:8081 to dodge a JDK-HttpClient/nginx hang that KcTokenClient already fixes by pinning HTTP_1_1, and
+    the forward died on every KeyCloak rollout
+
 07/03/2026 mir0n  v1.2.10 -- KC<->Esquire reconcile utility; write-time X-Request-ID companion
 cli.KcReconcileCommand  (new)
   - picocli "kc-reconcile" subcommand -- detect (and optionally --repair) drift between esq2025 and KeyCloak, PG(JDBC) + KC(REST) directly, out of the Esquire services

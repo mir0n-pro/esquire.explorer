@@ -1,6 +1,91 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (backend / BFF tier)
 
+07/23/2026 mir0n  v1.2.11 -- homework: fix/resolve issues noted during the audit
+src\config.ts
+  - KC_CLIENT_SECRET and SESSION_SECRET fail CLOSED: required() with no dev fallback (missing secret crashes boot)
+src\auth\routes.ts
+  - safeReturnTo(): post-login returnTo constrained to the callback origin (open-redirect / CWE-601 guard)
+
+07/17/2026 mir0n  v1.2.11 -- T11 cleanup: fix/resolve issues noted during development
+src\util\metrics.ts
+  - esq_bff_inbound_duration_seconds (renamed from bff_http_request_duration_seconds, I48) plus
+    esq_bff_outbound_duration_seconds for the BFF->gateway hop (I42/L8+L9); the metrics surface now reads its own
+    metrics sub-switch, not tracing.enabled (I41)
+src\util\trace.ts
+  - traceKcCall(name, fn) opens a CLIENT span around a KeyCloak round-trip; toW3cTraceId / isW3cTraceId are
+    exported for the cross-language W3C conformance test
+src\proxy\apiProxy.ts
+  - the BFF->gateway hop is timed via timeUpstream (esq_bff_outbound_duration_seconds), stopped once on both
+    proxy paths -- idempotent so the res close event cannot double-count (I42/L8+L9)
+src\config.ts
+  - per-pillar sub-switches: a separate metrics.enabled, and tracing.enabled via pillarOn under the
+    ESQ_OBSERVABILITY_ENABLED umbrella (I41)
+src\auth\openidClient.ts
+  - the KeyCloak issuer discovery is wrapped in traceKcCall, so it appears as a CLIENT span in the trace
+src\auth\routes.ts
+  - the KeyCloak token exchange (callback) is wrapped in traceKcCall (CLIENT span)
+src\auth\tokens.ts
+  - the KeyCloak token refresh is wrapped in traceKcCall (CLIENT span); the refresh token is narrowed to a local
+    so it stays narrowed inside the closure
+
+07/15/2026 mir0n  v1.2.11 -- T11 cleanup: fix/resolve issues noted during development
+src\config.ts
+  - tracing.enabled now reads ESQ_OBSERVABILITY_ENABLED (was ESQ_TRACING_ENABLED), the same umbrella switch the
+    Java services use; it gates the BFF tracing AND the BFF metrics surface (I13)
+
+07/10/2026 mir0n  v1.2.11 -- metrics foundation (O1): the BFF publishes its own metrics
+src\util\metrics.ts  (new)
+  - the BFF Prometheus /metrics surface (prom-client): initMetrics() registers the Node runtime defaults
+    (process + event-loop + heap) plus a bff_http_request_duration_seconds histogram; metricsMiddleware() times
+    each request by method / coarse route / status; metricsHandler() serves /metrics. Every series carries
+    application="esq-backend". Gated by the observability umbrella (config.tracing.enabled) -- off by default
+src\index.ts
+  - initMetrics(config) at startup; app.use(metricsMiddleware); app.get('/metrics', metricsHandler)
+package.json
+  - prom-client ^15.1.3 added
+
+07/09/2026 mir0n  v1.2.11 -- the BFF tracer resource carries service.instance.id
+src\util\trace.ts
+  - the tracer resource now carries service.instance.id, the INSTANCE_ID constant in the Java
+    <app>.<instanceNo> shape ('esq-backend.' + the host name's trailing ordinal after the last dash when
+    that tail is all digits, else 0 -- the EsqUtils.instanceNo() rule). The collector rewrites service.name
+    to it on the traces pipeline, so every BFF span is badged with the replica that served the request
+
+07/08/2026 mir0n  v1.2.11 -- distributed tracing (O2): the BFF is the first hop of the trace
+src\util\trace.ts
+  - the whole BFF tracing surface lives in this one module: the OpenTelemetry engine, the W3C helpers and
+    traceMiddleware
+  - OpenTelemetry Node SDK: initTracing / shutdownTracing build the OTLP exporter + sampler; a custom
+    IdGenerator seeds the root traceId from the settled CORRELATION id (never the per-request id), keeping
+    traceId == correlationId. Off by default (esquire.tracing.enabled)
+  - the BFF settles the canonical correlation id itself (kept when W3C-shaped, converted otherwise, else
+    generated; the request id is never a seed) and always exposes it on req.esqCorrelationId + the response
+  - added the W3C helpers toW3cTraceId / isW3cTraceId / generateW3cId / settleCorrelationId /
+    buildTraceparent, kept in step with the Java common.EsqUtils
+  - traceMiddleware opens the BFF root server span via beginTrace() and finishes it on response, exposing
+    req.esqTraceparent for the upstream call -- so the BFF is the first hop of the distributed trace
+    (BFF -> gateway -> service)
+  - the span is opened only on a traced path -- isTracedPath() + TRACED_PREFIXES (/api, /auth); off them
+    (SPA shell, static assets, health probes) no span is created and req.esqTraceparent is a plain
+    traceparent carrying the correlation id. The ids are settled on EVERY request
+src\proxy\apiProxy.ts
+  - upstream calls carry Esq-Correlation-ID (the settled id, replacing the forward-only X-Correlation-ID) plus
+    the traceparent built from that same id, on both the cacheable GET path and the proxied path
+src\config.ts
+  - added tracing { enabled, otlpEndpoint, samplingRatio } from ESQ_TRACING_ENABLED / ESQ_OTLP_ENDPOINT /
+    ESQ_TRACING_SAMPLING_RATIO (off by default)
+src\index.ts
+  - initTracing(config) before any request is handled; SIGTERM flushes in-flight spans via shutdownTracing()
+    before the server closes (both from util\trace.ts alongside traceMiddleware)
+package.json
+  - @opentelemetry/api, /core, /resources, /sdk-trace-base, /sdk-trace-node, /exporter-trace-otlp-http added
+
+07/07/2026 mir0n  v1.2.11 -- BFF stamps requestId / correlationId on each log line
+src\util\log.ts
+  - httpLogger customProps: stamp each request line with requestId (esqRequestId) and correlationId
+    (esqCorrelationId when present), matching the ECS field names
+
 07/03/2026 mir0n  v1.2.10 -- session-expiry redirect + pre-empt
 src\auth\routes.ts
   - session-expiry: callback stores session_expires_at; /auth/me returns sessionExpiresAt and reports authenticated:false once the refresh-token window has passed

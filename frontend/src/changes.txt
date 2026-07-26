@@ -1,6 +1,12 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+07/06/2026 mir0n  session-expired notice grouped with the login hint (button no longer displaced) + marquee scroll
+explorer\flatTree\app-shell.html
+  - session-expired notice + login hint grouped in .toolbar-login-area (grid col-3) so the notice no longer displaces the login button; notice text wrapped in a .notice-roll marquee span
+explorer\flatTree\app-shell.scss
+  - .toolbar-login-area grid cell (col-3) for the login affordances; .session-expired-notice marquee (fixed-width clip, esq-notice-marquee keyframes, reduced-motion) + font-weight
+
 07/03/2026 mir0n  v1.2.10 -- session-expiry landing + frontend debug-log tweak
 app\interceptor\rfc9457Interceptor.ts
   - a 401 redirects to /?auth=expired (session-expiry landing) and swallows the error (returns EMPTY)

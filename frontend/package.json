@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -10,8 +10,8 @@
     "test": "ng test",
     "lib:yalc": "yalc add @mir0n-pro/esquire.ui",
     "lib:git": "yalc remove --all && npm install @mir0n-pro/esquire.ui",
-    "lib:local": "yalc remove --all && npm install ../../esquire.ui.lib/pkg/mir0n-pro-esquire.ui-1.2.3.tgz",
-    "lib:pkg": "yalc remove --all && npm install https://github.com/mir0n-pro/esquire.ui.lib/raw/refs/tags/v1.2.3/pkg/mir0n-pro-esquire.ui-1.2.3.tgz"
+    "lib:local": "yalc remove --all && npm install ../../esquire.ui.lib/pkg/mir0n-pro-esquire.ui-latest.tgz --no-save --no-package-lock",
+    "lib:pkg": "yalc remove --all && npm install https://github.com/mir0n-pro/esquire.ui.lib/raw/refs/heads/develop/pkg/mir0n-pro-esquire.ui-latest.tgz"
   },
   "private": true,
   "dependencies": {
@@ -24,7 +24,7 @@
     "@angular/platform-browser": "^20.3.15",
     "@angular/platform-browser-dynamic": "^20.3.15",
     "@angular/router": "^ 20.3.15",
-    "@mir0n-pro/esquire.ui": "https://github.com/mir0n-pro/esquire.ui.lib/raw/refs/tags/v1.2.3/pkg/mir0n-pro-esquire.ui-1.2.3.tgz",
+    "@mir0n-pro/esquire.ui": "https://github.com/mir0n-pro/esquire.ui.lib/raw/refs/heads/develop/pkg/mir0n-pro-esquire.ui-latest.tgz",
     "rxjs": "^6.5.3 || ^7.4.0",
     "tslib": "^2.3.0",
     "winston": "^3.19.0"

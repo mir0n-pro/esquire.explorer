@@ -8,11 +8,14 @@
  *  History:
  * 05/07/2026 mir0n  created: openid-client v5 init via issuer discovery; cached singleton; getEndSessionUrl helper
  * 06/29/2026 mir0n  discover through config.kc.issuerInternal (server-to-server reachable) instead of the public issuer; log discovered issuer + authorization/token endpoints
+ * 07/17/2026 mir0n  the KeyCloak issuer discovery is wrapped in traceKcCall, so it appears as a CLIENT span in
+ *                   the trace.
  */
 
 import { Issuer, type Client } from 'openid-client';
 import type { BackendConfig } from '../config.js';
 import { log } from '../util/log.js';
+import { traceKcCall } from '../util/trace.js';
 
 let cachedClient: Client | null = null;
 
@@ -24,7 +27,7 @@ export async function getOidcClient(config: BackendConfig): Promise<Client> {
     // public authorize/logout endpoints (the browser uses those) but the
     // internal token/jwks endpoints (the BFF calls those server-to-server).
     log.info({ issuerInternal: config.kc.issuerInternal, issuer: config.kc.issuer }, 'discovering KC issuer');
-    const issuer = await Issuer.discover(config.kc.issuerInternal);
+    const issuer = await traceKcCall('KC issuer discovery', () => Issuer.discover(config.kc.issuerInternal));
     log.info({
       issuer: issuer.metadata.issuer,
       authorization_endpoint: issuer.metadata.authorization_endpoint,

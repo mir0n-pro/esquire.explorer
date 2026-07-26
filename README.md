@@ -24,16 +24,19 @@ Each subproject is independently built, run, and deployed; they all talk to
 the same **Esquire server** (`services/`) as outside callers.
 
 
-## v1.2.10 — complete (07/04/2026)
+## v1.2.11 — complete (07/25/2026)
 
-The explorer's share of the **Resilience / Durability** sprint: the SPA and BFF can bound how long they wait on a slow request or a stuck upstream, the BFF can run as more than one copy behind a shared login-session store, and the test harnesses gain recovery tooling and steadier end-to-end runs.
+The explorer's share of the **Observability** sprint: the browser tier joins the framework-wide observability, and the load harness gains an in-place cloud performance matrix -- plus a pair of security fixes at the login edge.
 
 | | |
 |--------------------|-------------------------|
-| `frontend/`| - the browser can bound how long it waits on a slow request (off by default);<br>- an expired session now returns the user to sign-in cleanly (redirect + pre-empt);<br>- debug logging routed through a single helper |
-| `backend/`| - login sessions can move to a shared store (Redis) so the BFF runs as more than one copy; left unset it keeps sessions in memory as a single copy;<br>- the BFF can bound how long it waits on a slow incoming request and on a stuck gateway call (off by default) |
-| `e2e-test/`| - self-contained Test House fixtures;<br>- new session-expiry and login-cancel scenarios;<br>- steadier runs under remote / two-copy timing (cold-start retry and tree-navigation waits) |
-| `hauberk/`| - a load run that checks the database query-time cap;<br>- a Keycloak <-> Esquire reconcile tool;<br>- a request-id stamped on write calls |
+| `backend/`| - the browser tier joins the single observability switch -- its own metrics, a timing on the hop out to the gateway, and its calls to the login server now show up in traces, with tracing and metrics switchable independently;<br>- login secrets now fail closed instead of falling back to a built-in dev value;<br>- a post-login redirect is confined to the app's own address, so a crafted link cannot bounce a signed-in user elsewhere |
+| `hauberk/`| - the performance matrix can run on the live cloud cluster, switching monitoring on and off in place instead of tearing the environment down and rebuilding it each time, and it separates out the logging cost |
+
+## v1.2.10 — complete (07/04/2026)
+
+The explorer's share of the **Resilience / Durability** sprint: the SPA and BFF can bound how long they wait on a slow request or a stuck upstream, the BFF can run as more than one copy behind a shared login-session store, and the test harnesses gain recovery tooling and steadier end-to-end runs.<br>
+[More Details: v1.2.10 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.10?tab=readme-ov-file)
 
 ## v1.2.9 — complete (06/24/2026)
 

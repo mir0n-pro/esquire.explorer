@@ -9,6 +9,14 @@
  * 05/07/2026 mir0n  created: load BackendConfig from env (publicBaseUrl, allowedOrigins, KC issuer/client, gateway URL, session secret, dict cache)
  * 06/27/2026 mir0n  added session.redisUrl from REDIS_URL env (default empty) -- shared session store endpoint
  * 06/29/2026 mir0n  added kc.issuerInternal (KC_ISSUER_INTERNAL env, defaults to issuer); added server.requestTimeoutMs (BFF_REQUEST_TIMEOUT_MS) + proxy.timeoutMs (BFF_PROXY_TIMEOUT_MS), both default 0
+ * 07/08/2026 mir0n  v1.2.11 -- added tracing { enabled, otlpEndpoint, samplingRatio } from ESQ_TRACING_ENABLED / ESQ_OTLP_ENDPOINT / ESQ_TRACING_SAMPLING_RATIO (off by default)
+ * 07/15/2026 mir0n  v1.2.11 T11 -- tracing.enabled now reads ESQ_OBSERVABILITY_ENABLED (was ESQ_TRACING_ENABLED),
+ *                   the same umbrella switch the Java services use; it gates the BFF tracing AND the BFF metrics
+ *                   surface (I13)
+ * 07/17/2026 mir0n  per-pillar sub-switches: a separate metrics.enabled, and tracing.enabled via pillarOn under
+ *                   the ESQ_OBSERVABILITY_ENABLED umbrella (I41).
+ * 07/23/2026 mir0n  v1.2.11 -- KC_CLIENT_SECRET and SESSION_SECRET now fail CLOSED: required() with NO dev fallback
+ *                   (a missing secret crashes the boot instead of defaulting to a committed value)
  */
 
 export interface BackendConfig {
@@ -61,6 +69,21 @@ export interface BackendConfig {
     ttlMs: number;
     maxEntries: number;
   };
+  // Distributed tracing (v1.2.11 O2). When enabled, the BFF emits a root OTel span per request
+  // (traceId == the settled correlation id) and exports it over OTLP to the collector. Off by
+  // default (same posture as the Java services); the o11y stack + env turn it on. `enabled` is the
+  // per-pillar EFFECTIVE value: master AND the tracing sub-switch (I41) -- see loadConfig.
+  tracing: {
+    enabled: boolean;
+    otlpEndpoint: string;
+    samplingRatio: number;
+  };
+  // Metrics pillar (O1/T5c): the Prometheus /metrics surface. `enabled` is the per-pillar EFFECTIVE
+  // value: master AND the metrics sub-switch (I41). Peer of tracing under the one observability master,
+  // so the BFF matches the Java services -- either pillar can run without the other (mesh coexistence).
+  metrics: {
+    enabled: boolean;
+  };
 }
 
 function required(name: string, fallback?: string): string {
@@ -86,7 +109,10 @@ export function loadConfig(): BackendConfig {
       issuer: kcIssuer,
       issuerInternal: process.env.KC_ISSUER_INTERNAL ?? kcIssuer,
       clientId: required('KC_CLIENT_ID', 'esq-angular'),
-      clientSecret: required('KC_CLIENT_SECRET', 'esq-angular-bff-dev-secret-rotate-in-prod'),
+      // Security secret: NO fallback -- fail CLOSED. Supplied by config in every runtime (compose sets a dev
+      // value; the chart helm-requires it via --set at install). A missing secret must crash the boot, never
+      // default to a committed value -- dev included. Do not add a fallback here.
+      clientSecret: required('KC_CLIENT_SECRET'),
     },
     gateway: {
       url: required('GATEWAY_URL', 'http://localhost:7070'),
@@ -98,7 +124,8 @@ export function loadConfig(): BackendConfig {
       timeoutMs: Number(process.env.BFF_PROXY_TIMEOUT_MS ?? 0),
     },
     session: {
-      secret: required('SESSION_SECRET', 'dev-session-secret-replace-me'),
+      // Security secret: NO fallback -- fail CLOSED (see kc.clientSecret). Signs the esq.sid session cookie.
+      secret: required('SESSION_SECRET'),
       cookieName: 'esq.sid',
       maxAgeMs: Number(process.env.SESSION_MAX_AGE_MS ?? 12 * 60 * 60 * 1000),
       redisUrl: process.env.REDIS_URL ?? '',
@@ -107,6 +134,25 @@ export function loadConfig(): BackendConfig {
       ttlMs: Number(process.env.ESQ_DICT_CACHE_TTL_MS ?? 60 * 60 * 1000),
       maxEntries: Number(process.env.ESQ_DICT_CACHE_MAX ?? 64),
     },
+    tracing: {
+      enabled: pillarOn(process.env.ESQ_TRACING_ENABLED),
+      otlpEndpoint: process.env.ESQ_OTLP_ENDPOINT ?? 'http://localhost:4318/v1/traces',
+      samplingRatio: Number(process.env.ESQ_TRACING_SAMPLING_RATIO ?? 1.0),
+    },
+    metrics: {
+      enabled: pillarOn(process.env.ESQ_METRICS_ENABLED),
+    },
   };
   return ret;
+}
+
+// Per-pillar enable (I41), mirroring the Java services: the observability MASTER
+// (ESQ_OBSERVABILITY_ENABLED) gates everything; each pillar then has a sub-switch that DEFAULTS to on,
+// so a bare master keeps both pillars up (unchanged). Effective = master AND sub. An unset or empty
+// sub follows the master; an explicit "false" turns just that pillar off -- e.g. ESQ_TRACING_ENABLED=false
+// runs the BFF metrics-only, the service-mesh coexistence case (a mesh already traces the wire).
+function pillarOn(sub: string | undefined): boolean {
+  const master = process.env.ESQ_OBSERVABILITY_ENABLED === 'true';
+  const subOn = sub === undefined || sub === '' ? true : sub === 'true';
+  return master && subOn;
 }

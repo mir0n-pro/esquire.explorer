@@ -13,6 +13,24 @@ test('the auth=expired marker shows the notice and strips the marker from the UR
   await expect.poll(() => new URL(page.url()).searchParams.has('auth'), { timeout: 5000 }).toBe(false);
 });
 
+test('the session-expired notice does not push the login button out of the toolbar', async ({ page }) => {
+  await page.goto('/?auth=expired');
+  const notice = page.locator('.session-expired-notice');
+  const loginBtn = page.locator('button.profile-menu-button');
+  await expect(notice).toBeVisible({ timeout: 10000 });
+  await expect(loginBtn).toBeVisible();
+  // Regression guard: the notice used to steal the col-3 grid track and collide the
+  // login trigger into col-4, overflowing it into a clipped 2nd toolbar row. toBeVisible
+  // does NOT catch that (the element keeps a bounding box), so assert the button stays
+  // inside the toolbar's single-row vertical band.
+  const tb = await page.locator('mat-toolbar').first().boundingBox();
+  const bb = await loginBtn.boundingBox();
+  expect(tb).not.toBeNull();
+  expect(bb).not.toBeNull();
+  expect(bb!.y).toBeGreaterThanOrEqual(tb!.y - 1);
+  expect(bb!.y + bb!.height).toBeLessThanOrEqual(tb!.y + tb!.height + 1);
+});
+
 test('a plain landing shows no session-expired notice', async ({ page }) => {
   await page.goto('/');
   await page.waitForSelector('.toolbar-login-hint', { timeout: 10000 });

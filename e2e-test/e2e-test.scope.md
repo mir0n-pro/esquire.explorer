@@ -113,6 +113,9 @@ and Test Driver users (15, 16). Read-only — no entity is removed (the guard bl
   `/?auth=expired` shows the "Your session expired — please log in again" landing notice, and
   ngOnInit strips the marker so a reload does not keep showing it.
 - **a plain landing shows no session-expired notice**: a normal `/` load shows no notice.
+- **the session-expired notice does not push the login button out of the toolbar**: with the notice
+  shown (`/?auth=expired`), the standalone login button stays within the toolbar's single-row band
+  (bounding-box check, since `toBeVisible` alone does not catch an element clipped into a 2nd grid row).
 - **a dead session on an API action bounces to the landing notice**: after login, `/api/*` is
   forced to 401 {no session} and `/auth/me` to unauthenticated; a tree Refresh fires an `/api/*`
   call → the rfc9457Interceptor redirects to `/?auth=expired` → the landing notice appears.
@@ -124,3 +127,56 @@ and Test Driver users (15, 16). Read-only — no entity is removed (the guard bl
 - **Cancel link persists across a failed-login re-render**: wrong credentials re-render the KC
   login page (the URL drops redirect_uri); the Cancel target survives via sessionStorage and still
   returns to the app.
+
+### 18-details-esc-focus.spec.ts — Details dialog Esc/focus
+- **a single Esc closes the Details dialog on an editable entity**: navigate Test House → All
+  admin-s → select the seeded admin **Test Driver** → open Details; focus lands inside the dialog
+  on open (on its Close button) and a single Esc closes it. Guards the fix for the editable-dialog
+  focus bug where Esc was ignored (focus stayed on the launching toolbar button) until a Tab moved
+  focus into the dialog.
+
+### 19-access-profile-sync.spec.ts -- access-profile save -> Keycloak identity sync
+- **connect -> update role -> disconnect round-trips the identity through Keycloak**: builds its own
+  subtree under Test House, then on the merchant user: saves the access profile with connect=Y (Keycloak
+  CREATES the identity), grants a role it does not already hold (Keycloak re-assigns its roles), and saves
+  connect=N (Keycloak REMOVES the identity). Tears the subtree down.
+- THE GAP THIS FILLS: spec 03 only OPENS and CLOSES the Access Profile dialog -- it never saves. So the main
+  suite never once drove the identity path, and NOTHING anywhere drove a ROLE change. A role Esquire revoked
+  but Keycloak kept is an AUTHORIZATION drift -- the user keeps a permission the system believes it took away
+  -- and every test we had would still have been green.
+- THE ORDER IS THE CONTRACT, not cosmetics. keySmith derives the Keycloak operation from the connect flag:
+  N->Y is a CREATE, Y->Y an UPDATE, Y->N a DELETE. So the role change must sit BETWEEN connect and
+  disconnect: it is the only thing that drives kcMaster's UPDATE branch, and kcMaster looks the user up in
+  Keycloak by username and throws if the identity is not there yet. Before this spec existed the update path
+  was driven by NOTHING (esq.biz.kc.sync.total only ever showed CREATE and DELETE).
+- Exercises the full chain for real: browser session -> BFF /api proxy (injects the bearer) -> gateway ->
+  keySmith (saves the profile, publishes a URQ on the kc R&R bus) -> kcMaster (calls the Keycloak admin API).
+
+### 20-token-relay.spec.ts -- gateway Token Relay (vanilla + phantom)
+- **Vanilla Token Relay: HTTP Basic at the edge reaches a protected route**: presents HTTP Basic
+  (client_id:client_secret) for the allowlisted esq-hauberk-S client straight to the gateway; the gateway runs
+  client_credentials on its behalf and forwards a full JWT downstream. A 200 from a protected read proves it.
+- **Phantom Token Relay: exchanged Bearer reaches a protected route**: gets a Bearer for the allowlisted
+  esq-hauberk-M client from Keycloak, presents it to the gateway; the gateway runs an RFC 8693 token-exchange
+  (as esq-gw-exchange) and forwards the exchanged JWT downstream. A 200 proves it.
+- THE GAP THIS FILLS: the relay was ENABLED on both targets and exercised by NOTHING -- three
+  esq.biz.gw.tokenrelay.* meters sat at zero series through every prior e2e run, smoke and the T10 matrix. These
+  calls hit the gateway DIRECTLY (not the BFF /api proxy, which injects the session bearer and never exercises
+  the relay).
+- Targets: default to the docker gateway (localhost:7070); e2e-k8s.bat points GATEWAY_URL / KC_URL at the k8s
+  ingress (api.esquire.localhost). The dev client secrets come from the committed realm import.
+
+### cycle/cycle.spec.ts — full-lifecycle soak / activity generator (not a coverage assertion)
+An activity generator, NOT an assertion spec: repeats a full GUI lifecycle N times (`CYCLES` env,
+default 2) under the Test House to exercise every service and light up the metrics dashboard + Tempo
+traces. Reuses the proven building blocks (`setupHouse` / `teardownHouse`, `navigateTo` / `listInto`,
+the deposit/withdrawal dialog flow from spec 11). Each lap runs on a FRESH page in the logged-in
+context: build a working subtree (office + merchant user + EUR account) -> navigate to it (enyMan /
+bizTree reads) -> Connect the user (keySmith -> kcMaster -> Keycloak CREATE) -> grant the user a role while
+connected (the same chain, Keycloak UPDATE) -> deposit -> withdraw -> Disconnect (Keycloak DELETE) -> tear
+the subtree down; each GUI op is followed by a render pause (`RENDER_MS`). The role step is the ONE step
+driven by API rather than GUI -- the roles control is a dynamic multi-select, and this suite generates
+ACTIVITY rather than asserting; spec 19 is where the role contract is asserted. Gentle stop between
+laps via the `cycle/.stop` marker (`cycle-stop.bat`) or Ctrl-C — the in-flight lap finishes its
+teardown and no new lap begins. Per-environment launchers: `cycle-test.bat` (docker), `cycle-k8s.bat`,
+`cycle-oci.bat`.

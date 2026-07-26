@@ -8,6 +8,8 @@
  *  History:
  * 05/07/2026 mir0n  created: BFF entrypoint; Express server; mounts /auth, /api proxy, baked SPA static, /readyz
  * 06/29/2026 mir0n  set server.requestTimeout from config.server.requestTimeoutMs when > 0 (R1; 0 leaves Node's default)
+ * 07/08/2026 mir0n  v1.2.11 -- initTracing(config) before any request is handled; SIGTERM flushes in-flight spans via shutdownTracing() before the server closes (both from util/trace.ts, alongside traceMiddleware)
+ * 07/10/2026 mir0n  v1.2.11 -- BFF metrics surface (O1): initMetrics(config) at startup, metricsMiddleware times each request, and a /metrics route (all from util/metrics.ts); no-op when observability is off
  */
 
 import express from 'express';
@@ -18,14 +20,21 @@ import { buildAuthRouter } from './auth/routes.js';
 import { getOidcClient } from './auth/openidClient.js';
 import { buildApiProxy } from './proxy/apiProxy.js';
 import { buildSpaHandler } from './static/spa.js';
-import { traceMiddleware } from './util/trace.js';
+import { traceMiddleware, initTracing, shutdownTracing } from './util/trace.js';
+import { initMetrics, metricsMiddleware, metricsHandler } from './util/metrics.js';
 
 const config = loadConfig();
+// Wire the OTel tracer before any request is handled (traceMiddleware opens the BFF span). No-op
+// when tracing is disabled.
+initTracing(config);
+initMetrics(config);   // BFF Prometheus /metrics (T5c); no-op when observability off
 const app = express();
 
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
 app.use(traceMiddleware);
+app.use(metricsMiddleware);
+app.get('/metrics', metricsHandler);
 app.use(httpLogger);
 
 app.get('/healthz', (_req, res) => {
@@ -60,3 +69,8 @@ const server = app.listen(config.port, () => {
 if (config.server.requestTimeoutMs > 0) {
   server.requestTimeout = config.server.requestTimeoutMs;
 }
+
+// Flush in-flight spans before the process exits (docker/k8s send SIGTERM on stop).
+process.once('SIGTERM', () => {
+  void shutdownTracing().finally(() => server.close(() => process.exit(0)));
+});
