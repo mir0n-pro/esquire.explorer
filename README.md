@@ -1,4 +1,11 @@
-# <img src="./favicon.ico" alt="Esquire logo" valign="middle" width="64" height="64"> Esquire Application Frameworks(tm) 2.0
+<table style="width: 100%; table-layout: fixed;">
+  <tr>
+    <td style="width: 12%"><img src="./favicon.ico" alt="Esquire logo" align="right" valign="middle" width="64"></td>
+    <td style="width: 88%;">
+       <h1>Esquire Application Frameworks(tm) 2.0</h1>
+    </td>
+  </tr>
+</table>
 
 Frameworks for organizing business entities in a tree, for any business or activity. The framework is targeting to cover traditional 
 functionality for a Backoffice (sub)system: onboarding, user profile maintenance, permissions, authorization, and accounting.
@@ -24,14 +31,23 @@ Each subproject is independently built, run, and deployed; they all talk to
 the same **Esquire server** (`services/`) as outside callers.
 
 
-## v1.2.11 — complete (07/25/2026)
+## v1.2.12 — complete (08/11/2026)
 
-The explorer's share of the **Observability** sprint: the browser tier joins the framework-wide observability, and the load harness gains an in-place cloud performance matrix -- plus a pair of security fixes at the login edge.
+The explorer's share of the **entity change number** sprint is a front-door one: the counter itself is
+internal and never reaches the browser, so the application is unchanged. What changed is how the landing
+pages describe the framework.
 
 | | |
 |--------------------|-------------------------|
-| `backend/`| - the browser tier joins the single observability switch -- its own metrics, a timing on the hop out to the gateway, and its calls to the login server now show up in traces, with tracing and metrics switchable independently;<br>- login secrets now fail closed instead of falling back to a built-in dev value;<br>- a post-login redirect is confined to the app's own address, so a crafted link cannot bounce a signed-in user elsewhere |
-| `hauberk/`| - the performance matrix can run on the live cloud cluster, switching monitoring on and off in place instead of tearing the environment down and rebuilding it each time, and it separates out the logging cost |
+| `frontend/`| - the comparison and audience pages now name the alternatives they are measured against, and state plainly where each one is a better fit;<br>- two claims that read stronger than the framework can support were walked back to what it actually does |
+
+## v1.2.11 — complete (07/25/2026)
+
+The explorer's share of the **Observability** sprint: the browser tier joins the framework-wide
+observability -- its own metrics, a timing on the hop out to the gateway, and its login-server calls visible
+in traces -- the load harness gains an in-place cloud performance matrix, and a pair of security fixes land
+at the login edge.<br>
+[More Details: v1.2.11 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.11?tab=readme-ov-file)
 
 ## v1.2.10 — complete (07/04/2026)
 
