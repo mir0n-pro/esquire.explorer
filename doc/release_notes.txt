@@ -1,6 +1,12 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.12-2608.1114  v1.2.12 -- Entity change number
+    :Doc:         the landing page names the alternatives the framework is measured against and where each
+                  of them is the better fit, and the domains it fits -- HR systems, ERP front-ends, CRM
+                  administrative shells and GTM software
+    Components:   frontend
+
 v1.2.11-2607.2714  v1.2.11 -- Finalization
     - the cloud end-to-end launchers now point the token-relay checks at the cloud gateway (where the
       relay is intentionally off, so the checks skip) instead of silently testing a local gateway

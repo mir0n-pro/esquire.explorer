@@ -4,79 +4,120 @@
               The comparison below is not a promise about where Esquire is headed — it is a <strong>mature
               framework measured as it stands</strong>: a complete, working system from database to browser,
               highly available, fully observable, open at every vendor layer, and running live in production.
-              Where others stop at a UI, an identity service, or a scaffold, Esquire delivers the whole
-              backbone, finished.
             </p>
 
-            <h3>Low-code admin panel tools</h3>
             <p>
-              Forest Admin, Retool, AdminJS, React Admin — these tools generate a working UI quickly.
-              The tradeoff is that they are UI tools, not backoffice frameworks. They have no opinion
-              about your permission model beyond what the database schema implies. They have no audit
-              trail and no end-to-end domain demonstration. They work well for internal dashboards and
-              data browsing. They are not a foundation for a regulated backoffice system.
+              It is also written to be checked. Where a comparable project does something better, this page
+              says so, and the claims below are drawn from those projects' own documentation.
             </p>
-            <p>Esquire is slower to get started with than Retool. It is incomparably more complete.</p>
+
+            <h3>Domain-model-driven frameworks — the closest comparison</h3>
+            <p>
+              <strong>Apache Causeway</strong> (formerly Apache Isis) is the closest project to Esquire's
+              shape. It runs on Spring Boot and generates its UI directly from the domain model, as a webapp,
+              REST or GraphQL, integrating Spring Security and Keycloak. The difference is where the UI
+              definition comes from: Causeway derives it from the domain classes as written, Esquire from
+              runtime server configuration — so in Esquire a field layout change reaches the browser without a
+              redeployment. Causeway does not filter data rows; its permissions grant or veto access to
+              namespaces, types and members, which governs what appears in the UI rather than which rows come
+              back.
+            </p>
+            <p>
+              <strong>Jmix</strong>, successor to CUBA Platform, is the closest commercial-grade one — Spring
+              Boot, Apache 2.0, built for large data models and complex internal UIs. It has genuine
+              row-level security and entity-attribute permissions, and so does Esquire. The distinction is
+              hierarchy. In Jmix every constraint is authored per entity class by the developer, as a JPQL
+              clause against the session user's attributes, and its documentation states that there is no
+              native support for a user seeing their own subtree: explicit constraints must be written for
+              each level, with no automatic cascade.
+            </p>
+            <p>
+              That is the whole argument, and it is worth stating plainly: <strong>these are frameworks you
+              build a permission model on; Esquire is one where the hierarchy already is the permission
+              model.</strong> Esquire additionally ships the operational floor — high availability, correlated
+              metrics, logs and traces, async messaging — assembled and running rather than left as work.
+            </p>
+
+            <h3>Authorization engines</h3>
+            <p>
+              <strong>OpenFGA</strong>, <strong>SpiceDB</strong>, Ory Keto and Permify model relationships
+              with far more rigour than Esquire does; SpiceDB is the most faithful implementation of Google's
+              Zanzibar paper and runs at very large scale. Alongside them sit policy-as-code engines (OPA,
+              Cerbos, AWS Cedar) and embedded libraries (Oso, Casbin).
+            </p>
+            <p>
+              Esquire's permission model is less academically rigorous than ReBAC. What it is instead is
+              integrated — part of the entity model and the UI, shipped with the framework rather than
+              operated as a separate service. The common hard case is the same for all of them: point checks
+              are the easy half, and filtering a list to a subtree on every screen is where these systems are
+              actually tested.
+            </p>
 
             <h3>Identity and access management</h3>
             <p>
-              Apache Syncope is the closest technical cousin — hierarchical entity model, Spring-based,
-              multi-database, audit-aware. But it is an identity management system. Its hierarchy exists
-              to support provisioning and reconciliation of users and groups across external systems.
-              There is no server-driven UI, no domain-agnostic entity layer for arbitrary business
-              hierarchies, and no demonstration that runs a business domain end to end.
+              <strong>Apache Syncope</strong> is Spring-based, multi-database and audit-aware, and solves
+              identity provisioning very well. Its hierarchy exists to support provisioning and reconciliation
+              of users and groups across external systems; Esquire solves the layer above it. Note that
+              Syncope's realms do scope administrative authority hierarchically, which is closer to positional
+              authorization than a simple comparison suggests.
             </p>
             <p>
-              Frontegg is purpose-built for B2B SaaS multi-tenancy. Its permission model is strong.
-              But it is a SaaS product with proprietary IAM, and it stops at the organization/user
-              boundary — there is no entity layer below users, no server-driven UI, no async messaging
-              topology, no path to host it yourself.
-            </p>
-            <p>
-              OpenFGA is a fine-grained authorization engine — it solves one part of the permission
-              problem with great depth. Esquire's permission model is less academically rigorous than ReBAC,
-              but it is fully integrated with the entity model and the UI, and ships as part of the framework.
+              <strong>Frontegg</strong> is purpose-built for B2B SaaS multi-tenancy and its permission model
+              is strong. It models organizations and users; Esquire's tree continues below the user boundary
+              into arbitrary business entities.
             </p>
 
             <h3>Microservice generators</h3>
             <p>
-              JHipster generates a microservices scaffold. It does not give you a pre-built, working
-              backoffice — it gives you the starting point for building one. After generation, the
-              hierarchical entity tree, the positional permission model, the server-driven UI, and
-              the async messaging topology are all still on your backlog. Esquire starts where
+              <strong>JHipster</strong> generates a scaffold — the starting point for a backoffice rather than
+              a backoffice. After generation the hierarchical entity tree, the positional permission model,
+              the server-driven UI and the async messaging topology are still to be built. A generator that
+              shipped an opinionated permission model would be a worse generator; Esquire starts where
               JHipster leaves off.
             </p>
 
-            <h3>eCommerce and CMS platforms</h3>
+            <h3>Low-code admin panel tools</h3>
             <p>
-              Broadleaf Commerce and Strapi ship strong admin panels for a fixed domain (products,
-              content). Their admin domain is closed — extending it means rebuilding what the platform
-              was built around. Esquire's admin domain is open: any hierarchy of any entities sits on
-              the framework's structural backbone with no domain-specific assumptions baked in.
+              <strong>Retool</strong>, <strong>Forest</strong>, <strong>AdminJS</strong> and
+              <strong>react-admin</strong> generate a working UI quickly, with fields defined in frontend
+              code, so a schema change is a deployment. Esquire is slower to get started with than Retool, and
+              Retool covers a breadth of integrations Esquire does not attempt. The distinction is the
+              destination rather than the speed: a panel over an existing schema is the right tool for an
+              internal data browser and the wrong starting point for a back office whose permission model is a
+              tree. (react-admin is a framework rather than a low-code tool — you write React with it — and is
+              maintained by Marmelab.)
             </p>
 
             <h3>Feature comparison</h3>
+            <p>
+              Against the nearest comparable frameworks, rather than against every tool that ships an admin
+              panel. A row only Esquire can answer proves nothing if the others were never attempting it.
+            </p>
             <table class="landing-feature-table">
               <tr>
                 <th>Feature</th>
                 <th>Esquire</th>
+                <th>Apache Causeway</th>
+                <th>Jmix</th>
                 <th>Apache Syncope</th>
                 <th>JHipster</th>
-                <th>Forest Admin</th>
-                <th>Frontegg</th>
               </tr>
-              <tr><td>Hierarchical entity tree (domain-agnostic)</td><td>Yes</td><td>Partial</td><td>No</td><td>No</td><td>Partial</td></tr>
-              <tr><td>Server-driven UI</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
-              <tr><td>Audit trail (pluggable, optional)</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td><td>No</td></tr>
+              <tr><td>Hierarchical entity tree (domain-agnostic)</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Partial</td><td>No</td></tr>
+              <tr><td><strong>Tree-shaped (positional) authorization</strong></td><td><strong>Yes</strong></td><td><strong>No</strong></td><td><strong>No</strong></td><td>Partial</td><td>No</td></tr>
+              <tr><td>Row-level data filtering</td><td>Yes</td><td>No</td><td>Yes</td><td>Partial</td><td>No</td></tr>
+              <tr><td>Field-level permission enforcement</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Partial</td><td>No</td></tr>
+              <tr><td>UI derived from the model</td><td>Yes, from runtime config</td><td>Yes, from domain code</td><td>Yes</td><td>No</td><td>No</td></tr>
+              <tr><td>Audit trail (pluggable, optional)</td><td>Yes</td><td>Partial</td><td>Yes</td><td>Yes</td><td>Partial</td></tr>
               <tr><td>Distributed trace correlation</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
-              <tr><td>Full observability (metrics + logs + traces)</td><td>Yes</td><td>No</td><td>Partial</td><td>No</td><td>No</td></tr>
-              <tr><td>High availability (redundant, multi-node)</td><td>Yes</td><td>Partial</td><td>Partial</td><td>No</td><td>No</td></tr>
-              <tr><td>Microservices + async messaging</td><td>Yes</td><td>Partial</td><td>Yes</td><td>No</td><td>No</td></tr>
-              <tr><td>Field-level permission enforcement</td><td>Yes</td><td>Partial</td><td>No</td><td>No</td><td>No</td></tr>
-              <tr><td>Tree-shaped (positional) authorization</td><td>Yes</td><td>Partial</td><td>No</td><td>No</td><td>No</td></tr>
-              <tr><td>Pluggable IAM adapter (Keycloak today)</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
-              <tr><td>Oracle + Postgres</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Partial</td><td>No</td></tr>
-              <tr><td>No vendor lock-in</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td></tr>
-              <tr><td>Open source / self-hosted</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td></tr>
-              <tr><td>End-to-end demonstration domain</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+              <tr><td>Microservices + async messaging</td><td>Yes</td><td>No</td><td>Partial</td><td>Partial</td><td>Yes</td></tr>
+              <tr><td>High availability, shipped assembled</td><td>Yes</td><td>No</td><td>No</td><td>Partial</td><td>Partial</td></tr>
+              <tr><td>Full observability, shipped assembled</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>Partial</td></tr>
+              <tr><td>Pluggable IAM adapter (Keycloak today)</td><td>Yes</td><td>Partial</td><td>Partial</td><td>No</td><td>No</td></tr>
+              <tr><td>Oracle + Postgres</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Open source / self-hosted</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>End-to-end demonstration domain</td><td>Yes</td><td>Partial</td><td>Partial</td><td>No</td><td>No</td></tr>
             </table>
+            <p style="font-size:11pt; color:rgba(0,0,0,0.6);">
+              The highlighted row is the argument. Everything else here is a difference of degree; that one is
+              a difference in kind, and it is the reason the framework exists.
+            </p>
