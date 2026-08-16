@@ -6,6 +6,7 @@
  *
  *  History:
  * 05/14/2026 mir0n  created: Chain GET /esq-key?id=usrId; saves connectFlg / loginId / email; tolerates 400/404 (no access profile yet)
+ * 08/15/2026 mir0n  the class note states that "no access profile yet" is a 404; 400 stays accepted
  */
 package pro.mir0n.esquire.hauberk.chain;
 
@@ -29,10 +30,11 @@ import static io.gatling.javaapi.http.HttpDsl.*;
  *   apEmail          -- email; absent if no access profile yet.
  *   apPwdChangeForced -- "Y" / "N"; absent if no access profile yet.
  *
- * Status filtering: 200 + 400 + 404 accepted. 400 means "no access
- * profile yet" (enyMan-style ResourceNotFoundException response), which
- * is normal for newly-created users that haven't been activated yet --
- * downstream chains should branch on apConnectFlg.exists().
+ * Status filtering: 200 + 400 + 404 accepted. 404 means "no access
+ * profile yet" (a ResourceNotFoundException response), which is normal
+ * for newly-created users that haven't been activated yet -- downstream
+ * chains should branch on apConnectFlg.exists(). 400 stays accepted so a
+ * run works against an older deployment too.
  */
 public final class LookupAccessProfile {
 

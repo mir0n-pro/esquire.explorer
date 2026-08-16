@@ -6,6 +6,7 @@
  *
  *  History:
  * 05/14/2026 mir0n  created: idempotent find-or-create office by name: LookupOfficeIdByName then verify via /esq-cmd; CreateOffice if missing or stale
+ * 08/15/2026 mir0n  the note on the accepted statuses states that an absent office is a 404; 400 stays accepted
  */
 package pro.mir0n.esquire.hauberk.chain;
 
@@ -42,9 +43,9 @@ public final class EnsureOffice {
         // Step 1: lookup via biztree
         exec(LookupOfficeIdByName.chain)
         // Step 2: if we got an id, verify it exists in the authoritative source.
-        //   enyMan maps ResourceNotFoundException -> 400 (not 404), so we
-        //   accept both. A bust-the-stale-officeId follows when verification
-        //   doesn't return a body with id.
+        //   An office that is not there is a 404; 400 stays accepted so a run
+        //   works against an older deployment too. A bust-the-stale-officeId
+        //   follows when verification doesn't return a body with id.
         .doIf(session -> session.contains("officeId")).then(
             exec(http("GET /esq-cmd (verify office exists in DB)")
                 .get("/esq-cmd")

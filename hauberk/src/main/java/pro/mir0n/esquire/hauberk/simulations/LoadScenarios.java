@@ -9,6 +9,7 @@
  * 07/14/2026 mir0n  exitHereIfFailed() between the setup and the .forever() loop in all five scenarios -- a VU whose
  *                   setup failed used to walk into the loop with no session attributes, so its requests were never
  *                   SENT and the loop spun at full CPU issuing nothing
+ * 08/15/2026 mir0n  the in-loop transient-failure example no longer names a status code
  */
 package pro.mir0n.esquire.hauberk.simulations;
 
@@ -58,8 +59,8 @@ import static io.gatling.javaapi.http.HttpDsl.*;
  *
  * So a VU whose setup failed must LEAVE. The guard belongs here, between the
  * setup and the loop -- and NOT inside the loop, where a transient failure
- * (a 400 from two movers racing the same office) is normal and must not kill
- * the VU. Fewer VUs is an honest, visible degradation; a spin is a lie.
+ * (two movers racing the same office) is normal and must not kill the VU.
+ * Fewer VUs is an honest, visible degradation; a spin is a lie.
  */
 public final class LoadScenarios {
 

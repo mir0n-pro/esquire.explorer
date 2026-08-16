@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.13-2608.1521  v1.2.13 -- gateWard
+    :Config:      the load harness's notes on what a lookup may answer say that something absent is
+                  "not found"; the older answer stays accepted so a run works against an older deployment
+    Components:   hauberk
+
 v1.2.12-2608.1114  v1.2.12 -- Entity change number
     :Doc:         the landing page names the alternatives the framework is measured against and where each
                   of them is the better fit, and the domains it fits -- HR systems, ERP front-ends, CRM

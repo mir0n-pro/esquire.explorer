@@ -6,6 +6,7 @@
  *
  *  History:
  * 05/14/2026 mir0n  created: Chain GET /esq-enode?name=officeName via biztree cache for O(1) office-id lookup
+ * 08/15/2026 mir0n  the note on the accepted statuses states that an absent office is a 404; 400 stays accepted
  */
 package pro.mir0n.esquire.hauberk.chain;
 
@@ -46,7 +47,7 @@ public final class LookupOfficeIdByName {
             .get("/esq-enode")
             .queryParam("kind", EntityKinds.ORG)
             .queryParam("name", "#{officeName}")
-            // bizTree maps ResourceNotFoundException to 400 (not 404); accept both.
+            // An absent office is a 404; 400 stays accepted so a run works against an older deployment too.
             .check(status().in(200, 400, 404))
             .check(
                 jsonPath("$.id").optional().saveAs("officeId")
