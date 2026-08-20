@@ -69,6 +69,11 @@ $ErrorActionPreference = "Continue"
 $SVCS    = "C:\MyProjects\esquire\services"
 $HAUBERK = $PSScriptRoot
 $APPS    = @("gateway","biztree","enyman","pacman","keysmith","kcmaster","aukeep","backend")
+# The COMPACT fleet: gateWard carries the gate and the tree cache, Mesnie carries enyMan, keySmith and the
+# identity work. Four workloads instead of eight, and they are named differently: the compact charts name the
+# workload {{ .Release.Name }} ("esquire-mesnie"), the classic ones {{ .Release.Name }}-<svc>
+# ("esquire-enyman-enyman"). Wl() below is the one place that knows which.
+$APPS_COMPACT = @("gateward","mesnie","pacman","aukeep","backend")
 
 # The super-puper load: 200 virtual users across the five scenarios.
 # The standard super-load: 200 VUs as read 64 / update 32 / create 32 / move 8 / tx 64.
@@ -138,6 +143,15 @@ $CONFIGS = @(
     @{ name = "k8s-x2-FULL"; target = "k8s";    reps = 2; o11y = "FULL" },
     @{ name = "k8s-x2-ON";   target = "k8s";    reps = 2; o11y = "ON"   },
     # docker: smoke test only -- NEVER part of an o11y measurement (see the note above).
+    # COMPACT on local k8s -- the same six arms against the composed fleet. `dir` is the stack folder, and it is
+    # the only thing that forks: same charts layout, same ingress hosts, same o11y arm scripts.
+    @{ name = "k8sc-x1-OFF";  target = "k8sc"; dir = "k8s-compact"; reps = 1; o11y = "OFF"  },
+    @{ name = "k8sc-x1-LOG";  target = "k8sc"; dir = "k8s-compact"; reps = 1; o11y = "LOG"  },
+    @{ name = "k8sc-x1-FULL"; target = "k8sc"; dir = "k8s-compact"; reps = 1; o11y = "FULL" },
+    @{ name = "k8sc-x2-OFF";  target = "k8sc"; dir = "k8s-compact"; reps = 2; o11y = "OFF"  },
+    @{ name = "k8sc-x2-LOG";  target = "k8sc"; dir = "k8s-compact"; reps = 2; o11y = "LOG"  },
+    @{ name = "k8sc-x2-FULL"; target = "k8sc"; dir = "k8s-compact"; reps = 2; o11y = "FULL" },
+
     @{ name = "docker-OFF";  target = "docker"; reps = 1; o11y = "OFF" },
     @{ name = "docker-LOG";  target = "docker"; reps = 1; o11y = "LOG" },
     @{ name = "docker-ON";   target = "docker"; reps = 1; o11y = "ON"  }
@@ -219,17 +233,41 @@ function Wait-K8sPods {
     Log "    !! pods never all became Ready"
 }
 
-function Wait-Url($url, $tries = 90) {
+# UP = the host ANSWERED, not "answered 200". Invoke-WebRequest throws on every non-2xx, so a bare try/catch
+# treats a guarded endpoint's 401 as down and waits out the whole budget. What separates a ready gate from an
+# unready one is WHICH status comes back:
+#   2xx/3xx/4xx -- the gate answered. A 401 on a guarded route is the gate UP and enforcing auth.
+#   5xx         -- NOT up: ingress-nginx returns 502/503 when no endpoint is ready behind it.
+#   no response -- NOT up: connection refused, DNS, or timeout.
+function Wait-Url($url, $tries = 90, [switch] $GuardedOk) {
     for ($i = 0; $i -lt $tries; $i++) {
         try { Invoke-WebRequest -Uri $url -TimeoutSec 4 -UseBasicParsing | Out-Null; return $true }
-        catch { Start-Sleep -Seconds 10 }
+        catch {
+            $code = 0
+            if ($_.Exception.Response) { $code = [int]$_.Exception.Response.StatusCode }
+            # -GuardedOk is ONLY for a route that answers 401 when it is healthy. It must NOT be used for the
+            # realm: KeyCloak answers 404 on that path from the moment it is listening, long before the import
+            # finishes, so accepting a 4xx there passes the gate on a realm that does not exist yet and the
+            # prepare then finds no token. That is exactly how a run reached its prepare one second after the
+            # gate and produced no requests at all.
+            if ($GuardedOk -and $code -ge 400 -and $code -lt 500) { return $true }
+            Start-Sleep -Seconds 10
+        }
     }
     return $false
 }
 
 # ---- build a k8s environment FROM SCRATCH -------------------------------------------------
+function Wl($cfg, $svc) {
+    # The workload name for a service on THIS profile. Compact charts name it after the release alone.
+    if ($cfg.dir -eq "k8s-compact") { return "esquire-$svc" }
+    return "esquire-$svc-$svc"
+}
+
 function Build-K8s($cfg) {
-    Set-Location "$SVCS\k8s"
+    $dir  = if ($cfg.dir) { $cfg.dir } else { "k8s" }
+    $apps = if ($cfg.dir -eq "k8s-compact") { $APPS_COMPACT } else { $APPS }
+    Set-Location "$SVCS\$dir"
     Log "  tearing k8s down"
     & ".\k8s-down.bat" *> $null
     for ($i = 0; $i -lt 60; $i++) {
@@ -259,7 +297,7 @@ function Build-K8s($cfg) {
     if ($cfg.reps -eq 1) {
         Log "  required infra only -- removing kafka + redis (x1: BFF uses an in-memory session store)"
         & helm upgrade esquire-backend charts\esquire-backend --reset-then-reuse-values --set redis.url="" *> $null
-        & kubectl rollout restart statefulset esquire-backend-backend *> $null
+        & kubectl rollout restart statefulset (Wl $cfg "backend") *> $null
         & helm uninstall esquire-infra-redis *> $null
     } else {
         Log "  required infra only -- removing kafka; redis KEPT (x2: the BFF replicas need a shared session store)"
@@ -290,14 +328,19 @@ function Build-K8s($cfg) {
 
     if ($cfg.reps -eq 1) {
         Log "  scaling to x1"
-        foreach ($s in $APPS) { kubectl scale sts "esquire-$s-$s" --replicas=1 *> $null }
+        foreach ($s in $apps) { kubectl scale sts (Wl $cfg $s) --replicas=1 *> $null }
         Start-Sleep -Seconds 20
         Wait-K8sPods
     }
     # Both endpoints are ingress-fronted -- no port-forward, which would be a single-threaded proxy
     # AND would die on every KeyCloak rollout, leaving the run with no token and no stats.
     if (-not (Wait-Url "http://esquire.localhost/kc-auth/realms/esquire")) { Log "  !! realm never imported"; return $false }
-    if (-not (Wait-Url "http://api.esquire.localhost/actuator/health"))    { Log "  !! gateway never came UP"; return $false }
+    # NOT /actuator/health on compact: the actuator sits on the management port (F0 A6) and is deliberately not
+    # published through the Service or the ingress, so it 404s there. A guarded route is the honest probe --
+    # 401 means the gate is up, routing, and enforcing auth.
+    $gateUrl = if ($cfg.dir -eq "k8s-compact") { "http://api.esquire.localhost/esq-enode" }
+               else { "http://api.esquire.localhost/actuator/health" }
+    if (-not (Wait-Url $gateUrl -GuardedOk)) { Log "  !! gateway never came UP"; return $false }
     Log "  k8s ready (x$($cfg.reps), o11y=$($cfg.o11y))"
     return $true
 }
@@ -372,7 +415,7 @@ function Invoke-Run($run, $cfg) {
         }
     }
     Log "======== RUN $run : $($cfg.name)  (from scratch) ========"
-    if ($cfg.target -eq "k8s") {
+    if ($cfg.target -eq "k8s" -or $cfg.target -eq "k8sc") {
         if (-not (Build-K8s $cfg)) { Log "  ABORTING run $run"; return }
         $hcfg = @("--config","hauberk-k8s.properties")
     } else {

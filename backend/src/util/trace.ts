@@ -26,6 +26,7 @@
  *                   span is badged with the replica that served the request.
  * 07/17/2026 mir0n  traceKcCall(name, fn) opens a CLIENT span around a KeyCloak round-trip; toW3cTraceId /
  *                   isW3cTraceId are exported for the cross-language W3C conformance test.
+ * 08/20/2026 mir0n  v1.2.13 -- the instance-number example names the compact workload (esquire-backend-1)
  */
 
 import { AsyncLocalStorage } from 'node:async_hooks';
@@ -134,7 +135,7 @@ let provider: NodeTracerProvider | undefined;
 
 // This instance's id in the Java <app>.<instanceNo> shape, computed ONCE (cached). Mirrors the Java
 // EsqUtils.instanceNo() rule EXACTLY: the ordinal is the host name's tail AFTER THE LAST DASH, and only when
-// that tail is all digits (esquire-backend-backend-1 -> 1); anything else -- including a docker container id
+// that tail is all digits (esquire-backend-1 -> 1); anything else -- including a docker container id
 // that merely ends in digits (dd3376b3e076) -- has no ordinal and is instance 0. Emitted as the resource's
 // service.instance.id, in step with the Java services: the collector rewrites service.name to it on the traces
 // pipeline, so every BFF span is badged with the replica that served the request.

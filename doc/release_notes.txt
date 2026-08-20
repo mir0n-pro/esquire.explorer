@@ -1,6 +1,14 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.13-2608.2017  v1.2.13 -- the composed services on the cloud
+    :Feature:     the load harness measures the composed setup too, at one and two copies of each service,
+                  with monitoring off, logging only, and everything on
+    :Fix:         a measurement run waits for the gate the way that setup answers, instead of asking for a
+                  page the composed gate does not serve
+    Components:   hauberk,
+                  backend
+
 v1.2.13-2608.1521  v1.2.13 -- gateWard
     :Config:      the load harness's notes on what a lookup may answer say that something absent is
                   "not found"; the older answer stays accepted so a run works against an older deployment
