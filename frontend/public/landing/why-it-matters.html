@@ -20,6 +20,13 @@
               logic — entirely to you.
             </p>
             <p>Esquire is the middle path: a framework that solves the structural problems correctly once.</p>
+            <p>
+              That is what the promise every framework prints &mdash; <em>you write only business logic</em>
+              &mdash; actually costs to keep. It holds only when the parts it covers are in the box and already
+              joined to each other: storage, identity and sign-in, permissions, the messaging between services,
+              the audit trail, metrics, logs and traces. Esquire ships those wired together and running, which
+              is what leaves your domain as the only thing left to write.
+            </p>
 
             <h3>1. The server defines the UI</h3>
             <p>
@@ -35,6 +42,13 @@
               resolved server-side, and reflected in the frontend without duplication. There is no way to
               call an endpoint the user is not permitted to call, and no way to render a field the user
               is not permitted to edit.
+            </p>
+            <p>
+              And the scope is not something anyone has to remember. Systems that limit what a user sees
+              usually apply that limit per query &mdash; and a query missing it looks exactly like a correct
+              query: nothing in review, in the build or in a scanner marks it. Here the limit is resolved from
+              the user's position in the tree, in the data path, so there is no filter to write and none to
+              leave out.
             </p>
 
             <h3>3. Audit trail as a first-class, pluggable concern</h3>
@@ -107,6 +121,28 @@
               Every tier already runs as more than one copy, spread across machines, so losing one keeps the
               site up. This is how Esquire is deployed from the start — not a hardening step added after the
               first outage.
+            </p>
+
+            <h3>9. One framework, more than one shape</h3>
+            <p>
+              The same code and the same settings run as eight programs, as five, or as four. Services that
+              always run together can be grouped into one program &mdash; the entity manager, the credential
+              service and the identity agent in one; the API router and the tree cache in another &mdash; and
+              nothing a caller can see changes: the same routes, the same messages, the same screens. The shape
+              is chosen per installation and can be changed back.
+            </p>
+            <p>
+              It was measured rather than assumed. On the cloud deployment the same load rig turned
+              <strong>27% more work</strong> with observability off and <strong>42% more</strong> with metrics,
+              logs and traces fully on, while the whole application used <strong>1.5 GiB</strong> of memory and
+              ran on <strong>7 pods instead of 13</strong>. The four running-stack suites pass on every shape,
+              unchanged.
+            </p>
+            <p>
+              The cost belongs in the same breath: services inside one program restart together, scale
+              together, and one crash takes all of them down at once. The work itself does not change &mdash;
+              the same requests and messages, carried by fewer machines. A small deployment stops paying for a
+              large one; a deployment that needs the separations keeps them.
             </p>
 
             <p style="margin-top: 20px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 16px;">

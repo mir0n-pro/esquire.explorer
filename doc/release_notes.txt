@@ -1,6 +1,12 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.13-2608.2119  v1.2.13 -- the promise, and what stands behind it
+    :Doc:         the site carries a new motto
+    :Doc:         the landing tabs are tuned to stand behind it
+    :Doc:         the social banner is re-drawn to the new wording
+    Components:   frontend
+
 v1.2.13-2608.2017  v1.2.13 -- the composed services on the cloud
     :Feature:     the load harness measures the composed setup too, at one and two copies of each service,
                   with monitoring off, logging only, and everything on

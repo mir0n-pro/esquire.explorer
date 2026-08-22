@@ -11,7 +11,8 @@
 
             <p>
               The <strong>gateway</strong>, the six backend <strong>services</strong> (bizTree, enyMan,
-              pacMan, keySmith, kcMaster, auKeep), and the <strong>BFF</strong> each run
+              pacMan, keySmith, kcMaster, auKeep), and the <strong>BFF</strong> &mdash; the shape shown above,
+              a program each &mdash; run
               <strong>redundant, with optional autoscale</strong>, for high availability &mdash; spread
               across separate nodes so losing one keeps the site up. The databases, Keycloak, the message
               broker, and the Session Store run as a single instance here; each is a third-party platform
@@ -190,6 +191,36 @@
               <img src="/logo/grafana_icon.svg" alt="Grafana" height="22" style="vertical-align:middle"></h3>
             <p>The one screen &mdash; dashboards for logs, traces, and numbers together; because everything shares one
                id, a log line, its trace, and its numbers are one click apart.</p>
+
+            <h3 style="color: #4D6A8D;">The compact shape &mdash; the same framework in fewer programs</h3>
+            <img class="landing-arch-diagram" src="/img/ComponentModel.Compact.png" alt="Esquire Component Model, compact shape"/>
+            <p>
+              Everything above runs as a program per service. The same code and the same settings also run
+              grouped: <strong>mesnie</strong> holds enyMan, keySmith and kcMaster, and <strong>gateWard</strong>
+              holds the gateway together with the tree cache. Eight programs become five &mdash; or four in the
+              cloud, where the database writes the audit trail itself and the program that drains it is not
+              needed. Nothing is removed and nothing is rewritten: the same routes, the same messages, the same
+              screens.
+            </p>
+            <p>
+              Two things move with the grouping, and both are worth knowing. Identity work that travelled the
+              message bus &mdash; keySmith asking kcMaster to write to Keycloak &mdash; becomes a call inside one
+              program, and a tree read is answered where the request arrives instead of crossing the network a
+              second time. What does <strong>not</strong> move is <strong>pacMan</strong>: accounting is a
+              business domain built on the framework, not a part of it, so it stays its own program in every
+              shape &mdash; exactly as any domain you build would.
+            </p>
+            <p>
+              Measured on the cloud deployment, against the same load rig: <strong>27% more work</strong> with
+              observability off and <strong>42% more</strong> with metrics, logs and traces fully on,
+              <strong>1.5 GiB</strong> of memory for the whole application, and <strong>7 pods instead of
+              13</strong>. Every running-stack test suite passes on both shapes, unchanged.
+            </p>
+            <p>
+              The cost is real and worth saying: services inside one program restart together, scale together,
+              and a crash takes all of them down at once. That is the trade a small installation makes to stop
+              paying for a large one, and it is a deployment choice, reversible at any time.
+            </p>
 
             <p style="margin-top: 24px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 16px;">
               Source code and documentation:
