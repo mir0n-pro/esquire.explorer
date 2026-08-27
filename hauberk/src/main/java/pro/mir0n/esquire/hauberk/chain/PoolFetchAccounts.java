@@ -26,8 +26,7 @@ import static io.gatling.javaapi.http.HttpDsl.*;
  * (id=11 kind=52 Merchant, id=12 kind=50 Client, id=13 kind=54 Paper
  * are seed data). Without scoping, tx chains would POST `kind=50` for
  * a kind=52/54 account and pacMan would reject with
- * ResourceNotFoundException; or worse, leak transactions onto seed
- * accounts that the Phase 4 cleanup hook does not catch.
+ * ResourceNotFoundException; or worse, leak transactions onto seed accounts.
  *
  * Session outputs:
  *   acctPool -- List<String> of kind=50 account ids under hauberk-office-smoke.

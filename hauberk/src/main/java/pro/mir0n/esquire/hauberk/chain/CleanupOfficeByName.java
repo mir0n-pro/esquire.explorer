@@ -39,11 +39,7 @@ import static io.gatling.javaapi.http.HttpDsl.*;
  * Best-effort semantics: no .check(status()) on the delete call; failures
  * are visible as red bars in the Gatling report but do NOT halt the run.
  * One stuck account never blocks teardown of the rest of the office.
- *
- * pacMan Phase 4 hook: account-deletes whose acct.desc ends "@mir0n.pro"
- * trigger cascade-purge of transactions + null fundedDate + force status=C,
- * so this chain does not need explicit close / withdraw steps before
- * deleting accounts.
+
  *
  * Idempotent: if the office does not exist, the lookup leaves officeId
  * unset and the rest of the chain is skipped.

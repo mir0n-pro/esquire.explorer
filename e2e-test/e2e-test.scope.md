@@ -102,11 +102,15 @@ Stub — see 11-deposit.spec.ts.
 Provoke a backend error; bottom status bar shows error message; error report icon opens
 dialog with RFC 7807 Problem Detail fields (title, detail, status).
 
-### 15-system-entity-protection.spec.ts — system entity flag (anti-deletion)
+### 15-system-entity-protection.spec.ts — system entity protection (anti-deletion)
 After login, calls the BFF `/api/esq-cmd-del` with the authenticated browser session (session →
-BFF injects bearer → gateway → enyMan → DB guard) and asserts a delete of each seed-flagged
-entity is rejected with **HTTP 409**: root Esquire office (org 1), Test House office (org 14),
-and Test Driver users (15, 16). Read-only — no entity is removed (the guard blocks before delete).
+BFF injects bearer → gateway → enyMan → DB guard) and asserts each protected entity refuses the
+delete, with the status each protection actually answers. Two protections, told apart:
+**403** for the system root (org 1, kind 0) -- the permission matrix has no delete on kind 0 for
+any role; **409** for the Test House office (org 14) and the Test Driver users (15, 16) -- the
+system-entity flag. Each target carries the kind its ROW has, since the server compares the two
+and a target named under a kind it does not hold answers 404 and proves nothing. Read-only -- no
+entity is removed.
 
 ### 16-session-expiry.spec.ts — session-expiry recovery
 - **the auth=expired marker shows the notice and strips the marker from the URL**: loading
@@ -165,6 +169,17 @@ and Test Driver users (15, 16). Read-only — no entity is removed (the guard bl
   the relay).
 - Targets: default to the docker gateway (localhost:7070); e2e-k8s.bat points GATEWAY_URL / KC_URL at the k8s
   ingress (api.esquire.localhost). The dev client secrets come from the committed realm import.
+
+### 21-credential-state-sync.spec.ts -- credential state reaches KeyCloak, and comes back off
+- **force password change and TOTP: requested, then withdrawn**: Esquire never changes a password or
+  configures TOTP itself -- it records the REQUEST (`au_force_change_flg`, `au_tfa_method`) and keySmith
+  syncs it to KeyCloak as a required action, which KeyCloak puts in front of the user at the next login.
+  The spec asserts both directions against KeyCloak required actions: raised, KeyCloak asks; lowered,
+  KeyCloak stops asking.
+- THE GAP THIS FILLS: the taking-back half had neither coverage nor implementation. `tfaMethod` g -> n --
+  TOTP requested, the user never logged in to set it up, then cancelled -- removed an otp credential that
+  was never created and left CONFIGURE_TOTP standing, so the database said TOTP was off while KeyCloak
+  still forced the setup. Nothing in the suite could see it: nothing here had ever read a required action.
 
 ### cycle/cycle.spec.ts — full-lifecycle soak / activity generator (not a coverage assertion)
 An activity generator, NOT an assertion spec: repeats a full GUI lifecycle N times (`CYCLES` env,

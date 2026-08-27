@@ -27,16 +27,16 @@ test.describe.serial('system entity flag — protected from deletion', () => {
   });
 
   const protectedTargets = [
-    { label: 'root Esquire office (org 1)', kind: 20, id: '1' },
-    { label: 'Test House office (org 14)', kind: 20, id: '14' },
-    { label: 'Test Driver user (user 15)', kind: 32, id: '15' },
-    { label: 'Test Driver S user (user 16)', kind: 32, id: '16' },
+    { label: 'root Esquire office (org 1)', kind: 0, id: '1', status: 403, by: 'the permission matrix (no role deletes kind 0)' },
+    { label: 'Test House office (org 14)', kind: 20, id: '14', status: 409, by: 'the system-entity flag' },
+    { label: 'Test Driver user (user 15)', kind: 32, id: '15', status: 409, by: 'the system-entity flag' },
+    { label: 'Test Driver S user (user 16)', kind: 32, id: '16', status: 409, by: 'the system-entity flag' },
   ];
 
   for (const t of protectedTargets) {
-    test(`delete of ${t.label} is blocked with 409`, async () => {
+    test(`delete of ${t.label} is blocked with ${t.status}`, async () => {
       const res = await page.request.post(`/api/esq-cmd-del?kind=${t.kind}&id=${t.id}`);
-      expect(res.status(), `${t.label} must be delete-protected (system entity)`).toBe(409);
+      expect(res.status(), `${t.label} must be delete-protected by ${t.by}`).toBe(t.status);
     });
   }
 });

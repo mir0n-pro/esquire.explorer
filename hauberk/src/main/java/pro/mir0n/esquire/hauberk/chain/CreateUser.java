@@ -6,6 +6,7 @@
  *
  *  History:
  * 05/14/2026 mir0n  created: Chain POST /esq-cmd-new kind=34 client user under session officeId; fat-fill USR/person/addr/bizaddr fields; saves userId + userEmail
+ * 08/26/2026 mir0n  userEmail builds the domain inline
  */
 package pro.mir0n.esquire.hauberk.chain;
 
@@ -21,8 +22,7 @@ import static io.gatling.javaapi.http.HttpDsl.*;
  * POST /esq-cmd-new for kind=34 (Client user) under the office captured by
  * CreateOffice / EnsureOffice. Generates a fresh random local-part each call
  * so multiple runs (and parallel VUs) never collide on the unique-email
- * constraint. Email always lands in the @mir0n.pro domain, which makes the
- * resulting account's desc field match the Phase 4 cleanup hook.
+ * constraint.
  *
  * Body shape: enyMan's UsrService.createUsr() reads name and email from a
  * nested "person" sub-entity (kind=992), then derives loginId = email.
@@ -62,7 +62,7 @@ public final class CreateUser {
                     ThreadLocalRandom.current().nextLong() & 0xFFFFFFFFFFL);
             return session
                     .set("userSlug",  slug)
-                    .set("userEmail", slug + EntityKinds.TEST_EMAIL_DOMAIN);
+                    .set("userEmail", slug + "@mir0n.pro");
         })
         .exec(http("POST /esq-cmd-new (user)")
             .post("/esq-cmd-new")

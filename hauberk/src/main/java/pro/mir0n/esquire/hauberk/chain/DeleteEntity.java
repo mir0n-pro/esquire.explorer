@@ -24,8 +24,7 @@ import static io.gatling.javaapi.http.HttpDsl.*;
  *   delId    -- entity id to delete (string)
  *
  * Note for accounts: this Chain assumes the account is already closed
- * (status=C, balance=0) and -- if it carries any transactions -- has a
- * desc ending "@mir0n.pro" so pacMan's test hook cascade-purges them.
+ * (status=C, balance=0).
  */
 public final class DeleteEntity {
 

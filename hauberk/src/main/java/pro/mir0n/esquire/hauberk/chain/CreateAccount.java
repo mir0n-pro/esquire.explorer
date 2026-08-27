@@ -6,6 +6,7 @@
  *
  *  History:
  * 05/14/2026 mir0n  created: Chain POST /esq-cmd-new kind=50 client account under session userId; desc = userEmail; saves acctId
+ * 08/26/2026 mir0n  the account body no longer carries desc
  */
 package pro.mir0n.esquire.hauberk.chain;
 
@@ -17,13 +18,10 @@ import static io.gatling.javaapi.http.HttpDsl.*;
 
 /**
  * POST /esq-cmd-new for kind=50 (Client account) under the user captured by
- * CreateUser. Critical: the account "desc" field is set to the parent user's
- * email (e.g. "hauberk-user-7@mir0n.pro"). pacMan's account-delete handler
- * checks desc.endsWith("@mir0n.pro") to enable the test-data purge hook.
+ * CreateUser.
  *
  * Session inputs:
  *   userId     -- parent user id (from CreateUser)
- *   userEmail  -- parent user email (from CreateUser); written into desc
  * Session outputs:
  *   acctId     -- new account id
  */
@@ -40,7 +38,6 @@ public final class CreateAccount {
             .header("Content-Type", "application/json")
             .body(StringBody(
                 "{\"name\":\"acct-#{userSlug}\","
-              + "\"desc\":\"#{userEmail}\","
               + "\"ccy\":\"USD\","
               + "\"status\":\"O\","
               + "\"negativeAllowed\":\"N\"}"))

@@ -7,6 +7,7 @@
  *
  *  History:
  * 05/14/2026 mir0n  created: kind-code constants (ORG=20, USR_CLIENT=34, ACCT_CLIENT=50, ...) used by all Chains
+ * 08/26/2026 mir0n  TEST_EMAIL_DOMAIN removed
  */
 package pro.mir0n.esquire.hauberk.config;
 
@@ -29,7 +30,4 @@ public final class EntityKinds {
     /** Root entity id -- top of the tree, parent of all top-level offices. */
     public static final String ROOT_ID = "1";
 
-    /** Test-data marker domain. Account.desc ending with this triggers the
-     *  pacMan test hook on delete (see Phase 4 in the v1.2.4 plan). */
-    public static final String TEST_EMAIL_DOMAIN = "@mir0n.pro";
 }

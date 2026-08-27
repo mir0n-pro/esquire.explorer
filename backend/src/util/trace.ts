@@ -27,6 +27,8 @@
  * 07/17/2026 mir0n  traceKcCall(name, fn) opens a CLIENT span around a KeyCloak round-trip; toW3cTraceId /
  *                   isW3cTraceId are exported for the cross-language W3C conformance test.
  * 08/20/2026 mir0n  v1.2.13 -- the instance-number example names the compact workload (esquire-backend-1)
+ * 08/26/2026 mir0n  traceKcCall stamps peer.service=keycloak on the CLIENT span, so the collector service graph names
+ *                   the far end instead of drawing it as the literal "unknown"
  */
 
 import { AsyncLocalStorage } from 'node:async_hooks';
@@ -212,7 +214,10 @@ export async function traceKcCall<T>(name: string, fn: () => Promise<T>): Promis
   if (!enabled || tracer === undefined) {
     return fn();
   }
-  const span = tracer.startSpan(name, { kind: SpanKind.CLIENT });
+  const span = tracer.startSpan(name, {
+    kind: SpanKind.CLIENT,
+    attributes: { 'peer.service': 'keycloak' },
+  });
   try {
     return await context.with(trace.setSpan(context.active(), span), fn);
   } catch (err) {

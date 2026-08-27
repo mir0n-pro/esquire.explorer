@@ -22,7 +22,7 @@ import static io.gatling.javaapi.core.CoreDsl.*;
  * Flow:
  *   EnsureOffice    (idempotent: lookup-or-create office by name)
  *   CreateUser      (slug "hauberk-smoke-1", email "...@mir0n.pro")
- *   CreateAccount   (desc = userEmail, free-text only)
+ *   CreateAccount
  *   Deposit 100
  *   ReadUsers
  *   ReadUserDetails
