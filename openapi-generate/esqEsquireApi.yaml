@@ -14,6 +14,11 @@ tags:
   - name: esquire
     description: Everything you need to browse Esquire tree
 paths:
+  # NOTE: /esq-sweep, /esq-cmd-del and /esq-move answer success with NO body. The generator builds a
+  # method's Accept list from EVERY response, so declaring a body on their ERROR responses made
+  # application/problem+json the only media type they advertise -- the client then asked for it on the
+  # request itself and the move never completed. Their errors are the same ProblemDetail; only the
+  # content declaration is left off, so Accept stays as it was.
   /esq:
     get:
       tags:
@@ -53,6 +58,30 @@ paths:
                   $ref: '#/components/schemas/EsqTreeNode'
         '405':
           description: Invalid input
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Permission denied (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not found (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /esq-path:
     get:
       tags:
@@ -78,6 +107,30 @@ paths:
                   type: string
         '405':
           description: Invalid input
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Permission denied (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not found (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /esq-cmd:
     get:
       tags:
@@ -116,6 +169,30 @@ paths:
                 type: object
         '405':
           description: Invalid input
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Permission denied (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not found (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /esq-cmd-tree:
     get:
       tags:
@@ -148,6 +225,30 @@ paths:
                   $ref: '#/components/schemas/EsqTreeNode'
         '405':
           description: Invalid input
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Permission denied (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not found (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /esq-enode:
     get:
       tags:
@@ -184,6 +285,30 @@ paths:
                 $ref: '#/components/schemas/EsqTreeNode'
         '405':
           description: Invalid input
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Permission denied (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not found (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /esq-tree:
     get:
       tags:
@@ -209,6 +334,30 @@ paths:
                   $ref: '#/components/schemas/EsqTreeNode'
         '405':
           description: Invalid input
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Permission denied (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not found (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /esq-sweep:
     post:
       tags:
@@ -219,6 +368,14 @@ paths:
       responses:
         '202':
           description: sweep accepted (runs asynchronously)
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+        '403':
+          description: Permission denied (ProblemDetail)
+        '404':
+          description: Not found (ProblemDetail)
   /esq-dict:
     get:
       tags:
@@ -245,6 +402,30 @@ paths:
                   $ref: '#/components/schemas/EsqEntityLayer'
         '405':
           description: Invalid input
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Permission denied (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not found (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /esq-kinds:
     get:
       tags:
@@ -263,6 +444,30 @@ paths:
                   $ref: '#/components/schemas/EsqObjectKind'
         '405':
           description: Invalid input
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Permission denied (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not found (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /esq-key:
     get:
       tags:
@@ -286,6 +491,30 @@ paths:
                 $ref: '#/definitions/EsqAccessProfile'
         '405':
           description: Invalid input
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Permission denied (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not found (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /esq-cmd-save:
     post:
       tags:
@@ -328,6 +557,36 @@ paths:
                 $ref: '#/components/schemas/EsqEntity'
         '405':
           description: Invalid input
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Permission denied (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not found (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '409':
+          description: Conflict -- refused by existing state (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /esq-key-save:
     post:
       tags:
@@ -357,6 +616,36 @@ paths:
                 $ref: '#/components/schemas/EsqAccessProfile'
         '405':
           description: Invalid input
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Permission denied (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not found (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '409':
+          description: Conflict -- refused by existing state (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /esq-cmd-new:
     post:
       tags:
@@ -400,6 +689,36 @@ paths:
                 $ref: '#/components/schemas/EsqEntity'
         '405':
           description: Invalid input
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Permission denied (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not found (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '409':
+          description: Conflict -- refused by existing state (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /esq-cmd-del:
     post:
       tags:
@@ -433,6 +752,16 @@ paths:
           description: successful operation
         '405':
           description: Invalid input
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+        '403':
+          description: Permission denied (ProblemDetail)
+        '404':
+          description: Not found (ProblemDetail)
+        '409':
+          description: Conflict -- refused by existing state (ProblemDetail)
   /esq-acct:
     post:
       tags:
@@ -476,10 +805,28 @@ paths:
                 $ref: '#/components/schemas/AcctTransactionSimple'
         '403':
           description: Permission denied
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
         '404':
           description: Account not found
-        '422':
-          description: Insufficient balance or invalid amount
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /esq-move:
     post:
       tags:
@@ -516,9 +863,73 @@ paths:
           description: Entity or destination org not found
         '405':
           description: Invalid input
+        '400':
+          description: Validation error -- the request was rejected (ProblemDetail)
+        '401':
+          description: Not authenticated -- no identity was presented (ProblemDetail)
+        '503':
+          description: Command not accepted -- the service is not taking it now (ProblemDetail)
 
 components:
   schemas:
+    ProblemDetail:
+      type: object
+      description: >-
+        The error body every Esquire service returns (RFC 7807, as Spring writes it).
+        Served as application/problem+json.
+      properties:
+        type:
+          type: string
+          format: uri
+          example: https://mir0n.pro/errors
+        title:
+          type: string
+          example: Forbidden
+        status:
+          type: integer
+          format: int32
+          example: 403
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+          description: the request path that produced the error
+        properties:
+          $ref: '#/components/schemas/ProblemDetailProperties'
+    ProblemDetailProperties:
+      type: object
+      description: the extra members Esquire sets on every problem
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        traceId:
+          type: string
+        correlationId:
+          type: string
+        requestId:
+          type: string
+          description: present when the caller sent one
+        stackTrace:
+          type: string
+          description: present only when the request asked for metric capture
+        errors:
+          type: array
+          description: present on a validation error
+          items:
+            $ref: '#/components/schemas/ProblemDetailFieldError'
+    ProblemDetailFieldError:
+      type: object
+      properties:
+        fieldName:
+          type: string
+        message:
+          type: string
+        fieldLabel:
+          type: string
+        tabIndex:
+          type: string
     EsqEntity:
       title: Entity
       description: An entity with identity and dynamic fields defined by dictionary

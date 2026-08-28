@@ -31,15 +31,23 @@ Each subproject is independently built, run, and deployed; they all talk to
 the same **Esquire server** (`services/`) as outside callers.
 
 
-## v1.2.12 — complete (08/11/2026)
+## v1.2.13 — complete (08/27/2026)
 
-The explorer's share of the **entity change number** sprint is a front-door one: the counter itself is
-internal and never reaches the browser, so the application is unchanged. What changed is how the landing
-pages describe the framework.
+The explorer's share of the **compact topology and hardening** sprint. The server side learned to run as four
+programs instead of seven; the explorer's job was to follow that shape everywhere it is measured, and to close
+the gaps the reading-back found.
 
 | | |
 |--------------------|-------------------------|
-| `frontend/`| - the comparison and audience pages now name the alternatives they are measured against, and state plainly where each one is a better fit;<br>- two claims that read stronger than the framework can support were walked back to what it actually does |
+| `frontend/`| - the site carries a new motto, and the landing tabs are tuned to stand behind it;<br>- the social banner is re-drawn to the new wording |
+| `backend/`| - cookies and authorization headers no longer reach the browser tier's logs;<br>- the login server is named on the topology map |
+| `hauberk/`| - the load harness measures the composed setup as well as the classic one, at one and two copies of each service, with monitoring off, logging only, and everything on;<br>- a run waits for the gate the way the composed setup answers, instead of asking for a page it does not serve;<br>- a run follows the shape that is actually deployed, so it can never drive a service the deployment does not have;<br>- the transfer request carries the body the server expects |
+| `e2e-test/`| - a new routine covers a password change and two-factor, requested and then taken back;<br>- the root-office check now asserts against the protection that actually refuses it |
+
+## v1.2.12 — complete (08/11/2026)
+
+The explorer's share of the **entity change number** sprint was a front-door one: the counter is internal and never reaches the browser, so the application was unchanged, while the comparison and audience pages gained the alternatives they are measured against and two overstated claims were walked back.<br>
+[More Details: v1.2.12 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.12?tab=readme-ov-file)
 
 ## v1.2.11 — complete (07/25/2026)
 

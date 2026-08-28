@@ -21,6 +21,9 @@ model/esqPermission.ts
 model/esqRole.ts
 model/esqTreeNode.ts
 model/models.ts
+model/problemDetail.ts
+model/problemDetailFieldError.ts
+model/problemDetailProperties.ts
 param.ts
 provide-api.ts
 variables.ts

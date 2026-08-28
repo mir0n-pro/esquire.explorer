@@ -417,7 +417,12 @@ function Invoke-Run($run, $cfg) {
     Log "======== RUN $run : $($cfg.name)  (from scratch) ========"
     if ($cfg.target -eq "k8s" -or $cfg.target -eq "k8sc") {
         if (-not (Build-K8s $cfg)) { Log "  ABORTING run $run"; return }
-        $hcfg = @("--config","hauberk-k8s.properties")
+        # THE PROFILE FOLLOWS THE SHAPE. k8sc deploys k8s-compact, where the bizTree cache lives inside
+        # gateWard -- its director/restart commands drive statefulset/esquire-gateward, not esquire-biztree.
+        # Handing the classic profile to a compact run leaves those commands pointing at a deployment that
+        # does not exist, and only the resilience arms notice.
+        if ($cfg.target -eq "k8sc") { $hcfg = @("--config","hauberk-k8s-compact.properties") }
+        else                        { $hcfg = @("--config","hauberk-k8s.properties") }
     } else {
         if (-not (Build-Docker $cfg)) { Log "  ABORTING run $run"; return }
         $hcfg = @()

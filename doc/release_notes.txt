@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.13-2608.2721  v1.2.13 -- Finalization
+    :Fix:         Open API up-to-date
+    Components:   frontend
+
 v1.2.13-2608.2620  v1.2.13 -- Hardening
     :Fix:         cookies and authorization headers no longer reach the browser tier logs
     :Fix:         a KeyCloak call is named on the topology map
