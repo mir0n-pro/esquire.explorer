@@ -1,6 +1,40 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.13-2608.2721  v1.2.13 -- Finalization
+    :Fix:         Open API up-to-date
+    Components:   frontend
+
+v1.2.13-2608.2620  v1.2.13 -- Hardening
+    :Fix:         cookies and authorization headers no longer reach the browser tier logs
+    :Fix:         a KeyCloak call is named on the topology map
+    :Fix:         the load harness sends the transfer body the server expects
+    :Fix:         e2e 15-system-entity-protection: the root office is checked against the protection that refuses it
+    :New:         e2e 21-credential-state-sync: a password change and two-factor, requested then withdrawn
+    :Doc:         e2e-test\e2e-test.scope.md
+    Components:   backend,
+                  hauberk,
+                  e2e
+
+v1.2.13-2608.2119  v1.2.13 -- the promise, and what stands behind it
+    :Doc:         the site carries a new motto
+    :Doc:         the landing tabs are tuned to stand behind it
+    :Doc:         the social banner is re-drawn to the new wording
+    Components:   frontend
+
+v1.2.13-2608.2017  v1.2.13 -- the composed services on the cloud
+    :Feature:     the load harness measures the composed setup too, at one and two copies of each service,
+                  with monitoring off, logging only, and everything on
+    :Fix:         a measurement run waits for the gate the way that setup answers, instead of asking for a
+                  page the composed gate does not serve
+    Components:   hauberk,
+                  backend
+
+v1.2.13-2608.1521  v1.2.13 -- gateWard
+    :Config:      the load harness's notes on what a lookup may answer say that something absent is
+                  "not found"; the older answer stays accepted so a run works against an older deployment
+    Components:   hauberk
+
 v1.2.12-2608.1114  v1.2.12 -- Entity change number
     :Doc:         the landing page names the alternatives the framework is measured against and where each
                   of them is the better fit, and the domains it fits -- HR systems, ERP front-ends, CRM

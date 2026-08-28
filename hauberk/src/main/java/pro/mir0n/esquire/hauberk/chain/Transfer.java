@@ -6,6 +6,7 @@
  *
  *  History:
  * 05/14/2026 mir0n  created: Chain POST /esq-acct typeId=3 transfer between two accounts (id + id2/kind2)
+ * 08/26/2026 mir0n  the transfer body sends the amount NEGATED, a rate of 1, and refCode "other"
  */
 package pro.mir0n.esquire.hauberk.chain;
 
@@ -38,10 +39,11 @@ public final class Transfer {
             .header("Content-Type", "application/json")
             .body(StringBody(
                 "{\"typeId\":3,"
-              + "\"amount\":#{txAmount},"
+              + "\"amount\":-#{txAmount},"
               + "\"id2\":\"#{acctId2}\","
               + "\"kind2\":" + EntityKinds.ACCT_CLIENT + ","
-              + "\"refCode\":\"cc\","
+              + "\"rate\":1,"
+              + "\"refCode\":\"other\","
               + "\"refCode2\":\"TSHIRT-XFR\","
               + "\"desc\":\"hauberk transfer\"}"))
             .check(status().is(200)));

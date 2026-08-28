@@ -11,6 +11,29 @@
               says so, and the claims below are drawn from those projects' own documentation.
             </p>
 
+            <h3>The property worth comparing on</h3>
+            <p>
+              Scoping by hierarchy is not rare. Read enough systems that organize people and resources in a
+              tree and most of them limit access by that tree in some form. So "tree-shaped authorization" on
+              its own compares nothing. The difference worth putting side by side is narrower and checkable:
+              <strong>can the scope be forgotten?</strong>
+            </p>
+            <p>
+              In many designs it can. The scope is applied per query &mdash; a filter fragment added to the
+              statement, a checker called before the work, a session wrapper opened around the call. Each of
+              those works, and each depends on the developer remembering it every single time. A query missing
+              the filter looks exactly like a correct query: nothing in code review, in the build, or in static
+              analysis marks it as unscoped. Enforcement stops being structural one reasonable exception at a
+              time, usually under feature pressure rather than carelessness.
+            </p>
+            <p>
+              Esquire resolves visibility in the data path, from the caller's position in the tree. There is no
+              per-query filter to write, so there is none to omit and none to review. That is the honest form of
+              the comparison &mdash; not <em>we scope by hierarchy and they do not</em>, but <strong>here the
+              scope cannot be left out</strong> &mdash; and it is a property a reader can check by opening the
+              code rather than taking this page's word for it.
+            </p>
+
             <h3>Domain-model-driven frameworks — the closest comparison</h3>
             <p>
               <strong>Apache Causeway</strong> (formerly Apache Isis) is the closest project to Esquire's

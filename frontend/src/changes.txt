@@ -1,6 +1,20 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+08/27/2026 mir0n  v1.2.13 -- rest/ regenerated for the framework's error contract
+rest\api\esquire.service.ts
+  - regenerated from esqEsquireApi.yaml: every operation now accepts application/problem+json as well as
+    application/json
+rest\model\problemDetail.ts  (new)
+  - the error body every service returns: type / title / status / detail / instance plus the nested
+    properties object
+rest\model\problemDetailProperties.ts  (new)
+  - timestamp, traceId, correlationId, requestId, and the conditional stackTrace and errors
+rest\model\problemDetailFieldError.ts  (new)
+  - fieldName, message, fieldLabel, tabIndex -- one entry of the errors array
+rest\model\models.ts
+  - the three ProblemDetail models exported
+
 07/26/2026 mir0n  v1.2.11 -- landing pages: observability + the mature-framework message
 public\landing\architecture.html
   - Observability Stack section added (o11yStack.png + the seven o11y components: Postgres Exporter,

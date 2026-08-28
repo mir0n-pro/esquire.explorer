@@ -5,9 +5,18 @@
               what within that tree, and run business operations against it.
             </p>
             <p>
+              Every framework promises that you write only business logic. That promise is kept when the parts
+              it covers are in the box and already joined to each other &mdash; storage, identity and sign-in,
+              permissions, the messaging between services, the audit trail, metrics, logs and traces. Esquire
+              holds those, wired together and running, which is what leaves your domain as the only thing left
+              to write. What it does <strong>not</strong> do is written down just as plainly.
+            </p>
+            <p>
               Its authorization backbone is two dimensions at once: <strong>role-based rules</strong> for what a
               user may do, and <strong>tree-based scope</strong> for what a user may see — a user's position in
-              the tree resolves both, with no per-query filter written by hand. Any business domain can sit on
+              the tree resolves both, with no per-query filter written by hand &mdash; and a filter nobody
+              writes is a filter nobody can forget, which is the part that matters: elsewhere a query missing
+              its scope looks exactly like a correct one. Any business domain can sit on
               top of it.
             </p>
             <p>
@@ -19,6 +28,21 @@
             <p>
               Esquire is not a product you subscribe to. It is a framework you own, deploy, and extend.
               No SaaS lock-in, no monthly seat fees, no vendor standing between you and your data.
+            </p>
+
+            <h3 style="color: #4D6A8D;">What it does not do</h3>
+            <p>
+              Esquire is a framework for developers building platforms. It is not a no-code tool and not a
+              hosted service. It does not give you workflow automation, reporting dashboards or content
+              management, and it is not an ERP &mdash; it is the structural layer such a product is built on.
+              It does not replace your database, your message broker or your identity server; it brings them
+              together into one working system.
+            </p>
+            <p>
+              The user interface it ships is the <strong>administration UI</strong> &mdash; the one that renders
+              your entity descriptions at runtime, and at the same time the worked example of using the REST
+              API. An application for your own end users is yours to write, against the same descriptions over
+              the same API.
             </p>
 
             <h3 style="color: #4D6A8D;">A mature framework — everything the stack makes possible</h3>
@@ -43,6 +67,9 @@
                   deployment choice behind a stable interface; no single vendor is baked in.</li>
               <li><strong>Running for real</strong> — the complete stack is deployed live in the cloud, not only
                   on a developer's laptop.</li>
+              <li><strong>One framework, more than one shape</strong> — the same code and settings run as eight
+                  programs or as five, so a small installation stops paying for a large one and nothing about the
+                  framework changes.</li>
             </ul>
             <p>
               The three backbone ideas — tree-shaped visibility, positional authority, entity self-description —

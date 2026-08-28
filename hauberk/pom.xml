@@ -6,7 +6,7 @@
 
     <groupId>pro.mir0n.esquire</groupId>
     <artifactId>hauberk</artifactId>
-    <version>1.2.11</version>
+    <version>1.2.13</version>
     <packaging>jar</packaging>
 
     <name>Esquire Haubergeon</name>

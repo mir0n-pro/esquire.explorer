@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (backend / BFF tier)
 
+08/20/2026 mir0n  v1.2.13 -- the composed services on the cloud
+src\util\trace.ts
+  - the instance-number example names the compact workload (esquire-backend-1)
+
 07/23/2026 mir0n  v1.2.11 -- homework: fix/resolve issues noted during the audit
 src\config.ts
   - KC_CLIENT_SECRET and SESSION_SECRET fail CLOSED: required() with no dev fallback (missing secret crashes boot)

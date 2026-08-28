@@ -10,6 +10,9 @@
  * 07/07/2026 mir0n  httpLogger customProps: stamp each request line with requestId (esqRequestId) and
  *                   correlationId (esqCorrelationId when present), matching the ECS field names so the log
  *                   shipper cross-links the BFF edge to the service logs
+ * 08/26/2026 mir0n  pino redact drops cookie / set-cookie / authorization from every logged header bag; explicit req / res
+ *                   serializers replace the pino-http defaults with a fixed field list (id, method, url, query,
+ *                   remoteAddress, remotePort / statusCode)
  */
 
 import { pino } from 'pino';
@@ -21,10 +24,44 @@ export const log = pino({
   formatters: {
     level: (label) => ({ level: label }),
   },
+  
+redact: {
+    paths: [
+      'headers.cookie', 'headers["set-cookie"]', 'headers.authorization',
+      '*.headers.cookie', '*.headers["set-cookie"]', '*.headers.authorization',
+    ],
+    remove: true,
+  },
 });
+
+interface LoggedRequest {
+  id?: unknown;
+  method?: string;
+  url?: string;
+  query?: unknown;
+  remoteAddress?: string;
+  remotePort?: number;
+}
+
+interface LoggedResponse {
+  statusCode?: number;
+}
 
 export const httpLogger = pinoHttp({
   logger: log,
+  serializers: {
+    req: (req: LoggedRequest) => ({
+      id: req.id,
+      method: req.method,
+      url: req.url,
+      query: req.query,
+      remoteAddress: req.remoteAddress,
+      remotePort: req.remotePort,
+    }),
+    res: (res: LoggedResponse) => ({
+      statusCode: res.statusCode,
+    }),
+  },
   customLogLevel: (_req, res, err) => {
     var ret: 'error' | 'warn' | 'info' = 'info';
     if (err || res.statusCode >= 500) {
@@ -34,11 +71,7 @@ export const httpLogger = pinoHttp({
     }
     return ret;
   },
-  // Cross-link the BFF request line to the downstream Java-service logs by the SAME ids:
-  // requestId (the per-request X-Request-ID the BFF always sets in traceMiddleware) and
-  // correlationId (present only when the client set X-Correlation-ID). Field names match the
-  // ECS `requestId` / `correlationId` the services emit, so the log shipper extracts them
-  // uniformly across the whole request path.
+
   customProps: (req) => {
     const r = req as unknown as { esqRequestId?: string; esqCorrelationId?: string };
     const ret: Record<string, string> = {};

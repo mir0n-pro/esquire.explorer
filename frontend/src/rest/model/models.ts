@@ -10,3 +10,6 @@ export * from './esqObjectKind';
 export * from './esqPermission';
 export * from './esqRole';
 export * from './esqTreeNode';
+export * from './problemDetail';
+export * from './problemDetailFieldError';
+export * from './problemDetailProperties';
