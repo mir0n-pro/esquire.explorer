@@ -15,7 +15,7 @@ export default defineConfig({
   // pools, and the bus warm up. Steady-state tests finish in 1-2s regardless.
   timeout: 60_000,
   use: {
-    baseURL: process.env['BASE_URL'] ?? 'http://localhost:4200',
+    baseURL: process.env['BASE_URL'] || 'http://localhost:4200',
     headless: true,
   },
   reporter: [['list'], ['html', { open: 'never' }]],

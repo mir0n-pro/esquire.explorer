@@ -21,10 +21,10 @@ import { setupHouse, teardownHouse, House } from '../helpers/testHouse';
 // the dev values from the committed realm import (keycloak/import/esquire.json), overridable via env, the same
 // arrangement 20-token-relay uses.
 
-const KC = process.env['KC_URL'] ?? 'http://localhost:8081/kc-auth';
-const REALM = process.env['KC_REALM'] ?? 'esquire';
-const ADMIN_CLIENT = process.env['KC_ADMIN_CLIENT'] ?? 'esq-kcMaster';
-const ADMIN_SECRET = process.env['KC_ADMIN_SECRET'] ?? 'MHgq0Nu69u2uJ2johaK1wxQLMdakELXN';
+const KC = process.env['KC_URL'] || 'http://localhost:8081/kc-auth';
+const REALM = process.env['KC_REALM'] || 'esquire';
+const ADMIN_CLIENT = process.env['KC_ADMIN_CLIENT'] || 'esq-kcMaster';
+const ADMIN_SECRET = process.env['KC_ADMIN_SECRET'] || 'MHgq0Nu69u2uJ2johaK1wxQLMdakELXN';
 
 // The sync is asynchronous -- keySmith publishes a URQ and kcMaster answers on the bus -- so every assertion
 // polls rather than sleeps.

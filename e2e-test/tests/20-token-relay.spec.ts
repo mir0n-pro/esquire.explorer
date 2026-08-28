@@ -14,14 +14,14 @@ import { test, expect, request as pwRequest } from '@playwright/test';
 // client secrets are the dev values from the committed realm import (keycloak/import/esquire.json),
 // overridable via env.
 
-const GATEWAY = process.env['GATEWAY_URL'] ?? 'http://localhost:7070';
-const KC = process.env['KC_URL'] ?? 'http://localhost:8081/kc-auth';
-const REALM = process.env['KC_REALM'] ?? 'esquire';
+const GATEWAY = process.env['GATEWAY_URL'] || 'http://localhost:7070';
+const KC = process.env['KC_URL'] || 'http://localhost:8081/kc-auth';
+const REALM = process.env['KC_REALM'] || 'esquire';
 
-const VANILLA_ID = process.env['RELAY_VANILLA_CLIENT'] ?? 'esq-hauberk-S';
-const VANILLA_SECRET = process.env['RELAY_VANILLA_SECRET'] ?? 'esq-hauberk-s-dev-secret-rotate-in-prod';
-const PHANTOM_ID = process.env['RELAY_PHANTOM_CLIENT'] ?? 'esq-hauberk-M';
-const PHANTOM_SECRET = process.env['RELAY_PHANTOM_SECRET'] ?? 'esq-hauberk-m-dev-secret-rotate-in-prod';
+const VANILLA_ID = process.env['RELAY_VANILLA_CLIENT'] || 'esq-hauberk-S';
+const VANILLA_SECRET = process.env['RELAY_VANILLA_SECRET'] || 'esq-hauberk-s-dev-secret-rotate-in-prod';
+const PHANTOM_ID = process.env['RELAY_PHANTOM_CLIENT'] || 'esq-hauberk-M';
+const PHANTOM_SECRET = process.env['RELAY_PHANTOM_SECRET'] || 'esq-hauberk-m-dev-secret-rotate-in-prod';
 
 // A protected read that needs only a valid bearer downstream -- no fixture data. If the relay works the
 // gateway forwards a JWT and enyMan answers 200; if it does not, the request is rejected at the edge.
