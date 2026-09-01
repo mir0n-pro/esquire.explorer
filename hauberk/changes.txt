@@ -1,5 +1,11 @@
 hauberk changes
 
+09/01/2026 mir0n  v1.2.14 -- the AWS run profile
+hauberk-aws.properties  (new)
+  - the AWS overlay: it inherits hauberk.properties and replaces only the endpoints and the
+    infra-orchestration commands. One public host serves all three paths on AWS, so KC, the BFF and the
+    gateway differ by path rather than by hostname
+
 08/26/2026 mir0n  v1.2.13 -- the transfer body, and the test-data marker removed
 Transfer.java
   - the transfer body sends the amount NEGATED, a rate of 1, and refCode "other"

@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.14-2609.0100  v1.2.14 -- AWS
+    :New:         the load harness runs against the AWS deployment
+    Components:   hauberk
+
 v1.2.13-2608.2721  v1.2.13 -- Finalization
     :Fix:         Open API up-to-date
     Components:   frontend
