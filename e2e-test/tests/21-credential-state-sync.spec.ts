@@ -17,14 +17,30 @@ import { setupHouse, teardownHouse, House } from '../helpers/testHouse';
 // CONFIGURE_TOTP standing: the database said TOTP was off and KeyCloak still forced the setup. Nothing in the
 // suite could see it, because nothing here had ever read a required action.
 //
-// Asserted through KeyCloak's admin API -- the state lives there, not in any Esquire response. Credentials are
-// the dev values from the committed realm import (keycloak/import/esquire.json), overridable via env, the same
-// arrangement 20-token-relay uses.
+// Asserted through KeyCloak's admin API -- the state lives there, not in any Esquire response. The host, realm
+// and client id are the dev values from the committed realm import (keycloak/import/esquire.json), overridable
+// via env, the same arrangement 20-token-relay uses.
 
 const KC = process.env['KC_URL'] || 'http://localhost:8081/kc-auth';
 const REALM = process.env['KC_REALM'] || 'esquire';
 const ADMIN_CLIENT = process.env['KC_ADMIN_CLIENT'] || 'esq-kcMaster';
-const ADMIN_SECRET = process.env['KC_ADMIN_SECRET'] || 'MHgq0Nu69u2uJ2johaK1wxQLMdakELXN';
+
+// THE SECRET IS THE ONE THING WITH NO FALLBACK, and it is the same rule every deploy script now carries.
+// esq-kcMaster is the only published client holding realm-management realm-admin, so its secret is the realm's
+// master key rather than one credential among seven. It used to default to the committed value, which is right
+// against the docker realm and wrong the moment a public realm is rotated: the suite would authenticate with a
+// dead credential and fail on an assertion, blaming Esquire for a secret that was never supplied.
+//
+// Failing here instead names the actual cause. KC_ADMIN_SECRET is set the same way the deploy scripts take it
+// -- from the environment.
+const ADMIN_SECRET = process.env['KC_ADMIN_SECRET'];
+if (!ADMIN_SECRET) {
+  throw new Error(
+    'KC_ADMIN_SECRET is not set. It is the esq-kcMaster (realm-admin) client secret, and this spec has no ' +
+    'fallback for it on purpose -- a default would pass against the docker realm and authenticate with a dead ' +
+    'credential against a rotated one. Set it from the same place the deploy scripts read it.',
+  );
+}
 
 // The sync is asynchronous -- keySmith publishes a URQ and kcMaster answers on the bus -- so every assertion
 // polls rather than sleeps.
