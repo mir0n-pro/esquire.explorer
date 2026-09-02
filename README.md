@@ -31,18 +31,23 @@ Each subproject is independently built, run, and deployed; they all talk to
 the same **Esquire server** (`services/`) as outside callers.
 
 
-## v1.2.13 — complete (08/27/2026)
+## v1.2.14 — complete (09/01/2026)
 
-The explorer's share of the **compact topology and hardening** sprint. The server side learned to run as four
-programs instead of seven; the explorer's job was to follow that shape everywhere it is measured, and to close
-the gaps the reading-back found.
+The explorer's share of the **AWS** sprint. The server side moved to a second cloud and to that cloud's own
+services; the explorer's job was to reach it there and to stop trusting a published credential.
 
 | | |
 |--------------------|-------------------------|
-| `frontend/`| - the site carries a new motto, and the landing tabs are tuned to stand behind it;<br>- the social banner is re-drawn to the new wording |
-| `backend/`| - cookies and authorization headers no longer reach the browser tier's logs;<br>- the login server is named on the topology map |
-| `hauberk/`| - the load harness measures the composed setup as well as the classic one, at one and two copies of each service, with monitoring off, logging only, and everything on;<br>- a run waits for the gate the way the composed setup answers, instead of asking for a page it does not serve;<br>- a run follows the shape that is actually deployed, so it can never drive a service the deployment does not have;<br>- the transfer request carries the body the server expects |
-| `e2e-test/`| - a new routine covers a password change and two-factor, requested and then taken back;<br>- the root-office check now asserts against the protection that actually refuses it |
+| `frontend/`| - the component-model drawings carry the AWS database, messaging and monitoring services;<br>- the architecture tab shows the refreshed drawings, names the AWS database and messaging services in its legend, and gains a section for the AWS monitoring tools;<br>- the why-it-matters tab counts monitoring as a fourth place the framework can be moved to another supplier, and names the AWS database services |
+| `hauberk/`| - the load harness runs against the AWS deployment, over the same public address a browser uses |
+| `e2e-test/`| - the browser suite runs against the AWS deployment unchanged, over its public address, with nothing tunnelled;<br>- the credential routine no longer falls back to the published sign-in secret: it stops and says which value is missing |
+
+## v1.2.13 — complete (08/27/2026)
+
+The explorer's share of the **compact topology and hardening** sprint: the site took a new motto and a re-drawn
+banner, the load harness learned to measure the composed setup as well as the classic one, and the browser
+routines grew to cover what the reading-back had found.<br>
+[More Details: v1.2.13 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.13?tab=readme-ov-file)
 
 ## v1.2.12 — complete (08/11/2026)
 

@@ -89,18 +89,31 @@
             <p>
               Spring Boot and Spring Cloud, Angular, every component is a well-known open-source
               technology. Vendor independence is an architectural principle, not a feature.
-              It operates at three layers:
+              It operates at four layers, and at each one the same test applies: carrying an open
+              component onto another cloud is deployment, not portability. The claim only bites against
+              a cloud-native service &mdash; the managed one with no equivalent elsewhere, which is where
+              lock-in actually lives. Esquire was run against all of them.
             </p>
             <p>
               <strong>Database.</strong> Oracle and Postgres today; MySQL and other RDBMS targets
               on the roadmap. Vendor-specific SQL is isolated in named query XML files — switching
-              does not touch application code.
+              does not touch application code. The same Postgres profile also ran on
+              <strong>RDS for PostgreSQL</strong> and <strong>Aurora PostgreSQL</strong> without touching
+              a line of code or SQL.
             </p>
             <p>
               <strong>Messaging Bus.</strong> Esquire ships a vendor-agnostic Messaging Bus —
               the broadcast and request-response patterns are the contract; the transport is a
-              deployment choice behind a pluggable transport-provider interface. The first transport
-              providers are ActiveMQ, Kafka, and Redis &mdash; all implemented on the same interface.
+              deployment choice behind a pluggable transport-provider interface. Six transport providers
+              exist on that one interface: ActiveMQ, Kafka and Redis, and on AWS &mdash; SNS, SQS and
+              Kinesis. The ActiveMQ and Kafka drivers also reach Amazon MQ and MSK unchanged.
+            </p>
+            <p>
+              <strong>Observability.</strong> The three signals leave Esquire in open formats: logs as ECS
+              JSON on stdout, traces as OTLP, metrics as a Prometheus page. Grafana, Loki, Tempo and
+              Prometheus are what Esquire ships to read them — a default, not a requirement. All three
+              were moved onto <strong>AWS X-Ray</strong> and <strong>CloudWatch</strong> on a running
+              deployment without rebuilding an image.
             </p>
             <p>
               <strong>Identity and access management.</strong> Keycloak today. The architecture

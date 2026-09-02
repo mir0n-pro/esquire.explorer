@@ -1,5 +1,5 @@
             <h2>Current Architecture</h2>
-            <img class="landing-arch-diagram" src="/img/ComponentModel.png" alt="Esquire Component Model"/>
+            <img class="landing-arch-diagram" src="/img/ComponentModel.png?v=1214" alt="Esquire Component Model"/>
 
             <p>
               Two public hosts:
@@ -22,28 +22,40 @@
 
             <h3>Esq2025
               <img src="/logo/postgres.svg" alt="Postgres" height="20" style="vertical-align:middle">&nbsp;
-              <img src="/logo/oracle.svg" alt="Oracle" height="20" style="vertical-align:middle"></h3>
-            <p>The database (Oracle or Postgres); persistent store for all entity data, transactions,
-               permissions, configuration parameters, and the audit log (when triggers are enabled).</p>
+              <img src="/logo/oracle.svg" alt="Oracle" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/RDS-cd.svg" alt="Amazon RDS" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/aurora-cd.svg" alt="Amazon Aurora" height="20" style="vertical-align:middle"></h3>
+            <p>The database; persistent store for all entity data, transactions,
+               permissions, configuration parameters, and the audit log (when triggers are enabled).
+               <br><br>Supported databases: Postgres, Oracle. With AWS you can use RDS for PostgreSQL or
+               Aurora PostgreSQL.</p>
 
             <h3>Esq2025 audit
               <img src="/logo/postgres.svg" alt="Postgres" height="20" style="vertical-align:middle"> &nbsp;
-              <img src="/logo/oracle.svg" alt="Oracle" height="20" style="vertical-align:middle"></h3>
+              <img src="/logo/oracle.svg" alt="Oracle" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/RDS-cd.svg" alt="Amazon RDS" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/aurora-cd.svg" alt="Amazon Aurora" height="20" style="vertical-align:middle"></h3>
             <p>Optional; a separate database (Oracle or Postgres) holding the entity audit log
                (<code>*_log</code> tables), so audit writes never touch the operational Esq2025.</p>
 
             <h3>Messaging Bus
               <img src="/logo/activemq.png" alt="ActiveMQ" height="20" style="vertical-align:middle">
               <img src="/logo/redis.svg" alt="Redis" height="20" style="vertical-align:middle">&nbsp;
-              <img src="/logo/kafka.svg" alt="Kafka" height="20" style="vertical-align:middle"></h3>
+              <img src="/logo/kafka.svg" alt="Kafka" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/MQ-cd.svg" alt="Amazon MQ" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/sns-cd.svg" alt="Amazon SNS" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/sqs-cd.svg" alt="Amazon SQS" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/kinesis-cd.svg" alt="Amazon Kinesis" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/msk-cd.svg" alt="Amazon MSK" height="20" style="vertical-align:middle"></h3>
             <p>Three logical channels:
-               the IAM Request-Response Bus carries identity commands from keySmith to kcMaster and
-               acknowledgement replies back; ActiveMQ transport provider;
-               the Entity Broadcast Bus carries entity change events published by enyMan and pacMan
-               to bizTree and other interested consumers; ActiveMQ transport provider;
-               the Audit Broadcast Bus (optional, off by default) carries each committed change event
-               from the entity-updating services (enyMan, pacMan, keySmith) to the audit sink &mdash;
-               transport providers: ActiveMQ, Kafka, or Redis.</p>
+               <br> - <i>IAM Request-Response Bus</i> &mdash; carries identity commands from keySmith to
+                 kcMaster, and acknowledgement replies back
+               <br> - <i>Entity Broadcast Bus</i> &mdash; enyMan and pacMan publish entity change events on
+                 every mutation; bizTree and other interested consumers subscribe
+               <br> - <i>Audit Broadcast Bus</i> &mdash; optional (off by default); the entity-updating
+                 services (enyMan, pacMan, keySmith) publish each committed change event to the audit sink.
+               <br><br>Supported messaging vendors / brokers: ActiveMQ, Kafka or Redis. With AWS you can use
+               SNS, SQS, Kinesis, MQ for ActiveMQ or MSK (managed Kafka).</p>
 
             <h3>pacMan — Personal Account Manager
               <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
@@ -192,8 +204,21 @@
             <p>The one screen &mdash; dashboards for logs, traces, and numbers together; because everything shares one
                id, a log line, its trace, and its numbers are one click apart.</p>
 
-            <h3 style="color: #4D6A8D;">The compact shape &mdash; the same framework in fewer programs</h3>
-            <img class="landing-arch-diagram" src="/img/ComponentModel.Compact.png" alt="Esquire Component Model, compact shape"/>
+            <h2 style="margin-top: 32px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 20px;">AWS Observability Stack</h2>
+
+            <p>Running on AWS, the same three signals can go to Amazon's own tools instead.</p>
+
+            <h3>AWS X-Ray
+              <img src="/logo/x-ray-cd.svg" alt="AWS X-Ray" height="22" style="vertical-align:middle"></h3>
+            <p>The trace store &mdash; keeps the traces and shows the path one request took through the services.</p>
+
+            <h3>Amazon CloudWatch
+              <img src="/logo/cw-cd.svg" alt="Amazon CloudWatch" height="22" style="vertical-align:middle"></h3>
+            <p>The numbers and the logs &mdash; keeps the metrics and the log lines, searchable, and draws the
+               dashboards.</p>
+
+            <h2 style="margin-top: 32px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 20px;">The compact shape &mdash; the same framework in fewer programs</h2>
+
             <p>
               Everything above runs as a program per service. The same code and the same settings also run
               grouped: <strong>mesnie</strong> holds enyMan, keySmith and kcMaster, and <strong>gateWard</strong>
@@ -222,6 +247,29 @@
               paying for a large one, and it is a deployment choice, reversible at any time.
             </p>
 
+            <img class="landing-arch-diagram" src="/img/ComponentModel.Compact.png?v=1214" alt="Esquire Component Model, compact shape"/>
+
+            <h3>Mesnie
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/mesnie.svg" alt="Mesnie" height="22" style="vertical-align:middle">&nbsp;
+              <img src="/logo/enyMan.3.png" alt="enyMan" height="22" style="vertical-align:middle">&nbsp;
+              <img src="/logo/keySmith.3.png" alt="keySmith" height="22" style="vertical-align:middle">&nbsp;
+              <img src="/logo/kcMaster.png" alt="kcMaster" height="22" style="vertical-align:middle"></h3>
+            <p>The write side in one program: the entity manager, the identity service and the Keycloak agent.
+               Identity work that used to travel over the message bus is a call inside the program, so a whole
+               round trip disappears while the commands and the events on the outside stay the same.</p>
+
+            <h3>gateWard
+              <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">&nbsp;
+              <img src="/logo/gateward.svg" alt="gateWard" height="22" style="vertical-align:middle">&nbsp;
+              <img src="/logo/gateway.svg" alt="Gateway" height="22" style="vertical-align:middle">&nbsp;
+              <img src="/logo/bizTree.png" alt="bizTree" height="22" style="vertical-align:middle">&nbsp;
+              <img src="/logo/h2.svg" alt="H2" height="20" style="vertical-align:middle"></h3>
+            <p>The read side in one program: the API router together with the business-tree cache and the
+               in-memory database that holds it. A tree read is answered in the program that received it, so
+               the request never leaves the machine to be served.</p>
             <p style="margin-top: 24px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 16px;">
               Source code and documentation:
               <a href="https://github.com/mir0n-pro/esquire.services#readme"

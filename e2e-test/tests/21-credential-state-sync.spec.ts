@@ -17,14 +17,37 @@ import { setupHouse, teardownHouse, House } from '../helpers/testHouse';
 // CONFIGURE_TOTP standing: the database said TOTP was off and KeyCloak still forced the setup. Nothing in the
 // suite could see it, because nothing here had ever read a required action.
 //
-// Asserted through KeyCloak's admin API -- the state lives there, not in any Esquire response. Credentials are
-// the dev values from the committed realm import (keycloak/import/esquire.json), overridable via env, the same
-// arrangement 20-token-relay uses.
+// Asserted through KeyCloak's admin API -- the state lives there, not in any Esquire response. The host, realm
+// and client id are the dev values from the committed realm import (keycloak/import/esquire.json), overridable
+// via env, the same arrangement 20-token-relay uses.
 
 const KC = process.env['KC_URL'] || 'http://localhost:8081/kc-auth';
 const REALM = process.env['KC_REALM'] || 'esquire';
 const ADMIN_CLIENT = process.env['KC_ADMIN_CLIENT'] || 'esq-kcMaster';
-const ADMIN_SECRET = process.env['KC_ADMIN_SECRET'] || 'MHgq0Nu69u2uJ2johaK1wxQLMdakELXN';
+
+// THE SECRET IS THE ONE THING WITH NO FALLBACK, and it is the same rule every deploy script now carries.
+// esq-kcMaster is the only published client holding realm-management realm-admin, so its secret is the realm's
+// master key rather than one credential among seven. It used to default to the committed value, which is right
+// against the docker realm and wrong the moment a public realm is rotated: the suite would authenticate with a
+// dead credential and fail on an assertion, blaming Esquire for a secret that was never supplied.
+//
+// Failing here instead names the actual cause. Either name is accepted: KC_ADMIN_SECRET is what CI passes,
+// KCMASTER_ADMIN_SECRET is what the deploy scripts already read from the environment, and they are one value.
+//
+// THE CHECK IS LAZY, AND THAT MATTERS. A throw at module scope runs when Playwright COLLECTS the suite, not
+// when this spec runs -- so it takes down `playwright test --list` and every other spec with it
+// ("Total: 0 tests in 0 files"). Reading it where it is used fails only the tests that need it.
+function adminSecret(): string {
+  const ret = process.env['KC_ADMIN_SECRET'] || process.env['KCMASTER_ADMIN_SECRET'];
+  if (!ret) {
+    throw new Error(
+      'KC_ADMIN_SECRET (or KCMASTER_ADMIN_SECRET) is not set. It is the esq-kcMaster (realm-admin) client ' +
+      'secret, and this spec has no fallback for it on purpose -- a default would pass against the docker ' +
+      'realm and authenticate with a dead credential against a rotated one.',
+    );
+  }
+  return ret;
+}
 
 // The sync is asynchronous -- keySmith publishes a URQ and kcMaster answers on the bus -- so every assertion
 // polls rather than sleeps.
@@ -35,7 +58,7 @@ type Profile = { loginId: string; connectFlg: string; [k: string]: unknown };
 async function adminToken(): Promise<string> {
   const ctx = await pwRequest.newContext();
   const res = await ctx.post(`${KC}/realms/${REALM}/protocol/openid-connect/token`, {
-    form: { grant_type: 'client_credentials', client_id: ADMIN_CLIENT, client_secret: ADMIN_SECRET },
+    form: { grant_type: 'client_credentials', client_id: ADMIN_CLIENT, client_secret: adminSecret() },
   });
   expect(res.status(), 'the admin client must be able to get a token').toBe(200);
   const token = ((await res.json()) as { access_token?: string }).access_token;
