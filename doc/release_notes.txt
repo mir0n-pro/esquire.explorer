@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.14-2609.0200  v1.2.14 -- Finalization
+    :Fix:         e2e 21-credential-state-sync reads the KeyCloak admin credential (once again)
+    Components:   e2e,
+                  frontend
+
 v1.2.14-2609.0119  v1.2.14 -- the KeyCloak admin credential is required
     :Fix:         e2e 21-credential-state-sync stops when the KeyCloak admin credential is missin
     Components:   e2e
