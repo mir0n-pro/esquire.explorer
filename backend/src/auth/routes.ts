@@ -10,6 +10,7 @@
  * 07/02/2026 mir0n  session-expiry: callback stores session_expires_at; /auth/me returns sessionExpiresAt and reports authenticated:false once the refresh-token window has passed
  * 07/17/2026 mir0n  the KeyCloak token exchange (callback) is wrapped in traceKcCall (CLIENT span).
  * 07/23/2026 mir0n  v1.2.11 -- safeReturnTo(): constrain post-login returnTo to the callback origin (open-redirect / CWE-601 guard)
+ * 09/05/2026 mir0n  v1.2.15 -- logoutHandler() answers { endSessionUrl } instead of redirecting to it
  */
 
 import { Router, type Request, type Response } from 'express';
@@ -198,7 +199,7 @@ function logoutHandler(config: BackendConfig) {
         ret = postLogout;
       }
       await destroySession(req, res, config.session.cookieName);
-      res.redirect(ret);
+      res.json({ endSessionUrl: ret });
     } catch (err) {
       log.error({ err }, 'logout failed');
       res.status(500).json({ error: 'logout failed' });

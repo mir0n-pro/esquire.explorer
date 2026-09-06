@@ -70,6 +70,7 @@
 *                   DomSanitizer.bypassSecurityTrustHtml; landing = signal of the 6 SafeHtml values
 * 07/02/2026 mir0n  session-expiry: sessionExpired signal + '?auth=expired' marker (shown then stripped in ngOnInit);
 *                   scheduleSessionPreempt / onSessionPreempt re-check /auth/me and redirect on real expiry; ngOnDestroy clears the timer
+* 09/05/2026 mir0n  v1.2.15 -- logout() navigates to the endSessionUrl the BFF returns
 */
 import {
   Component,
@@ -534,12 +535,17 @@ public faceNameClass() : string {
 public async logout(): Promise<void> {
   this.profileRequested = false;
   this.profile.set(null);
+  let target: string = '/';
   try {
-    await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+    const res = await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+    const body = await res.json();
+    if (body && body.endSessionUrl) {
+      target = body.endSessionUrl;
+    }
   } catch (err) {
     console.warn('logout fetch failed: ', err);
   }
-  window.location.href = '/';
+  window.location.href = target;
 }
 
 private findIcon(kind:number) : string {

@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+09/05/2026 mir0n  v1.2.15 -- logout reaches KeyCloak as a navigation
+explorer\flatTree\app-shell.ts
+  - logout() navigates to the endSessionUrl the BFF returns
+
 08/27/2026 mir0n  v1.2.13 -- rest/ regenerated for the framework's error contract
 rest\api\esquire.service.ts
   - regenerated from esqEsquireApi.yaml: every operation now accepts application/problem+json as well as

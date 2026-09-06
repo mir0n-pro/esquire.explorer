@@ -1,6 +1,15 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.15-2609.0523  v1.2.15 -- logging out lets you log in as somebody else
+    :Fix:         logging out ends the KeyCloak session as well
+    :New:         e2e 22-role-state-login signs in with no role, with an admin role but no TREE, and
+                  with TREE but no admin role, and asserts what each one is told
+    :New:         e2e 23-logout-switch-user asserts KeyCloak asks for credentials after a logout
+    Components:   backend,
+                  frontend,
+                  e2e
+
 v1.2.14-2609.0200  v1.2.14 -- Finalization
     :Fix:         e2e 21-credential-state-sync reads the KeyCloak admin credential (once again)
     Components:   e2e,

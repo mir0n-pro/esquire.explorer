@@ -181,6 +181,34 @@ entity is removed.
   was never created and left CONFIGURE_TOTP standing, so the database said TOTP was off while KeyCloak
   still forced the setup. Nothing in the suite could see it: nothing here had ever read a required action.
 
+### 22-role-state-login.spec.ts -- a wrong role setting, met the way a user meets it
+- **activation and roles are two steps, and nothing makes an operator do the second one.** A user can be
+  given a working login and left with no role, and the sign-in then fails a long way from the cause. The
+  spec drives three wrong settings and signs in as the user for each: no role at all; an admin role but no
+  TREE; TREE but no admin role.
+- **no role, and admin-without-TREE, must both be REFUSED with a sentence naming the account.** Asserted
+  twice over: the answer on `/api/esq-key` is 403 carrying a problem detail whose `detail` holds the login
+  id and "no privileges", and the message the browser actually puts in front of the user says the same.
+- THE REGRESSION THIS PINS: a roleless token used to be refused as `invalid_token`. The browser reads 401
+  as a dead session and bounces to the login, which succeeds, which 401s again -- a loop reported as "your
+  session expired", the one thing that had not happened. Every sign-in here also asserts the flow never
+  visits the `auth=expired` marker.
+- **TREE without an admin role is NOT an error** and is asserted as working: it signs in, the profile reads
+  200, and only a change is refused (403 on a create). A read-only account is a legitimate setting.
+- The KeyCloak halves (does the account exist yet, which realm roles does it hold, setting a password on it)
+  go through the admin API, the same arrangement spec 21 uses -- `KC_ADMIN_SECRET` / `KCMASTER_ADMIN_SECRET`,
+  with no fallback. Activation leaves a TEMPORARY password with UPDATE_PASSWORD standing, so the spec sets a
+  permanent one and clears the required actions -- otherwise the sign-in lands on KeyCloak's change-password
+  form and the spec would be asserting that form instead of the role state.
+
+### 23-logout-switch-user.spec.ts -- logout ends the Keycloak session, not only the Esquire one
+- **the next login must ask again.** Logs in, logs out through the toolbar, then starts a login and asserts
+  Keycloak presents the credentials form. If it does not, the SSO cookies survived and the user cannot be
+  switched -- the account just signs straight back in.
+- Also asserts `/auth/logout` answers **200**, not a redirect. That is the shape distinction: RP-initiated
+  logout only works as a top-level navigation, so the BFF hands the end-session URL back and the SPA
+  navigates to it. Driven through fetch, Keycloak never sees the browser first-party and its cookies live on.
+
 ### cycle/cycle.spec.ts — full-lifecycle soak / activity generator (not a coverage assertion)
 An activity generator, NOT an assertion spec: repeats a full GUI lifecycle N times (`CYCLES` env,
 default 2) under the Test House to exercise every service and light up the metrics dashboard + Tempo
