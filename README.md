@@ -31,16 +31,23 @@ Each subproject is independently built, run, and deployed; they all talk to
 the same **Esquire server** (`services/`) as outside callers.
 
 
-## v1.2.14 — complete (09/01/2026)
+## v1.2.15 — complete (09/06/2026)
 
-The explorer's share of the **AWS** sprint. The server side moved to a second cloud and to that cloud's own
-services; the explorer's job was to reach it there and to stop trusting a published credential.
+Several minor fixes in the **user activation** routine -- the parts that were awkward to work through
+or left the operator guessing.
 
 | | |
 |--------------------|-------------------------|
-| `frontend/`| - the component-model drawings carry the AWS database, messaging and monitoring services;<br>- the architecture tab shows the refreshed drawings, names the AWS database and messaging services in its legend, and gains a section for the AWS monitoring tools;<br>- the why-it-matters tab counts monitoring as a fourth place the framework can be moved to another supplier, and names the AWS database services |
-| `hauberk/`| - the load harness runs against the AWS deployment, over the same public address a browser uses |
-| `e2e-test/`| - the browser suite runs against the AWS deployment unchanged, over its public address, with nothing tunnelled;<br>- the credential routine no longer falls back to the published sign-in secret: it stops and says which value is missing |
+| `backend/`| - signing out ends the session at the sign-in service as well, so the next person is asked who they are |
+| `frontend/`| - the sign-out is carried out as a real page visit, which is what lets the sign-in service close its own session;<br>- with the refreshed components library, activating an account shows a note naming the initial password and the change it forces |
+| `e2e-test/`| - a new routine signs in under each of the three wrong permission settings and checks what the person is actually told;<br>- a new routine checks that after signing out the sign-in service asks for a password again, so somebody else can sign in |
+
+## v1.2.14 — complete (09/01/2026)
+
+The explorer's share of the **AWS** sprint: the drawings and the front-door pages gained the AWS database,
+messaging and monitoring services, the load harness and the browser suite both ran against the second cloud
+over its public address, and the credential routine stopped falling back to a published sign-in secret.<br>
+[More Details: v1.2.14 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.14?tab=readme-ov-file)
 
 ## v1.2.13 — complete (08/27/2026)
 
