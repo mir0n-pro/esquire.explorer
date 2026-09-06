@@ -41,6 +41,7 @@ or left the operator guessing.
 | `backend/`| - signing out ends the session at the sign-in service as well, so the next person is asked who they are |
 | `frontend/`| - the sign-out is carried out as a real page visit, which is what lets the sign-in service close its own session;<br>- with the refreshed components library, activating an account shows a note naming the initial password and the change it forces |
 | `e2e-test/`| - a new routine signs in under each of the three wrong permission settings and checks what the person is actually told;<br>- a new routine checks that after signing out the sign-in service asks for a password again, so somebody else can sign in |
+| `hauberk/`| - the check that compares the sign-in service against the database now reads the database the stack itself runs |
 
 ## v1.2.14 — complete (09/01/2026)
 

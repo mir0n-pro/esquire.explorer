@@ -10,14 +10,14 @@
             </p>
 
             <p>
-              The <strong>gateway</strong>, the six backend <strong>services</strong> (bizTree, enyMan,
-              pacMan, keySmith, kcMaster, auKeep), and the <strong>BFF</strong> &mdash; the shape shown above,
-              a program each &mdash; run
-              <strong>redundant, with optional autoscale</strong>, for high availability &mdash; spread
-              across separate nodes so losing one keeps the site up. The databases, Keycloak, the message
-              broker, and the Session Store run as a single instance here; each is a third-party platform
-              that brings its <strong>own</strong> high-availability (clustering / replication), set up by
-              the operator when wanted &mdash; outside Esquire's concern.
+              Every box above is its own program: the <strong>gateway</strong>, the six backend
+              <strong>services</strong> (bizTree, enyMan, pacMan, keySmith, kcMaster, auKeep), and the
+              <strong>BFF</strong>. Each of them runs <strong>redundant, with optional autoscale</strong>,
+              and the copies sit on separate nodes, so losing one keeps the site up.
+              The databases, Keycloak, the message broker and the Session Store run as a single instance
+              here. Each of those is a third-party platform that brings its <strong>own</strong> high
+              availability, clustering or replication, which the operator turns on when it is wanted.
+              That part is outside Esquire.
             </p>
 
             <h3>Esq2025
@@ -228,18 +228,20 @@
               screens.
             </p>
             <p>
-              Two things move with the grouping, and both are worth knowing. Identity work that travelled the
-              message bus &mdash; keySmith asking kcMaster to write to Keycloak &mdash; becomes a call inside one
-              program, and a tree read is answered where the request arrives instead of crossing the network a
+              Two things move with the grouping, and both are worth knowing. Identity work used to travel the
+              message bus: keySmith asked kcMaster to write to Keycloak. Now it is a call inside one program.
+              And a tree read is answered where the request arrives, instead of crossing the network a
               second time. What does <strong>not</strong> move is <strong>pacMan</strong>: accounting is a
               business domain built on the framework, not a part of it, so it stays its own program in every
-              shape &mdash; exactly as any domain you build would.
+              shape. Any domain you build works the same way.
             </p>
             <p>
-              Measured on the cloud deployment, against the same load rig: <strong>27% more work</strong> with
-              observability off and <strong>42% more</strong> with metrics, logs and traces fully on,
-              <strong>1.5 GiB</strong> of memory for the whole application, and <strong>7 pods instead of
-              13</strong>. Every running-stack test suite passes on both shapes, unchanged.
+              It was measured on the cloud deployment, against the same load rig. The compact shape does
+              <strong>27% more work</strong> with observability off, and <strong>42% more</strong> with
+              metrics, logs and traces fully on. The whole application uses <strong>1.5 GiB</strong> of
+              memory. The shape itself is
+              <strong>10 application pods instead of 16</strong>. Every running-stack test suite passes on
+              both shapes, unchanged.
             </p>
             <p>
               The cost is real and worth saying: services inside one program restart together, scale together,

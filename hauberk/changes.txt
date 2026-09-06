@@ -1,5 +1,24 @@
 hauberk changes
 
+09/07/2026 mir0n  v1.2.15 -- kc-reconcile reads every environment
+KcRecover.java
+  - adminToken() takes a client_credentials token on the realm admin client instead of a
+    master-realm password grant
+HauberkConfig.java
+  - added KC_ADMIN_CLIENT_ID (kc.admin.client.id, default esq-kcMaster) and KC_ADMIN_SECRET, the
+    latter read from the environment only (KC_ADMIN_SECRET / KCMASTER_ADMIN_SECRET)
+hauberk-oke.properties
+  - pg.url added: the OKE database over a port-forward on 35432
+hauberk-aws.properties
+  - pg.url to the in-pod postgres over a port-forward on 45432; cluster and statefulset in cmd.*
+    moved to esquire-aws-compact and esquire-gateward
+
+09/06/2026 mir0n  v1.2.15 -- kc-reconcile reads the stack database
+hauberk.properties
+  - pg.url port 5432 -> 5433, the port the compose stack publishes its own postgres on
+hauberk-compact.properties
+  - pg.url port 5432 -> 5433, the port the compose stack publishes its own postgres on
+
 09/01/2026 mir0n  v1.2.14 -- the AWS run profile
 hauberk-aws.properties  (new)
   - the AWS overlay: it inherits hauberk.properties and replaces only the endpoints and the

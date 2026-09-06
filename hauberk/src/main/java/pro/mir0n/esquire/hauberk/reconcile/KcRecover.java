@@ -10,6 +10,8 @@
  *                   from esq2025 DIRECTLY over PG/JDBC and the mirror state from KeyCloak DIRECTLY over the
  *                   REST admin API -- OUT of the Esquire services, so recovery works when the services / bus
  *                   are down. Diffs and (in repair mode) fixes a stale KC esq_rootpath in place.
+ * 09/07/2026 mir0n  adminToken() takes a client_credentials token on the realm admin client instead of a
+ *                   master-realm password grant, so one mechanism reads every environment
  */
 package pro.mir0n.esquire.hauberk.reconcile;
 
@@ -20,9 +22,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import pro.mir0n.esquire.hauberk.config.HauberkConfig;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -148,21 +152,25 @@ public final class KcRecover {
 
     // ------------------------------------------------------------------ KeyCloak (REST admin)
 
-    /** Master-realm bootstrap admin token (admin-cli password grant) -- realm-management rights on esquire. */
     private static String adminToken() throws Exception {
         String ret;
-        String form = "grant_type=password&client_id=admin-cli"
-                + "&username=" + HauberkConfig.KC_ADMIN_USER
-                + "&password=" + HauberkConfig.KC_ADMIN_PASSWORD;
+        if (HauberkConfig.KC_ADMIN_SECRET.isBlank()) {
+            throw new IllegalStateException("KC_ADMIN_SECRET (or KCMASTER_ADMIN_SECRET) is not set. It is the "
+                    + HauberkConfig.KC_ADMIN_CLIENT_ID + " client secret, which kc-reconcile needs to read KeyCloak.");
+        }
+        String form = "grant_type=client_credentials"
+                + "&client_id=" + URLEncoder.encode(HauberkConfig.KC_ADMIN_CLIENT_ID, StandardCharsets.UTF_8)
+                + "&client_secret=" + URLEncoder.encode(HauberkConfig.KC_ADMIN_SECRET, StandardCharsets.UTF_8);
         HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(HauberkConfig.KC_BASE + "/realms/master/protocol/openid-connect/token"))
+                .uri(URI.create(HauberkConfig.KC_BASE + "/realms/" + HauberkConfig.KC_REALM
+                        + "/protocol/openid-connect/token"))
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .timeout(Duration.ofSeconds(10))
                 .POST(HttpRequest.BodyPublishers.ofString(form))
                 .build();
         HttpResponse<String> resp = HTTP.send(req, HttpResponse.BodyHandlers.ofString());
         if (resp.statusCode() != 200) {
-            throw new IllegalStateException("KC master admin token returned " + resp.statusCode() + ": " + resp.body());
+            throw new IllegalStateException("KC realm-admin token returned " + resp.statusCode() + ": " + resp.body());
         }
         ret = MAPPER.readTree(resp.body()).path("access_token").asText(null);
         if (ret == null || ret.isBlank()) {

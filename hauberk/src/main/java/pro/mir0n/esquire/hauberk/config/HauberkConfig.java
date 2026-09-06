@@ -16,6 +16,8 @@
  * 06/29/2026 mir0n  added ENYMAN_BASE (enyman.base, required) -- enyMan reached directly for the R6 timeout smoke
  * 07/02/2026 mir0n  added PG_URL / PG_USER / PG_PASSWORD (pg.url / pg.user / pg.password) for the kc-reconcile
  *                   utility's direct JDBC read of esq2025
+ * 09/07/2026 mir0n  added KC_ADMIN_CLIENT_ID (kc.admin.client.id, default esq-kcMaster) and KC_ADMIN_SECRET,
+ *                   the latter read from the environment only (KC_ADMIN_SECRET / KCMASTER_ADMIN_SECRET)
  */
 package pro.mir0n.esquire.hauberk.config;
 
@@ -67,6 +69,9 @@ public final class HauberkConfig {
      *  esquire realm. Optional -- only required by sims that touch the admin API. */
     public static final String KC_ADMIN_USER;
     public static final String KC_ADMIN_PASSWORD;
+
+    public static final String KC_ADMIN_CLIENT_ID;
+    public static final String KC_ADMIN_SECRET;
 
     /** Direct esq2025 connection for the OUT-OF-BAND kc-reconcile utility (PG/JDBC). Optional -- only the
      *  kc-reconcile command touches them, so they are NOT {@code require}d (sims never open a DB). */
@@ -168,6 +173,8 @@ public final class HauberkConfig {
 
         KC_ADMIN_USER     = p.getProperty("kc.admin.user", "admin");
         KC_ADMIN_PASSWORD = p.getProperty("kc.admin.password", "q");
+        KC_ADMIN_CLIENT_ID = p.getProperty("kc.admin.client.id", "esq-kcMaster");
+        KC_ADMIN_SECRET    = adminSecretFromEnv();
 
         PG_URL      = p.getProperty("pg.url", "");
         PG_USER     = p.getProperty("pg.user", "esq2025");
@@ -265,6 +272,17 @@ public final class HauberkConfig {
             return defaultValue;
         }
         return raw.trim().toLowerCase();
+    }
+
+    private static String adminSecretFromEnv() {
+        String ret = System.getenv("KC_ADMIN_SECRET");
+        if (ret == null || ret.isBlank()) {
+            ret = System.getenv("KCMASTER_ADMIN_SECRET");
+        }
+        if (ret == null) {
+            ret = "";
+        }
+        return ret;
     }
 
     private static String require(Properties p, String key) {
