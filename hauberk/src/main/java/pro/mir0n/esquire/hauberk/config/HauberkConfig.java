@@ -18,6 +18,10 @@
  *                   utility's direct JDBC read of esq2025
  * 09/07/2026 mir0n  added KC_ADMIN_CLIENT_ID (kc.admin.client.id, default esq-kcMaster) and KC_ADMIN_SECRET,
  *                   the latter read from the environment only (KC_ADMIN_SECRET / KCMASTER_ADMIN_SECRET)
+ * 09/24/2026 mir0n  v1.2.16 -- added SUPER_TREE_WORKERS, SUPER_READACCT_WORKERS, SUPER_TREESMALL_WORKERS,
+ *                   SUPER_CACHE_WORKERS and SUPER_CACHESMALL_WORKERS (super.tree.workers,
+ *                   super.readacct.workers, super.treesmall.workers, super.cache.workers,
+ *                   super.cachesmall.workers), each requireIntMin0
  */
 package pro.mir0n.esquire.hauberk.config;
 
@@ -126,6 +130,11 @@ public final class HauberkConfig {
     public static final int SUPER_CREATE_WORKERS;
     public static final int SUPER_MOVE_WORKERS;
     public static final int SUPER_TX_WORKERS;
+    public static final int SUPER_TREE_WORKERS;
+    public static final int SUPER_READACCT_WORKERS;
+    public static final int SUPER_TREESMALL_WORKERS;
+    public static final int SUPER_CACHE_WORKERS;
+    public static final int SUPER_CACHESMALL_WORKERS;
 
     /** Infra-orchestration shell commands (key -> command line), from the cmd.* properties.
      *  Run as sim steps via Cmd.run("key"); -Dcmd.key=... overrides at the CLI. */
@@ -216,6 +225,11 @@ public final class HauberkConfig {
         SUPER_CREATE_WORKERS          = requireIntMin0(p,"super.create.workers");
         SUPER_MOVE_WORKERS            = requireIntMin0(p,"super.move.workers");
         SUPER_TX_WORKERS              = requireIntMin0(p,"super.tx.workers");
+        SUPER_TREE_WORKERS            = requireIntMin0(p,"super.tree.workers");
+        SUPER_READACCT_WORKERS        = requireIntMin0(p,"super.readacct.workers");
+        SUPER_TREESMALL_WORKERS       = requireIntMin0(p,"super.treesmall.workers");
+        SUPER_CACHE_WORKERS           = requireIntMin0(p,"super.cache.workers");
+        SUPER_CACHESMALL_WORKERS      = requireIntMin0(p,"super.cachesmall.workers");
 
         java.util.Map<String, String> cmds = new java.util.HashMap<>();
         for (String name : p.stringPropertyNames()) {

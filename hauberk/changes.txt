@@ -1,5 +1,54 @@
 hauberk changes
 
+10/11/2026 mir0n  v1.2.16 -- one operation per cell: the read scenarios, and the paired driver
+chain.ReadTreeRoot  (new)
+  - Chain GET /esq-cmd-tree on the driver's own root office; used by Tree load
+chain.ReadTreeUser  (new)
+  - Chain GET /esq-cmd-tree on one client user's subtree; used by TreeSmall load
+chain.ReadCacheRoot  (new)
+  - Chain GET /esq-tree on the driver's own root, served from the bizTree cache; used by Cache load
+chain.ReadCacheUser  (new)
+  - Chain GET /esq-tree on one customer's subtree from the bizTree cache; used by CacheSmall load
+chain.ReadAcctDetail  (new)
+  - Chain GET /esq-cmd?kind=50&id=pickedAcctId for a single account; used by ReadAcct load
+simulations.LoadScenarios
+  - five read scenarios added: TREE (ReadTreeRoot), TREE_SMALL (PoolFetchUsers +
+    PickRandomFromPool.userChain + ReadTreeUser), CACHE (ReadCacheRoot), CACHE_SMALL (PoolFetchUsers +
+    PickRandomFromPool.userChain + ReadCacheUser) and READ_ACCT (PoolFetchAccounts +
+    PickRandomFromPool.acctChain + ReadAcctDetail). The three pooled ones carry the same
+    exitHereIfFailed() between the setup and the .forever() loop
+simulations.SuperLoadSimulation
+  - TREE, READ_ACCT, TREE_SMALL, CACHE and CACHE_SMALL join the parallel populations, each injected only
+    when its worker count is above zero; the nothing-to-run guard sums all ten. The javadoc and
+    @SimulationInfo no longer say five
+config.HauberkConfig
+  - added SUPER_TREE_WORKERS, SUPER_READACCT_WORKERS, SUPER_TREESMALL_WORKERS, SUPER_CACHE_WORKERS and
+    SUPER_CACHESMALL_WORKERS (super.tree.workers, super.readacct.workers, super.treesmall.workers,
+    super.cache.workers, super.cachesmall.workers), each requireIntMin0
+cli.RunCommand
+  - added --tree, --readacct, --treesmall, --cache and --cachesmall, each overriding its
+    super.*.workers property
+hauberk.properties
+  - super.tree.workers, super.readacct.workers, super.treesmall.workers, super.cache.workers and
+    super.cachesmall.workers, all 0
+perf-matrix.ps1
+  - -Kinds: ONE KIND PER CELL, named "<config>-<kind>", driving that scenario alone at -KindVus with every
+    other scenario passed an explicit 0; the kinds of a config share one build, and the names are checked
+    against KIND_NAMES
+  - -MetricsVus / -MetricsDuration: a LIGHT --metrics leg pass per kind after the plateau cycles, never
+    sharing a cycle with one, landing as "<config>-<kind>-legs"
+  - -PrepDepth / -PrepClients / -PrepAccounts replace the fixed 5 / 5 / 2 passed to prepare-for-anything
+  - -PoolMax sets BIZTREE_H2_POOL_MAX on the workload that holds the tree cache (gateward in compact,
+    biztree in classic); -ServiceMetrics sets GW_SERVICE_METRICS_ENABLED on the gate after each build
+  - Save-Result takes the duration the row was measured over, so a leg row's rps is not divided by the
+    plateau duration
+  - the resume check matches the exact cell names this invocation produces instead of the config prefix,
+    and the discard sweeps the capture rows with the plateau rows
+perf-pairs.ps1  (new)
+  - per-operation pairs: for each kind, the classic cell then the compact cell back to back, each one a
+    separate perf-matrix.ps1 invocation, with a full helm drain between cells, a refusal to measure while
+    any esquire pod survives the drain, and an optional -RecycleVm restart of the Docker VM
+
 09/07/2026 mir0n  v1.2.15 -- kc-reconcile reads every environment
 KcRecover.java
   - adminToken() takes a client_credentials token on the realm admin client instead of a

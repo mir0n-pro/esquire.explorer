@@ -6,6 +6,8 @@
  *
  *  History:
  * 05/14/2026 mir0n  created: picocli "run" subcommand; programmatic Gatling launch with --metrics, --output, --config, --times, shape knobs
+ * 09/24/2026 mir0n  v1.2.16 -- added --tree, --readacct, --treesmall, --cache and --cachesmall, each
+ *                   overriding its super.*.workers property
  */
 package pro.mir0n.esquire.hauberk.cli;
 
@@ -68,6 +70,11 @@ public class RunCommand implements Callable<Integer> {
     @Option(names = "--create", paramLabel = "N", description = "super.create.workers") Integer create;
     @Option(names = "--move",   paramLabel = "N", description = "super.move.workers")   Integer move;
     @Option(names = "--tx",     paramLabel = "N", description = "super.tx.workers")     Integer tx;
+    @Option(names = "--tree",     paramLabel = "N", description = "super.tree.workers")     Integer tree;
+    @Option(names = "--readacct", paramLabel = "N", description = "super.readacct.workers") Integer readAcct;
+    @Option(names = "--treesmall", paramLabel = "N", description = "super.treesmall.workers") Integer treeSmall;
+    @Option(names = "--cache", paramLabel = "N", description = "super.cache.workers") Integer cache;
+    @Option(names = "--cachesmall", paramLabel = "N", description = "super.cachesmall.workers") Integer cacheSmall;
 
     // --- Prepare shape knobs ---
 
@@ -178,6 +185,11 @@ public class RunCommand implements Callable<Integer> {
         setIfPresent("super.create.workers",           create);
         setIfPresent("super.move.workers",             move);
         setIfPresent("super.tx.workers",               tx);
+        setIfPresent("super.tree.workers",             tree);
+        setIfPresent("super.readacct.workers",         readAcct);
+        setIfPresent("super.treesmall.workers",        treeSmall);
+        setIfPresent("super.cache.workers",            cache);
+        setIfPresent("super.cachesmall.workers",       cacheSmall);
         setIfPresent("prepare.offices.depth",          prepDepth);
         setIfPresent("prepare.clients.per.office",     prepClients);
         setIfPresent("prepare.accounts.per.client",    prepAccounts);
