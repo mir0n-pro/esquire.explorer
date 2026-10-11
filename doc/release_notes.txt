@@ -1,6 +1,17 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v1.2.16-2610.1117  v1.2.16 -- the landing page on a phone, and one operation per load cell
+    :Fix:         the landing page fits a phone screen
+    :Fix:         the landing header keeps the login button on the screen
+    :New:         the load harness drives one operation on its own
+               -- reading the tree from the service that owns it or from the cache,
+                  the whole tree or one customer's, and reading one account 
+               -- so a number names that operation instead of a mixture
+    :New:         the load harness measures an operation on both deployment shapes back to back
+    Components:   frontend,
+                  hauberk
+
 v1.2.15-2609.0700  v1.2.15 -- the reconcile check reads the stack database
     Components:   hauberk
 

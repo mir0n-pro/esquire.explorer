@@ -31,17 +31,20 @@ Each subproject is independently built, run, and deployed; they all talk to
 the same **Esquire server** (`services/`) as outside callers.
 
 
-## v1.2.15 — complete (09/06/2026)
+## v1.2.16 — complete (10/11/2026)
 
-Several minor fixes in the **user activation** routine -- the parts that were awkward to work through
-or left the operator guessing.
+The **landing page on a phone**, and a load harness that can measure one operation at a time.
 
 | | |
 |--------------------|-------------------------|
-| `backend/`| - signing out ends the session at the sign-in service as well, so the next person is asked who they are |
-| `frontend/`| - the sign-out is carried out as a real page visit, which is what lets the sign-in service close its own session;<br>- with the refreshed components library, activating an account shows a note naming the initial password and the change it forces |
-| `e2e-test/`| - a new routine signs in under each of the three wrong permission settings and checks what the person is actually told;<br>- a new routine checks that after signing out the sign-in service asks for a password again, so somebody else can sign in |
-| `hauberk/`| - the check that compares the sign-in service against the database now reads the database the stack itself runs |
+| `frontend/`| - the landing page fits a phone screen |
+| `hauberk/`| - the harness drives one operation on its own -- reading the tree from the service that owns it or from the cache, the whole tree or one customer's, and reading one account -- so a number names that operation instead of a mixture;<br>- a paired run measures the same operation on both deployment shapes back to back, with the machine emptied in between |
+
+## v1.2.15 — complete (09/06/2026)
+
+Several minor fixes in the **user activation** routine -- the parts that were awkward to work through
+or left the operator guessing.<br>
+[More Details: v1.2.15 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.15?tab=readme-ov-file)
 
 ## v1.2.14 — complete (09/01/2026)
 

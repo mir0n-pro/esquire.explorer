@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+10/11/2026 mir0n  v1.2.16 -- the landing page fits a phone
+styles.scss
+  - work for mobile
+explorer\flatTree\app-shell.scss
+  - work for mobile
 09/05/2026 mir0n  v1.2.15 -- logout reaches KeyCloak as a navigation
 explorer\flatTree\app-shell.ts
   - logout() navigates to the endSessionUrl the BFF returns

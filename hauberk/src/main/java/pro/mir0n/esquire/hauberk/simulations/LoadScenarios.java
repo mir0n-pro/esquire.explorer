@@ -10,6 +10,11 @@
  *                   setup failed used to walk into the loop with no session attributes, so its requests were never
  *                   SENT and the loop spun at full CPU issuing nothing
  * 08/15/2026 mir0n  the in-loop transient-failure example no longer names a status code
+ * 09/24/2026 mir0n  v1.2.16 -- five read scenarios added: TREE (ReadTreeRoot), TREE_SMALL (PoolFetchUsers +
+ *                   PickRandomFromPool.userChain + ReadTreeUser), CACHE (ReadCacheRoot), CACHE_SMALL
+ *                   (PoolFetchUsers + PickRandomFromPool.userChain + ReadCacheUser) and READ_ACCT
+ *                   (PoolFetchAccounts + PickRandomFromPool.acctChain + ReadAcctDetail). The three pooled
+ *                   ones carry the same exitHereIfFailed() between the setup and the .forever() loop
  */
 package pro.mir0n.esquire.hauberk.simulations;
 
@@ -168,5 +173,44 @@ public final class LoadScenarios {
                         .set("txAmount", TX_AMOUNT))
                 .exec(Deposit.chain)
                 .exec(Withdrawal.chain)
+            );
+
+    // (f) read the tree from the driver's own root
+    public static final ScenarioBuilder TREE = scenario("load-tree")
+            .forever().on(
+                exec(ReadTreeRoot.chain)
+            );
+
+    // (h) read one customer's subtree
+    public static final ScenarioBuilder TREE_SMALL = scenario("load-tree-small")
+            .exec(PoolFetchUsers.chain)
+            .exitHereIfFailed()                 // no pool -> no work; leave rather than spin
+            .forever().on(
+                exec(PickRandomFromPool.userChain)
+                .exec(ReadTreeUser.chain)
+            );
+
+    // (i) read the tree from the cache, root
+    public static final ScenarioBuilder CACHE = scenario("load-cache")
+            .forever().on(
+                exec(ReadCacheRoot.chain)
+            );
+
+    // (j) read one customer's subtree from the cache
+    public static final ScenarioBuilder CACHE_SMALL = scenario("load-cache-small")
+            .exec(PoolFetchUsers.chain)
+            .exitHereIfFailed()                 // no pool -> no work; leave rather than spin
+            .forever().on(
+                exec(PickRandomFromPool.userChain)
+                .exec(ReadCacheUser.chain)
+            );
+
+    // (g) read random account details
+    public static final ScenarioBuilder READ_ACCT = scenario("load-read-acct")
+            .exec(PoolFetchAccounts.chain)
+            .exitHereIfFailed()                 // no accounts -> no work; leave rather than spin
+            .forever().on(
+                exec(PickRandomFromPool.acctChain)
+                .exec(ReadAcctDetail.chain)
             );
 }

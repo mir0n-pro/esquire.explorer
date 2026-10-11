@@ -60,7 +60,22 @@ param(
     [int]    $Runs       = 2,        # runs per config (2 = the noise floor)
     [switch] $Fresh,                 # start a new CSV instead of resuming the existing one
     [string[]] $Only     = @(),      # run ONLY these config names (empty = all of $CONFIGS)
-    [double] $Scale      = 1.0       # scale every scenario's VU count (1.0 = the standard 200-VU super-load)
+    [double] $Scale      = 1.0,      # scale every scenario's VU count (1.0 = the standard 200-VU super-load)
+    [string[]] $Kinds    = @(),      # ONE KIND PER CELL: tree read readacct update tx (empty = the mixed super-load)
+    [int]    $KindVus    = 64,       # VU count for the single scenario of a -Kinds cell
+    [int]    $PrepDepth  = 5,
+    [int]    $PrepClients= 5,
+    [int]    $PrepAccounts = 2,
+    [int]    $MetricsVus  = 0,       # >0 adds a LIGHT capture cycle per kind (--metrics): the per-leg timings
+    [int]    $MetricsDuration = 60,
+    [int]    $PoolMax    = 0,         # >0 sets BIZTREE_H2_POOL_MAX on the workload that holds the tree
+                                      # cache -- gateWard in compact, bizTree in classic. The cache-read
+                                      # scheduler sizes itself from this pool, so it is the one knob that
+                                      # widens both the connections and the threads waiting on them.
+    [switch] $ServiceMetrics          # set GW_SERVICE_METRICS_ENABLED on the gate after each build:
+                                      # it only adds a header to the downstream request, and the per-leg
+                                      # timings are stamped only for a request that carries the client's
+                                      # X-Capture-Metrics -- so a plateau cycle pays nothing for it
 )
 # NOTE $Only, never $Configs: PowerShell variable names are CASE-INSENSITIVE, so a param named $Configs
 # IS $CONFIGS -- it would silently overwrite the matrix definition with a list of strings and select nothing.
@@ -157,6 +172,16 @@ $CONFIGS = @(
     @{ name = "docker-ON";   target = "docker"; reps = 1; o11y = "ON"  }
 )
 
+# ONE KIND PER CELL (-Kinds). Each base config becomes one cell per kind, named "<config>-<kind>", and the
+# cell drives that scenario ALONE at -KindVus. The mixed super-load cannot answer a per-operation question:
+# its scenarios share the box, so an operation that speeds up takes capacity from the others and every row
+# moves at once. A cell per kind is the only way a single operation's number means that operation.
+$KIND_NAMES = @("tree","treesmall","cache","cachesmall","read","readacct","update","create","move","tx")
+if ($Kinds.Count -gt 0) {
+    $typo = $Kinds | Where-Object { $KIND_NAMES -notcontains $_ }
+    if ($typo) { throw "unknown kind(s): $($typo -join ', ') -- known: $($KIND_NAMES -join ', ')" }
+}
+
 # The full matrix order, captured BEFORE any -Configs filter: run numbers are assigned from a config's slot
 # here, so a subset keeps the same numbers it would have had in a full matrix.
 $ALL_CONFIG_NAMES = [System.Collections.ArrayList]@($CONFIGS | ForEach-Object { $_.name })
@@ -201,7 +226,8 @@ function Log($m) {
 }
 
 # ---- parse one Gatling global-stats block ------------------------------------------------
-function Save-Result($out, $run, $cfg, $loadNo) {
+function Save-Result($out, $run, $cfg, $loadNo, $secs = 0) {
+    if ($secs -le 0) { $secs = $Duration }
     $hit = @($out | Select-String "request count")
     if ($hit.Count -eq 0) { Log "    !! NO STATS (run $run load $loadNo) -- did the token fetch fail?"; return $null }
     $all   = [regex]::Matches($hit[0].ToString(), '\|\s*([\d,\-]+)')
@@ -215,7 +241,7 @@ function Save-Result($out, $run, $cfg, $loadNo) {
         if ($c.Count -lt 1) { return "" }
         return ($c[0].Groups[1].Value) -replace ',',''
     }
-    $rps   = [math]::Round($total / $Duration, 1)
+    $rps   = [math]::Round($total / $secs, 1)
     $koPct = if ($total -gt 0) { [math]::Round(100.0 * [double]$ko / $total, 3) } else { 0 }
     "$run,$($cfg.name),$($cfg.target),$($cfg.reps),$($cfg.o11y),$loadNo,$total,$ok,$ko,$koPct,$rps,$(Col 'mean response time'),$(Col '50th percentile'),$(Col '75th percentile'),$(Col '95th percentile'),$(Col '99th percentile'),$(Col 'max response time')" |
         Out-File -FilePath $CSV -Encoding utf8 -Append
@@ -326,6 +352,22 @@ function Build-K8s($cfg) {
     }
     Wait-K8sPods
 
+    if ($ServiceMetrics) {
+        $gw = if ($cfg.dir -eq "k8s-compact") { "gateward" } else { "gateway" }
+        Log "  enabling the per-leg duration trace on $(Wl $cfg $gw)"
+        & kubectl set env statefulset (Wl $cfg $gw) GW_SERVICE_METRICS_ENABLED=true *> $null
+        & kubectl rollout status statefulset (Wl $cfg $gw) --timeout=300s *> $null
+        Wait-K8sPods
+    }
+
+    if ($PoolMax -gt 0) {
+        $holder = if ($cfg.dir -eq "k8s-compact") { "gateward" } else { "biztree" }
+        Log "  setting BIZTREE_H2_POOL_MAX=$PoolMax on $(Wl $cfg $holder)"
+        & kubectl set env statefulset (Wl $cfg $holder) BIZTREE_H2_POOL_MAX=$PoolMax *> $null
+        & kubectl rollout status statefulset (Wl $cfg $holder) --timeout=300s *> $null
+        Wait-K8sPods
+    }
+
     if ($cfg.reps -eq 1) {
         Log "  scaling to x1"
         foreach ($s in $apps) { kubectl scale sts (Wl $cfg $s) --replicas=1 *> $null }
@@ -406,12 +448,26 @@ function Build-Docker($cfg) {
 
 # ---- one run: build from scratch -> prepare -> loads until steady --------------------------
 function Invoke-Run($run, $cfg) {
+    # WHICH ROWS COUNT AS THIS CELL. With one kind per invocation, every kind of a config shares the run
+    # number, and the config column carries "<config>-<kind>". Matching the config PREFIX therefore counts a
+    # previous kind's rows as this one's and skips the cell -- silently, with a COMPLETE line and no work.
+    # Match the exact cell names this invocation is about to produce.
+    $cells = @()
+    $all   = @()
+    if ($Kinds.Count -gt 0) {
+        foreach ($k in $Kinds) { $cells += "$($cfg.name)-$k"; $all += "$($cfg.name)-$k"; $all += "$($cfg.name)-$k-legs" }
+    } else {
+        $cells = @($cfg.name); $all = @($cfg.name)
+    }
     if (Test-Path $CSV) {
-        $done = @(Import-Csv $CSV | Where-Object { $_.run -eq "$run" }).Count
-        if ($done -ge $MinLoads) { Log "======== RUN $run : $($cfg.name) -- already complete, skipping ========"; return }
-        if ($done -gt 0) {
-            @(Import-Csv $CSV | Where-Object { $_.run -ne "$run" }) | Export-Csv -Path $CSV -NoTypeInformation -Encoding utf8
-            Log "  (discarded $done rows from an interrupted run $run)"
+        # completeness counts the PLATEAU cells only; the discard sweeps the capture rows too, or a repeat
+        # would leave the previous attempt's legs row behind next to the new one
+        $mine = @(Import-Csv $CSV | Where-Object { $_.run -eq "$run" -and $cells -contains $_.config })
+        if ($mine.Count -ge ($MinLoads * $cells.Count)) { Log "======== RUN $run : $($cfg.name) [$($Kinds -join ',')] -- already complete, skipping ========"; return }
+        $stale = @(Import-Csv $CSV | Where-Object { $_.run -eq "$run" -and $all -contains $_.config })
+        if ($stale.Count -gt 0) {
+            @(Import-Csv $CSV | Where-Object { -not ($_.run -eq "$run" -and $all -contains $_.config) }) | Export-Csv -Path $CSV -NoTypeInformation -Encoding utf8
+            Log "  (discarded $($stale.Count) rows from an interrupted run $run)"
         }
     }
     Log "======== RUN $run : $($cfg.name)  (from scratch) ========"
@@ -432,7 +488,7 @@ function Invoke-Run($run, $cfg) {
     # CHECK the prepare. It used to be fire-and-forget, and "playground prepared" was logged whether or
     # not it worked -- so a broken environment produced four NO-STATS loads instead of one clear abort.
     # If the playground is not there, no load can mean anything; stop the run here and say why.
-    $prep = & .\hauberk.cmd run prepare-for-anything @hcfg --prep-depth 5 --prep-clients 5 --prep-accounts 2 2>&1
+    $prep = & .\hauberk.cmd run prepare-for-anything @hcfg --prep-depth $PrepDepth --prep-clients $PrepClients --prep-accounts $PrepAccounts 2>&1
     $prepReq = @($prep | Select-String "request count")
     if ($prepReq.Count -eq 0) {
         Log "  !! PLAYGROUND PREPARE PRODUCED NO REQUESTS -- the environment is not usable (token? gateway? seeded DB?)"
@@ -441,18 +497,60 @@ function Invoke-Run($run, $cfg) {
     }
     Log "  playground prepared; loads (min $MinLoads, extend while climbing >$ClimbPct%, max $MaxLoads):"
 
+    # -Kinds: ONE build, one load series per kind, in the order given. Every other scenario is passed an
+    # explicit 0, so a cycle measures that operation with the whole fleet to itself. The kinds share a build
+    # on purpose -- a rebuild per kind costs four times the wall clock and the reads do not disturb the data;
+    # put the writing kinds LAST so what they add cannot reach the read cycles.
+    $cycles = @()
+    if ($Kinds.Count -gt 0) {
+        foreach ($k in $Kinds) {
+            $vals = [ordered]@{ read = 0; update = 0; create = 0; move = 0; tx = 0; tree = 0; readacct = 0; treesmall = 0; cache = 0; cachesmall = 0 }
+            $vals[[string]$k] = $KindVus
+            $one = @("--duration","$Duration")
+            foreach ($v in $vals.Keys) { $one += @("--$v", "$($vals[$v])") }
+            $cell = $cfg.Clone()
+            $cell.name = "$($cfg.name)-$k"
+            $cycles += ,@($cell, $one)
+        }
+    } else {
+        $cycles += ,@($cfg, $LOAD)
+    }
+
+    foreach ($cycle in $cycles) {
+    $cell = $cycle[0]
+    $load = $cycle[1]
+    if ($Kinds.Count -gt 0) { Log "  ---- cycle $($cell.name) at $KindVus VUs ----" }
     $rps = @()
     for ($i = 1; $i -le $MaxLoads; $i++) {
-        $out = & .\hauberk.cmd run super-load @hcfg @LOAD 2>&1
+        $out = & .\hauberk.cmd run super-load @hcfg @load 2>&1
         # Belt and braces: take only the LAST value the function emits, and force it to a double, so a
         # stray pipeline write can never turn the climb check into string arithmetic again.
-        $r = @(Save-Result $out $run $cfg $i)[-1]
+        $r = @(Save-Result $out $run $cell $i)[-1]
         if ($null -ne $r -and $r -match '^\d+(\.\d+)?$') { $rps += [double]$r }
         if ($i -ge $MinLoads -and $rps.Count -ge 2) {
             $climb = 100.0 * ($rps[-1] - $rps[-2]) / $rps[-2]
             if ($climb -le $ClimbPct) { Log "    settled ($([math]::Round($climb,1))% vs previous) -- $i loads"; break }
             Log "    still climbing (+$([math]::Round($climb,1))%) -- extending"
             if ($i -eq $MaxLoads) { Log "    !! hit the $MaxLoads-load cap WHILE STILL CLIMBING -- steady state not reached, treat this config's number as a floor" }
+        }
+    }
+    }
+
+    # THE LEG PASS. --metrics makes the gateway buffer the response to stamp its timing headers, which
+    # inflates its own band and lowers throughput -- so it can never share a cycle with a plateau
+    # measurement. It runs here instead: same build, same data, a LIGHT load well under the knee, one load
+    # per kind. Rows land as "<config>-<kind>-legs"; the per-leg CSVs land in the Gatling run folder.
+    if ($MetricsVus -gt 0 -and $Kinds.Count -gt 0) {
+        foreach ($k in $Kinds) {
+            $vals = [ordered]@{ read = 0; update = 0; create = 0; move = 0; tx = 0; tree = 0; readacct = 0; treesmall = 0; cache = 0; cachesmall = 0 }
+            $vals[[string]$k] = $MetricsVus
+            $one = @("--duration","$MetricsDuration","--metrics")
+            foreach ($v in $vals.Keys) { $one += @("--$v", "$($vals[$v])") }
+            $legCell = $cfg.Clone()
+            $legCell.name = "$($cfg.name)-$k-legs"
+            Log "  ---- legs $($legCell.name) at $MetricsVus VUs for $MetricsDuration s ----"
+            $out = & .\hauberk.cmd run super-load @hcfg @one 2>&1
+            $null = Save-Result $out $run $legCell 1 $MetricsDuration
         }
     }
 }
