@@ -18,5 +18,7 @@ export default defineConfig({
     baseURL: process.env['BASE_URL'] || 'http://localhost:4200',
     headless: true,
   },
-  reporter: [['list'], ['html', { open: 'never' }]],
+  // The html reporter empties its folder on every run -- so it writes one level below the
+  // tracked html-report/--placeholder--.
+  reporter: [['list'], ['html', { open: 'never', outputFolder: 'html-report/latest' }]],
 });

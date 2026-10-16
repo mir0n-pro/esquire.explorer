@@ -33,9 +33,9 @@
 *                   console.log replaced with EsqUtils.log
 * 03/01/2026 mir0n  wait for initial access profile load
 * 03/06/2026 mir0n  error report dialog: JSON.stringify errors[] for tabstring display
-* 03/09/2026 mir0n  profile converted to signal — fixes NG0100 ExpressionChangedAfterChecked
-*                   callApiMill/dictionary init moved before await — fixes CallApiMill not initialized race
-* 03/16/2026 mir0n  let → var (convention); subscribe error blocks removed
+* 03/09/2026 mir0n  profile converted to signal -- fixes NG0100 ExpressionChangedAfterChecked
+*                   callApiMill/dictionary init moved before await -- fixes CallApiMill not initialized race
+* 03/16/2026 mir0n  let -> var (convention); subscribe error blocks removed
 * 03/26/2026 mir0n  implements EsqExplorerHost: onTreeRefresh(), onTreeRefreshSelect(), setErrorMessage()
 *                   esquireCmdNew() routes to /esq-anew (acct) or /esq-new; registers mill host
 * 03/27/2026 mir0n  setUserId() called at profile load; userId passed to EsqSingleEntryDialog

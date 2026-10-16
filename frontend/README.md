@@ -1,6 +1,13 @@
-# esquire.explorer/frontend -- Esquire Tree Explorer (SPA)
+<table style="width: 100%; table-layout: fixed;">
+  <tr>
+    <td style="width: 12%"><img src="../favicon.ico" alt="Esquire logo" align="right" valign="middle" width="64"></td>
+    <td style="width: 88%;">
+       <h1>Esquire Application Frameworks(tm) 2.0</h1>
+    </td>
+  </tr>
+</table>
 
-## Esquire Frameworks (tm) 2.0
+# esquire.explorer/frontend -- Esquire Tree Explorer (SPA)
 
 The frameworks for organizing business entities in a tree -- any kind of
 business or activity. Targeted at traditional Backoffice (sub)system
@@ -16,7 +23,7 @@ operations gated by the caller's access profile; dialogs, fields, kind
 icons, and column layouts all driven at runtime from server configuration
 (no hardcoded field definitions in the frontend).
 
-![](doc/media/context-menu.jpg)
+![](../doc/media/context-menu.jpg)
 
 A typical session: log in via the BFF (`/auth/me`), the SPA hydrates the
 access profile, the kind registry, and the dictionary; from there the
@@ -24,7 +31,7 @@ user walks the tree, opens entity details, runs administrative commands
 (Create / Move / Delete) and accounting commands (Deposit / Withdrawal /
 Transfer).
 
-![](doc/media/access-profile.jpg)
+![](../doc/media/access-profile.jpg)
 
 ## The actual implementation lives in `esquire.ui.lib`
 

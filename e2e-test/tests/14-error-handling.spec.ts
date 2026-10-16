@@ -22,7 +22,7 @@ test('error bar appears and error report dialog opens', async ({ page }) => {
   await page.locator('mat-tree-node').first().click();
   await page.locator('button[matTooltip="Details"]').click();
 
-  // Details dialog may open (and create an overlay backdrop) — dismiss it first
+  // Details dialog may open (and create an overlay backdrop) -- dismiss it first
   const openDialog = page.locator('mat-dialog-container');
   if (await openDialog.isVisible({ timeout: 2000 }).catch(() => false)) {
     await page.keyboard.press('Escape');

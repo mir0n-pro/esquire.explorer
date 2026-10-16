@@ -1,6 +1,14 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+10/16/2026 mir0n  v2.0.0 -- version 2.0.0
+package.json
+  - version 2.0.0
+package-lock.json
+  - version 2.0.0
+index.html
+  - softwareVersion 2.0.0
+
 10/11/2026 mir0n  v1.2.16 -- the landing page fits a phone
 styles.scss
   - work for mobile
@@ -280,7 +288,7 @@ explorer\flatTree\app-explorer.component.ts
 styles.scss
   - app-root, app-explorer: display: block; height: 100% (propagates height chain to Angular host elements)
 explorer\flatTree\app-explorer.component.scss
-  - grid-template-rows: auto → 1fr (explorer fills space between toolbars on resize)
+  - grid-template-rows: auto -> 1fr (explorer fills space between toolbars on resize)
   - login-hint-row + login-form-wrapper: callout bubble with triangle arrow pointing to login icon
 explorer\flatTree\app-explorer.component.html
   - login hint restructured as callout (login-hint-row wrapper, arrow bubble)
@@ -297,7 +305,7 @@ explorer\flatTree\app-explorer.component.ts
 
 03/27/2026 mir0n  dialog resize + position/size persistence per user
 explorer\flatTree\app-explorer.component.ts
-  - setUserId() called at profile load — informs mill of logged-in userId at logon
+  - setUserId() called at profile load -- informs mill of logged-in userId at logon
   - userId passed to EsqSingleEntryDialog data
 
 03/26/2026 mir0n  create entity dialog
@@ -314,15 +322,15 @@ explorer\flatTree\app-explorer.component.ts
 explorer\flatTree\app-explorer.component.html
   - [esqExplorerHost]="this" binding on <esqExplorer> component
 
-03/16/2026 mir0n  let → var convention; subscribe error blocks removed
+03/16/2026 mir0n  let -> var convention; subscribe error blocks removed
 explorer\flatTree\app-explorer.component.ts
-  - let → var for ret variable (coding convention)
+  - let -> var for ret variable (coding convention)
   - subscribe error blocks removed (error handling done in dialog catchError)
 
 03/09/2026 mir0n Race condition fixes: NG0100 and CallApiMill not initialized
 explorer\flatTree\app-explorer.component.ts
-  - profile converted to Angular signal — fixes NG0100 ExpressionChangedAfterChecked on faceIcon/faceName
-  - callApiMill and dictionary initialized before await EsqObjectKindFactory.init() — fixes "CallApiMill not initialized" race
+  - profile converted to Angular signal -- fixes NG0100 ExpressionChangedAfterChecked on faceIcon/faceName
+  - callApiMill and dictionary initialized before await EsqObjectKindFactory.init() -- fixes "CallApiMill not initialized" race
 
 03/06/2026 mir0n Server-side validation error focus; error report errors[] display
 explorer\flatTree\app-explorer.component.ts
@@ -330,14 +338,14 @@ explorer\flatTree\app-explorer.component.ts
 
 03/03/2026 claude Fix Keycloak SSO iframe timeout in K8s deployment
 main.ts
-  - checkLoginIframe: true → false (cross-port iframe unreliable with self-signed certs)
-  - onLoad stays 'check-sso' — session detection still works via silentCheckSsoRedirectUri
+  - checkLoginIframe: true -> false (cross-port iframe unreliable with self-signed certs)
+  - onLoad stays 'check-sso' -- session detection still works via silentCheckSsoRedirectUri
 
 03/01/2026 mir0n
 explorer\flatTree\app-explorer.component.ts
   - Wait for initial access profile load
 
-02/18/2026 mir0n Wire Save to REST — esquireCmdSave & esquireKeySave
+02/18/2026 mir0n Wire Save to REST -- esquireCmdSave & esquireKeySave
 explorer\flatTree\app-explorer.component.ts
   - added esquireCmdSave() wrapper (routes acct entities to /esq-cmd-asave)
   - added esquireKeySave() wrapper

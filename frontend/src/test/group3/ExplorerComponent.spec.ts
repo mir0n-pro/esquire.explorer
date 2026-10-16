@@ -29,7 +29,7 @@ describe('ExplorerComponent', () => {
 
         fixture = TestBed.createComponent(ExplorerComponent);
         component = fixture.componentInstance;
-        // Do not call detectChanges — ngOnInit requires live REST + /auth/me
+        // Do not call detectChanges -- ngOnInit requires live REST + /auth/me
     });
 
     it('creates without error', () => {
