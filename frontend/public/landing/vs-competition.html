@@ -1,7 +1,7 @@
             <h2>vs Competition</h2>
 
             <p>
-              The comparison below is not a promise about where Esquire is headed — it is a <strong>mature
+              The comparison below is not a promise about where Esquire is headed &mdash; it is a <strong>mature
               framework measured as it stands</strong>: a complete, working system from database to browser,
               highly available, fully observable, open at every vendor layer, and running live in production.
             </p>
@@ -34,19 +34,19 @@
               code rather than taking this page's word for it.
             </p>
 
-            <h3>Domain-model-driven frameworks — the closest comparison</h3>
+            <h3>Domain-model-driven frameworks &mdash; the closest comparison</h3>
             <p>
               <strong>Apache Causeway</strong> (formerly Apache Isis) is the closest project to Esquire's
               shape. It runs on Spring Boot and generates its UI directly from the domain model, as a webapp,
               REST or GraphQL, integrating Spring Security and Keycloak. The difference is where the UI
               definition comes from: Causeway derives it from the domain classes as written, Esquire from
-              runtime server configuration — so in Esquire a field layout change reaches the browser without a
+              runtime server configuration &mdash; so in Esquire a field layout change reaches the browser without a
               redeployment. Causeway does not filter data rows; its permissions grant or veto access to
               namespaces, types and members, which governs what appears in the UI rather than which rows come
               back.
             </p>
             <p>
-              <strong>Jmix</strong>, successor to CUBA Platform, is the closest commercial-grade one — Spring
+              <strong>Jmix</strong>, successor to CUBA Platform, is the closest commercial-grade one &mdash; Spring
               Boot, Apache 2.0, built for large data models and complex internal UIs. It has genuine
               row-level security and entity-attribute permissions, and so does Esquire. The distinction is
               hierarchy. In Jmix every constraint is authored per entity class by the developer, as a JPQL
@@ -57,8 +57,8 @@
             <p>
               That is the whole argument, and it is worth stating plainly: <strong>these are frameworks you
               build a permission model on; Esquire is one where the hierarchy already is the permission
-              model.</strong> Esquire additionally ships the operational floor — high availability, correlated
-              metrics, logs and traces, async messaging — assembled and running rather than left as work.
+              model.</strong> Esquire additionally ships the operational floor &mdash; high availability, correlated
+              metrics, logs and traces, async messaging &mdash; assembled and running rather than left as work.
             </p>
 
             <h3>Authorization engines</h3>
@@ -70,7 +70,7 @@
             </p>
             <p>
               Esquire's permission model is less academically rigorous than ReBAC. What it is instead is
-              integrated — part of the entity model and the UI, shipped with the framework rather than
+              integrated &mdash; part of the entity model and the UI, shipped with the framework rather than
               operated as a separate service. The common hard case is the same for all of them: point checks
               are the easy half, and filtering a list to a subtree on every screen is where these systems are
               actually tested.
@@ -92,7 +92,7 @@
 
             <h3>Microservice generators</h3>
             <p>
-              <strong>JHipster</strong> generates a scaffold — the starting point for a backoffice rather than
+              <strong>JHipster</strong> generates a scaffold &mdash; the starting point for a backoffice rather than
               a backoffice. After generation the hierarchical entity tree, the positional permission model,
               the server-driven UI and the async messaging topology are still to be built. A generator that
               shipped an opinionated permission model would be a worse generator; Esquire starts where
@@ -107,7 +107,7 @@
               Retool covers a breadth of integrations Esquire does not attempt. The distinction is the
               destination rather than the speed: a panel over an existing schema is the right tool for an
               internal data browser and the wrong starting point for a back office whose permission model is a
-              tree. (react-admin is a framework rather than a low-code tool — you write React with it — and is
+              tree. (react-admin is a framework rather than a low-code tool &mdash; you write React with it &mdash; and is
               maintained by Marmelab.)
             </p>
 

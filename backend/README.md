@@ -1,5 +1,11 @@
-| ![Alt text](../favicon.ico) | Esquire Frameworks(tm) 2.0 |
-|----------------------------|---------------------------|
+<table style="width: 100%; table-layout: fixed;">
+  <tr>
+    <td style="width: 12%"><img src="../favicon.ico" alt="Esquire logo" align="right" valign="middle" width="64"></td>
+    <td style="width: 88%;">
+       <h1>Esquire Application Frameworks(tm) 2.0</h1>
+    </td>
+  </tr>
+</table>
 
 # Esquire Backend (BFF tier)
 
@@ -9,8 +15,6 @@ Node.js Backend-for-Frontend tier introduced in v1.2.3. Sits between `explorer/f
 - JWE access-token forwarding to the gateway (which decrypts and relays plain JWS to Spring services).
 - In-memory LRU cache for static entity dictionaries (`/api/esq-dict`, `/api/esq-kinds`).
 - Static SPA serving from `frontend/dist` (Step 2+).
-
-See [`services/doc/BFF.md`](../../services/doc/BFF.md) for the full plan.
 
 ## Run locally
 

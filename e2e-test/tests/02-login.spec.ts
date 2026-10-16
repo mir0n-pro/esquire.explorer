@@ -21,7 +21,7 @@ test('logout: name-bar disappears and Log in is available', async ({ page }) => 
   await keycloakLogin(page);
   await page.locator('button[aria-label="Profile menu"]').click();
   await page.locator('button[mat-menu-item]:has-text("Log out")').click();
-  // After logout keycloak redirects back with ?from=auth — login hint is suppressed,
+  // After logout keycloak redirects back with ?from=auth -- login hint is suppressed,
   // but user is unauthenticated: name-bar is gone and Log in appears in profile menu
   await expect(page.locator('.name-bar')).not.toBeVisible({ timeout: 10000 });
   await page.locator('button[aria-label="Profile menu"]').click();

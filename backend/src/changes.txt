@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (backend / BFF tier)
 
+10/16/2026 mir0n  v2.0.0 -- version 2.0.0
+package.json
+  - version 2.0.0
+
 09/05/2026 mir0n  v1.2.15 -- logout reaches KeyCloak as a navigation
 src\auth\routes.ts
   - logoutHandler() answers { endSessionUrl } instead of redirecting to it

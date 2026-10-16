@@ -7,122 +7,81 @@
   </tr>
 </table>
 
-Frameworks for organizing business entities in a tree, for any business or activity. The framework is targeting to cover traditional 
-functionality for a Backoffice (sub)system: onboarding, user profile maintenance, permissions, authorization, and accounting.
+Frameworks for organizing business entities in a tree, for any business or activity. They cover the
+usual work of a back-office system: onboarding, user profiles, permissions, authorization, and
+accounting.
 
-## esquire.explorer -- the front-yard of Esquire frameworks
+## esquire.explorer -- the front yard of Esquire
 
-This repository is the **front-yard system equipment**: a collection of
-independent tools and applications that sit *outside* the Esquire server
-and connect to it as external callers -- each for one task or another.
+This repository holds the tools that sit OUTSIDE the Esquire server and call it the way any outside
+caller would. The server itself is the [Esquire services](https://github.com/mir0n-pro/esquire.services)
+repository.
 
-Not a single product. Five subprojects sharing one home, one build chain,
-and the same generated REST clients pointing at `services/`:
+It is not a single product. Four subprojects share one home, one build chain, and the same generated
+REST clients. Each one is built, run, and deployed on its own.
 
-| Subproject     | What it is                                                  | What it's for                                                                                                                  |
-|----------------|-------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
-| `frontend/`    | Angular SPA -- the **Esquire Tree Explorer** UI             | Navigating the entity tree, managing entity state, modifying relationships, running administrative operations and procedures. |
-| `backend/`     | Node.js BFF (OIDC session + token broker)                   | Shielding the SPA from access tokens, handling the OIDC handshake server-side, brokering Bearer to the gateway.               |
-| `openapi-generate/`| OpenAPI spec + generator templates                      | Producing the typed REST clients the other subprojects consume.                                                                |
-| `e2e-test/`    | Playwright end-to-end test suite                            | Exercising the full SPA + BFF + gateway path in a real browser.                                                                |
-| `hauberk/`     | Gatling-based stress / load / soak harness (**Haubergeon**) | Driving HTTP load against a running deployment from outside; per-request timing with multi-tier attribution.                  |
+The cost is one more tier on the way in: the browser never talks to the server directly, it goes
+through the backend.
 
-Each subproject is independently built, run, and deployed; they all talk to
-the same **Esquire server** (`services/`) as outside callers.
+---
+>
+> **v2.0.0 -- the load harness leaves the explorer.** The harness is a product of its own now,
+> `armoury-hauberk` in [Armoury](https://github.com/mir0n-pro/armoury), and the Esquire load tests
+> moved to the Esquire services repository. See [Release History](#release-history).
+>
+> The 1.2 line goes on in parallel. Its last release is
+> [v1.2.16](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.16?tab=readme-ov-file).
 
+---
 
-## v1.2.16 — complete (10/11/2026)
+## Running it
 
-The **landing page on a phone**, and a load harness that can measure one operation at a time.
+Node.js 22. The Esquire server stack must be running first: Keycloak, the gateway, and the services.
 
-| | |
-|--------------------|-------------------------|
-| `frontend/`| - the landing page fits a phone screen |
-| `hauberk/`| - the harness drives one operation on its own -- reading the tree from the service that owns it or from the cache, the whole tree or one customer's, and reading one account -- so a number names that operation instead of a mixture;<br>- a paired run measures the same operation on both deployment shapes back to back, with the machine emptied in between |
+```
+run.all.bat
+```
 
-## v1.2.15 — complete (09/06/2026)
+This opens two console windows:
 
-Several minor fixes in the **user activation** routine -- the parts that were awkward to work through
-or left the operator guessing.<br>
-[More Details: v1.2.15 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.15?tab=readme-ov-file)
+| Window | Address | What it is |
+|---|---|---|
+| `esquire-backend` | http://localhost:3000 | The backend, in watch mode |
+| `esquire-frontend` | http://localhost:4200 | The Angular dev server; it passes `/api` and `/auth` to the backend |
 
-## v1.2.14 — complete (09/01/2026)
+`run.backend.bat` and `run.frontend.bat` start one side each. On docker and k8s the backend and the
+frontend ship together, as one image.
 
-The explorer's share of the **AWS** sprint: the drawings and the front-door pages gained the AWS database,
-messaging and monitoring services, the load harness and the browser suite both ran against the second cloud
-over its public address, and the credential routine stopped falling back to a published sign-in secret.<br>
-[More Details: v1.2.14 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.14?tab=readme-ov-file)
+---
 
-## v1.2.13 — complete (08/27/2026)
+## Project Structure
 
-The explorer's share of the **compact topology and hardening** sprint: the site took a new motto and a re-drawn
-banner, the load harness learned to measure the composed setup as well as the classic one, and the browser
-routines grew to cover what the reading-back had found.<br>
-[More Details: v1.2.13 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.13?tab=readme-ov-file)
+| Project | Description |
+|---|---|
+| [frontend](frontend) | The Esquire Tree Explorer: an Angular app that shows the entity tree, the details of an entity, and the commands on it. Its screens come from the [Esquire UI library](https://github.com/mir0n-pro/esquire.ui.lib) |
+| [backend](backend) | A Node.js backend for the browser. It runs the Keycloak login on the server side and keeps the tokens there; the browser holds only a session cookie. It passes each request on to the gateway with the token, and serves the frontend |
+| [openapi-generate](openapi-generate) | The REST API description and the templates that generate the typed clients the other projects use |
+| [e2e-test](e2e-test) | The Playwright browser tests. They drive the frontend, the backend, and the gateway in a real browser |
 
-## v1.2.12 — complete (08/11/2026)
+---
 
-The explorer's share of the **entity change number** sprint was a front-door one: the counter is internal and never reaches the browser, so the application was unchanged, while the comparison and audience pages gained the alternatives they are measured against and two overstated claims were walked back.<br>
-[More Details: v1.2.12 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.12?tab=readme-ov-file)
+## Release History
 
-## v1.2.11 — complete (07/25/2026)
+**[release_notes.txt](doc/release_notes.txt)** -- the release notes, newest first.
 
-The explorer's share of the **Observability** sprint: the browser tier joins the framework-wide
-observability -- its own metrics, a timing on the hop out to the gateway, and its login-server calls visible
-in traces -- the load harness gains an in-place cloud performance matrix, and a pair of security fixes land
-at the login edge.<br>
-[More Details: v1.2.11 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.11?tab=readme-ov-file)
+---
 
-## v1.2.10 — complete (07/04/2026)
+## Documentation
 
-The explorer's share of the **Resilience / Durability** sprint: the SPA and BFF can bound how long they wait on a slow request or a stuck upstream, the BFF can run as more than one copy behind a shared login-session store, and the test harnesses gain recovery tooling and steadier end-to-end runs.<br>
-[More Details: v1.2.10 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.10?tab=readme-ov-file)
+- [Frontend](frontend/README.md) *(the Tree Explorer, what comes from the UI library, how to build
+  and run it, and the login flow)*
+- [Backend](backend/README.md) *(the login flow, the token forwarding, and the settings)*
+- [e2e test scope](e2e-test/e2e-test.scope.md) *(what each browser test covers, and what it needs to
+  run)*
+- [e2e test, open work](doc/e2e.todo.md) *(changes that would make the browser tests steadier)*
 
-## v1.2.9 — complete (06/24/2026)
+---
 
-The explorer's share of the **hardening** sprint: the About page's six tabs lifted out of the Angular app shell into standalone static files loaded at runtime, and the landing copy reframed to name the vendor-agnostic Esquire Messaging Bus and its first three transport providers (ActiveMQ, Kafka, Redis).<br>
-[More Details: v1.2.9 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.9?tab=readme-ov-file)
+## License
 
-## v1.2.8 — complete (06/19/2026)
-
-The explorer's share of the **Messaging Bus** sprint: end-to-end coverage for the system-entity
-anti-deletion flag (`15-system-entity-protection` asserts a delete of a system-flagged office or user
-is blocked with HTTP 409), and a landing-page reframe presenting the messaging layer as the delivered,
-vendor-agnostic **Messaging Bus**.<br>
-[More Details: v1.2.8 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.8?tab=readme-ov-file)
-
-## v1.2.7 — complete (06/10/2026)
-
-The explorer's share of the backend **audit-logging** + CI/CD sprint: the landing page reframed the audit story, the e2e suite was made deterministic (full suite **31 passed** on Docker and local k8s), the hauberk harness gained a report-summary fix and a list-catalog contract, and GitHub Actions CI build-and-test was established for frontend and backend.<br>
-[More Details: v1.2.7 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.7?tab=readme-ov-file)
-
-## v1.2.6 — complete (06/02/2026)
-
-The explorer's share of the **enyMan-redundancy / race-8c** sprint: the hauberk harness gained a KC-side verify-and-cleanup layer — the `RaceMoveCreateKc` / single-shot repros that prove the kcMaster path-buffer fix, KC orphan cleanup, and prefix-driven residue cleanup — reaching 21 Simulations / 32 reusable Chains.<br>
-[More Details: v1.2.6 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.6?tab=readme-ov-file)
-
-## v1.2.5 — complete (05/24/2026)
-
-bizTree **Taijitu night-watch** surface: the `/esq-sweep` force-sweep reaches the generated client,
-the harness gains message-loss simulations proving the cache self-heals, and the landing page
-reframes bizTree as a recoverable cache service.<br>
-[More Details: v1.2.5 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.5?tab=readme-ov-file)
-
-## v1.2.4 — complete (05/17/2026)
-
-Introduces **Haubergeon** (`hauberk/`) — a pure-REST Gatling 3.13 stress / load / smoke / race-repro
-harness — and updates the landing page to the two-public-entrypoint component model.<br>
-[More Details: v1.2.4 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.4?tab=readme-ov-file)
-
-## v1.2.3 — complete (05/08/2026)
-
-BFF sprint: the Node.js **`backend/`** tier (OIDC session + token broker) sits between the Angular
-SPA and the gateway, so the browser holds only an opaque session cookie.<br>
-[More Details: v1.2.3 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.3?tab=readme-ov-file)
-
-## v1.2.2 — complete (04/20/2026)
-
-First complete vertical slice: the `@mir0n-pro/esquire.ui` library plus the explorer frontend deliver
-the full entity lifecycle and accounting command set, validated by a 30-test Playwright e2e suite.<br>
-[More Details: v1.2.2 README](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.2?tab=readme-ov-file)
-
+GNU General Public License v3.0. See [LICENSE](LICENSE).

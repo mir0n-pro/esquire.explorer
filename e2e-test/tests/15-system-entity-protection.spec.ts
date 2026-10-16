@@ -13,7 +13,7 @@ import { keycloakLogin } from '../helpers/auth';
 // Targets below are the ones that reach the guard cleanly. user 4 (System Administrator)
 // is also protected but returns 403 first: the isAdminCmdPermitted() permission gate
 // rejects the caller before the system-flag guard runs, so it is not a clean guard probe.
-test.describe.serial('system entity flag — protected from deletion', () => {
+test.describe.serial('system entity flag -- protected from deletion', () => {
   let page: Page;
 
   test.beforeAll(async ({ browser }) => {

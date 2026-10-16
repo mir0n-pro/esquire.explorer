@@ -16,8 +16,8 @@
               These are not competitive differentiators. They are infrastructure. Building them from
               scratch on every project is expensive, slow, and consistently underestimated. Buying a
               monolithic ERP means inheriting ten years of someone else's assumptions. Low-code admin
-              tools give you a panel quickly but leave the hard problems — permissions, audit, accounting
-              logic — entirely to you.
+              tools give you a panel quickly but leave the hard problems &mdash; permissions, audit, accounting
+              logic &mdash; entirely to you.
             </p>
             <p>Esquire is the middle path: a framework that solves the structural problems correctly once.</p>
             <p>
@@ -32,7 +32,7 @@
             <p>
               Field layouts, control types, validation rules, and available commands are delivered at
               runtime from a server configuration. Add a new entity type, change a field label, adjust a
-              validation rule — the Angular frontend adapts without a redeployment.
+              validation rule &mdash; the Angular frontend adapts without a redeployment.
               Every comparable tool uses a static component library where a schema change is a deployment.
             </p>
 
@@ -63,19 +63,19 @@
 
             <h3>4. Accounting as the demo business model</h3>
             <p>
-              Everyone knows what to expect from accounting — that is exactly why it is the demo.
-              The accounting domain — multi-currency deposit, withdrawal, and two-leg transfer with
-              conversion-rate validation, balance constraints, and status guards — is implemented
+              Everyone knows what to expect from accounting &mdash; that is exactly why it is the demo.
+              The accounting domain &mdash; multi-currency deposit, withdrawal, and two-leg transfer with
+              conversion-rate validation, balance constraints, and status guards &mdash; is implemented
               as the framework's demonstration, not as a framework feature. Pick a domain the reader
               already understands, and the framework's behavior speaks for itself: tree-scoped reads,
               positional permission resolution, server-driven UI rendering, audit, async entity
-              broadcast — all visible in a single click-through.
+              broadcast &mdash; all visible in a single click-through.
             </p>
             <p>
               Most comparable tools demonstrate themselves with CRUD over toy data. No other entry
               in the competitive landscape ships a framework demonstration this complete. The
-              accounting domain is the proof. Any other domain — KYC, case management, contracts,
-              portfolios — sits on the same backbone and inherits the same structural rules.
+              accounting domain is the proof. Any other domain &mdash; KYC, case management, contracts,
+              portfolios &mdash; sits on the same backbone and inherits the same structural rules.
             </p>
 
             <h3>5. Asynchronous entity synchronization</h3>
@@ -96,13 +96,13 @@
             </p>
             <p>
               <strong>Database.</strong> Oracle and Postgres today; MySQL and other RDBMS targets
-              on the roadmap. Vendor-specific SQL is isolated in named query XML files — switching
+              on the roadmap. Vendor-specific SQL is isolated in named query XML files &mdash; switching
               does not touch application code. The same Postgres profile also ran on
               <strong>RDS for PostgreSQL</strong> and <strong>Aurora PostgreSQL</strong> without touching
               a line of code or SQL.
             </p>
             <p>
-              <strong>Messaging Bus.</strong> Esquire ships a vendor-agnostic Messaging Bus —
+              <strong>Messaging Bus.</strong> Esquire ships a vendor-agnostic Messaging Bus &mdash;
               the broadcast and request-response patterns are the contract; the transport is a
               deployment choice behind a pluggable transport-provider interface. Six transport providers
               exist on that one interface: ActiveMQ, Kafka and Redis, and on AWS &mdash; SNS, SQS and
@@ -111,14 +111,14 @@
             <p>
               <strong>Observability.</strong> The three signals leave Esquire in open formats: logs as ECS
               JSON on stdout, traces as OTLP, metrics as a Prometheus page. Grafana, Loki, Tempo and
-              Prometheus are what Esquire ships to read them — a default, not a requirement. All three
+              Prometheus are what Esquire ships to read them &mdash; a default, not a requirement. All three
               were moved onto <strong>AWS X-Ray</strong> and <strong>CloudWatch</strong> on a running
               deployment without rebuilding an image.
             </p>
             <p>
               <strong>Identity and access management.</strong> Keycloak today. The architecture
               ensures no core service ever touches Keycloak directly. Replacing it means replacing
-              kcMaster with an xyzMaster that speaks to a different IAM — the rest of the system
+              kcMaster with an xyzMaster that speaks to a different IAM &mdash; the rest of the system
               is unchanged. A deployment decision, not an architectural one.
             </p>
 
@@ -126,13 +126,13 @@
             <p>
               Metrics, logs, and traces come from every service in the same shape, ready from the start and
               the same in every environment. Most comparable tools ship none of this and leave it to your team
-              to add later, one gap at a time — here it is part of the framework.
+              to add later, one gap at a time &mdash; here it is part of the framework.
             </p>
 
             <h3>8. High availability from the first deploy, not a later project</h3>
             <p>
               Every tier already runs as more than one copy, spread across machines, so losing one keeps the
-              site up. This is how Esquire is deployed from the start — not a hardening step added after the
+              site up. This is how Esquire is deployed from the start &mdash; not a hardening step added after the
               first outage.
             </p>
 

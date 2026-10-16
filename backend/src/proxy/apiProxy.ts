@@ -144,7 +144,7 @@ async function handleProxy(
     }
     return;
   }
-  // Stash the token for the proxyReq hook to read — avoids re-resolving inside the hook.
+  // Stash the token for the proxyReq hook to read -- avoids re-resolving inside the hook.
   const ext = req as Request & EsqProxyState;
   ext._esqAccessToken = token;
   // I42/L9: start the clock on the outbound leg and stash the stop for the proxy hooks. Started HERE rather than

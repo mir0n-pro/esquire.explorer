@@ -21,10 +21,10 @@ test('Details dialog closes with ESC', async ({ page }) => {
   const dialog = page.locator('mat-dialog-container');
   await dialog.waitFor();
   // The tab-group renders BEFORE the dictionary/details finish loading, so waiting for it is not
-  // enough: against a remote backend ESC can fire while details are still in flight → originalDetails
-  // is not yet synced → hasChanges() returns true → the unsaved-changes guard holds the dialog open
-  // instead of closing (passes locally where latency ≈ 0, fails against OKE). Wait until a field is
-  // actually POPULATED — proof the details loaded and originalDetails is set — before pressing ESC.
+  // enough: against a remote backend ESC can fire while details are still in flight -> originalDetails
+  // is not yet synced -> hasChanges() returns true -> the unsaved-changes guard holds the dialog open
+  // instead of closing (passes locally where latency ~ 0, fails against OKE). Wait until a field is
+  // actually POPULATED -- proof the details loaded and originalDetails is set -- before pressing ESC.
   await dialog.locator('mat-tab-group').waitFor({ state: 'visible', timeout: 5000 });
   await expect(dialog.locator('input').first()).not.toHaveValue('', { timeout: 8000 });
   await page.keyboard.press('Escape');

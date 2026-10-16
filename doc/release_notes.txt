@@ -1,6 +1,11 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v2.0.0-2610.1615  v2.0.0 -- the load harness leaves the explorer
+    :Refactoring: the load-test harness is a product of its own: armoury-hauberk
+    :Refactoring: the Esquire load tests moved to Esquire services: hauberk
+    Components:   hauberk
+
 v1.2.16-2610.1117  v1.2.16 -- the landing page on a phone, and one operation per load cell
     :Fix:         the landing page fits a phone screen
     :Fix:         the landing header keeps the login button on the screen
