@@ -1,6 +1,7 @@
 import { test, expect, request as pwRequest, Page } from '@playwright/test';
 import { keycloakLogin, keycloakSignIn } from '../helpers/auth';
 import { setupHouse, teardownHouse, House } from '../helpers/testHouse';
+import { adminToken, waitForKcUser, setPassword, waitForKcUserGone, sleep, SYNC_TIMEOUT, POLL_MS } from '../helpers/kcAdmin';
 
 // Three role settings, asserted the way the user meets them -- by signing in.
 //   no role at all       -- REFUSED
@@ -12,55 +13,15 @@ import { setupHouse, teardownHouse, House } from '../helpers/testHouse';
 
 const KC = process.env['KC_URL'] || 'http://localhost:8081/kc-auth';
 const REALM = process.env['KC_REALM'] || 'esquire';
-const ADMIN_CLIENT = process.env['KC_ADMIN_CLIENT'] || 'esq-kcMaster';
+//xxx: the stack's BFF runs on the pure OAuth client -- the gateway then names the account by its login id
+const PURE_OAUTH = process.env['PURE_OAUTH'] === 'true';
 
 // The role the explorer routes ask for, and the role family that carries admin permissions.
 const TREE_ROLE = 'TREE';
 const ADMIN_ROLE = 'SUPERVIZOR';
 
-// keySmith publishes and kcMaster answers on the bus, so every wait for KeyCloak polls rather than sleeps.
-const SYNC_TIMEOUT = 20000;
-const POLL_MS = 500;
-
 type Role = { id: string; kind: number; name: string };
 type Profile = { loginId: string; connectFlg: string; roles: Role[]; rolesAll: Role[]; [k: string]: unknown };
-
-// THE SECRET HAS NO FALLBACK, and the check is lazy on purpose -- both for the reasons spelled out in
-// 21-credential-state-sync: a default authenticates against a rotated realm with a dead credential and blames
-// Esquire for it, and a throw at module scope takes down suite COLLECTION, not just this file.
-function adminSecret(): string {
-  const ret = process.env['KC_ADMIN_SECRET'] || process.env['KCMASTER_ADMIN_SECRET'];
-  if (!ret) {
-    throw new Error(
-      'KC_ADMIN_SECRET (or KCMASTER_ADMIN_SECRET) is not set. It is the esq-kcMaster (realm-admin) client ' +
-      'secret, and this spec has no fallback for it on purpose.',
-    );
-  }
-  return ret;
-}
-
-async function adminToken(): Promise<string> {
-  const ctx = await pwRequest.newContext();
-  const res = await ctx.post(`${KC}/realms/${REALM}/protocol/openid-connect/token`, {
-    form: { grant_type: 'client_credentials', client_id: ADMIN_CLIENT, client_secret: adminSecret() },
-  });
-  expect(res.status(), 'the admin client must be able to get a token').toBe(200);
-  const token = ((await res.json()) as { access_token?: string }).access_token;
-  await ctx.dispose();
-  return token as string;
-}
-
-// The KeyCloak user id for a login, or null while KeyCloak does not hold the user yet.
-async function kcUserId(token: string, loginId: string): Promise<string | null> {
-  const ctx = await pwRequest.newContext();
-  const res = await ctx.get(
-    `${KC}/admin/realms/${REALM}/users?username=${encodeURIComponent(loginId)}&exact=true`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  const users = (await res.json()) as Array<{ id: string }>;
-  await ctx.dispose();
-  return users && users.length > 0 ? users[0].id : null;
-}
 
 async function kcRealmRoles(token: string, kcId: string): Promise<string[]> {
   const ctx = await pwRequest.newContext();
@@ -70,36 +31,6 @@ async function kcRealmRoles(token: string, kcId: string): Promise<string[]> {
   const roles = (await res.json()) as Array<{ name: string }>;
   await ctx.dispose();
   return (roles ?? []).map((r) => r.name);
-}
-
-// Give the test user a password we know. Activation does set one -- kcMaster creates the account with a
-// temporary password and UPDATE_PASSWORD standing -- so signing in with it would land on KeyCloak's
-// change-password form, and the spec would be asserting that form instead of the role state. Setting a
-// permanent one and clearing the required actions puts the sign-in back on the path under test.
-async function setPassword(token: string, kcId: string, password: string): Promise<void> {
-  const ctx = await pwRequest.newContext();
-  const pwd = await ctx.put(`${KC}/admin/realms/${REALM}/users/${kcId}/reset-password`, {
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    data: { type: 'password', value: password, temporary: false },
-  });
-  expect(pwd.status(), 'the test password must be accepted').toBeLessThan(300);
-  const cleared = await ctx.put(`${KC}/admin/realms/${REALM}/users/${kcId}`, {
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    data: { requiredActions: [] },
-  });
-  expect(cleared.status(), 'the required actions must be clearable').toBeLessThan(300);
-  await ctx.dispose();
-}
-
-// kcMaster removes the KeyCloak account on disconnect; the entity delete may run before that lands.
-async function waitForKcUserGone(token: string, loginId: string): Promise<void> {
-  const deadline = Date.now() + SYNC_TIMEOUT;
-  while (Date.now() < deadline) {
-    if ((await kcUserId(token, loginId)) === null) {
-      return;
-    }
-    await new Promise((r) => setTimeout(r, POLL_MS));
-  }
 }
 
 async function waitForRoles(token: string, kcId: string, expected: string[]): Promise<void> {
@@ -118,7 +49,7 @@ async function waitForRoles(token: string, kcId: string, expected: string[]): Pr
         && !held.includes(ADMIN_ROLE) === !expected.includes(ADMIN_ROLE)) {
       return;
     }
-    await new Promise((r) => setTimeout(r, POLL_MS));
+    await sleep(POLL_MS);
   }
   throw new Error(`KeyCloak roles did not settle to [${expected.join(', ')}] -- last seen [${held.join(', ')}]`);
 }
@@ -148,6 +79,14 @@ test.describe.serial('a wrong role setting is refused by name, not reported as a
     return (await res.json()) as Profile;
   }
 
+  function accountName(): string {
+    let ret = house.merchantId;
+    if (PURE_OAUTH) {
+      ret = loginId;
+    }
+    return ret;
+  }
+
   async function pageAsAdmin(browser: any): Promise<Page> {
     const page = await browser.newPage();
     await keycloakLogin(page);
@@ -156,11 +95,15 @@ test.describe.serial('a wrong role setting is refused by name, not reported as a
 
   // Put the user into one role state and wait until KeyCloak agrees, so the next sign-in mints a token
   // that actually carries it.
+  //xxx: the pure OAuth stack keeps the roles out of KeyCloak -- the save evicts the gateway's cached claims,
+  // so there is nothing to wait for
   async function setRoles(browser: any, roles: Role[]): Promise<void> {
     const page = await pageAsAdmin(browser);
     await saveProfile(page, house.merchantId, { roles });
     await page.close();
-    await waitForRoles(token, kcId, roles.map((r) => r.name));
+    if (!PURE_OAUTH) {
+      await waitForRoles(token, kcId, roles.map((r) => r.name));
+    }
   }
 
   test.beforeAll(async ({ browser }) => {
@@ -184,14 +127,7 @@ test.describe.serial('a wrong role setting is refused by name, not reported as a
     await saveProfile(page, house.merchantId, { connectFlg: 'Y', roles: [] });
     await page.close();
 
-    const deadline = Date.now() + SYNC_TIMEOUT;
-    let found: string | null = null;
-    while (found === null && Date.now() < deadline) {
-      found = await kcUserId(token, loginId);
-      if (found === null) {
-        await new Promise((r) => setTimeout(r, POLL_MS));
-      }
-    }
+    const found = await waitForKcUser(token, loginId);
     expect(found, `KeyCloak must hold ${loginId} after activation`).toBeTruthy();
     kcId = found as string;
     await setPassword(token, kcId, password);
@@ -246,7 +182,7 @@ test.describe.serial('a wrong role setting is refused by name, not reported as a
       await expect
         .poll(() => dialogs.join(' | '), { timeout: 15000, message: 'the user must be told, in words' })
         .toContain('no privileges');
-      expect(dialogs.join(' | '), 'the refusal must name the account').toContain(house.merchantId);
+      expect(dialogs.join(' | '), 'the refusal must name the account').toContain(accountName());
       expect(visited.join(' | '), 'a missing role must never be reported as an expired session')
         .not.toContain('auth=expired');
       await page.context().close();
@@ -261,7 +197,7 @@ test.describe.serial('a wrong role setting is refused by name, not reported as a
     await expect
       .poll(() => dialogs.join(' | '), { timeout: 15000, message: 'the user must be told, in words' })
       .toContain('no privileges');
-    expect(dialogs.join(' | '), 'the refusal must name the account').toContain(house.merchantId);
+    expect(dialogs.join(' | '), 'the refusal must name the account').toContain(accountName());
     expect(visited.join(' | '), 'a missing role must never be reported as an expired session')
       .not.toContain('auth=expired');
     await page.context().close();

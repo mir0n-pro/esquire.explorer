@@ -19,6 +19,10 @@ set GATEWAY_URL=https://api.esquire.mir0n.pro
 set KC_URL=https://esquire.mir0n.pro/kc-auth
 set RELAY_DISABLED=true
 
+rem OKE runs the claims mode only (no pure OAuth client there), so the pure OAuth token spec (24)
+rem skips, exactly as the GHA validate does.
+set PURE_OAUTH_DISABLED=true
+
 if not exist node_modules (
     call npm install
     call npx playwright install chromium

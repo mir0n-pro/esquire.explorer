@@ -25,9 +25,11 @@ through the backend.
 
 ---
 >
-> **v2.0.0 -- the load harness leaves the explorer.** The harness is a product of its own now,
-> `armoury-hauberk` in [Armoury](https://github.com/mir0n-pro/armoury), and the Esquire load tests
-> moved to the Esquire services repository. See [Release History](#release-history).
+> **v2.0.2 -- browser tests for a sign-in that carries no Esquire data.** Esquire 2.0.2 adds a lab
+> mode in which the sign-in token holds only who the user is, and the server looks up the rest. Two new
+> browser test files cover it: what the token holds, and that a change to a user's access reaches that user
+> while they stay signed in. The tests run on docker and local Kubernetes; the public site runs the
+> default mode, and skips them. See [Release History](#release-history).
 >
 > The 1.2 line goes on in parallel. Its last release is
 > [v1.2.16](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.16?tab=readme-ov-file).
@@ -68,6 +70,8 @@ frontend ship together, as one image.
 ## Release History
 
 **[release_notes.txt](doc/release_notes.txt)** -- the release notes, newest first.
+
+**[report_v2.0.2.md](doc/reports/report_v2.0.2.md)** -- the report of this release.
 
 ---
 

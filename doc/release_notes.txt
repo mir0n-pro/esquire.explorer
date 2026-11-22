@@ -1,6 +1,17 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v2.0.2-2611.2216  v2.0.2 -- pure OAuth, a lab mode: e2e for the token with no Esquire claims
+    :New:         e2e 24-pure-oauth-token asserts the pure client's token carries the login only, that
+                  it reads the same access profile through the gateway, and that forged claim headers
+                  are replaced
+    :New:         e2e 25-pure-oauth-eviction asserts a role change and a move reach a signed-in user at
+                  once on a pure OAuth stack
+    :Config:      e2e 22-role-state-login runs on a pure OAuth stack too (PURE_OAUTH=true)
+    :Config:      the OKE e2e run skips 24-pure-oauth-token: OKE runs the claims mode only
+    :Doc:         e2e-test.scope.md: 22, 24 and 25
+    Components:   e2e
+
 v2.0.0-2610.1615  v2.0.0 -- the load harness leaves the explorer
     :Refactoring: the load-test harness is a product of its own: armoury-hauberk
     :Refactoring: the Esquire load tests moved to Esquire services: hauberk

@@ -209,6 +209,10 @@ entity is removed.
   with no fallback. Activation leaves a TEMPORARY password with UPDATE_PASSWORD standing, so the spec sets a
   permanent one and clears the required actions -- otherwise the sign-in lands on KeyCloak's change-password
   form and the spec would be asserting that form instead of the role state.
+- **On a pure OAuth stack (`PURE_OAUTH=true`)** the refusal names the account by its login id, because the
+  token carries no `esq_uid`; the claims mode names the entity id. The spec also stops waiting for the
+  KeyCloak roles there: the roles stay out of KeyCloak, and the save removes the user's cached claims at
+  the gateway.
 
 ### 23-logout-switch-user.spec.ts -- logout ends the Keycloak session, not only the Esquire one
 - **the next login must ask again.** Logs in, logs out through the toolbar, then starts a login and asserts
@@ -217,6 +221,42 @@ entity is removed.
 - Also asserts `/auth/logout` answers **200**, not a redirect. That is the shape distinction: RP-initiated
   logout only works as a top-level navigation, so the BFF hands the end-session URL back and the SPA
   navigates to it. Driven through fetch, Keycloak never sees the browser first-party and its cookies live on.
+
+### 24-pure-oauth-token.spec.ts -- the pure OAuth client: a token with no Esquire claims
+- **the claims client and the pure client sign in the same user, and their tokens differ.** The claims
+  token carries `esq_uid`, `esq_rootpath` and the realm roles. The pure token carries the login only:
+  `sub`, `preferred_username` and `azp`, with no Esquire claim, no realm or client roles, and none in the
+  ID token either.
+- **through the gateway, both tokens read the same access profile.** The pure call gets its claims from
+  keySmith, and the answer names the same user and login id.
+- **forged claim headers are replaced.** A pure call that sends its own `X-Esq-UID`, `X-Esq-Root-Path` and
+  `X-Esq-Roles` still reads the caller's own profile: the gateway drops the inbound headers and sets them
+  from its own lookup.
+- **timing, two parts that run on every pass:** the logon handshake for both clients, cold and hot, five
+  rounds by default (`HANDSHAKE_RUNS`), and ten `/esq-key` calls per client. They assert only that each step
+  succeeds. The figures go to the console and to JSON attachments.
+- **a full measurement runs only with `MEASURE=true`:** the gateway call and the whole logon, cold and hot,
+  with the KeyCloak user cache cleared before each cold logon. A cold gateway call is a cache miss only when
+  the stack runs with `ESQ_GW_PURE_OAUTH_CACHE_IDLE_MS` equal to `GW_IDLE_MS`.
+- The handshake drives the authorization code flow with PKCE straight against KeyCloak, and answers the
+  callback inside the test, so the BFF never spends the code. The spec talks to the gateway directly
+  (`GATEWAY_URL`), the way spec 20 does.
+- Targets: docker and local k8s run it, in either mode; the pure clients are listed there by default. OKE
+  runs the claims mode only and sets `PURE_OAUTH_DISABLED=true`, so the whole spec skips there.
+
+### 25-pure-oauth-eviction.spec.ts -- a claims change reaches a signed-in user at once
+- **the pure OAuth gateway keeps a user's claims in a cache, and two events remove them:** keySmith sends
+  one when an access profile is saved, and enyMan sends one when a user is moved. Each test changes the
+  claims of a user who stays signed in, and asserts that the user's next calls see the change.
+- **an access profile save:** TREE is taken away and the user's next reads are refused (403); TREE is given
+  back and the reads open again (200).
+- **a move:** the user is moved to another office. With the old root path still cached, the user's own
+  profile would not be found; after the event it reads 200 under the new office.
+- The polls never let the cache entry go idle, so only the event can change the answer. With the two
+  events switched off, both tests fail.
+- Runs only on a pure OAuth stack (`PURE_OAUTH=true`); in the claims mode the roles and the path ride in
+  the token, so there is no cache to clear, and the spec skips. The test user is made and removed the way
+  spec 22 does it, through the KeyCloak admin API (`helpers/kcAdmin.ts`, shared with spec 22).
 
 ### cycle/cycle.spec.ts -- full-lifecycle soak / activity generator (not a coverage assertion)
 An activity generator, NOT an assertion spec: repeats a full GUI lifecycle N times (`CYCLES` env,
