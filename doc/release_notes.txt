@@ -1,6 +1,15 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v2.0.3-2611.2300  v2.0.3 -- pure OAuth only: the e2e specs the gateway change outdated are disabled
+    :Config:      e2e 20-token-relay is disabled: the token relay left the gateway
+    :Config:      e2e 22-role-state-login is disabled: on the pure OAuth default it passes only with
+                  PURE_OAUTH=true
+    :Config:      e2e 24-pure-oauth-token: the claims client test is disabled -- esq-angular is a pure
+                  client now
+    :Doc:         e2e-test.scope.md: 20, 22 and 24
+    Components:   e2e
+
 v2.0.2-2611.2216  v2.0.2 -- pure OAuth, a lab mode: e2e for the token with no Esquire claims
     :New:         e2e 24-pure-oauth-token asserts the pure client's token carries the login only, that
                   it reads the same access profile through the gateway, and that forged claim headers

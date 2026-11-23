@@ -145,7 +145,10 @@ function maxOf(values: number[]): number {
 
 test.describe('pure OAuth client: the token carries no Esquire claims', () => {
 
-  test('the claims client: the token carries esq_uid, esq_rootpath and the realm roles', async ({ browser }) => {
+  //xxx: DISABLED -- esq-angular is a pure client since services v2.0.3, so its token carries no Esquire claims;
+  // reworked when the e2e suite moves to pure OAuth only
+  // test('the claims client: the token carries esq_uid, esq_rootpath and the realm roles', async ({ browser }) => {
+  test.skip('the claims client: the token carries esq_uid, esq_rootpath and the realm roles', async ({ browser }) => {
     const ctx = await newCallbackContext(browser);
     const result = await handshake(await ctx.newPage(), CLAIMS);
     const realmAccess = result.accessClaims['realm_access'] as { roles?: string[] } | undefined;

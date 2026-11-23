@@ -166,6 +166,8 @@ entity is removed.
   keySmith (saves the profile, publishes a URQ on the kc R&R bus) -> kcMaster (calls the Keycloak admin API).
 
 ### 20-token-relay.spec.ts -- gateway Token Relay (vanilla + phantom)
+- **disabled:** the token relay left the gateway (services v2.0.3), so both tests are skipped. The
+  spec is reworked or removed when the suite moves to pure OAuth only.
 - **Vanilla Token Relay: HTTP Basic at the edge reaches a protected route**: presents HTTP Basic
   (client_id:client_secret) for the allowlisted esq-hauberk-S client straight to the gateway; the gateway runs
   client_credentials on its behalf and forwards a full JWT downstream. A 200 from a protected read proves it.
@@ -191,6 +193,8 @@ entity is removed.
   still forced the setup. Nothing in the suite could see it: nothing here had ever read a required action.
 
 ### 22-role-state-login.spec.ts -- a wrong role setting, met the way a user meets it
+- **disabled:** the services run pure OAuth by default (v2.0.3), and the spec passes on that stack only
+  with `PURE_OAUTH=true`. It runs again when the suite moves to pure OAuth only.
 - **activation and roles are two steps, and nothing makes an operator do the second one.** A user can be
   given a working login and left with no role, and the sign-in then fails a long way from the cause. The
   spec drives three wrong settings and signs in as the user for each: no role at all; an admin role but no
@@ -223,6 +227,8 @@ entity is removed.
   navigates to it. Driven through fetch, Keycloak never sees the browser first-party and its cookies live on.
 
 ### 24-pure-oauth-token.spec.ts -- the pure OAuth client: a token with no Esquire claims
+- **one test disabled:** "the claims client: the token carries esq_uid, esq_rootpath and the realm roles".
+  `esq-angular` is a pure client since services v2.0.3, so its token carries no Esquire claims.
 - **the claims client and the pure client sign in the same user, and their tokens differ.** The claims
   token carries `esq_uid`, `esq_rootpath` and the realm roles. The pure token carries the login only:
   `sub`, `preferred_username` and `azp`, with no Esquire claim, no realm or client roles, and none in the

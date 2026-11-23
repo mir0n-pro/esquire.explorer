@@ -33,7 +33,10 @@ const TOKEN_ENDPOINT = `${KC}/realms/${REALM}/protocol/openid-connect/token`;
 // allowlists, so the gateway never brokers/exchanges and a relay call is correctly 403'd (services
 // k8s-oci/values/gateway.yaml, mir0n 2026-07-20). The OKE e2e run sets RELAY_DISABLED=true so these two
 // specs SKIP there; docker / local k8s leave the relay live and keep running them.
-const relayTest = process.env['RELAY_DISABLED'] === 'true' ? test.skip : test;
+//xxx: DISABLED -- the token relay left the gateway (services v2.0.3); this spec is reworked or removed when the
+// e2e suite moves to pure OAuth only
+// const relayTest = process.env['RELAY_DISABLED'] === 'true' ? test.skip : test;
+const relayTest = test.skip;
 
 relayTest('Vanilla Token Relay: HTTP Basic at the edge reaches a protected route', async () => {
   const ctx = await pwRequest.newContext();
