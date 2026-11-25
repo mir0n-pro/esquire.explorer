@@ -19,7 +19,7 @@ import type { BackendConfig } from '../config.js';
 import { log } from '../util/log.js';
 
 export interface OidcTokens {
-  access_token: string;   // JWE blob; never decrypted in the BFF
+  access_token: string;   // passed to the gateway as it is; never decoded in the BFF
   refresh_token?: string;
   id_token?: string;
   expires_at: number;         // access-token expiry, epoch seconds (auto-refreshed)
@@ -30,7 +30,6 @@ export interface OidcTokens {
 export interface SessionClaims {
   sub: string;
   preferred_username?: string;
-  roles: string[];
 }
 
 export interface PendingLogin {

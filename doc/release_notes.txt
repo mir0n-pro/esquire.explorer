@@ -1,6 +1,12 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v2.0.3-2611.2518  v2.0.3 -- code review: what the claims mode left behind
+    :Refactoring: the login backend keeps no roles in the session and no longer reports them
+    :Doc:         the backend README names the esq-angular client and says the token carries the login
+                  id only
+    Components:   backend
+
 v2.0.3-2611.2419  v2.0.3 -- OAuth only: the e2e suite tests one kind of sign-in
     :New:         e2e 20-direct-client asserts a direct client takes its own token, reads its own
                   access profile and a protected read straight at the gateway, and that forged claim

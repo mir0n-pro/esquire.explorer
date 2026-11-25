@@ -11,8 +11,8 @@
 
 Node.js Backend-for-Frontend tier introduced in v1.2.3. Sits between `explorer/frontend` (Angular SPA) and the Spring Cloud Gateway. Owns:
 
-- OIDC auth flow with Keycloak as a confidential client (`esq-backend`); tokens held server-side, browser sees only an HttpOnly session cookie.
-- JWE access-token forwarding to the gateway (which decrypts and relays plain JWS to Spring services).
+- OIDC auth flow with Keycloak as a confidential client (`esq-angular`); tokens held server-side, browser sees only an HttpOnly session cookie.
+- Access-token forwarding to the gateway, as a bearer header on every `/api/*` call. The token carries the login id only; the gateway takes the rest of the user's claims from keySmith.
 - In-memory LRU cache for static entity dictionaries (`/api/esq-dict`, `/api/esq-kinds`).
 - Static SPA serving from `frontend/dist` (Step 2+).
 
@@ -40,7 +40,7 @@ curl http://localhost:3000/healthz
 | `NODE_ENV` | `development` | Toggles `Secure` cookie flag and verbose errors |
 | `PUBLIC_BASE_URL` | `http://localhost:3000` | Used in OIDC redirect URIs |
 | `KC_ISSUER` | `http://localhost:8080/kc-auth/realms/esquire` | Keycloak realm issuer |
-| `KC_CLIENT_ID` | `esq-backend` | Confidential KC client |
+| `KC_CLIENT_ID` | `esq-angular` | Confidential KC client |
 | `KC_CLIENT_SECRET` | **required (no default)** | KC client secret -- boot fails closed if unset (compose sets a dev value; the chart --sets it) |
 | `GATEWAY_URL` | `http://localhost:7070` | Spring Cloud Gateway |
 | `SESSION_SECRET` | **required (no default)** | express-session signing secret -- boot fails closed if unset (compose sets a dev value; the chart --sets it) |

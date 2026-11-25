@@ -11,6 +11,7 @@
  * 07/17/2026 mir0n  the KeyCloak token exchange (callback) is wrapped in traceKcCall (CLIENT span).
  * 07/23/2026 mir0n  v1.2.11 -- safeReturnTo(): constrain post-login returnTo to the callback origin (open-redirect / CWE-601 guard)
  * 09/05/2026 mir0n  v1.2.15 -- logoutHandler() answers { endSessionUrl } instead of redirecting to it
+ * 11/25/2026 mir0n  v2.0.3 -- extractClaims() no longer reads realm_access; /auth/me answers no roles
  */
 
 import { Router, type Request, type Response } from 'express';
@@ -223,18 +224,15 @@ async function meHandler(req: Request, res: Response): Promise<void> {
   res.json({
     authenticated: true,
     username: claims.preferred_username ?? claims.sub,
-    roles: claims.roles,
     expiresAt: tokens.expires_at,
     sessionExpiresAt: tokens.session_expires_at,
   });
 }
 
 function extractClaims(idClaims: Record<string, unknown>): SessionClaims {
-  const realmAccess = idClaims['realm_access'] as { roles?: string[] } | undefined;
   const ret: SessionClaims = {
     sub: String(idClaims['sub'] ?? ''),
     preferred_username: typeof idClaims['preferred_username'] === 'string' ? idClaims['preferred_username'] : undefined,
-    roles: Array.isArray(realmAccess?.roles) ? realmAccess.roles : [],
   };
   return ret;
 }

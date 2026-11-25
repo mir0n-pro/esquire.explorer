@@ -1,6 +1,10 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (backend / BFF tier)
 
+11/25/2026 mir0n  v2.0.3 -- code review: what the claims mode left behind
+src\auth\routes.ts
+  - extractClaims() no longer reads realm_access; /auth/me answers no roles
+
 10/16/2026 mir0n  v2.0.0 -- version 2.0.0
 package.json
   - version 2.0.0
