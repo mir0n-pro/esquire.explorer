@@ -10,7 +10,7 @@ import { setupHouse, teardownHouse, House } from '../helpers/testHouse';
 // take it back off again.
 //
 // The flag is the answer in both directions: raised, KeyCloak asks; lowered, KeyCloak stops asking. esq2025
-// owns the two actions Esquire drives, the same way it owns the realm role mapping.
+// owns the two actions Esquire drives.
 //
 // The taking-back is the half that had no coverage and no implementation. tfaMethod g -> n (TOTP requested,
 // user never logged in to set it up, then cancelled) removed an otp credential that was never created and left
@@ -19,7 +19,7 @@ import { setupHouse, teardownHouse, House } from '../helpers/testHouse';
 //
 // Asserted through KeyCloak's admin API -- the state lives there, not in any Esquire response. The host, realm
 // and client id are the dev values from the committed realm import (keycloak/import/esquire.json), overridable
-// via env, the same arrangement 20-token-relay uses.
+// via env, the same arrangement 24-oauth-token uses.
 
 const KC = process.env['KC_URL'] || 'http://localhost:8081/kc-auth';
 const REALM = process.env['KC_REALM'] || 'esquire';

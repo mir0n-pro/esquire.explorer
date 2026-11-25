@@ -1,7 +1,7 @@
-import { test, expect, request as pwRequest, Page } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { keycloakLogin, keycloakSignIn } from '../helpers/auth';
 import { setupHouse, teardownHouse, House } from '../helpers/testHouse';
-import { adminToken, waitForKcUser, setPassword, waitForKcUserGone, sleep, SYNC_TIMEOUT, POLL_MS } from '../helpers/kcAdmin';
+import { adminToken, waitForKcUser, setPassword, waitForKcUserGone } from '../helpers/kcAdmin';
 
 // Three role settings, asserted the way the user meets them -- by signing in.
 //   no role at all       -- REFUSED
@@ -11,11 +11,6 @@ import { adminToken, waitForKcUser, setPassword, waitForKcUserGone, sleep, SYNC_
 // expired session and bounced to the login, forever. Both halves are asserted -- the message shown, and
 // that the flow never lands on the session-expiry marker.
 
-const KC = process.env['KC_URL'] || 'http://localhost:8081/kc-auth';
-const REALM = process.env['KC_REALM'] || 'esquire';
-//xxx: the stack's BFF runs on the pure OAuth client -- the gateway then names the account by its login id
-const PURE_OAUTH = process.env['PURE_OAUTH'] === 'true';
-
 // The role the explorer routes ask for, and the role family that carries admin permissions.
 const TREE_ROLE = 'TREE';
 const ADMIN_ROLE = 'SUPERVIZOR';
@@ -23,41 +18,7 @@ const ADMIN_ROLE = 'SUPERVIZOR';
 type Role = { id: string; kind: number; name: string };
 type Profile = { loginId: string; connectFlg: string; roles: Role[]; rolesAll: Role[]; [k: string]: unknown };
 
-async function kcRealmRoles(token: string, kcId: string): Promise<string[]> {
-  const ctx = await pwRequest.newContext();
-  const res = await ctx.get(`${KC}/admin/realms/${REALM}/users/${kcId}/role-mappings/realm`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const roles = (await res.json()) as Array<{ name: string }>;
-  await ctx.dispose();
-  return (roles ?? []).map((r) => r.name);
-}
-
-async function waitForRoles(token: string, kcId: string, expected: string[]): Promise<void> {
-  const deadline = Date.now() + SYNC_TIMEOUT;
-  let held: string[] = [];
-  while (Date.now() < deadline) {
-    held = await kcRealmRoles(token, kcId);
-    let matched = true;
-    for (const name of expected) {
-      if (!held.includes(name)) {
-        matched = false;
-      }
-    }
-    // The realm's own default role rides along on every user, so only the Esquire ones are compared.
-    if (matched && !held.includes(TREE_ROLE) === !expected.includes(TREE_ROLE)
-        && !held.includes(ADMIN_ROLE) === !expected.includes(ADMIN_ROLE)) {
-      return;
-    }
-    await sleep(POLL_MS);
-  }
-  throw new Error(`KeyCloak roles did not settle to [${expected.join(', ')}] -- last seen [${held.join(', ')}]`);
-}
-
-//xxx: DISABLED -- on a pure OAuth stack (the services default since v2.0.3) this spec passes only with
-// PURE_OAUTH=true; it runs again when the e2e suite moves to pure OAuth only
-// test.describe.serial('a wrong role setting is refused by name, not reported as an expired session', () => {
-test.describe.skip('a wrong role setting is refused by name, not reported as an expired session', () => {
+test.describe.serial('a wrong role setting is refused by name, not reported as an expired session', () => {
   let house: House;
   let token: string;
   let kcId: string;
@@ -82,31 +43,18 @@ test.describe.skip('a wrong role setting is refused by name, not reported as an 
     return (await res.json()) as Profile;
   }
 
-  function accountName(): string {
-    let ret = house.merchantId;
-    if (PURE_OAUTH) {
-      ret = loginId;
-    }
-    return ret;
-  }
-
   async function pageAsAdmin(browser: any): Promise<Page> {
     const page = await browser.newPage();
     await keycloakLogin(page);
     return page;
   }
 
-  // Put the user into one role state and wait until KeyCloak agrees, so the next sign-in mints a token
-  // that actually carries it.
-  //xxx: the pure OAuth stack keeps the roles out of KeyCloak -- the save evicts the gateway's cached claims,
-  // so there is nothing to wait for
+  //xxx: the roles stay out of KeyCloak -- the save evicts the gateway's cached claims, so the next sign-in
+  // reads the new roles with nothing to wait for
   async function setRoles(browser: any, roles: Role[]): Promise<void> {
     const page = await pageAsAdmin(browser);
     await saveProfile(page, house.merchantId, { roles });
     await page.close();
-    if (!PURE_OAUTH) {
-      await waitForRoles(token, kcId, roles.map((r) => r.name));
-    }
   }
 
   test.beforeAll(async ({ browser }) => {
@@ -185,7 +133,7 @@ test.describe.skip('a wrong role setting is refused by name, not reported as an 
       await expect
         .poll(() => dialogs.join(' | '), { timeout: 15000, message: 'the user must be told, in words' })
         .toContain('no privileges');
-      expect(dialogs.join(' | '), 'the refusal must name the account').toContain(accountName());
+      expect(dialogs.join(' | '), 'the refusal must name the account').toContain(loginId);
       expect(visited.join(' | '), 'a missing role must never be reported as an expired session')
         .not.toContain('auth=expired');
       await page.context().close();
@@ -200,7 +148,7 @@ test.describe.skip('a wrong role setting is refused by name, not reported as an 
     await expect
       .poll(() => dialogs.join(' | '), { timeout: 15000, message: 'the user must be told, in words' })
       .toContain('no privileges');
-    expect(dialogs.join(' | '), 'the refusal must name the account').toContain(accountName());
+    expect(dialogs.join(' | '), 'the refusal must name the account').toContain(loginId);
     expect(visited.join(' | '), 'a missing role must never be reported as an expired session')
       .not.toContain('auth=expired');
     await page.context().close();

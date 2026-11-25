@@ -116,7 +116,7 @@ After login, calls the BFF `/api/esq-cmd-del` with the authenticated browser ses
 BFF injects bearer -> gateway -> enyMan -> DB guard) and asserts each protected entity refuses the
 delete, with the status each protection actually answers. Two protections, told apart:
 **403** for the system root (org 1, kind 0) -- the permission matrix has no delete on kind 0 for
-any role; **409** for the Test House office (org 14) and the Test Driver users (15, 16) -- the
+any role; **409** for the Test House office (org 14) and the Test Driver user (15) -- the
 system-entity flag. Each target carries the kind its ROW has, since the server compares the two
 and a target named under a kind it does not hold answers 404 and proves nothing. Read-only -- no
 entity is removed.
@@ -151,12 +151,11 @@ entity is removed.
 ### 19-access-profile-sync.spec.ts -- access-profile save -> Keycloak identity sync
 - **connect -> update role -> disconnect round-trips the identity through Keycloak**: builds its own
   subtree under Test House, then on the merchant user: saves the access profile with connect=Y (Keycloak
-  CREATES the identity), grants a role it does not already hold (Keycloak re-assigns its roles), and saves
-  connect=N (Keycloak REMOVES the identity). Tears the subtree down.
+  CREATES the identity), grants a role it does not already hold (Keycloak UPDATES the identity; the roles
+  stay in Esquire, and the save evicts the user's cached claims at the gateway), and saves connect=N
+  (Keycloak REMOVES the identity). Tears the subtree down.
 - THE GAP THIS FILLS: spec 03 only OPENS and CLOSES the Access Profile dialog -- it never saves. So the main
-  suite never once drove the identity path, and NOTHING anywhere drove a ROLE change. A role Esquire revoked
-  but Keycloak kept is an AUTHORIZATION drift -- the user keeps a permission the system believes it took away
-  -- and every test we had would still have been green.
+  suite never once drove the identity path, and NOTHING anywhere drove a ROLE change.
 - THE ORDER IS THE CONTRACT, not cosmetics. keySmith derives the Keycloak operation from the connect flag:
   N->Y is a CREATE, Y->Y an UPDATE, Y->N a DELETE. So the role change must sit BETWEEN connect and
   disconnect: it is the only thing that drives kcMaster's UPDATE branch, and kcMaster looks the user up in
@@ -165,21 +164,21 @@ entity is removed.
 - Exercises the full chain for real: browser session -> BFF /api proxy (injects the bearer) -> gateway ->
   keySmith (saves the profile, publishes a URQ on the kc R&R bus) -> kcMaster (calls the Keycloak admin API).
 
-### 20-token-relay.spec.ts -- gateway Token Relay (vanilla + phantom)
-- **disabled:** the token relay left the gateway (services v2.0.3), so both tests are skipped. The
-  spec is reworked or removed when the suite moves to pure OAuth only.
-- **Vanilla Token Relay: HTTP Basic at the edge reaches a protected route**: presents HTTP Basic
-  (client_id:client_secret) for the allowlisted esq-hauberk-S client straight to the gateway; the gateway runs
-  client_credentials on its behalf and forwards a full JWT downstream. A 200 from a protected read proves it.
-- **Phantom Token Relay: exchanged Bearer reaches a protected route**: gets a Bearer for the allowlisted
-  esq-hauberk-M client from Keycloak, presents it to the gateway; the gateway runs an RFC 8693 token-exchange
-  (as esq-gw-exchange) and forwards the exchanged JWT downstream. A 200 proves it.
-- THE GAP THIS FILLS: the relay was ENABLED on both targets and exercised by NOTHING -- three
-  esq.biz.gw.tokenrelay.* meters sat at zero series through every prior e2e run, smoke and the T10 matrix. These
-  calls hit the gateway DIRECTLY (not the BFF /api proxy, which injects the session bearer and never exercises
-  the relay).
-- Targets: default to the docker gateway (localhost:7070); e2e-k8s.bat points GATEWAY_URL / KC_URL at the k8s
-  ingress (api.esquire.localhost). The dev client secrets come from the committed realm import.
+### 20-direct-client.spec.ts -- a direct client: its own token, straight to the gateway
+- **a direct client is a service that calls the gateway itself, with no BFF in between.** `esq-hauberk`, the
+  load harness, is that client. It takes its own token from KeyCloak (client_credentials) and sends it as a
+  Bearer.
+- **the token carries the login only**: `azp` and `preferred_username`, with no Esquire claim and no realm
+  roles.
+- **the client reads its own access profile**: the gateway takes the claims from keySmith by the login id,
+  and `/esq-key` answers with the seeded profile 15 (`esq-hauberk@mir0n.pro`).
+- **the client reaches a protected read** (`/esq-dict?kind=1000`), and **forged claim headers are
+  replaced**: a call that sends its own `X-Esq-UID`, `X-Esq-Root-Path` and `X-Esq-Roles` still reads the
+  client's own profile.
+- **no token is refused at the edge** with 401.
+- Targets: the docker gateway (localhost:7070) by default; e2e-k8s.bat and e2e-oci.bat point `GATEWAY_URL` /
+  `KC_URL` at the target. The client id, the secret and the login id default to the committed realm import
+  and the seed (`DIRECT_CLIENT_ID`, `DIRECT_CLIENT_SECRET`, `DIRECT_CLIENT_LOGIN`).
 
 ### 21-credential-state-sync.spec.ts -- credential state reaches KeyCloak, and comes back off
 - **force password change and TOTP: requested, then withdrawn**: Esquire never changes a password or
@@ -193,8 +192,6 @@ entity is removed.
   still forced the setup. Nothing in the suite could see it: nothing here had ever read a required action.
 
 ### 22-role-state-login.spec.ts -- a wrong role setting, met the way a user meets it
-- **disabled:** the services run pure OAuth by default (v2.0.3), and the spec passes on that stack only
-  with `PURE_OAUTH=true`. It runs again when the suite moves to pure OAuth only.
 - **activation and roles are two steps, and nothing makes an operator do the second one.** A user can be
   given a working login and left with no role, and the sign-in then fails a long way from the cause. The
   spec drives three wrong settings and signs in as the user for each: no role at all; an admin role but no
@@ -202,21 +199,20 @@ entity is removed.
 - **no role, and admin-without-TREE, must both be REFUSED with a sentence naming the account.** Asserted
   twice over: the answer on `/api/esq-key` is 403 carrying a problem detail whose `detail` holds the login
   id and "no privileges", and the message the browser actually puts in front of the user says the same.
+  The account is named by its login id, because the token carries no Esquire id.
 - THE REGRESSION THIS PINS: a roleless token used to be refused as `invalid_token`. The browser reads 401
   as a dead session and bounces to the login, which succeeds, which 401s again -- a loop reported as "your
   session expired", the one thing that had not happened. Every sign-in here also asserts the flow never
   visits the `auth=expired` marker.
 - **TREE without an admin role is NOT an error** and is asserted as working: it signs in, the profile reads
   200, and only a change is refused (403 on a create). A read-only account is a legitimate setting.
-- The KeyCloak halves (does the account exist yet, which realm roles does it hold, setting a password on it)
+- The KeyCloak halves (does the account exist yet, setting a password on it)
   go through the admin API, the same arrangement spec 21 uses -- `KC_ADMIN_SECRET` / `KCMASTER_ADMIN_SECRET`,
   with no fallback. Activation leaves a TEMPORARY password with UPDATE_PASSWORD standing, so the spec sets a
   permanent one and clears the required actions -- otherwise the sign-in lands on KeyCloak's change-password
   form and the spec would be asserting that form instead of the role state.
-- **On a pure OAuth stack (`PURE_OAUTH=true`)** the refusal names the account by its login id, because the
-  token carries no `esq_uid`; the claims mode names the entity id. The spec also stops waiting for the
-  KeyCloak roles there: the roles stay out of KeyCloak, and the save removes the user's cached claims at
-  the gateway.
+- **a role change has nothing to wait for.** The roles stay out of KeyCloak, and the save removes the user's
+  cached claims at the gateway, so the next sign-in reads the new roles.
 
 ### 23-logout-switch-user.spec.ts -- logout ends the Keycloak session, not only the Esquire one
 - **the next login must ask again.** Logs in, logs out through the toolbar, then starts a login and asserts
@@ -226,43 +222,40 @@ entity is removed.
   logout only works as a top-level navigation, so the BFF hands the end-session URL back and the SPA
   navigates to it. Driven through fetch, Keycloak never sees the browser first-party and its cookies live on.
 
-### 24-pure-oauth-token.spec.ts -- the pure OAuth client: a token with no Esquire claims
-- **one test disabled:** "the claims client: the token carries esq_uid, esq_rootpath and the realm roles".
-  `esq-angular` is a pure client since services v2.0.3, so its token carries no Esquire claims.
-- **the claims client and the pure client sign in the same user, and their tokens differ.** The claims
-  token carries `esq_uid`, `esq_rootpath` and the realm roles. The pure token carries the login only:
-  `sub`, `preferred_username` and `azp`, with no Esquire claim, no realm or client roles, and none in the
-  ID token either.
-- **through the gateway, both tokens read the same access profile.** The pure call gets its claims from
-  keySmith, and the answer names the same user and login id.
-- **forged claim headers are replaced.** A pure call that sends its own `X-Esq-UID`, `X-Esq-Root-Path` and
+### 24-oauth-token.spec.ts -- the OAuth token of the BFF's client: the login only
+- **the token carries the login only.** The handshake signs the e2e user in on `esq-angular`, the client the
+  BFF uses. The access token holds `sub`, `preferred_username` and `azp`, with no Esquire claim and no realm
+  or client roles; the ID token holds no Esquire claim either.
+- **through the gateway, the token reads the user's own access profile.** The gateway gets the claims from
+  keySmith, and the answer names the signed-in login id.
+- **forged claim headers are replaced.** A call that sends its own `X-Esq-UID`, `X-Esq-Root-Path` and
   `X-Esq-Roles` still reads the caller's own profile: the gateway drops the inbound headers and sets them
   from its own lookup.
-- **timing, two parts that run on every pass:** the logon handshake for both clients, cold and hot, five
-  rounds by default (`HANDSHAKE_RUNS`), and ten `/esq-key` calls per client. They assert only that each step
-  succeeds. The figures go to the console and to JSON attachments.
-- **a full measurement runs only with `MEASURE=true`:** the gateway call and the whole logon, cold and hot,
-  with the KeyCloak user cache cleared before each cold logon. A cold gateway call is a cache miss only when
-  the stack runs with `ESQ_GW_PURE_OAUTH_CACHE_IDLE_MS` equal to `GW_IDLE_MS`.
 - The handshake drives the authorization code flow with PKCE straight against KeyCloak, and answers the
-  callback inside the test, so the BFF never spends the code. The spec talks to the gateway directly
-  (`GATEWAY_URL`), the way spec 20 does.
-- Targets: docker and local k8s run it, in either mode; the pure clients are listed there by default. OKE
-  runs the claims mode only and sets `PURE_OAUTH_DISABLED=true`, so the whole spec skips there.
+  callback inside the test, so the BFF never spends the code. The redirect URI is the origin of `BASE_URL`,
+  so a default port in it (e2e-oci.bat names `:443`) does not break KeyCloak's redirect match. The spec talks
+  to the gateway directly (`GATEWAY_URL`), the way spec 20 does.
 
-### 25-pure-oauth-eviction.spec.ts -- a claims change reaches a signed-in user at once
-- **the pure OAuth gateway keeps a user's claims in a cache, and two events remove them:** keySmith sends
-  one when an access profile is saved, and enyMan sends one when a user is moved. Each test changes the
-  claims of a user who stays signed in, and asserts that the user's next calls see the change.
+### 25-oauth-eviction.spec.ts -- a claims change reaches a signed-in user at once
+- **the gateway keeps a user's claims in a cache, and two events remove them:** keySmith sends one when an
+  access profile is saved, and enyMan sends one when a user is moved. Each test changes the claims of a user
+  who stays signed in, and asserts that the user's next calls see the change.
 - **an access profile save:** TREE is taken away and the user's next reads are refused (403); TREE is given
   back and the reads open again (200).
 - **a move:** the user is moved to another office. With the old root path still cached, the user's own
   profile would not be found; after the event it reads 200 under the new office.
 - The polls never let the cache entry go idle, so only the event can change the answer. With the two
   events switched off, both tests fail.
-- Runs only on a pure OAuth stack (`PURE_OAUTH=true`); in the claims mode the roles and the path ride in
-  the token, so there is no cache to clear, and the spec skips. The test user is made and removed the way
-  spec 22 does it, through the KeyCloak admin API (`helpers/kcAdmin.ts`, shared with spec 22).
+- The test user is made and removed the way spec 22 does it, through the KeyCloak admin API
+  (`helpers/kcAdmin.ts`).
+
+### 26-user-kinds.spec.ts -- every user kind signs in through the BFF
+- **three kinds of user sign in the way a person does**, through the KeyCloak login page and the BFF: the
+  main admin of the seed, a merchant user, and a client user. The two test users are built in a Test House
+  office, connected with the TREE role, and given a password through the KeyCloak admin API.
+- **each one works on the gateway's claims:** the name bar shows, `/api/esq-key` answers with the user's own
+  login id, and the own tree loads.
+- The teardown disconnects both users first; a connected user refuses deletion, and the office would stay.
 
 ### cycle/cycle.spec.ts -- full-lifecycle soak / activity generator (not a coverage assertion)
 An activity generator, NOT an assertion spec: repeats a full GUI lifecycle N times (`CYCLES` env,

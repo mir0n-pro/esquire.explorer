@@ -1,6 +1,21 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v2.0.3-2611.2419  v2.0.3 -- OAuth only: the e2e suite tests one kind of sign-in
+    :New:         e2e 20-direct-client asserts a direct client takes its own token, reads its own
+                  access profile and a protected read straight at the gateway, and that forged claim
+                  headers are replaced; it takes the place of 20-token-relay
+    :New:         e2e 26-user-kinds asserts the main admin, a merchant user and a client user each
+                  sign in through the browser and read their own profile and tree
+    :Config:      e2e 24-oauth-token (was 24-pure-oauth-token) keeps what the token proves, on the
+                  browser's own client; the two-client comparisons and timings are out
+    :Config:      e2e 25-oauth-eviction (was 25-pure-oauth-eviction) runs in the default suite
+    :Config:      e2e 22-role-state-login runs again, one way
+    :Config:      e2e 15-system-entity-protection no longer checks the removed Test Driver S
+    :Config:      the OKE e2e runs skip no spec
+    :Doc:         e2e-test.scope.md: 15, 19, 20, 22, 24, 25 and 26
+    Components:   e2e
+
 v2.0.3-2611.2300  v2.0.3 -- pure OAuth only: the e2e specs the gateway change outdated are disabled
     :Config:      e2e 20-token-relay is disabled: the token relay left the gateway
     :Config:      e2e 22-role-state-login is disabled: on the pure OAuth default it passes only with

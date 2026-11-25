@@ -31,7 +31,7 @@ test('Details on seeded admin Test House/Test Driver: a single ESC closes the di
   await expect(page.locator('.esq-path-bar')).toContainText(TEST_HOUSE_NAME, { timeout: 10000 });
   await listInto(page, 'All admin-s');
 
-  // Select the seeded "Test Driver" admin -- exact text so it is not "Test Driver S" / "M".
+  // Select the seeded "Test Driver" admin by its exact text.
   const row = page.locator('tr[mat-row]')
     .filter({ has: page.getByText('Test Driver', { exact: true }) })
     .first();

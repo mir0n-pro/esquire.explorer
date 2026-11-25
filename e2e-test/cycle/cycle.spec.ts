@@ -80,11 +80,11 @@ async function guiConnect(page: Page, connect: boolean) {
 // asserted by tests/19-access-profile-sync.spec.ts.
 //
 // WHY IT MATTERS. keySmith decides the KC operation from the connect flag: N->Y is a CREATE, Y->Y an UPDATE,
-// Y->N a DELETE. So a role change while CONNECTED is the only thing that drives kcMaster's UPDATE branch -- the
-// one that pushes the role set into Keycloak. Before this step existed, esq.biz.kc.sync.total only ever showed
-// CREATE and DELETE: the whole update path, and the authorization drift it guards against (a role Esquire
-// revoked but Keycloak kept), was exercised by NOTHING. It has to sit BETWEEN connect and disconnect: kcMaster
-// looks the user up in Keycloak by username and throws if the identity is not there yet.
+// Y->N a DELETE. So a role change while CONNECTED is the only thing that drives kcMaster's UPDATE branch. The
+// roles stay in Esquire; the save also evicts the user's cached claims at the gateway. Before this step existed,
+// esq.biz.kc.sync.total only ever showed CREATE and DELETE: the whole update path was exercised by NOTHING. It
+// has to sit BETWEEN connect and disconnect: kcMaster looks the user up in Keycloak by username and throws if
+// the identity is not there yet.
 async function guiRole(page: Page, userId: string) {
   const read = await page.request.get(`/api/esq-key?id=${userId}`);
   if (read.status() !== 200) return;                       // soak run: never fail the lap on a read
@@ -95,7 +95,7 @@ async function guiRole(page: Page, userId: string) {
   await page.request.post(`/api/esq-key-save?id=${userId}`, {
     data: { ...profile, roles: [...(profile.roles ?? []), toAdd] },
   });
-  await settle(page, 1500);                                // let the keySmith -> kcMaster -> Keycloak sync land
+  await settle(page, 1500);                                // let the keySmith -> kcMaster -> Keycloak update land
 }
 
 test.describe.serial(`GUI lifecycle cycle x${CYCLES} under ${TEST_HOUSE_NAME}`, () => {

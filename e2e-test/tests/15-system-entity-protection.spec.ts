@@ -8,7 +8,7 @@ import { keycloakLogin } from '../helpers/auth';
 //
 // Exercises the full path: authenticated browser session -> BFF /api proxy (injects the
 // bearer) -> gateway -> enyMan -> DB guard. Targets are the seed fixtures flagged 'Y' in
-// db.seed/fill/initial-entities.sql (org 1, 14; users 4, 5, 15, 16, 17).
+// db.seed/fill/initial-entities.sql (org 1, 14; users 4, 5, 15).
 //
 // Targets below are the ones that reach the guard cleanly. user 4 (System Administrator)
 // is also protected but returns 403 first: the isAdminCmdPermitted() permission gate
@@ -30,7 +30,6 @@ test.describe.serial('system entity flag -- protected from deletion', () => {
     { label: 'root Esquire office (org 1)', kind: 0, id: '1', status: 403, by: 'the permission matrix (no role deletes kind 0)' },
     { label: 'Test House office (org 14)', kind: 20, id: '14', status: 409, by: 'the system-entity flag' },
     { label: 'Test Driver user (user 15)', kind: 32, id: '15', status: 409, by: 'the system-entity flag' },
-    { label: 'Test Driver S user (user 16)', kind: 32, id: '16', status: 409, by: 'the system-entity flag' },
   ];
 
   for (const t of protectedTargets) {

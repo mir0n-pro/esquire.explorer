@@ -3,12 +3,10 @@ import { keycloakLogin, keycloakSignIn } from '../helpers/auth';
 import { setupHouse, createOffice, teardownHouse, House } from '../helpers/testHouse';
 import { adminToken, waitForKcUser, waitForKcUserGone, setPassword, sleep, POLL_MS } from '../helpers/kcAdmin';
 
-// The pure OAuth mode keeps a user's claims in the gateway's cache, and two events remove them:
+// The gateway keeps a user's claims in its cache, and two events remove them:
 //   keySmith -- the access profile was saved (roles)
 //   enyMan   -- the user was moved (root path)
 // Each test changes the claims of a user who stays signed in, and the user's next calls must see it.
-
-const PURE_OAUTH = process.env['PURE_OAUTH'] === 'true';
 
 const TREE_ROLE = 'TREE';
 const USR_MERCHANT = 36;
@@ -18,10 +16,7 @@ const EVICT_TIMEOUT = 15000;
 type Role = { id: string; kind: number; name: string };
 type Profile = { loginId: string; connectFlg: string; roles: Role[]; rolesAll: Role[]; [k: string]: unknown };
 
-//xxx: the claims mode carries the roles and the path in the token, so there is no cache to evict
-const describePure = PURE_OAUTH ? test.describe.serial : test.describe.skip;
-
-describePure('pure OAuth: a claims change reaches a signed-in user at once', () => {
+test.describe.serial('a claims change reaches a signed-in user at once', () => {
   let house: House;
   let otherOffice: { id: string; name: string };
   let token: string;

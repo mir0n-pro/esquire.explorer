@@ -5,9 +5,7 @@ import { setupHouse, teardownHouse, House } from '../helpers/testHouse';
 // Access-profile save -> Keycloak identity sync: CONNECT -> UPDATE ROLE -> DISCONNECT.
 //
 // THE GAP THIS FILLS. Spec 03 only OPENS and CLOSES the Access Profile dialog -- it never saves. So the main
-// suite never once drove the identity path, and NOTHING anywhere drove a ROLE change. A role that Esquire
-// revoked but Keycloak kept is an AUTHORIZATION drift: the user keeps a permission the system believes it took
-// away, and every test we had would still be green.
+// suite never once drove the identity path, and NOTHING anywhere drove a ROLE change.
 //
 // THE CHAIN, end to end, for real:
 //   browser session -> BFF /api proxy (injects the bearer) -> gateway -> keySmith
@@ -17,9 +15,11 @@ import { setupHouse, teardownHouse, House } from '../helpers/testHouse';
 // WHY THIS ORDER, and not any other. au_connect_flg='Y' means an interactive-login user -- one that HAS a
 // Keycloak account. So:
 //   1. CONNECT      -> Keycloak CREATES the identity.
-//   2. UPDATE ROLE  -> Keycloak re-assigns its roles. This only works on an identity that EXISTS: kcMaster looks
-//                      the user up by username and throws if it is absent. Rolling the role change before the
-//                      connect would fail the sync -- so the order here is not cosmetic, it is the contract.
+//   2. UPDATE ROLE  -> Keycloak UPDATES the identity (login id, email, credential state); the roles stay in
+//                      Esquire, and the save evicts the user's cached claims at the gateway (spec 25 checks
+//                      that). The update only works on an identity that EXISTS: kcMaster looks the user up by
+//                      username and throws if it is absent. Rolling the role change before the connect would
+//                      fail the sync -- so the order here is not cosmetic, it is the contract.
 //   3. DISCONNECT   -> Keycloak REMOVES the identity, leaving it as we found it.
 // Both directions of the connect are driven on purpose: a create that works and a delete that silently does not
 // is exactly the drift that leaves Esquire and Keycloak disagreeing about who exists.
@@ -79,7 +79,7 @@ test.describe.serial('access profile save drives the Keycloak identity sync', ()
     // room to land, or the role update below can overtake the create it depends on.
     await page.waitForTimeout(2000);
 
-    // ---- 2. UPDATE ROLE: Keycloak re-assigns the user's roles ----------------------------------------------
+    // ---- 2. UPDATE ROLE: Keycloak updates the identity, the roles stay in Esquire ---------------------------
     const profile = await readProfile(page.request, id);
     const assigned = new Set((profile.roles ?? []).map((r) => r.name));
     const toAdd = (profile.rolesAll ?? []).find((r) => !assigned.has(r.name));
@@ -94,7 +94,7 @@ test.describe.serial('access profile save drives the Keycloak identity sync', ()
     const after = (await roleSaved.json()) as Profile;
     expect(
       (after.roles ?? []).map((r) => r.name).sort(),
-      'the granted role must come back on the saved profile -- if it does not, Esquire and Keycloak have already diverged',
+      'the granted role must come back on the saved profile',
     ).toEqual(newRoles.map((r) => r.name).sort());
 
     await page.waitForTimeout(2000);
