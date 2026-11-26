@@ -25,11 +25,12 @@ through the backend.
 
 ---
 >
-> **v2.0.2 -- browser tests for a sign-in that carries no Esquire data.** Esquire 2.0.2 adds a lab
-> mode in which the sign-in token holds only who the user is, and the server looks up the rest. Two new
-> browser test files cover it: what the token holds, and that a change to a user's access reaches that user
-> while they stay signed in. The tests run on docker and local Kubernetes; the public site runs the
-> default mode, and skips them. See [Release History](#release-history).
+> **v2.0.3 -- one kind of sign-in.** Esquire 2.0.3 makes the 2.0.2 lab mode the only one: the sign-in
+> token holds only who the user is, and the server looks up the rest. The browser tests now cover that one
+> way -- every kind of user signing in through the browser, and a direct client calling the gateway with a
+> token of its own. The tests that compared two kinds of token are gone, and the public site runs every
+> test. The backend keeps no roles in the session, and the landing pages show the new component model. See
+> [Release History](#release-history).
 >
 > The 1.2 line goes on in parallel. Its last release is
 > [v1.2.16](https://github.com/mir0n-pro/esquire.explorer/tree/release/v1.2.16?tab=readme-ov-file).
@@ -71,7 +72,7 @@ frontend ship together, as one image.
 
 **[release_notes.txt](doc/release_notes.txt)** -- the release notes, newest first.
 
-**[report_v2.0.2.md](doc/reports/report_v2.0.2.md)** -- the report of this release.
+**[report_v2.0.3.md](doc/reports/report_v2.0.3.md)** -- the report of this release.
 
 ---
 

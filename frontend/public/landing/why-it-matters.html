@@ -117,9 +117,11 @@
             </p>
             <p>
               <strong>Identity and access management.</strong> Keycloak today. The architecture
-              ensures no core service ever touches Keycloak directly. Replacing it means replacing
-              kcMaster with an xyzMaster that speaks to a different IAM &mdash; the rest of the system
-              is unchanged. A deployment decision, not an architectural one.
+              ensures no core service ever touches Keycloak directly. Keycloak signs users in and issues a
+              token that names the user, and nothing more: the roles and the position in the tree stay in
+              Esquire's own database, so the identity server holds no Esquire data to migrate. Replacing it
+              means replacing kcMaster with an xyzMaster that speaks to a different IAM &mdash; the rest of
+              the system is unchanged. A deployment decision, not an architectural one.
             </p>
 
             <h3>7. Observability built in, not left to you</h3>

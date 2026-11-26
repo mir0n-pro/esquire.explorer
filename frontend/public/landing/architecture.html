@@ -1,5 +1,5 @@
             <h2>Current Architecture</h2>
-            <img class="landing-arch-diagram" src="/img/ComponentModel.png?v=1214" alt="Esquire Component Model"/>
+            <img class="landing-arch-diagram" src="/img/ComponentModel.png?v=203" alt="Esquire Component Model"/>
 
             <p>
               Two public hosts:
@@ -11,7 +11,7 @@
 
             <p>
               Every box above is its own program: the <strong>gateway</strong>, the six backend
-              <strong>services</strong> (bizTree, enyMan, pacMan, keySmith, kcMaster, auKeep), and the
+              <strong>services</strong> (bizTree, enyMan, paacMan, keySmith, kcMaster, auKeep), and the
               <strong>BFF</strong>. Each of them runs <strong>redundant, with optional autoscale</strong>,
               and the copies sit on separate nodes, so losing one keeps the site up.
               The databases, Keycloak, the message broker and the Session Store run as a single instance
@@ -47,23 +47,27 @@
               <img src="/logo/sqs-cd.svg" alt="Amazon SQS" height="20" style="vertical-align:middle">&nbsp;
               <img src="/logo/kinesis-cd.svg" alt="Amazon Kinesis" height="20" style="vertical-align:middle">&nbsp;
               <img src="/logo/msk-cd.svg" alt="Amazon MSK" height="20" style="vertical-align:middle"></h3>
-            <p>Three logical channels:
-               <br> - <i>IAM Request-Response Bus</i> &mdash; carries identity commands from keySmith to
+            <p>Five logical channels:
+               <br> - <i>Biz Request-Response Bus</i> &mdash; carries account commands from the gateway to
+                 paacMan, and the answers back
+               <br> - <i>IAM Request-Response Bus</i> &mdash; carries sign-in commands from keySmith to
                  kcMaster, and acknowledgement replies back
-               <br> - <i>Entity Broadcast Bus</i> &mdash; enyMan and pacMan publish entity change events on
+               <br> - <i>Entity Broadcast Bus</i> &mdash; enyMan and paacMan publish entity change events on
                  every mutation; bizTree and other interested consumers subscribe
+               <br> - <i>Claim Broadcast Bus</i> &mdash; keySmith and enyMan tell every gateway copy that a
+                 user's roles or position changed, so the next request reads the new ones
                <br> - <i>Audit Broadcast Bus</i> &mdash; optional (off by default); the entity-updating
-                 services (enyMan, pacMan, keySmith) publish each committed change event to the audit sink.
+                 services (enyMan, paacMan, keySmith) publish each committed change event to the audit sink.
                <br><br>Supported messaging vendors / brokers: ActiveMQ, Kafka or Redis. With AWS you can use
                SNS, SQS, Kinesis, MQ for ActiveMQ or MSK (managed Kafka).</p>
 
-            <h3>pacMan &mdash; Personal Account Manager
+            <h3>paacMan &mdash; Personal Account Manager
               <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
               <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">
               <img src="/logo/pac-man.svg" alt="pacMan" height="22" style="vertical-align:middle"></h3>
             <p>The accounting service; manages account balance operations: deposit, withdrawal,
                cross-currency transfer; the place where business logic lives; all other services
-               exist to support it.</p>
+               exist to support it. It takes its commands from the gateway over the Biz bus.</p>
 
             <h3>bizTree
               <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
@@ -90,17 +94,18 @@
               <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
               <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">
               <img src="/logo/keySmith.3.png" alt="keySmith" height="36" style="vertical-align:middle"></h3>
-            <p>Authentication and access profile service; manages IAS integration and JWT-based
-               authorization; serves access profiles to the frontend; publishes identity change requests
-               to the IAM bus.</p>
+            <p>The access profile service; keeps each user's login, email, roles and sign-in state;
+               answers the gateway when it asks who a caller is and what they may do; publishes sign-in
+               changes to the IAM bus, and tells the gateways over the Claim Broadcast Bus when a user's rights
+               change.</p>
 
             <h3>kcMaster
               <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
               <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">
               <img src="/logo/kcMaster.png" alt="kcMaster" height="20" style="vertical-align:middle"></h3>
             <p>Keycloak sync coordinator; the only service that writes to Keycloak directly; consumes
-               identity commands from the IAM bus and executes create / update / delete in the IAM. Also
-               listens on the entity broadcast bus to keep a moved entity's Keycloak path in sync.</p>
+               sign-in commands from the IAM bus and executes create / update / delete in the IAM: the
+               login, the email and the sign-in state. Esquire's own data stays in Esq2025.</p>
 
             <h3>auKeep
               <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">
@@ -120,7 +125,9 @@
               <img src="/logo/spring-boot.svg" alt="Spring Boot" height="20" style="vertical-align:middle">&nbsp;
               <img src="/logo/gateway.svg" alt="Gateway" height="20" style="vertical-align:middle"></h3>
             <p>Spring Cloud Gateway; the API router; routes requests to the appropriate backend
-               service by path and entity kind; validates JWT tokens on every request. Reachable
+               service by path and entity kind; validates JWT tokens on every request. The token names
+               the caller; the gateway asks keySmith what that caller may see and do, keeps the answer
+               in a cache, and passes it to the services with the request. Reachable
                two ways: in-cluster from the BFF on /api/*, and externally at
                <strong>api.esquire.mir0n.pro</strong> &mdash; the public REST API for non-browser
                callers (service-to-service integrations, load / smoke harnesses, future mobile or
@@ -128,8 +135,9 @@
 
             <h3>Keycloak
               <img src="/logo/keycloak.png" alt="Keycloak" height="20" style="vertical-align:middle"></h3>
-            <p>External IAM; issues JWT access tokens; manages user identities, realm configuration,
-               and authentication flows including TOTP; runs as a containerized service.</p>
+            <p>External IAM; signs users in and issues JWT access tokens that name the user; holds the
+               login, the email and the credential, including TOTP, and no Esquire data; runs as a
+               containerized service.</p>
 
             <h3>Esquire Explorer Backend (BFF)
               <img src="/logo/node.js.svg" alt="Node.js" height="20" style="vertical-align:middle"></h3>
@@ -231,7 +239,7 @@
               Two things move with the grouping, and both are worth knowing. Identity work used to travel the
               message bus: keySmith asked kcMaster to write to Keycloak. Now it is a call inside one program.
               And a tree read is answered where the request arrives, instead of crossing the network a
-              second time. What does <strong>not</strong> move is <strong>pacMan</strong>: accounting is a
+              second time. What does <strong>not</strong> move is <strong>paacMan</strong>: accounting is a
               business domain built on the framework, not a part of it, so it stays its own program in every
               shape. Any domain you build works the same way.
             </p>
@@ -249,7 +257,7 @@
               paying for a large one, and it is a deployment choice, reversible at any time.
             </p>
 
-            <img class="landing-arch-diagram" src="/img/ComponentModel.Compact.png?v=1214" alt="Esquire Component Model, compact shape"/>
+            <img class="landing-arch-diagram" src="/img/ComponentModel.Compact.png?v=203" alt="Esquire Component Model, compact shape"/>
 
             <h3>Mesnie
               <img src="/logo/java.svg" alt="Java" height="20" style="vertical-align:middle">&nbsp;
