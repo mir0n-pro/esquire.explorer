@@ -1,6 +1,18 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+v2.0.4-2611.2712  v2.0.4 -- T0: the BLINKY role; the money dialogs drawn in full; e2e review items
+    :Feature:     an app role shows the same icon as a tool role
+    :Fix:         the deposit, withdrawal and transfer dialogs no longer open half drawn
+    :Fix:         e2e 25-oauth-eviction cleans up only what its setup made, so a failed setup shows its own
+                  error
+    :Fix:         e2e 22-role-state-login, 25-oauth-eviction and 26-user-kinds fail when KeyCloak keeps a test
+                  user after the disconnect, once the test office is removed
+    :Fix:         e2e 22-role-state-login, 25-oauth-eviction and 26-user-kinds set the test user's password
+                  only after KeyCloak holds the one kcMaster sets, so it is no longer overwritten
+    Components:   frontend,
+                  e2e
+
 v2.0.3-2611.2518  v2.0.3 -- code review: what the claims mode left behind
     :Refactoring: the login backend keeps no roles in the session and no longer reports them
     :Doc:         the backend README names the esq-angular client and says the token carries the login

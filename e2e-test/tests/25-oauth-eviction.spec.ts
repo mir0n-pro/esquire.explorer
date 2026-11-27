@@ -120,14 +120,23 @@ test.describe.serial('a claims change reaches a signed-in user at once', () => {
     await setPassword(token, kcId as string, password);
   });
 
+  //xxx: runs after a failed beforeAll too, so it removes only what beforeAll got to make
   test.afterAll(async ({ browser }) => {
-    const page = await pageAsAdmin(browser);
-    //xxx: a connected user refuses deletion, so the teardown would leave the whole house behind
-    await saveProfile(page, house.merchantId, { connectFlg: 'N', roles: [] });
-    await waitForKcUserGone(token, loginId);
-    await teardownHouse(page, house.officeId);
-    await teardownHouse(page, otherOffice.id);
-    await page.close();
+    let gone = true;
+    if (house) {
+      const page = await pageAsAdmin(browser);
+      if (loginId) {
+        //xxx: a connected user refuses deletion, so the teardown would leave the whole house behind
+        await saveProfile(page, house.merchantId, { connectFlg: 'N', roles: [] });
+        gone = await waitForKcUserGone(token, loginId);
+      }
+      await teardownHouse(page, house.officeId);
+      if (otherOffice) {
+        await teardownHouse(page, otherOffice.id);
+      }
+      await page.close();
+    }
+    expect(gone, `Keycloak must drop ${loginId} after the disconnect`).toBe(true);
   });
 
   test('an access profile save evicts the roles -- taken away and given back', async ({ browser }) => {

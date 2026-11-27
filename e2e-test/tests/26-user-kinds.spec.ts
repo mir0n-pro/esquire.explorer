@@ -55,11 +55,13 @@ test.describe.serial('every user kind signs in through the BFF', () => {
     return ret;
   }
 
-  async function disconnect(page: Page, user: TestUser | undefined): Promise<void> {
+  async function disconnect(page: Page, user: TestUser | undefined): Promise<boolean> {
+    let ret = true;
     if (user) {
       await saveProfile(page, user.id, { connectFlg: 'N', roles: [] });
-      await waitForKcUserGone(token, user.loginId);
+      ret = await waitForKcUserGone(token, user.loginId);
     }
+    return ret;
   }
 
   async function expectOwnWork(page: Page, loginId: string): Promise<void> {
@@ -93,10 +95,12 @@ test.describe.serial('every user kind signs in through the BFF', () => {
     const page = await browser.newPage();
     await keycloakLogin(page);
     //xxx: a connected user refuses deletion, so the teardown would leave the whole house behind
-    await disconnect(page, merchant);
-    await disconnect(page, client);
+    const merchantGone = await disconnect(page, merchant);
+    const clientGone = await disconnect(page, client);
     await teardownHouse(page, house.officeId);
     await page.close();
+    expect(merchantGone, 'Keycloak must drop the merchant user after the disconnect').toBe(true);
+    expect(clientGone, 'Keycloak must drop the client user after the disconnect').toBe(true);
   });
 
   test('the main admin', async ({ browser }) => {

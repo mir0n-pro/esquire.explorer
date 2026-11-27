@@ -1,6 +1,18 @@
 Esquire Frameworks(tm) 2.0
 Esquire Explorer (frontend)
 
+11/27/2026 mir0n  v2.0.4 -- the BLINKY role: the apps kind; the money dialogs drawn in full
+explorer\flatTree\app-shell.ts
+  - v2.0.4 -- kind 984 (apps) with the tools icon
+explorer\flatTree\acct\EsqAcctDialog.ts
+  - v2.0.4 -- ChangeDetectorRef.markForCheck() once the dictionary is loaded
+package.json
+  - version 2.0.4
+package-lock.json
+  - version 2.0.4
+index.html
+  - softwareVersion 2.0.4
+
 10/16/2026 mir0n  v2.0.0 -- version 2.0.0
 package.json
   - version 2.0.0

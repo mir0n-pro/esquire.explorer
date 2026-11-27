@@ -1,7 +1,7 @@
 /**
 *  Esquire frameworks (tm)
 *
-*  Copyright(c) 2001, 2025 mir0n&co www.mir0n.me
+*  Copyright(c) 2001, 2026 mir0n&co www.mir0n.pro
 *  mailto:mir0n.the.programmer@gmail.com
 *
 * History :
@@ -16,8 +16,10 @@
 * 04/14/2026 mir0n  protected hooks for subclassing: onDictionaryLoaded, focusOnInit, extraConfirmLines, validateExtra async
 *                   isNegativeOp getter; el.nativeElement querySelector; idLabel in confirm lines
 * 04/19/2026 mir0n  import paths migrated to @mir0n-pro/esquire.ui library
+* 11/27/2026 mir0n  v2.0.4 -- ChangeDetectorRef.markForCheck() once the dictionary is loaded
 */
 import {
+    ChangeDetectorRef,
     Component,
     ElementRef,
     HostListener,
@@ -99,6 +101,7 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
     protected dictLayers: any[] = [];
 
     protected el = inject(ElementRef);
+    private cdr = inject(ChangeDetectorRef);
 
     public loading = signal(false);
     public saving = signal(false);
@@ -146,6 +149,8 @@ export class EsqAcctDialog extends EsqExplorerHostDummy implements OnInit, OnDes
             this.fields = allFields;
             this.onDictionaryLoaded();
             this.resetDetails();
+            //xxx: zoneless -- the fields set here are plain, so the view is redrawn only when asked
+            this.cdr.markForCheck();
             setTimeout(() => this.focusOnInit(), 0);
         });
     }

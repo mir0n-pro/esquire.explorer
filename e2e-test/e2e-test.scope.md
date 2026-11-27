@@ -210,9 +210,11 @@ entity is removed.
   go through the admin API, the same arrangement spec 21 uses -- `KC_ADMIN_SECRET` / `KCMASTER_ADMIN_SECRET`,
   with no fallback. Activation leaves a TEMPORARY password with UPDATE_PASSWORD standing, so the spec sets a
   permanent one and clears the required actions -- otherwise the sign-in lands on KeyCloak's change-password
-  form and the spec would be asserting that form instead of the role state.
+  form and the spec would be asserting that form instead of the role state. The spec sets its password only
+  once KeyCloak holds the temporary one, because kcMaster creates the user and sets that password in two calls.
 - **a role change has nothing to wait for.** The roles stay out of KeyCloak, and the save removes the user's
   cached claims at the gateway, so the next sign-in reads the new roles.
+- The teardown disconnects the user, removes the office, and then fails if KeyCloak still holds the user.
 
 ### 23-logout-switch-user.spec.ts -- logout ends the Keycloak session, not only the Esquire one
 - **the next login must ask again.** Logs in, logs out through the toolbar, then starts a login and asserts
@@ -248,6 +250,8 @@ entity is removed.
   events switched off, both tests fail.
 - The test user is made and removed the way spec 22 does it, through the KeyCloak admin API
   (`helpers/kcAdmin.ts`).
+- The teardown removes only what the setup made, so a failed setup reports its own error and nothing on
+  top. It fails if KeyCloak still holds the user after the disconnect.
 
 ### 26-user-kinds.spec.ts -- every user kind signs in through the BFF
 - **three kinds of user sign in the way a person does**, through the KeyCloak login page and the BFF: the
@@ -256,6 +260,7 @@ entity is removed.
 - **each one works on the gateway's claims:** the name bar shows, `/api/esq-key` answers with the user's own
   login id, and the own tree loads.
 - The teardown disconnects both users first; a connected user refuses deletion, and the office would stay.
+  It fails if KeyCloak still holds either user once the office is gone.
 
 ### cycle/cycle.spec.ts -- full-lifecycle soak / activity generator (not a coverage assertion)
 An activity generator, NOT an assertion spec: repeats a full GUI lifecycle N times (`CYCLES` env,

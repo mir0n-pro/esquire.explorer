@@ -52,11 +52,34 @@ export async function kcUserId(token: string, loginId: string): Promise<string |
   return ret;
 }
 
+async function kcHasPassword(token: string, kcId: string): Promise<boolean> {
+  const ctx = await pwRequest.newContext();
+  const res = await ctx.get(`${KC}/admin/realms/${REALM}/users/${kcId}/credentials`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  let ret = false;
+  if (res.status() === 200) {
+    const credentials = (await res.json()) as Array<{ type: string }>;
+    for (const c of credentials) {
+      if (c.type === 'password') {
+        ret = true;
+      }
+    }
+  }
+  await ctx.dispose();
+  return ret;
+}
+
+//xxx: kcMaster creates the user and sets its temporary password in two calls -- a password set in between
+// is overwritten, so the user counts as there only once it has a password
 export async function waitForKcUser(token: string, loginId: string): Promise<string | null> {
   const deadline = Date.now() + SYNC_TIMEOUT;
   let ret: string | null = null;
   while (ret === null && Date.now() < deadline) {
-    ret = await kcUserId(token, loginId);
+    const kcId = await kcUserId(token, loginId);
+    if (kcId !== null && await kcHasPassword(token, kcId)) {
+      ret = kcId;
+    }
     if (ret === null) {
       await sleep(POLL_MS);
     }
@@ -64,15 +87,16 @@ export async function waitForKcUser(token: string, loginId: string): Promise<str
   return ret;
 }
 
-export async function waitForKcUserGone(token: string, loginId: string): Promise<void> {
+export async function waitForKcUserGone(token: string, loginId: string): Promise<boolean> {
   const deadline = Date.now() + SYNC_TIMEOUT;
-  let gone = false;
-  while (!gone && Date.now() < deadline) {
-    gone = (await kcUserId(token, loginId)) === null;
-    if (!gone) {
+  let ret = false;
+  while (!ret && Date.now() < deadline) {
+    ret = (await kcUserId(token, loginId)) === null;
+    if (!ret) {
       await sleep(POLL_MS);
     }
   }
+  return ret;
 }
 
 //xxx: activation leaves a temporary password with UPDATE_PASSWORD standing -- the sign-in would land on the

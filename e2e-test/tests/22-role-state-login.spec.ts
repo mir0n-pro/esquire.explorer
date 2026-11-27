@@ -91,9 +91,10 @@ test.describe.serial('a wrong role setting is refused by name, not reported as a
     // connection). teardownHouse swallows that, so without disconnecting first the user survives,
     // the office cannot go either, and the tree is left behind in every environment the suite runs in.
     await saveProfile(page, house.merchantId, { connectFlg: 'N', roles: [] });
-    await waitForKcUserGone(token, loginId);
+    const gone = await waitForKcUserGone(token, loginId);
     await teardownHouse(page, house.officeId);
     await page.close();
+    expect(gone, `KeyCloak must drop ${loginId} after the disconnect`).toBe(true);
   });
 
   // Sign in as the test user on a context of its own, collecting what the app said, where it went, and

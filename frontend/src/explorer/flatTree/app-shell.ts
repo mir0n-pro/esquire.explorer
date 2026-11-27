@@ -71,6 +71,7 @@
 * 07/02/2026 mir0n  session-expiry: sessionExpired signal + '?auth=expired' marker (shown then stripped in ngOnInit);
 *                   scheduleSessionPreempt / onSessionPreempt re-check /auth/me and redirect on real expiry; ngOnDestroy clears the timer
 * 09/05/2026 mir0n  v1.2.15 -- logout() navigates to the endSessionUrl the BFF returns
+* 11/26/2026 mir0n  v2.0.4 -- kind 984 (apps) with the tools icon
 */
 import {
   Component,
@@ -608,6 +609,7 @@ export const EsquireObjectKinds = [
     new EsqObjectKind({id: 55, name:"paccountlnk", icon:"img/links/pacctl.ico"}),
     new EsqObjectKind({id: 980,  name:"admin",      icon:"img/star.ico"}),
     new EsqObjectKind({id: 982,  name:"tools",      icon:"img/tools.ico"}),
+    new EsqObjectKind({id: 984,  name:"apps",       icon:"img/tools.ico"}),
     new EsqObjectKind({id: 1000, name:"deposit",    title:"Deposit",    icon:"img/$sign.ico"}),
     new EsqObjectKind({id: 1002, name:"withdrawal", title:"Withdrawal", icon:"img/$withdraw.ico"}),
     new EsqObjectKind({id: 1004, name:"transfer",   title:"Transfer",   icon:"img/$transfer.ico"}),
